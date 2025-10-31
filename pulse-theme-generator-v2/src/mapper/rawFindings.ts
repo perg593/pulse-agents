@@ -2,6 +2,7 @@ import Color from "colorjs.io";
 import { PageExtractionResult } from "../extractor/extractSite.js";
 import { CollectedDeclaration, ComputedSample } from "../extractor/browserCollector.js";
 import { Evidence, RawFinding } from "../types.js";
+import { PALETTE_DERIVATION } from "../utils/constants.js";
 
 interface AggregatedValue {
   value: string;
@@ -90,10 +91,31 @@ function createEvidenceFromComputed(sample: ComputedSample, property: string, va
   };
 }
 
+/**
+ * Creates a unique signature for evidence comparison without JSON.stringify overhead
+ * Uses a simple string concatenation for better performance
+ */
+function createEvidenceSignature(evidence: Evidence): string {
+  switch (evidence.type) {
+    case "css-var":
+      return `css-var:${evidence.selector}:${evidence.property}:${evidence.value}`;
+    case "css-prop":
+      return `css-prop:${evidence.selector}:${evidence.property}:${evidence.value}`;
+    case "computed":
+      return `computed:${evidence.selector}:${evidence.property}:${evidence.value}`;
+    case "logo":
+      return `logo:${evidence.source}:${evidence.method}:${evidence.value}`;
+    case "derived":
+      return `derived:${evidence.note}`;
+    default:
+      return JSON.stringify(evidence);
+  }
+}
+
 function mergeEvidence(target: Evidence[], incoming: Evidence[]) {
-  const existing = new Set(target.map((item) => JSON.stringify(item)));
+  const existing = new Set(target.map(createEvidenceSignature));
   for (const item of incoming) {
-    const signature = JSON.stringify(item);
+    const signature = createEvidenceSignature(item);
     if (!existing.has(signature)) {
       target.push(item);
       existing.add(signature);
@@ -166,6 +188,22 @@ function prioritizeComputed(
   }
 }
 
+/**
+ * Builds raw findings from extracted page data by aggregating CSS declarations,
+ * computed styles, and logo colors from multiple pages.
+ *
+ * @param pages - Page extraction results containing declarations, computed styles, and logos
+ * @param options - Options for building findings
+ * @param options.selectorPriority - Ordered list of CSS selectors to prioritize (lower index = higher priority)
+ * @returns Array of raw findings with normalized names, categories, values, and evidence sources
+ *
+ * @example
+ * ```typescript
+ * const findings = buildRawFindings(pages, {
+ *   selectorPriority: [":root", "html", "body"]
+ * });
+ * ```
+ */
 export function buildRawFindings(pages: PageExtractionResult[], options: BuildOptions): RawFinding[] {
   const selectorPriority = new Map<string, number>();
   options.selectorPriority.forEach((selector, index) => selectorPriority.set(selector, index));
@@ -235,29 +273,21 @@ function derivePaletteIfNeeded(findings: RawFinding[]): RawFinding[] {
   const primaryCandidate =
     colorFindings.find((finding) => /primary|brand|accent/.test(finding.normalizedName)) ?? colorFindings[0];
   if (!primaryCandidate) return [];
-  if (colorFindings.length > 6) {
+  if (colorFindings.length > PALETTE_DERIVATION.MAX_COLORS_BEFORE_DERIVATION) {
     return [];
   }
 
   try {
     const baseColor = new Color(primaryCandidate.value);
     const oklch = baseColor.to("oklch");
-    const steps = [
-      { suffix: "50", delta: 0.35 },
-      { suffix: "100", delta: 0.25 },
-      { suffix: "200", delta: 0.18 },
-      { suffix: "300", delta: 0.1 },
-      { suffix: "400", delta: 0.05 },
-      { suffix: "500", delta: 0 },
-      { suffix: "600", delta: -0.05 },
-      { suffix: "700", delta: -0.1 },
-      { suffix: "800", delta: -0.18 },
-      { suffix: "900", delta: -0.28 },
-    ];
     const derived: RawFinding[] = [];
-    for (const step of steps) {
+    for (const step of PALETTE_DERIVATION.TONAL_STEPS) {
       const derivedColor = baseColor.clone();
-      const newL = clamp(oklch.l + step.delta, 0.08, 0.98);
+      const newL = clamp(
+        oklch.l + step.delta,
+        PALETTE_DERIVATION.LIGHTNESS_BOUNDS.min,
+        PALETTE_DERIVATION.LIGHTNESS_BOUNDS.max,
+      );
       derivedColor.set("oklch.l", newL);
       const hex = derivedColor.to("srgb").toString({ format: "hex" }).toLowerCase();
       derived.push({

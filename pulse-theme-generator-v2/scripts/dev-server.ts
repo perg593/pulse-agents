@@ -1,7 +1,6 @@
 #!/usr/bin/env -S tsx
 import express from "express";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { mkdir, writeFile } from "node:fs/promises";
 import { buildTokenSchema } from "../src/parser/tokenSchema.js";
 import { extractSite, DEFAULT_GLOBAL_SELECTORS } from "../src/extractor/extractSite.js";
@@ -12,15 +11,16 @@ import { compileTheme } from "../src/legacy/themeCompiler.js";
 import { curatedTemplate } from "../src/legacy/curatedTemplate.js";
 import { buildLegacyTokens, PaletteOverrides } from "../src/mapper/legacyTokenBuilder.js";
 import { loadColorDefaults, ColorDefaultGroup } from "../src/parser/colorDefaults.js";
+import { getSassRoot, getOutputDir, getProjectRoot } from "../src/utils/config.js";
+import { buildTokenSchemaWithCache } from "../src/utils/schemaCache.js";
 
 const app = express();
 app.use(express.json({ limit: "2mb" }));
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const projectRoot = path.resolve(__dirname, "..");
+const projectRoot = getProjectRoot();
 const publicDir = path.join(projectRoot, "public");
-const outputDir = path.join(projectRoot, "output");
-const sassRoot = path.resolve(projectRoot, "../Old-Pulse-Themes-Framework-2025/01-css-pulse");
+const outputDir = getOutputDir();
+const sassRoot = getSassRoot();
 const sassVariablesPath = path.join(sassRoot, "_variables.scss");
 let colorDefaults: ColorDefaultGroup[] = [];
 try {
@@ -33,7 +33,7 @@ try {
 app.use(express.static(publicDir));
 app.use("/output", express.static(outputDir));
 
-let schemaPromise = buildTokenSchema({ sassRoot });
+let schemaPromise = buildTokenSchemaWithCache({ sassRoot });
 let isBusy = false;
 
 app.get("/api/status", async (_req, res) => {
@@ -156,7 +156,7 @@ app.post("/api/extract", async (req, res) => {
       ok: false,
       error: (error as Error).message ?? "Unexpected error during extraction",
     });
-    schemaPromise = buildTokenSchema({ sassRoot });
+    schemaPromise = buildTokenSchemaWithCache({ sassRoot });
   } finally {
     isBusy = false;
   }
@@ -230,20 +230,35 @@ function buildCssFromLegacyCompiler(legacyTokens: Record<string, unknown>): stri
   return `${header}\n${curatedTemplate.trim()}\n\n${footer}\n${overrides.trim()}\n`;
 }
 
-function buildThemeSummary(tokens: Record<string, any>, findings: RawFinding[]) {
-  const colors = tokens?.colors ?? {};
-  const typography = tokens?.typography ?? {};
+interface ThemeSummary {
+  curatedStructure: boolean;
+  colors: {
+    primary: string | null;
+    secondary: string | null;
+    background: string | null;
+    text: string | null;
+    muted: string | null;
+  };
+  typography: {
+    fontFamily: string | null;
+  };
+  logoColors: string[];
+}
+
+function buildThemeSummary(tokens: Record<string, unknown>, findings: RawFinding[]): ThemeSummary {
+  const colors = (tokens?.colors as Record<string, unknown>) ?? {};
+  const typography = (tokens?.typography as Record<string, unknown>) ?? {};
   return {
     curatedStructure: true,
     colors: {
-      primary: colors.primary ?? null,
-      secondary: colors.secondary ?? null,
-      background: colors.bg ?? null,
-      text: colors.text ?? null,
-      muted: colors.muted ?? null,
+      primary: (colors.primary as string | undefined) ?? null,
+      secondary: (colors.secondary as string | undefined) ?? null,
+      background: (colors.bg as string | undefined) ?? null,
+      text: (colors.text as string | undefined) ?? null,
+      muted: (colors.muted as string | undefined) ?? null,
     },
     typography: {
-      fontFamily: typography.fontFamily ?? null,
+      fontFamily: (typography.fontFamily as string | undefined) ?? null,
     },
     logoColors: collectLogoPalette(findings),
   };

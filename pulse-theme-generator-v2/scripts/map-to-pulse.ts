@@ -1,10 +1,10 @@
 #!/usr/bin/env tsx
-import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { buildTokenSchema } from "../src/parser/tokenSchema.js";
 import { mapFindingsToSchema } from "../src/mapper/mapToSchema.js";
 import { RawFinding, ThemeReport } from "../src/types.js";
+import { getSassRoot, getOutputDir } from "../src/utils/config.js";
 
 interface CliOptions {
   rawPath: string;
@@ -53,15 +53,10 @@ function parseArgs(argv: string[]): CliOptions {
     throw new Error("Missing --raw argument");
   }
 
-  const __dirname = path.dirname(fileURLToPath(import.meta.url));
-  const projectRoot = path.resolve(__dirname, "..");
-  const defaultOut = path.resolve(projectRoot, "output");
-  const defaultSass = path.resolve(projectRoot, "../Old-Pulse-Themes-Framework-2025/01-css-pulse");
-
   return {
     rawPath: path.resolve(options.rawPath),
-    outDir: options.outDir ? path.resolve(options.outDir) : defaultOut,
-    sassRoot: options.sassRoot ? path.resolve(options.sassRoot) : defaultSass,
+    outDir: options.outDir ? path.resolve(options.outDir) : getOutputDir(),
+    sassRoot: options.sassRoot ? path.resolve(options.sassRoot) : getSassRoot(),
   };
 }
 

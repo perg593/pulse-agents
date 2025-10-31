@@ -1,5 +1,4 @@
 #!/usr/bin/env tsx
-import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { mkdir, writeFile } from "node:fs/promises";
 import { buildTokenSchema } from "../src/parser/tokenSchema.js";
@@ -7,6 +6,7 @@ import { extractSite, DEFAULT_GLOBAL_SELECTORS } from "../src/extractor/extractS
 import { buildRawFindings } from "../src/mapper/rawFindings.js";
 import { mapFindingsToSchema } from "../src/mapper/mapToSchema.js";
 import { ThemeReport } from "../src/types.js";
+import { getSassRoot, getOutputDir } from "../src/utils/config.js";
 
 interface CliOptions {
   url: string;
@@ -62,17 +62,12 @@ function parseArgs(argv: string[]): CliOptions {
     throw new Error("Missing --url argument");
   }
 
-  const __dirname = path.dirname(fileURLToPath(import.meta.url));
-  const projectRoot = path.resolve(__dirname, "..");
-  const defaultOut = path.resolve(projectRoot, "output");
-  const defaultSass = path.resolve(projectRoot, "../Old-Pulse-Themes-Framework-2025/01-css-pulse");
-
   return {
     url: options.url,
-    outDir: options.outDir ? path.resolve(options.outDir) : defaultOut,
+    outDir: options.outDir ? path.resolve(options.outDir) : getOutputDir(),
     maxPages: options.maxPages ?? 3,
     scheme: options.scheme ?? "light",
-    sassRoot: options.sassRoot ? path.resolve(options.sassRoot) : defaultSass,
+    sassRoot: options.sassRoot ? path.resolve(options.sassRoot) : getSassRoot(),
   };
 }
 

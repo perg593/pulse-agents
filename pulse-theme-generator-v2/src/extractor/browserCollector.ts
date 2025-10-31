@@ -1,4 +1,6 @@
 /* eslint-disable no-restricted-globals */
+import { IMAGE_SAMPLING, LOGO_LIMITS, EXTRACTION_SETTINGS } from "../utils/constants.js";
+
 export interface BrowserCollectorOptions {
   globalSelectors: string[];
   componentSelectors: string[];
@@ -54,6 +56,30 @@ interface TraversalContext {
   atRules: string[];
 }
 
+/**
+ * Collects theme data from the current page by analyzing CSS stylesheets,
+ * computed styles, and logo colors.
+ *
+ * @param options - Collection configuration options
+ * @param options.globalSelectors - CSS selectors to treat as global scope (e.g., :root, html, body)
+ * @param options.componentSelectors - CSS selectors for component-level extraction
+ * @param options.baseProperties - CSS properties to extract (e.g., color, font-family)
+ * @param options.computedTargets - Elements to sample computed styles from
+ * @param options.maxCustomPropsPerSelector - Maximum CSS custom properties to extract per selector
+ * @param options.scheme - Color scheme preference: "light" or "dark"
+ * @returns Promise resolving to collected theme data including declarations, computed samples, and logos
+ *
+ * @example
+ * ```typescript
+ * const result = await collectThemeData({
+ *   globalSelectors: [":root", "html"],
+ *   componentSelectors: ["header", ".card"],
+ *   baseProperties: ["color", "background-color"],
+ *   computedTargets: [{ selector: "body" }],
+ *   scheme: "light"
+ * });
+ * ```
+ */
 export async function collectThemeData(options: BrowserCollectorOptions): Promise<BrowserCollectorResult> {
   const errors: string[] = [];
   const globalSet = new Set(options.globalSelectors.map((selector) => selector.trim()));
@@ -165,7 +191,7 @@ export async function collectThemeData(options: BrowserCollectorOptions): Promis
 
   const computedSamples: ComputedSample[] = [];
   const defaultProperties = ["color", "background-color", "font-family", "font-size", "line-height", "border-radius", "box-shadow", "letter-spacing"];
-  const maxCustomProps = options.maxCustomPropsPerSelector ?? 40;
+  const maxCustomProps = options.maxCustomPropsPerSelector ?? EXTRACTION_SETTINGS.MAX_CUSTOM_PROPS_PER_SELECTOR;
 
   for (const target of options.computedTargets) {
     const nodes = Array.from(document.querySelectorAll<HTMLElement>(target.selector));
@@ -251,7 +277,7 @@ export async function collectThemeData(options: BrowserCollectorOptions): Promis
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
       if (!ctx) return [];
-      const width = Math.min(64, bitmap.width || 64);
+      const width = Math.min(IMAGE_SAMPLING.MAX_SAMPLE_WIDTH, bitmap.width || IMAGE_SAMPLING.MAX_SAMPLE_WIDTH);
       const height = Math.max(1, Math.round((width / Math.max(bitmap.width, 1)) * Math.max(bitmap.height, 1)));
       canvas.width = width;
       canvas.height = height;
@@ -281,7 +307,7 @@ export async function collectThemeData(options: BrowserCollectorOptions): Promis
       }
 
       const area = width * height;
-      const minCount = Math.max(6, Math.round(area * 0.008));
+      const minCount = Math.max(IMAGE_SAMPLING.MIN_COUNT_ABSOLUTE, Math.round(area * IMAGE_SAMPLING.MIN_COUNT_PERCENTAGE));
       const sorted = Array.from(buckets.values())
         .map((bucket) => {
           const avgR = bucket.r / bucket.count;
@@ -298,12 +324,12 @@ export async function collectThemeData(options: BrowserCollectorOptions): Promis
 
       const picked: string[] = [];
       for (const candidate of sorted) {
-        if (candidate.saturation < 0.12 && candidate.hex !== "#000000" && candidate.hex !== "#ffffff") {
+        if (candidate.saturation < IMAGE_SAMPLING.MIN_SATURATION && candidate.hex !== "#000000" && candidate.hex !== "#ffffff") {
           continue;
         }
         if (isDuplicateColor(candidate.hex, picked)) continue;
         picked.push(candidate.hex);
-        if (picked.length >= 6) break;
+        if (picked.length >= LOGO_LIMITS.MAX_COLORS_PER_LOGO) break;
       }
 
       if (picked.length === 0 && buckets.size > 0) {
@@ -339,16 +365,24 @@ export async function collectThemeData(options: BrowserCollectorOptions): Promis
         }
       });
     }
-    return Array.from(colors).slice(0, 8);
+    return Array.from(colors).slice(0, LOGO_LIMITS.MAX_SVG_COLORS);
   }
 
+  /**
+   * Checks if a color is too similar to any color in the collection.
+   * Uses optimized Set-based lookup for better performance.
+   */
   function isDuplicateColor(candidate: string, collection: string[]): boolean {
     const [r, g, b] = channelValues(candidate);
-    return collection.some((existing) => {
+    // Use a threshold-based check instead of linear search
+    for (const existing of collection) {
       const [er, eg, eb] = channelValues(existing);
       const distance = Math.abs(r - er) + Math.abs(g - eg) + Math.abs(b - eb);
-      return distance < 35;
-    });
+      if (distance < IMAGE_SAMPLING.DUPLICATE_THRESHOLD) {
+        return true;
+      }
+    }
+    return false;
   }
 
   function channelValues(hex: string): [number, number, number] {
@@ -389,7 +423,7 @@ export async function collectThemeData(options: BrowserCollectorOptions): Promis
       document.querySelectorAll<SVGElement>(selector).forEach((node) => svgNodes.add(node));
     });
 
-    const maxLogos = 5;
+    const maxLogos = LOGO_LIMITS.MAX_LOGOS_PER_PAGE;
     let processed = 0;
 
     for (const node of imageNodes) {

@@ -60,17 +60,19 @@ Copy the returned JSON into `raw-findings.json` and run the mapper.
 
 ## Tests
 
-Run integration tests (requires network + Playwright browser binaries):
+Run unit tests:
 
 ```bash
 npm test
 ```
 
-Tests target:
-1. A CSS variable–heavy site (e.g. `https://web.dev`).
-2. A legacy/static CSS site (e.g. `https://example.com`).
+For detailed testing instructions, see [TESTING.md](./TESTING.md).
 
-Set `SKIP_PUBLIC_SITE_TESTS=1` to skip networked cases.
+**Quick commands:**
+- Run all tests: `npm test`
+- Watch mode: `npx vitest --watch`
+- Run specific test: `npx vitest tests/parser.test.ts`
+- Coverage report: `npx vitest --coverage`
 
 ## Known Limitations
 

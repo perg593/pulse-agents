@@ -1,6 +1,7 @@
 import { TokenSchema, TokenDescriptor } from "../parser/tokenSchema.js";
 import { RawFinding, ThemeJson, ThemeReport, Evidence } from "../types.js";
 import { schemaToEmptyTheme } from "../parser/tokenSchema.js";
+import { MATCHING_THRESHOLDS, EVIDENCE_CONFIDENCE } from "../utils/constants.js";
 
 interface CandidateMatch {
   finding: RawFinding;
@@ -53,42 +54,42 @@ function buildCandidates(token: TokenDescriptor): Set<string> {
 
 function selectorConfidence(evidence: Evidence, preferred: string[]): number {
   if (evidence.type === "derived") {
-    return 0.3;
+    return EVIDENCE_CONFIDENCE.DERIVED;
   }
   if (evidence.type === "computed") {
-    return 0.4;
+    return EVIDENCE_CONFIDENCE.COMPUTED;
   }
   if (evidence.type === "logo") {
-    return 0.6;
+    return EVIDENCE_CONFIDENCE.LOGO;
   }
   const selector = "selector" in evidence && evidence.selector ? evidence.selector : "";
   for (const preferredSelector of preferred) {
     if (selector.includes(preferredSelector)) {
       switch (preferredSelector) {
         case ":root":
-          return 0.85;
+          return EVIDENCE_CONFIDENCE.ROOT_SELECTOR;
         case "html":
         case "body":
-          return 0.7;
+          return EVIDENCE_CONFIDENCE.BODY_SELECTOR;
         default:
           return 0.65;
       }
     }
   }
-  if (selector.includes(":root")) return 0.85;
-  if (selector.includes("html") || selector.includes("body")) return 0.7;
-  return 0.55;
+  if (selector.includes(":root")) return EVIDENCE_CONFIDENCE.ROOT_SELECTOR;
+  if (selector.includes("html") || selector.includes("body")) return EVIDENCE_CONFIDENCE.BODY_SELECTOR;
+  return EVIDENCE_CONFIDENCE.DEFAULT_SELECTOR;
 }
 
 function baseConfidence(matchType: CandidateMatch["matchType"], evidence: Evidence[], preferred: string[]): number {
   const bestSelectorConfidence = evidence.reduce((acc, item) => Math.max(acc, selectorConfidence(item, preferred)), 0);
   if (matchType === "exact-variable") {
-    return Math.max(0.95, bestSelectorConfidence);
+    return Math.max(MATCHING_THRESHOLDS.EXACT_VARIABLE_CONFIDENCE, bestSelectorConfidence);
   }
   if (matchType === "exact-name") {
-    return Math.max(0.85, bestSelectorConfidence);
+    return Math.max(MATCHING_THRESHOLDS.EXACT_NAME_CONFIDENCE, bestSelectorConfidence);
   }
-  return Math.max(0.55, bestSelectorConfidence);
+  return Math.max(MATCHING_THRESHOLDS.FUZZY_MATCH_BASE_CONFIDENCE, bestSelectorConfidence);
 }
 
 function fuzzyScore(a: string, b: string): number {
@@ -139,7 +140,7 @@ function findBestFinding(token: TokenDescriptor, findings: RawFinding[]): Candid
 
     const fuzzyCandidates = normalizedCandidates.map((candidate) => fuzzyScore(candidate, finding.normalizedName));
     const bestFuzzyScore = Math.max(...fuzzyCandidates);
-    if (bestFuzzyScore > 0.5) {
+    if (bestFuzzyScore > MATCHING_THRESHOLDS.FUZZY_MATCH_MIN) {
       if (!best || bestFuzzyScore > best.score) {
         best = {
           finding,
@@ -162,6 +163,22 @@ function writeThemeValue(theme: ThemeJson, token: TokenDescriptor, value: string
   group[token.key] = value;
 }
 
+/**
+ * Maps raw findings extracted from a website onto the Pulse theme token schema.
+ * Uses fuzzy matching and confidence scoring to find the best matches for each token.
+ *
+ * @param schema - The Pulse token schema to map findings against
+ * @param findings - Raw findings extracted from the target website
+ * @param options - Optional mapping configuration
+ * @param options.preferredSelectors - Selectors to prioritize for confidence scoring
+ * @returns Object containing the mapped theme, confidence report, and unmatched tokens
+ *
+ * @example
+ * ```typescript
+ * const { theme, report, unmatched } = mapFindingsToSchema(schema, rawFindings);
+ * console.log(`Mapped ${Object.keys(theme).length} token groups`);
+ * ```
+ */
 export function mapFindingsToSchema(
   schema: TokenSchema,
   findings: RawFinding[],

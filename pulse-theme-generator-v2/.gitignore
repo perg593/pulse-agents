@@ -1,0 +1,26 @@
+# Cache directory
+.cache/
+
+# Node modules
+node_modules/
+
+# Build output
+dist/
+
+# Test output
+coverage/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="refresh" content="0; url=/index.html" />
+  <!-- Removed meta refresh to prevent redirect loop - handled by JavaScript instead -->
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Pulse Demo Studio</title>
   <script>
@@ -122,14 +122,21 @@
   <script>
     (function redirect() {
       try {
+        // Prevent redirect loop: if we're already at /index.html or /preview/basic/index.html, don't redirect
+        var currentPath = window.location.pathname;
+        // If we're at root or index.html, don't redirect (root index.html is the actual app)
+        if (currentPath === '/' || currentPath === '/index.html' || currentPath === '/preview/basic/index.html') {
+          return;
+        }
+        
         var params = new URLSearchParams(window.location.search);
         var variant = (params.get('variant') || params.get('view') || '').toLowerCase();
         params.delete('variant');
         params.delete('view');
         var search = params.toString();
-        var targetBase = '/index.html';
+        var targetBase = '/index.html';  // Root index.html is the actual preview app
         if (variant === 'v3') {
-          targetBase = './v3/index.html';
+          targetBase = '/preview/v3/index.html';
         }
         var target = targetBase;
         if (search) {
@@ -151,7 +158,7 @@
     <p>If you are not redirected automatically, choose an experience below.</p>
     <div class="links">
       <a class="primary" href="/index.html">Open Preview (Basic)</a>
-      <a class="secondary" href="./v3/index.html">Open Preview v3 Prototype</a>
+      <a class="secondary" href="/preview/v3/index.html">Open Preview v3 Prototype</a>
     </div>
     <p class="meta">Tip: append <code>?variant=v3</code> to jump straight into the v3 prototype.</p>
   </div>

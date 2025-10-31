@@ -92,8 +92,6 @@ let colorDefaults = [];
 let currentPaletteDefaults = null;
 let initialPaletteSelections = null;
 const paletteControlMap = new Map();
-let initialPaletteSelections = null;
-const paletteControlMap = new Map();
 
 async function hydrateStatus() {
   try {

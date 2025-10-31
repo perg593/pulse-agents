@@ -1,16 +1,12 @@
 import Color from "colorjs.io";
 import { RawFinding } from "../types.js";
 import { deepMergeTokens, defaultTokenValues, parseLegacyColor, legacyContrastRatio } from "../legacy/themeCompiler.js";
+import { DEFAULT_COLORS } from "../utils/constants.js";
 
 interface ColorCandidate {
   value: string;
   name: string;
 }
-
-const FALLBACK_PRIMARY = "#2563eb";
-const FALLBACK_SECONDARY = "#1d4ed8";
-const FALLBACK_BACKGROUND = "#ffffff";
-const FALLBACK_TEXT = "#1f2937";
 
 export interface PaletteOverrides {
   primary?: string | null;
@@ -19,8 +15,26 @@ export interface PaletteOverrides {
   text?: string | null;
 }
 
-export function buildLegacyTokens(rawFindings: RawFinding[], overrides?: PaletteOverrides) {
-  const tokens = deepMergeTokens(defaultTokenValues, {}) as Record<string, any>;
+/**
+ * Builds legacy Pulse widget tokens from raw findings.
+ * Extracts colors and fonts, applies overrides if provided, and ensures
+ * proper contrast ratios for accessibility.
+ *
+ * @param rawFindings - Raw findings extracted from the target website
+ * @param overrides - Optional palette overrides for primary, secondary, background, and text colors
+ * @returns Legacy token object compatible with Pulse widget theme compiler
+ *
+ * @example
+ * ```typescript
+ * const tokens = buildLegacyTokens(rawFindings, {
+ *   primary: "#ff0000",
+ *   background: "#ffffff"
+ * });
+ * const css = compileTheme(tokens);
+ * ```
+ */
+export function buildLegacyTokens(rawFindings: RawFinding[], overrides?: PaletteOverrides): Record<string, unknown> {
+  const tokens = deepMergeTokens(defaultTokenValues, {}) as Record<string, unknown>;
   const colors = collectColorCandidates(rawFindings);
   const fonts = collectFontCandidates(rawFindings);
 
@@ -34,7 +48,7 @@ export function buildLegacyTokens(rawFindings: RawFinding[], overrides?: Palette
     "button",
     "link",
     "logo",
-  ]) ?? colors[0]?.value ?? FALLBACK_PRIMARY;
+  ]) ?? colors[0]?.value ?? DEFAULT_COLORS.PRIMARY;
   usedColors.add(primary);
 
   const secondary = pickColor(colors, usedColors, [
@@ -43,19 +57,19 @@ export function buildLegacyTokens(rawFindings: RawFinding[], overrides?: Palette
     "muted",
     "support",
     "logo",
-  ]) ?? colors.find((candidate) => candidate.value !== primary)?.value ?? FALLBACK_SECONDARY;
+  ]) ?? colors.find((candidate) => candidate.value !== primary)?.value ?? DEFAULT_COLORS.SECONDARY;
   usedColors.add(secondary);
 
   const background =
     pickColor(colors, usedColors, ["background", "surface", "panel", "card", "body.backgroundcolor"]) ??
     getNamedColor(colors, "body.backgroundColor") ??
-    FALLBACK_BACKGROUND;
+    DEFAULT_COLORS.BACKGROUND;
   usedColors.add(background);
 
   const text =
     pickColor(colors, usedColors, ["text", "body.color", "font", "heading"]) ??
     getNamedColor(colors, "body.color") ??
-    FALLBACK_TEXT;
+    DEFAULT_COLORS.TEXT;
   usedColors.add(text);
 
   const mutedCandidate =
@@ -78,23 +92,25 @@ export function buildLegacyTokens(rawFindings: RawFinding[], overrides?: Palette
   const resolvedBackground = normalizedOverrides.background ?? background;
   const resolvedText = normalizedOverrides.text ?? text;
 
-  tokens.colors = tokens.colors ?? {};
-  tokens.colors.primary = resolvedPrimary;
-  tokens.colors.primaryHover = darkenColor(resolvedPrimary, 0.1);
-  tokens.colors.primaryActive = darkenColor(resolvedPrimary, 0.2);
-  tokens.colors.secondary = resolvedSecondary;
-  tokens.colors.bg = resolvedBackground;
-  tokens.colors.text = resolvedText;
+  const colorsObj = (tokens.colors as Record<string, unknown>) ?? {};
+  colorsObj.primary = resolvedPrimary;
+  colorsObj.primaryHover = darkenColor(resolvedPrimary, 0.1);
+  colorsObj.primaryActive = darkenColor(resolvedPrimary, 0.2);
+  colorsObj.secondary = resolvedSecondary;
+  colorsObj.bg = resolvedBackground;
+  colorsObj.text = resolvedText;
   const resolvedMuted = normalizedOverrides.text ? lightenColor(resolvedText, 0.2) : mutedCandidate;
   const resolvedAnswerBorder = normalizedOverrides.primary ? lightenColor(resolvedPrimary, 0.35) : answerBorderCandidate;
 
-  tokens.colors.muted = resolvedMuted;
-  tokens.colors.answerBorder = resolvedAnswerBorder;
-  tokens.colors.inputBorder = lightenColor(resolvedPrimary, 0.4);
-  tokens.colors.inputFocus = lightenColor(resolvedPrimary, 0.15);
+  colorsObj.muted = resolvedMuted;
+  colorsObj.answerBorder = resolvedAnswerBorder;
+  colorsObj.inputBorder = lightenColor(resolvedPrimary, 0.4);
+  colorsObj.inputFocus = lightenColor(resolvedPrimary, 0.15);
+  tokens.colors = colorsObj;
 
-  tokens.typography = tokens.typography ?? {};
-  tokens.typography.fontFamily = fonts[0] ?? tokens.typography.fontFamily;
+  const typographyObj = (tokens.typography as Record<string, unknown>) ?? {};
+  typographyObj.fontFamily = fonts[0] ?? typographyObj.fontFamily;
+  tokens.typography = typographyObj;
 
   ensureOnPrimary(tokens);
   return tokens;
@@ -181,15 +197,19 @@ function clamp(value: number, min = 0, max = 1) {
   return Math.max(min, Math.min(max, value));
 }
 
-function ensureOnPrimary(tokens: Record<string, any>) {
-  const primary = parseLegacyColor(tokens.colors?.primary);
-  if (!primary) {
-    tokens.colors.onPrimary = "#ffffff";
+function ensureOnPrimary(tokens: Record<string, unknown>): void {
+  const colors = tokens.colors as Record<string, unknown> | undefined;
+  if (!colors) {
     return;
   }
-  const white = parseLegacyColor("#ffffff");
-  const dark = parseLegacyColor("#111827");
+  const primary = parseLegacyColor(colors.primary as string | undefined);
+  if (!primary) {
+    colors.onPrimary = DEFAULT_COLORS.ON_PRIMARY_LIGHT;
+    return;
+  }
+  const white = parseLegacyColor(DEFAULT_COLORS.ON_PRIMARY_LIGHT);
+  const dark = parseLegacyColor(DEFAULT_COLORS.ON_PRIMARY_DARK);
   const whiteContrast = legacyContrastRatio(primary, white);
   const darkContrast = legacyContrastRatio(primary, dark);
-  tokens.colors.onPrimary = whiteContrast >= darkContrast ? "#ffffff" : "#111827";
+  colors.onPrimary = whiteContrast >= darkContrast ? DEFAULT_COLORS.ON_PRIMARY_LIGHT : DEFAULT_COLORS.ON_PRIMARY_DARK;
 }

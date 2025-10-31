@@ -1,0 +1,3 @@
+# Cloudflare Pages redirects
+# Note: Cloudflare Pages automatically handles /player -> /player.html redirects
+# We don't need an explicit redirect rule here as it causes a redirect loop

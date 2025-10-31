@@ -203,6 +203,7 @@ let overlayLayoutRaf = null;
 let overlayLayoutTimeout = null;
 let widgetFallbackTimer = null;
 let widgetFallbackApplied = false;
+let corsErrorLogged = false;
 const behaviorButtons = new Map();
 let behaviorMessageTimeout = null;
 let behaviorStageTimeout = null;
@@ -2694,7 +2695,11 @@ function applyOverlayFallbackRect() {
   playerFrameEl.style.clipPath = '';
   playerFrameEl.style.webkitClipPath = '';
 
-  applyWidgetFallbackStyles({ placement, metrics });
+  // Only start widget fallback styles retry if not already in progress
+  // This prevents resetting the retry counter on every layout update
+  if (!widgetFallbackTimer && !widgetFallbackApplied) {
+    applyWidgetFallbackStyles({ placement, metrics }, 0);
+  }
 }
 
 function resolveFallbackViewportSize() {
@@ -2752,6 +2757,8 @@ function updatePlayerWidgetGeometry(message) {
   }
   playerViewportSize = normalizeViewport(message?.viewport);
   const rect = normalizeWidgetRect(message?.rect);
+  const hadRect = !!playerWidgetRect;
+  const wasInFallback = overlayFallbackActive;
   playerWidgetRect = rect;
   if (rect) {
     overlayFallbackActive = false;
@@ -2760,6 +2767,17 @@ function updatePlayerWidgetGeometry(message) {
     if (overlayContainer) {
       delete overlayContainer.dataset.fallbackPlacement;
     }
+  }
+  // If we just got geometry after fallback was active, ensure fallback styles are applied
+  // This handles the case where widget becomes available but fallback styles weren't applied yet
+  if (rect && wasInFallback && !hadRect) {
+    const fallbackPlacement = resolveFallbackPlacement();
+    const metrics = computeOverlayFallbackMetrics({
+      viewportWidth: playerViewportSize?.width || window.innerWidth,
+      viewportHeight: playerViewportSize?.height || window.innerHeight,
+      placement: fallbackPlacement
+    });
+    applyWidgetFallbackStyles({ placement: fallbackPlacement, metrics }, 0);
   }
   updatePlayerOverlayLayout();
 }
@@ -2964,7 +2982,11 @@ function getPlayerDocument() {
   try {
     return playerFrameEl.contentDocument || playerFrameEl.contentWindow?.document || null;
   } catch (error) {
-    console.warn('[preview] Unable to access player document for fallback styles', error);
+    // Only log CORS errors once to reduce console noise
+    if (!corsErrorLogged && error.name === 'SecurityError') {
+      corsErrorLogged = true;
+      console.warn('[preview] Unable to access player document for fallback styles (CORS blocked)', error);
+    }
     return null;
   }
 }
@@ -2974,10 +2996,17 @@ function applyWidgetFallbackStyles(context, attempt = 0) {
   const { placement, metrics } = context;
   const doc = getPlayerDocument();
   if (!doc) {
-    try {
-      console.debug('[preview] widget fallback waiting for player document', { attempt });
-    } catch (_error) {
-      /* ignore */
+    // If CORS error was detected, stop retrying after a few attempts (won't resolve)
+    if (corsErrorLogged && attempt >= 3) {
+      return;
+    }
+    // Only log first 3 attempts to reduce noise
+    if (attempt < 3) {
+      try {
+        console.debug('[preview] widget fallback waiting for player document', { attempt });
+      } catch (_error) {
+        /* ignore */
+      }
     }
     scheduleWidgetFallbackRetry(context, attempt);
     return;
@@ -2985,10 +3014,13 @@ function applyWidgetFallbackStyles(context, attempt = 0) {
   const container = doc.getElementById('_pi_surveyWidgetContainer');
   const widget = doc.getElementById('_pi_surveyWidget');
   if (!container || !widget) {
-    try {
-      console.debug('[preview] widget fallback waiting for widget', { attempt });
-    } catch (_error) {
-      /* ignore */
+    // Only log first 3 attempts to reduce noise
+    if (attempt < 3) {
+      try {
+        console.debug('[preview] widget fallback waiting for widget', { attempt });
+      } catch (_error) {
+        /* ignore */
+      }
     }
     scheduleWidgetFallbackRetry(context, attempt);
     return;
@@ -3068,10 +3100,12 @@ function scheduleWidgetFallbackRetry(context, attempt) {
   if (widgetFallbackTimer) {
     clearTimeout(widgetFallbackTimer);
   }
+  // Exponential backoff: start at 80ms, increase by 40ms each attempt, max 480ms
+  const delay = Math.min(480, 80 + attempt * 40);
   widgetFallbackTimer = window.setTimeout(() => {
     widgetFallbackTimer = null;
     applyWidgetFallbackStyles(context, attempt + 1);
-  }, Math.min(480, 80 + attempt * 40));
+  }, delay);
 }
 
 function resetWidgetFallbackStyles() {
@@ -3081,6 +3115,7 @@ function resetWidgetFallbackStyles() {
   }
   if (!widgetFallbackApplied) return;
   widgetFallbackApplied = false;
+  corsErrorLogged = false; // Reset CORS error flag when resetting fallback styles
 
   const doc = getPlayerDocument();
   if (!doc) return;
@@ -3183,7 +3218,8 @@ function updatePlayerOverlayLayout() {
 
   if (!playerWidgetRect || playerMode === 'inline') {
     const reason = !playerWidgetRect ? 'no-geometry' : 'inline-mode';
-    console.debug('[preview] overlay layout reset', { reason, mode: playerMode });
+    // Suppress debug log for overlay layout reset to reduce console noise
+    // console.debug('[preview] overlay layout reset', { reason, mode: playerMode });
     if (!playerWidgetRect && playerMode === 'overlay') {
       applyOverlayFallbackRect();
     } else {
@@ -3218,11 +3254,12 @@ function updatePlayerOverlayLayout() {
   );
 
   if (viewportWidth <= 0 || viewportHeight <= 0) {
-    console.debug('[preview] overlay layout reset', {
-      reason: 'invalid-viewport',
-      viewportWidth,
-      viewportHeight
-    });
+    // Suppress debug log for invalid viewport to reduce console noise
+    // console.debug('[preview] overlay layout reset', {
+    //   reason: 'invalid-viewport',
+    //   viewportWidth,
+    //   viewportHeight
+    // });
     resetPlayerOverlayLayout(playerFrameEl);
     return;
   }

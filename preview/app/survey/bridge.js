@@ -1,6 +1,6 @@
 import { Bridge as BridgeV1, derivePlayerOrigin } from './bridgeV1.mjs';
 
-const PLAYER_URL = '/preview/app/survey/player.html';
+const PLAYER_URL = '/preview/app/survey/player';
 const PLAYER_VERSION = '2025-10-09-01';
 
 try {

@@ -117,6 +117,25 @@ function buildGroupDescriptors(maps: SassMap[], variables: Record<string, SassVa
   });
 }
 
+/**
+ * Builds a token schema by parsing SASS files and extracting variable definitions,
+ * map structures, and builder references.
+ *
+ * @param options - Schema building options
+ * @param options.sassRoot - Root directory containing SASS source files
+ * @param options.mapFile - Path to _maps.scss file (defaults to sassRoot/_maps.scss)
+ * @param options.variablesFile - Path to _variables.scss file (defaults to sassRoot/_variables.scss)
+ * @param options.structureFile - Path to _theme-structure.scss file (defaults to sassRoot/_theme-structure.scss)
+ * @returns Promise resolving to the complete token schema with groups, variables, builders, and index
+ *
+ * @example
+ * ```typescript
+ * const schema = await buildTokenSchema({
+ *   sassRoot: "./sass"
+ * });
+ * console.log(`Found ${schema.groups.length} token groups`);
+ * ```
+ */
 export async function buildTokenSchema(options: SchemaOptions): Promise<TokenSchema> {
   const mapFile = options.mapFile ?? path.join(options.sassRoot, "_maps.scss");
   const variablesFile = options.variablesFile ?? path.join(options.sassRoot, "_variables.scss");
@@ -145,6 +164,13 @@ export async function buildTokenSchema(options: SchemaOptions): Promise<TokenSch
   };
 }
 
+/**
+ * Creates an empty theme object matching the schema structure.
+ * All token values are initialized to null.
+ *
+ * @param schema - Token schema to create theme from
+ * @returns Empty theme object with structure matching the schema
+ */
 export function schemaToEmptyTheme(schema: TokenSchema): ThemeJson {
   const theme: ThemeJson = {};
   for (const group of schema.groups) {
@@ -157,6 +183,12 @@ export function schemaToEmptyTheme(schema: TokenSchema): ThemeJson {
   return theme;
 }
 
+/**
+ * Extracts all token IDs from the schema.
+ *
+ * @param schema - Token schema to extract IDs from
+ * @returns Array of all token IDs in the format "group.key"
+ */
 export function schemaTokenIds(schema: TokenSchema): string[] {
   return schema.groups.flatMap((group) => group.tokens.map((token) => token.id));
 }

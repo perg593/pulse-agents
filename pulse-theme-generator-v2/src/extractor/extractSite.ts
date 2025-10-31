@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { BrowserCollectorOptions, BrowserCollectorResult } from "./browserCollector.js";
+import { EXTRACTION_SETTINGS } from "../utils/constants.js";
 
 export interface SiteExtractionOptions {
   url: string;
@@ -104,7 +105,7 @@ async function discoverAdditionalUrls(page: Page, limit: number): Promise<string
       urls.add(href);
     }
     return Array.from(urls);
-  }, limit * 3);
+  }, limit * EXTRACTION_SETTINGS.URL_DISCOVERY_MULTIPLIER);
 
   const base = new URL(page.url());
   const sameOrigin: string[] = [];
@@ -122,23 +123,57 @@ async function discoverAdditionalUrls(page: Page, limit: number): Promise<string
   return sameOrigin.slice(0, limit);
 }
 
+/**
+ * Extracts theme data from a website by navigating to it and collecting CSS variables,
+ * computed styles, and logo colors.
+ *
+ * @param options - Extraction configuration options
+ * @param options.url - Target website URL to extract from
+ * @param options.maxPages - Maximum number of pages to crawl (default: 1)
+ * @param options.scheme - Color scheme preference: "light" or "dark" (default: "light")
+ * @param options.timeoutMs - Navigation timeout in milliseconds (default: 45000)
+ * @returns Promise resolving to extraction results with pages and any errors encountered
+ *
+ * @example
+ * ```typescript
+ * const result = await extractSite({
+ *   url: "https://example.com",
+ *   maxPages: 3,
+ *   scheme: "light"
+ * });
+ * console.log(`Extracted ${result.pages.length} pages`);
+ * ```
+ */
 export async function extractSite(options: SiteExtractionOptions): Promise<SiteExtractionResult> {
-  const browser = await chromium.launch({
-    headless: true,
-  });
-  const context = await browser.newContext({
-    javaScriptEnabled: true,
-    colorScheme: options.scheme ?? "light",
-  });
-  const timeout = options.timeoutMs ?? 45000;
   const pages: PageExtractionResult[] = [];
   const errors: string[] = [];
+  let browser: Awaited<ReturnType<typeof chromium.launch>> | null = null;
+  let context: Awaited<ReturnType<Awaited<ReturnType<typeof chromium.launch>>["newContext"]>> | null = null;
 
   try {
+    browser = await chromium.launch({
+      headless: true,
+    });
+    context = await browser.newContext({
+      javaScriptEnabled: true,
+      colorScheme: options.scheme ?? "light",
+    });
+    const timeout = options.timeoutMs ?? EXTRACTION_SETTINGS.DEFAULT_TIMEOUT_MS;
+
     const page = await context.newPage();
-    const snippet = await loadBrowserSnippet();
-    await page.addInitScript({ content: snippet });
-    await page.goto(options.url, { waitUntil: "load", timeout });
+    let snippet: string;
+    try {
+      snippet = await loadBrowserSnippet();
+    } catch (error) {
+      throw new Error(`Failed to load browser snippet: ${(error as Error).message}`);
+    }
+
+    try {
+      await page.addInitScript({ content: snippet });
+      await page.goto(options.url, { waitUntil: "load", timeout });
+    } catch (error) {
+      throw new Error(`Failed to navigate to ${options.url}: ${(error as Error).message}`);
+    }
 
     const collectorOptions: BrowserCollectorOptions = {
       globalSelectors: DEFAULT_GLOBAL_SELECTORS,
@@ -148,14 +183,26 @@ export async function extractSite(options: SiteExtractionOptions): Promise<SiteE
       scheme: options.scheme,
     };
 
-    const primaryResult = await page.evaluate((opts) => {
-      return (window as unknown as { PulseThemeExtractor: { collect: (input: BrowserCollectorOptions) => Promise<BrowserCollectorResult> } }).PulseThemeExtractor.collect(opts);
-    }, collectorOptions);
+    let primaryResult: BrowserCollectorResult;
+    try {
+      primaryResult = await page.evaluate((opts) => {
+        return (window as unknown as { PulseThemeExtractor: { collect: (input: BrowserCollectorOptions) => Promise<BrowserCollectorResult> } }).PulseThemeExtractor.collect(opts);
+      }, collectorOptions);
+    } catch (error) {
+      throw new Error(`Failed to extract theme data from page: ${(error as Error).message}`);
+    }
     pages.push({ ...primaryResult, targetUrl: page.url() });
 
     const maxPages = options.maxPages ?? 1;
     if (maxPages > 1) {
-      const additionalUrls = await discoverAdditionalUrls(page, maxPages - 1);
+      let additionalUrls: string[];
+      try {
+        additionalUrls = await discoverAdditionalUrls(page, maxPages - 1);
+      } catch (error) {
+        errors.push(`Failed to discover additional URLs: ${(error as Error).message}`);
+        additionalUrls = [];
+      }
+
       for (const url of additionalUrls) {
         const extraPage = await context.newPage();
         try {
@@ -168,15 +215,30 @@ export async function extractSite(options: SiteExtractionOptions): Promise<SiteE
         } catch (error) {
           errors.push(`Failed to extract ${url}: ${(error as Error).message}`);
         } finally {
-          await extraPage.close();
+          await extraPage.close().catch((err) => {
+            errors.push(`Failed to close page ${url}: ${(err as Error).message}`);
+          });
         }
       }
     }
   } catch (error) {
     errors.push(`Extraction failed: ${(error as Error).message}`);
   } finally {
-    await context.close();
-    await browser.close();
+    // Ensure cleanup even if errors occur
+    if (context) {
+      try {
+        await context.close();
+      } catch (error) {
+        errors.push(`Failed to close browser context: ${(error as Error).message}`);
+      }
+    }
+    if (browser) {
+      try {
+        await browser.close();
+      } catch (error) {
+        errors.push(`Failed to close browser: ${(error as Error).message}`);
+      }
+    }
   }
 
   return { pages, errors };
