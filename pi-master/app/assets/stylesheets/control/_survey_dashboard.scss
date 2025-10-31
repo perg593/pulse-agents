@@ -1,0 +1,325 @@
+@import 'control/ext/mixins';
+
+// table elements will not fill the extra flexbox space
+// so we must wrap it.
+.react-table-wrapper {
+  flex-grow: 2;
+
+  .audit-modal-trigger {
+    position: relative;
+    margin: 20px 0 0 89%;
+    border-style: none;
+    color: #af4b8f;
+    background-color: #fff;
+  }
+}
+
+.summary-banner {
+  margin: 0;
+  padding-left: 50px;
+  height: 50px;
+  line-height: 50px;
+  background-color: $pi-highlight-color-border;
+  color: #fff;
+  font-family: 'Raleway';
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.no-results-message {
+  margin-top: 100px;
+  text-align: center;
+  font-family: 'Raleway';
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.clear-filters-button {
+  margin-top: 30px;
+  padding: 10px 68px;
+  border-style: none;
+  background-color: $pi-highlight-color;
+  color: #fff;
+  font-family: 'Raleway';
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.filter-panel {
+  .clear-filters-button {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    align-self: center;
+    margin-bottom: 20px;
+    padding-left: 40px;
+    padding-right: 40px;
+    width: 200px;
+    height: 60px;
+  }
+}
+
+.survey-dashboard-component {
+  display: flex;
+  justify-content: space-between;
+  min-width: 1800px;
+}
+
+.surveys-controller {
+  > .container {
+    &.survey-dashboard {
+      width: 100%;
+      padding: 0;
+      margin: 5px 0 0;
+
+      li {
+        margin: 10px 0;
+      }
+
+    }
+  }
+
+  .deletion-warning {
+    background-color: $pi-warning-color;
+    padding: 10px 20px;
+  }
+
+  .popup-menu {
+    position: absolute;
+
+    &.hover-menu {
+      width: 168px;
+
+      li {
+        margin: 0;
+
+        &:hover {
+          background-color: #f2f4f8
+        }
+      }
+
+      a {
+        display: block;
+        padding: 10px 0 10px 27px;
+        color: #323232;
+        text-decoration: none;
+      }
+    }
+
+    &.header-menu {
+      padding-left: 20px;
+      width: 250px;
+
+      ul {
+        padding-right: 10px;
+      }
+
+      li {
+        display: flex;
+        align-items: center;
+        border-right: 3px double #ccc;
+        font-size: 15px;
+      }
+
+      input {
+        margin-right: 20px;
+        margin-top: 0 !important; // ...overriding the global setting
+        margin-bottom: 0 !important; // ...overriding the global setting
+      }
+
+      .survey-filter-checkbox {
+        @include custom-checkbox(#909ba7, #909ba7, #5181bd, $pi-neutral-color, $pi-neutral-color);
+      }
+    }
+
+    .dangerous-option {
+      border-top: 3px solid #ccc;
+
+      &:hover {
+        background-color: $pi-danger-color;
+      }
+    }
+
+    ul {
+      padding: 0;
+      margin: 0;
+      list-style-type: none;
+      font-family: 'Diodrum';
+    }
+  }
+
+  .react-table {
+    width: 100%;
+    font-size: 14px;
+
+    th {
+      box-sizing: border-box;
+      height: 50px;
+      padding: 10px;
+      position: sticky;
+      top: 44px; // the height of the header
+      z-index: 1; // keep it above table icons
+      font-family: 'Diodrum';
+      text-transform: uppercase;
+      font-weight: 600;
+      font-size: 13px;
+      text-align: center;
+      background-color: #d5dce2;
+
+      &.name-header-cell {
+        text-align: left;
+      }
+
+      &:nth-child(1) {
+        padding-left: 80px;
+      }
+    }
+
+    td {
+      padding: 10px;
+      font-family: 'Diodrum';
+
+      > div {
+        display: flex;
+        align-items: center;
+      }
+
+      &.goals,
+      &.status {
+        text-align: center;
+
+        div {
+          display: inline-block;
+        }
+      }
+
+      &.impressions,
+      &.submissions,
+      &.rates,
+      &.last-change,
+      &.goals {
+        div {
+          justify-content: flex-end;
+        }
+      }
+
+      &:nth-child(1) {
+        padding-left: 50px;
+      }
+    }
+
+    .column-header-content-wrapper {
+      outline: none;
+    }
+
+    .survey-locale-group-row {
+      td {
+        &:nth-child(1) {
+          padding-left: 30px;
+        }
+      }
+    }
+
+    .subRow {
+      td {
+        &:nth-child(1) {
+          padding-left: 90px;
+        }
+      }
+    }
+
+    tr {
+      &.survey-locale-group-row {
+        td {
+          font-family: 'Diodrum';
+        }
+      }
+
+      &:hover {
+        background-color: #eaedf3;
+      }
+    }
+
+    .folding-icon-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 50px;
+    }
+
+    .folding-arrow-icon {
+      margin-right: 2px;
+      width: 10px;
+      height: 10px;
+    }
+
+    .folding-folder-icon {
+      margin-right: 10px;
+      width: 20px;
+      height: 15px;
+
+      -webkit-mask-size: cover;
+      mask-size: cover;
+      background: $pi-neutral-color-border;
+      -webkit-mask-repeat: no-repeat;
+      -webkit-mask-position: center;
+      mask-repeat: no-repeat;
+      mask-position: center;
+      border: none;
+
+      &.expanded {
+        background: $pi-highlight-color;
+      }
+    }
+
+    .localized-survey-icon {
+      margin-right: 10px;
+      width: 20px;
+      height: 20px;
+    }
+
+    .individual-survey-icon {
+      margin-right: 10px;
+      width: 19px;
+      height: 13px;
+    }
+
+    .hover-ellipses {
+      cursor: pointer;
+      margin-left: 10px;
+      margin-right: -30px;
+      width: 19px;
+      height: 13px;
+    }
+
+    .sorting-icons {
+      margin: 0 0 3px 5px;
+      width: 10px;
+      height: 5px;
+    }
+
+    .name-cell-container,
+    .localization-group-name-container {
+      display: flex;
+    }
+
+    .localization-group-name-container {
+      &.expanded {
+        color: $pi-highlight-color;
+      }
+
+      &.editing {
+        width: 90%;
+
+        // OutsideClickHandler injects a div which cannot be styled directly :(
+        > div {
+          width: 100%;
+        }
+      }
+    }
+
+    .goals-content {
+      padding: 0 14px;
+    }
+  }
+}

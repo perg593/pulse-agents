@@ -1,0 +1,9 @@
+%h1 Cross-Account Audit Log
+
+.auditing_container
+  - Account.all.each do |account|
+    - if @audits[account.id].present?
+      %h2= "Account: #{ account.name }"
+
+    - @audits[account.id].each do |audit|
+      = render "application/audit", audit: audit

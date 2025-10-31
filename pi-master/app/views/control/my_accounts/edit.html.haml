@@ -1,0 +1,67 @@
+- is_template_account = @user.account.try(:template_account?)
+%h1 Edit Account
+
+/ Contact Info
+.panel.panel-default
+  .panel-heading
+    %h4.panel-title Contact Info
+  .panel-body
+    = simple_form_for @user, url: my_account_path(type: :info), method: :patch, html: { role: 'form', class: 'form-horizontal' } do |form|
+      = form.input :name, label_html: { for: :user_first_name } do
+        = form.input_field :first_name, size: nil
+        = form.input_field :last_name, size: nil
+      = form.input :account_name, label: 'Company Name', input_html: { disabled: is_template_account }, required: @user.admin?, readonly: !@user.admin?
+      .form-action
+        = form.submit 'Update', class: 'btn btn-default'
+
+/ Change Email
+/ TODO: Check against current email
+.panel.panel-default
+  .panel-heading
+    %h4.panel-title Change Email
+  .panel-body
+    = simple_form_for @user, url: update_email_my_account_path, method: :patch, html: { role: 'form', class: 'form-horizontal' } do |form|
+      = form.input :email, label: 'New Email'
+      .form-action
+        = form.submit 'Send confirmation email', class: 'btn btn-default'
+
+/ Change Password
+.panel.panel-default
+  .panel-heading
+    %h4.panel-title Change Password
+  .panel-body
+    = simple_form_for @user, url: update_password_my_account_path, method: :patch, html: { role: 'form', class: 'form-horizontal' } do |form|
+      = form.input :current_password, label: 'Current Password'
+      = form.input :new_password, label: 'New Password'
+      .form-action
+        = form.submit 'Update Password', class: 'btn btn-default'
+
+/ Multi-factor Authentication
+.panel.panel-default
+  .panel-heading
+    %h4.panel-title Multi-factor Authentication
+  .panel-body
+    - if current_user.otp_required_for_login?
+      = link_to "Disable Multi-factor Authentication", mfa_settings_path, method: :delete
+    - else
+      = link_to "Set up MFA", new_mfa_settings_path
+
+/ AI Agents
+.panel.panel-default
+  .panel-heading
+    %h4.panel-title AI Agents
+  .panel-body
+    = link_to "AI Agents", edit_ai_agents_path
+
+- if false
+  / Cancel Account - visit this later #23992
+  .panel.panel-default
+    .panel-heading
+      %h4.panel-title Cancel Account
+    .panel-body
+      = simple_form_for @user, url: my_account_path(type: :cancel), method: :patch, html: { role: 'form', class: 'form-horizontal' } do |form|
+        = form.input :cancel_account, label: 'Cancel your account:' do
+          = form.submit ' Cancel ', class: 'btn btn-default'
+
+- if current_user.admin? && @audits.present?
+  = render "application/audits", audits: @audits, filter_fields: { "Account" => ["name"], "User" => ["first_name", "last_name", "email"] }

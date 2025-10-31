@@ -1,0 +1,1406 @@
+[
+  {
+    "clientId": "cnn",
+    "clientLabel": "cnn",
+    "themes": [
+      {
+        "themeId": "brand-faithful",
+        "themeName": "Brand Faithful",
+        "css": "/theme-generator/output/client-themes/cnn/brand-faithful.css",
+        "widgets": [
+          {
+            "id": "docked-desktop",
+            "label": "Docked (Desktop)",
+            "path": "/preview/widgets/docked_widget/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "docked-mobile",
+            "label": "Docked (Mobile)",
+            "path": "/preview/widgets/docked_widget_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-desktop",
+            "label": "Overlay (Desktop)",
+            "path": "/preview/widgets/overlay/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-mobile",
+            "label": "Overlay (Mobile)",
+            "path": "/preview/widgets/overlay_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-desktop",
+            "label": "Top Bar (Desktop)",
+            "path": "/preview/widgets/top_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-mobile",
+            "label": "Top Bar (Mobile)",
+            "path": "/preview/widgets/top_bar_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-desktop",
+            "label": "Inline (Desktop)",
+            "path": "/preview/widgets/inline/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-mobile",
+            "label": "Inline (Mobile)",
+            "path": "/preview/widgets/inline_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-desktop",
+            "label": "Bottom Bar (Desktop)",
+            "path": "/preview/widgets/bottom_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-mobile",
+            "label": "Bottom Bar (Mobile)",
+            "path": "/preview/widgets/bottom_bar_mobile/single_choice_standard_buttons.html"
+          }
+        ]
+      },
+      {
+        "themeId": "high-contrast",
+        "themeName": "High Contrast",
+        "css": "/theme-generator/output/client-themes/cnn/high-contrast.css",
+        "widgets": [
+          {
+            "id": "docked-desktop",
+            "label": "Docked (Desktop)",
+            "path": "/preview/widgets/docked_widget/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "docked-mobile",
+            "label": "Docked (Mobile)",
+            "path": "/preview/widgets/docked_widget_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-desktop",
+            "label": "Overlay (Desktop)",
+            "path": "/preview/widgets/overlay/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-mobile",
+            "label": "Overlay (Mobile)",
+            "path": "/preview/widgets/overlay_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-desktop",
+            "label": "Top Bar (Desktop)",
+            "path": "/preview/widgets/top_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-mobile",
+            "label": "Top Bar (Mobile)",
+            "path": "/preview/widgets/top_bar_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-desktop",
+            "label": "Inline (Desktop)",
+            "path": "/preview/widgets/inline/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-mobile",
+            "label": "Inline (Mobile)",
+            "path": "/preview/widgets/inline_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-desktop",
+            "label": "Bottom Bar (Desktop)",
+            "path": "/preview/widgets/bottom_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-mobile",
+            "label": "Bottom Bar (Mobile)",
+            "path": "/preview/widgets/bottom_bar_mobile/single_choice_standard_buttons.html"
+          }
+        ]
+      },
+      {
+        "themeId": "modern",
+        "themeName": "Modern",
+        "css": "/theme-generator/output/client-themes/cnn/modern.css",
+        "widgets": [
+          {
+            "id": "docked-desktop",
+            "label": "Docked (Desktop)",
+            "path": "/preview/widgets/docked_widget/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "docked-mobile",
+            "label": "Docked (Mobile)",
+            "path": "/preview/widgets/docked_widget_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-desktop",
+            "label": "Overlay (Desktop)",
+            "path": "/preview/widgets/overlay/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-mobile",
+            "label": "Overlay (Mobile)",
+            "path": "/preview/widgets/overlay_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-desktop",
+            "label": "Top Bar (Desktop)",
+            "path": "/preview/widgets/top_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-mobile",
+            "label": "Top Bar (Mobile)",
+            "path": "/preview/widgets/top_bar_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-desktop",
+            "label": "Inline (Desktop)",
+            "path": "/preview/widgets/inline/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-mobile",
+            "label": "Inline (Mobile)",
+            "path": "/preview/widgets/inline_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-desktop",
+            "label": "Bottom Bar (Desktop)",
+            "path": "/preview/widgets/bottom_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-mobile",
+            "label": "Bottom Bar (Mobile)",
+            "path": "/preview/widgets/bottom_bar_mobile/single_choice_standard_buttons.html"
+          }
+        ]
+      },
+      {
+        "themeId": "minimalist",
+        "themeName": "Minimalist",
+        "css": "/theme-generator/output/client-themes/cnn/minimalist.css",
+        "widgets": [
+          {
+            "id": "docked-desktop",
+            "label": "Docked (Desktop)",
+            "path": "/preview/widgets/docked_widget/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "docked-mobile",
+            "label": "Docked (Mobile)",
+            "path": "/preview/widgets/docked_widget_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-desktop",
+            "label": "Overlay (Desktop)",
+            "path": "/preview/widgets/overlay/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-mobile",
+            "label": "Overlay (Mobile)",
+            "path": "/preview/widgets/overlay_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-desktop",
+            "label": "Top Bar (Desktop)",
+            "path": "/preview/widgets/top_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-mobile",
+            "label": "Top Bar (Mobile)",
+            "path": "/preview/widgets/top_bar_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-desktop",
+            "label": "Inline (Desktop)",
+            "path": "/preview/widgets/inline/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-mobile",
+            "label": "Inline (Mobile)",
+            "path": "/preview/widgets/inline_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-desktop",
+            "label": "Bottom Bar (Desktop)",
+            "path": "/preview/widgets/bottom_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-mobile",
+            "label": "Bottom Bar (Mobile)",
+            "path": "/preview/widgets/bottom_bar_mobile/single_choice_standard_buttons.html"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "clientId": "pulseinsights",
+    "clientLabel": "pulseinsights",
+    "themes": [
+      {
+        "themeId": "brand-faithful",
+        "themeName": "Brand Faithful",
+        "css": "/theme-generator/output/client-themes/pulseinsights/brand-faithful.css",
+        "widgets": [
+          {
+            "id": "docked-desktop",
+            "label": "Docked (Desktop)",
+            "path": "/preview/widgets/docked_widget/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "docked-mobile",
+            "label": "Docked (Mobile)",
+            "path": "/preview/widgets/docked_widget_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-desktop",
+            "label": "Overlay (Desktop)",
+            "path": "/preview/widgets/overlay/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-mobile",
+            "label": "Overlay (Mobile)",
+            "path": "/preview/widgets/overlay_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-desktop",
+            "label": "Top Bar (Desktop)",
+            "path": "/preview/widgets/top_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-mobile",
+            "label": "Top Bar (Mobile)",
+            "path": "/preview/widgets/top_bar_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-desktop",
+            "label": "Inline (Desktop)",
+            "path": "/preview/widgets/inline/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-mobile",
+            "label": "Inline (Mobile)",
+            "path": "/preview/widgets/inline_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-desktop",
+            "label": "Bottom Bar (Desktop)",
+            "path": "/preview/widgets/bottom_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-mobile",
+            "label": "Bottom Bar (Mobile)",
+            "path": "/preview/widgets/bottom_bar_mobile/single_choice_standard_buttons.html"
+          }
+        ]
+      },
+      {
+        "themeId": "high-contrast",
+        "themeName": "High Contrast",
+        "css": "/theme-generator/output/client-themes/pulseinsights/high-contrast.css",
+        "widgets": [
+          {
+            "id": "docked-desktop",
+            "label": "Docked (Desktop)",
+            "path": "/preview/widgets/docked_widget/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "docked-mobile",
+            "label": "Docked (Mobile)",
+            "path": "/preview/widgets/docked_widget_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-desktop",
+            "label": "Overlay (Desktop)",
+            "path": "/preview/widgets/overlay/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-mobile",
+            "label": "Overlay (Mobile)",
+            "path": "/preview/widgets/overlay_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-desktop",
+            "label": "Top Bar (Desktop)",
+            "path": "/preview/widgets/top_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-mobile",
+            "label": "Top Bar (Mobile)",
+            "path": "/preview/widgets/top_bar_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-desktop",
+            "label": "Inline (Desktop)",
+            "path": "/preview/widgets/inline/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-mobile",
+            "label": "Inline (Mobile)",
+            "path": "/preview/widgets/inline_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-desktop",
+            "label": "Bottom Bar (Desktop)",
+            "path": "/preview/widgets/bottom_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-mobile",
+            "label": "Bottom Bar (Mobile)",
+            "path": "/preview/widgets/bottom_bar_mobile/single_choice_standard_buttons.html"
+          }
+        ]
+      },
+      {
+        "themeId": "modern",
+        "themeName": "Modern",
+        "css": "/theme-generator/output/client-themes/pulseinsights/modern.css",
+        "widgets": [
+          {
+            "id": "docked-desktop",
+            "label": "Docked (Desktop)",
+            "path": "/preview/widgets/docked_widget/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "docked-mobile",
+            "label": "Docked (Mobile)",
+            "path": "/preview/widgets/docked_widget_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-desktop",
+            "label": "Overlay (Desktop)",
+            "path": "/preview/widgets/overlay/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-mobile",
+            "label": "Overlay (Mobile)",
+            "path": "/preview/widgets/overlay_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-desktop",
+            "label": "Top Bar (Desktop)",
+            "path": "/preview/widgets/top_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-mobile",
+            "label": "Top Bar (Mobile)",
+            "path": "/preview/widgets/top_bar_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-desktop",
+            "label": "Inline (Desktop)",
+            "path": "/preview/widgets/inline/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-mobile",
+            "label": "Inline (Mobile)",
+            "path": "/preview/widgets/inline_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-desktop",
+            "label": "Bottom Bar (Desktop)",
+            "path": "/preview/widgets/bottom_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-mobile",
+            "label": "Bottom Bar (Mobile)",
+            "path": "/preview/widgets/bottom_bar_mobile/single_choice_standard_buttons.html"
+          }
+        ]
+      },
+      {
+        "themeId": "minimalist",
+        "themeName": "Minimalist",
+        "css": "/theme-generator/output/client-themes/pulseinsights/minimalist.css",
+        "widgets": [
+          {
+            "id": "docked-desktop",
+            "label": "Docked (Desktop)",
+            "path": "/preview/widgets/docked_widget/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "docked-mobile",
+            "label": "Docked (Mobile)",
+            "path": "/preview/widgets/docked_widget_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-desktop",
+            "label": "Overlay (Desktop)",
+            "path": "/preview/widgets/overlay/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-mobile",
+            "label": "Overlay (Mobile)",
+            "path": "/preview/widgets/overlay_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-desktop",
+            "label": "Top Bar (Desktop)",
+            "path": "/preview/widgets/top_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-mobile",
+            "label": "Top Bar (Mobile)",
+            "path": "/preview/widgets/top_bar_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-desktop",
+            "label": "Inline (Desktop)",
+            "path": "/preview/widgets/inline/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-mobile",
+            "label": "Inline (Mobile)",
+            "path": "/preview/widgets/inline_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-desktop",
+            "label": "Bottom Bar (Desktop)",
+            "path": "/preview/widgets/bottom_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-mobile",
+            "label": "Bottom Bar (Mobile)",
+            "path": "/preview/widgets/bottom_bar_mobile/single_choice_standard_buttons.html"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "clientId": "test-font-fallbacks",
+    "clientLabel": "test-font-fallbacks",
+    "themes": [
+      {
+        "themeId": "brand-faithful",
+        "themeName": "Brand Faithful",
+        "css": "/theme-generator/output/client-themes/test-font-fallbacks/brand-faithful.css",
+        "widgets": [
+          {
+            "id": "docked-desktop",
+            "label": "Docked (Desktop)",
+            "path": "/preview/widgets/docked_widget/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "docked-mobile",
+            "label": "Docked (Mobile)",
+            "path": "/preview/widgets/docked_widget_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-desktop",
+            "label": "Overlay (Desktop)",
+            "path": "/preview/widgets/overlay/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-mobile",
+            "label": "Overlay (Mobile)",
+            "path": "/preview/widgets/overlay_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-desktop",
+            "label": "Top Bar (Desktop)",
+            "path": "/preview/widgets/top_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-mobile",
+            "label": "Top Bar (Mobile)",
+            "path": "/preview/widgets/top_bar_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-desktop",
+            "label": "Inline (Desktop)",
+            "path": "/preview/widgets/inline/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-mobile",
+            "label": "Inline (Mobile)",
+            "path": "/preview/widgets/inline_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-desktop",
+            "label": "Bottom Bar (Desktop)",
+            "path": "/preview/widgets/bottom_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-mobile",
+            "label": "Bottom Bar (Mobile)",
+            "path": "/preview/widgets/bottom_bar_mobile/single_choice_standard_buttons.html"
+          }
+        ]
+      },
+      {
+        "themeId": "high-contrast",
+        "themeName": "High Contrast",
+        "css": "/theme-generator/output/client-themes/test-font-fallbacks/high-contrast.css",
+        "widgets": [
+          {
+            "id": "docked-desktop",
+            "label": "Docked (Desktop)",
+            "path": "/preview/widgets/docked_widget/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "docked-mobile",
+            "label": "Docked (Mobile)",
+            "path": "/preview/widgets/docked_widget_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-desktop",
+            "label": "Overlay (Desktop)",
+            "path": "/preview/widgets/overlay/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-mobile",
+            "label": "Overlay (Mobile)",
+            "path": "/preview/widgets/overlay_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-desktop",
+            "label": "Top Bar (Desktop)",
+            "path": "/preview/widgets/top_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-mobile",
+            "label": "Top Bar (Mobile)",
+            "path": "/preview/widgets/top_bar_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-desktop",
+            "label": "Inline (Desktop)",
+            "path": "/preview/widgets/inline/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-mobile",
+            "label": "Inline (Mobile)",
+            "path": "/preview/widgets/inline_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-desktop",
+            "label": "Bottom Bar (Desktop)",
+            "path": "/preview/widgets/bottom_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-mobile",
+            "label": "Bottom Bar (Mobile)",
+            "path": "/preview/widgets/bottom_bar_mobile/single_choice_standard_buttons.html"
+          }
+        ]
+      },
+      {
+        "themeId": "modern",
+        "themeName": "Modern",
+        "css": "/theme-generator/output/client-themes/test-font-fallbacks/modern.css",
+        "widgets": [
+          {
+            "id": "docked-desktop",
+            "label": "Docked (Desktop)",
+            "path": "/preview/widgets/docked_widget/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "docked-mobile",
+            "label": "Docked (Mobile)",
+            "path": "/preview/widgets/docked_widget_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-desktop",
+            "label": "Overlay (Desktop)",
+            "path": "/preview/widgets/overlay/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-mobile",
+            "label": "Overlay (Mobile)",
+            "path": "/preview/widgets/overlay_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-desktop",
+            "label": "Top Bar (Desktop)",
+            "path": "/preview/widgets/top_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-mobile",
+            "label": "Top Bar (Mobile)",
+            "path": "/preview/widgets/top_bar_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-desktop",
+            "label": "Inline (Desktop)",
+            "path": "/preview/widgets/inline/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-mobile",
+            "label": "Inline (Mobile)",
+            "path": "/preview/widgets/inline_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-desktop",
+            "label": "Bottom Bar (Desktop)",
+            "path": "/preview/widgets/bottom_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-mobile",
+            "label": "Bottom Bar (Mobile)",
+            "path": "/preview/widgets/bottom_bar_mobile/single_choice_standard_buttons.html"
+          }
+        ]
+      },
+      {
+        "themeId": "minimalist",
+        "themeName": "Minimalist",
+        "css": "/theme-generator/output/client-themes/test-font-fallbacks/minimalist.css",
+        "widgets": [
+          {
+            "id": "docked-desktop",
+            "label": "Docked (Desktop)",
+            "path": "/preview/widgets/docked_widget/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "docked-mobile",
+            "label": "Docked (Mobile)",
+            "path": "/preview/widgets/docked_widget_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-desktop",
+            "label": "Overlay (Desktop)",
+            "path": "/preview/widgets/overlay/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-mobile",
+            "label": "Overlay (Mobile)",
+            "path": "/preview/widgets/overlay_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-desktop",
+            "label": "Top Bar (Desktop)",
+            "path": "/preview/widgets/top_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-mobile",
+            "label": "Top Bar (Mobile)",
+            "path": "/preview/widgets/top_bar_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-desktop",
+            "label": "Inline (Desktop)",
+            "path": "/preview/widgets/inline/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-mobile",
+            "label": "Inline (Mobile)",
+            "path": "/preview/widgets/inline_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-desktop",
+            "label": "Bottom Bar (Desktop)",
+            "path": "/preview/widgets/bottom_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-mobile",
+            "label": "Bottom Bar (Mobile)",
+            "path": "/preview/widgets/bottom_bar_mobile/single_choice_standard_buttons.html"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "clientId": "airsuprahcp",
+    "clientLabel": "airsuprahcp",
+    "themes": [
+      {
+        "themeId": "brand-faithful",
+        "themeName": "Brand Faithful",
+        "css": "/theme-generator/output/client-themes/airsuprahcp/brand-faithful.css",
+        "widgets": [
+          {
+            "id": "docked-desktop",
+            "label": "Docked (Desktop)",
+            "path": "/preview/widgets/docked_widget/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "docked-mobile",
+            "label": "Docked (Mobile)",
+            "path": "/preview/widgets/docked_widget_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-desktop",
+            "label": "Overlay (Desktop)",
+            "path": "/preview/widgets/overlay/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-mobile",
+            "label": "Overlay (Mobile)",
+            "path": "/preview/widgets/overlay_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-desktop",
+            "label": "Top Bar (Desktop)",
+            "path": "/preview/widgets/top_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-mobile",
+            "label": "Top Bar (Mobile)",
+            "path": "/preview/widgets/top_bar_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-desktop",
+            "label": "Inline (Desktop)",
+            "path": "/preview/widgets/inline/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-mobile",
+            "label": "Inline (Mobile)",
+            "path": "/preview/widgets/inline_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-desktop",
+            "label": "Bottom Bar (Desktop)",
+            "path": "/preview/widgets/bottom_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-mobile",
+            "label": "Bottom Bar (Mobile)",
+            "path": "/preview/widgets/bottom_bar_mobile/single_choice_standard_buttons.html"
+          }
+        ]
+      },
+      {
+        "themeId": "high-contrast",
+        "themeName": "High Contrast",
+        "css": "/theme-generator/output/client-themes/airsuprahcp/high-contrast.css",
+        "widgets": [
+          {
+            "id": "docked-desktop",
+            "label": "Docked (Desktop)",
+            "path": "/preview/widgets/docked_widget/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "docked-mobile",
+            "label": "Docked (Mobile)",
+            "path": "/preview/widgets/docked_widget_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-desktop",
+            "label": "Overlay (Desktop)",
+            "path": "/preview/widgets/overlay/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-mobile",
+            "label": "Overlay (Mobile)",
+            "path": "/preview/widgets/overlay_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-desktop",
+            "label": "Top Bar (Desktop)",
+            "path": "/preview/widgets/top_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-mobile",
+            "label": "Top Bar (Mobile)",
+            "path": "/preview/widgets/top_bar_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-desktop",
+            "label": "Inline (Desktop)",
+            "path": "/preview/widgets/inline/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-mobile",
+            "label": "Inline (Mobile)",
+            "path": "/preview/widgets/inline_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-desktop",
+            "label": "Bottom Bar (Desktop)",
+            "path": "/preview/widgets/bottom_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-mobile",
+            "label": "Bottom Bar (Mobile)",
+            "path": "/preview/widgets/bottom_bar_mobile/single_choice_standard_buttons.html"
+          }
+        ]
+      },
+      {
+        "themeId": "modern",
+        "themeName": "Modern",
+        "css": "/theme-generator/output/client-themes/airsuprahcp/modern.css",
+        "widgets": [
+          {
+            "id": "docked-desktop",
+            "label": "Docked (Desktop)",
+            "path": "/preview/widgets/docked_widget/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "docked-mobile",
+            "label": "Docked (Mobile)",
+            "path": "/preview/widgets/docked_widget_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-desktop",
+            "label": "Overlay (Desktop)",
+            "path": "/preview/widgets/overlay/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-mobile",
+            "label": "Overlay (Mobile)",
+            "path": "/preview/widgets/overlay_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-desktop",
+            "label": "Top Bar (Desktop)",
+            "path": "/preview/widgets/top_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-mobile",
+            "label": "Top Bar (Mobile)",
+            "path": "/preview/widgets/top_bar_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-desktop",
+            "label": "Inline (Desktop)",
+            "path": "/preview/widgets/inline/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-mobile",
+            "label": "Inline (Mobile)",
+            "path": "/preview/widgets/inline_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-desktop",
+            "label": "Bottom Bar (Desktop)",
+            "path": "/preview/widgets/bottom_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-mobile",
+            "label": "Bottom Bar (Mobile)",
+            "path": "/preview/widgets/bottom_bar_mobile/single_choice_standard_buttons.html"
+          }
+        ]
+      },
+      {
+        "themeId": "minimalist",
+        "themeName": "Minimalist",
+        "css": "/theme-generator/output/client-themes/airsuprahcp/minimalist.css",
+        "widgets": [
+          {
+            "id": "docked-desktop",
+            "label": "Docked (Desktop)",
+            "path": "/preview/widgets/docked_widget/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "docked-mobile",
+            "label": "Docked (Mobile)",
+            "path": "/preview/widgets/docked_widget_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-desktop",
+            "label": "Overlay (Desktop)",
+            "path": "/preview/widgets/overlay/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-mobile",
+            "label": "Overlay (Mobile)",
+            "path": "/preview/widgets/overlay_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-desktop",
+            "label": "Top Bar (Desktop)",
+            "path": "/preview/widgets/top_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-mobile",
+            "label": "Top Bar (Mobile)",
+            "path": "/preview/widgets/top_bar_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-desktop",
+            "label": "Inline (Desktop)",
+            "path": "/preview/widgets/inline/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-mobile",
+            "label": "Inline (Mobile)",
+            "path": "/preview/widgets/inline_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-desktop",
+            "label": "Bottom Bar (Desktop)",
+            "path": "/preview/widgets/bottom_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-mobile",
+            "label": "Bottom Bar (Mobile)",
+            "path": "/preview/widgets/bottom_bar_mobile/single_choice_standard_buttons.html"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "clientId": "nytimes",
+    "clientLabel": "nytimes",
+    "themes": [
+      {
+        "themeId": "brand-faithful",
+        "themeName": "Brand Faithful",
+        "css": "/theme-generator/output/client-themes/nytimes/brand-faithful.css",
+        "widgets": [
+          {
+            "id": "docked-desktop",
+            "label": "Docked (Desktop)",
+            "path": "/preview/widgets/docked_widget/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "docked-mobile",
+            "label": "Docked (Mobile)",
+            "path": "/preview/widgets/docked_widget_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-desktop",
+            "label": "Overlay (Desktop)",
+            "path": "/preview/widgets/overlay/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-mobile",
+            "label": "Overlay (Mobile)",
+            "path": "/preview/widgets/overlay_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-desktop",
+            "label": "Top Bar (Desktop)",
+            "path": "/preview/widgets/top_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-mobile",
+            "label": "Top Bar (Mobile)",
+            "path": "/preview/widgets/top_bar_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-desktop",
+            "label": "Inline (Desktop)",
+            "path": "/preview/widgets/inline/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-mobile",
+            "label": "Inline (Mobile)",
+            "path": "/preview/widgets/inline_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-desktop",
+            "label": "Bottom Bar (Desktop)",
+            "path": "/preview/widgets/bottom_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-mobile",
+            "label": "Bottom Bar (Mobile)",
+            "path": "/preview/widgets/bottom_bar_mobile/single_choice_standard_buttons.html"
+          }
+        ]
+      },
+      {
+        "themeId": "high-contrast",
+        "themeName": "High Contrast",
+        "css": "/theme-generator/output/client-themes/nytimes/high-contrast.css",
+        "widgets": [
+          {
+            "id": "docked-desktop",
+            "label": "Docked (Desktop)",
+            "path": "/preview/widgets/docked_widget/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "docked-mobile",
+            "label": "Docked (Mobile)",
+            "path": "/preview/widgets/docked_widget_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-desktop",
+            "label": "Overlay (Desktop)",
+            "path": "/preview/widgets/overlay/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-mobile",
+            "label": "Overlay (Mobile)",
+            "path": "/preview/widgets/overlay_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-desktop",
+            "label": "Top Bar (Desktop)",
+            "path": "/preview/widgets/top_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-mobile",
+            "label": "Top Bar (Mobile)",
+            "path": "/preview/widgets/top_bar_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-desktop",
+            "label": "Inline (Desktop)",
+            "path": "/preview/widgets/inline/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-mobile",
+            "label": "Inline (Mobile)",
+            "path": "/preview/widgets/inline_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-desktop",
+            "label": "Bottom Bar (Desktop)",
+            "path": "/preview/widgets/bottom_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-mobile",
+            "label": "Bottom Bar (Mobile)",
+            "path": "/preview/widgets/bottom_bar_mobile/single_choice_standard_buttons.html"
+          }
+        ]
+      },
+      {
+        "themeId": "modern",
+        "themeName": "Modern",
+        "css": "/theme-generator/output/client-themes/nytimes/modern.css",
+        "widgets": [
+          {
+            "id": "docked-desktop",
+            "label": "Docked (Desktop)",
+            "path": "/preview/widgets/docked_widget/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "docked-mobile",
+            "label": "Docked (Mobile)",
+            "path": "/preview/widgets/docked_widget_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-desktop",
+            "label": "Overlay (Desktop)",
+            "path": "/preview/widgets/overlay/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-mobile",
+            "label": "Overlay (Mobile)",
+            "path": "/preview/widgets/overlay_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-desktop",
+            "label": "Top Bar (Desktop)",
+            "path": "/preview/widgets/top_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-mobile",
+            "label": "Top Bar (Mobile)",
+            "path": "/preview/widgets/top_bar_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-desktop",
+            "label": "Inline (Desktop)",
+            "path": "/preview/widgets/inline/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-mobile",
+            "label": "Inline (Mobile)",
+            "path": "/preview/widgets/inline_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-desktop",
+            "label": "Bottom Bar (Desktop)",
+            "path": "/preview/widgets/bottom_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-mobile",
+            "label": "Bottom Bar (Mobile)",
+            "path": "/preview/widgets/bottom_bar_mobile/single_choice_standard_buttons.html"
+          }
+        ]
+      },
+      {
+        "themeId": "minimalist",
+        "themeName": "Minimalist",
+        "css": "/theme-generator/output/client-themes/nytimes/minimalist.css",
+        "widgets": [
+          {
+            "id": "docked-desktop",
+            "label": "Docked (Desktop)",
+            "path": "/preview/widgets/docked_widget/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "docked-mobile",
+            "label": "Docked (Mobile)",
+            "path": "/preview/widgets/docked_widget_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-desktop",
+            "label": "Overlay (Desktop)",
+            "path": "/preview/widgets/overlay/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-mobile",
+            "label": "Overlay (Mobile)",
+            "path": "/preview/widgets/overlay_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-desktop",
+            "label": "Top Bar (Desktop)",
+            "path": "/preview/widgets/top_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-mobile",
+            "label": "Top Bar (Mobile)",
+            "path": "/preview/widgets/top_bar_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-desktop",
+            "label": "Inline (Desktop)",
+            "path": "/preview/widgets/inline/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-mobile",
+            "label": "Inline (Mobile)",
+            "path": "/preview/widgets/inline_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-desktop",
+            "label": "Bottom Bar (Desktop)",
+            "path": "/preview/widgets/bottom_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-mobile",
+            "label": "Bottom Bar (Mobile)",
+            "path": "/preview/widgets/bottom_bar_mobile/single_choice_standard_buttons.html"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "clientId": "npr",
+    "clientLabel": "npr",
+    "themes": [
+      {
+        "themeId": "brand-faithful",
+        "themeName": "Brand Faithful",
+        "css": "/theme-generator/output/client-themes/npr/brand-faithful.css",
+        "widgets": [
+          {
+            "id": "docked-desktop",
+            "label": "Docked (Desktop)",
+            "path": "/preview/widgets/docked_widget/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "docked-mobile",
+            "label": "Docked (Mobile)",
+            "path": "/preview/widgets/docked_widget_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-desktop",
+            "label": "Overlay (Desktop)",
+            "path": "/preview/widgets/overlay/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-mobile",
+            "label": "Overlay (Mobile)",
+            "path": "/preview/widgets/overlay_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-desktop",
+            "label": "Top Bar (Desktop)",
+            "path": "/preview/widgets/top_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-mobile",
+            "label": "Top Bar (Mobile)",
+            "path": "/preview/widgets/top_bar_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-desktop",
+            "label": "Inline (Desktop)",
+            "path": "/preview/widgets/inline/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-mobile",
+            "label": "Inline (Mobile)",
+            "path": "/preview/widgets/inline_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-desktop",
+            "label": "Bottom Bar (Desktop)",
+            "path": "/preview/widgets/bottom_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-mobile",
+            "label": "Bottom Bar (Mobile)",
+            "path": "/preview/widgets/bottom_bar_mobile/single_choice_standard_buttons.html"
+          }
+        ]
+      },
+      {
+        "themeId": "high-contrast",
+        "themeName": "High Contrast",
+        "css": "/theme-generator/output/client-themes/npr/high-contrast.css",
+        "widgets": [
+          {
+            "id": "docked-desktop",
+            "label": "Docked (Desktop)",
+            "path": "/preview/widgets/docked_widget/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "docked-mobile",
+            "label": "Docked (Mobile)",
+            "path": "/preview/widgets/docked_widget_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-desktop",
+            "label": "Overlay (Desktop)",
+            "path": "/preview/widgets/overlay/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-mobile",
+            "label": "Overlay (Mobile)",
+            "path": "/preview/widgets/overlay_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-desktop",
+            "label": "Top Bar (Desktop)",
+            "path": "/preview/widgets/top_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-mobile",
+            "label": "Top Bar (Mobile)",
+            "path": "/preview/widgets/top_bar_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-desktop",
+            "label": "Inline (Desktop)",
+            "path": "/preview/widgets/inline/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-mobile",
+            "label": "Inline (Mobile)",
+            "path": "/preview/widgets/inline_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-desktop",
+            "label": "Bottom Bar (Desktop)",
+            "path": "/preview/widgets/bottom_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-mobile",
+            "label": "Bottom Bar (Mobile)",
+            "path": "/preview/widgets/bottom_bar_mobile/single_choice_standard_buttons.html"
+          }
+        ]
+      },
+      {
+        "themeId": "modern",
+        "themeName": "Modern",
+        "css": "/theme-generator/output/client-themes/npr/modern.css",
+        "widgets": [
+          {
+            "id": "docked-desktop",
+            "label": "Docked (Desktop)",
+            "path": "/preview/widgets/docked_widget/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "docked-mobile",
+            "label": "Docked (Mobile)",
+            "path": "/preview/widgets/docked_widget_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-desktop",
+            "label": "Overlay (Desktop)",
+            "path": "/preview/widgets/overlay/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-mobile",
+            "label": "Overlay (Mobile)",
+            "path": "/preview/widgets/overlay_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-desktop",
+            "label": "Top Bar (Desktop)",
+            "path": "/preview/widgets/top_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-mobile",
+            "label": "Top Bar (Mobile)",
+            "path": "/preview/widgets/top_bar_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-desktop",
+            "label": "Inline (Desktop)",
+            "path": "/preview/widgets/inline/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-mobile",
+            "label": "Inline (Mobile)",
+            "path": "/preview/widgets/inline_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-desktop",
+            "label": "Bottom Bar (Desktop)",
+            "path": "/preview/widgets/bottom_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-mobile",
+            "label": "Bottom Bar (Mobile)",
+            "path": "/preview/widgets/bottom_bar_mobile/single_choice_standard_buttons.html"
+          }
+        ]
+      },
+      {
+        "themeId": "minimalist",
+        "themeName": "Minimalist",
+        "css": "/theme-generator/output/client-themes/npr/minimalist.css",
+        "widgets": [
+          {
+            "id": "docked-desktop",
+            "label": "Docked (Desktop)",
+            "path": "/preview/widgets/docked_widget/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "docked-mobile",
+            "label": "Docked (Mobile)",
+            "path": "/preview/widgets/docked_widget_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-desktop",
+            "label": "Overlay (Desktop)",
+            "path": "/preview/widgets/overlay/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "overlay-mobile",
+            "label": "Overlay (Mobile)",
+            "path": "/preview/widgets/overlay_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-desktop",
+            "label": "Top Bar (Desktop)",
+            "path": "/preview/widgets/top_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "topbar-mobile",
+            "label": "Top Bar (Mobile)",
+            "path": "/preview/widgets/top_bar_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-desktop",
+            "label": "Inline (Desktop)",
+            "path": "/preview/widgets/inline/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "inline-mobile",
+            "label": "Inline (Mobile)",
+            "path": "/preview/widgets/inline_mobile/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-desktop",
+            "label": "Bottom Bar (Desktop)",
+            "path": "/preview/widgets/bottom_bar/single_choice_standard_buttons.html"
+          },
+          {
+            "id": "bottombar-mobile",
+            "label": "Bottom Bar (Mobile)",
+            "path": "/preview/widgets/bottom_bar_mobile/single_choice_standard_buttons.html"
+          }
+        ]
+      }
+    ]
+  }
+]

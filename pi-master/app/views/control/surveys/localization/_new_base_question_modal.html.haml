@@ -1,0 +1,95 @@
+:ruby
+  modal_id ||= nil
+  survey_locale_group ||= nil
+
+  base_survey = survey_locale_group.base_survey
+
+.modal.fade{id: modal_id, :role => "dialog", :tabindex => "-1"}
+  .modal-dialog.new-question{:role => "document"}
+    .modal-content
+      = form_for Question.new, url: questions_path do |question_form|
+        = hidden_field_tag :survey_locale_group_id, survey_locale_group.id
+        = hidden_field_tag :for_base_survey, true
+        .modal-header
+          %button.close{"aria-label" => "Close", "data-dismiss" => "modal", :type => "button"}
+            %span{"aria-hidden" => "true"} ×
+          %h5.modal-title Add Question
+        .modal-body
+          .basic-fields-container
+            .basic-fields-row
+              %label Base Value:
+              = question_form.text_field :content, class: 'base-content-input', required: true
+
+            .basic-fields-row
+              %label Short Name:
+              = text_field_tag :question_locale_group_name, nil, class: 'locale-group-name', required: true
+
+            .basic-fields-row
+              %label Type:
+              - question_type_options = Question.question_types.map {|survey_type, val| [ survey_type.titleize, val, {data: { question_type_selector: survey_type}}]}
+              - question_type_options << ["NPS", 0, {data: { question_type_selector: "nps_question" }}] # NPS is basically a single choice question with an NPS flag
+              = question_form.select :question_type, options_for_select(question_type_options)
+
+          .question_fields_container.free_text_question.hidden
+            .basic-fields-row
+              %label Next Question:
+              = select_tag :next_question_locale_group_id, options_for_select(base_survey.questions.map(&:question_locale_group).compact.map {|question_locale_group| [question_locale_group.name, question_locale_group.id]}), include_blank: true, disabled: true
+
+          .question_fields_container.single_choice_question
+            .basic-fields-container
+              .basic-fields-row
+                %label Randomize:
+                = question_form.select :randomize, options_for_select(question_randomization_options), disabled: true
+
+            = question_form.simple_fields_for :additional_question_fields do |additional_question_fields|
+              .surveys-controller
+                .survey-formatting
+                  .survey-fields-wrapper
+                    .sub-fields
+                      = render "control/surveys/localization/single_choice_question_options", survey: base_survey, follow_up_questions_fields: additional_question_fields
+
+          .question_fields_container.multiple_choices_question.hidden
+            .basic-fields-container
+              .basic-fields-row
+                %label Enable Maximum Selection Limit:
+                = question_form.check_box :enable_maximum_selection, disabled: true
+              .basic-fields-row
+                %label Maximum selections:
+                = question_form.text_field :maximum_selection, disabled: true
+
+          .question_fields_container.free_text_question.hidden
+            .basic-fields-container
+              .basic-fields-row
+                %label Hint
+                = question_form.text_field :hint_text, disabled: true
+              .basic-fields-row
+                %label Submit Label
+                = question_form.text_field :submit_label, disabled: true
+
+            = question_form.simple_fields_for :additional_question_fields do |additional_question_fields|
+              .surveys-controller
+                .survey-formatting
+                  .survey-fields-wrapper
+                    .sub-fields
+                      = render "control/surveys/localization/free_text_question_options", survey: base_survey, follow_up_questions_fields: additional_question_fields
+
+          .question_fields_container.custom_content_question.hidden
+            = question_form.simple_fields_for :additional_question_fields do |additional_question_fields|
+              .surveys-controller
+                .survey-formatting
+                  .survey-fields-wrapper
+                    .sub-fields
+                      = render "control/surveys/localization/custom_content_question_options", survey: base_survey, follow_up_questions_fields: additional_question_fields
+
+          .question_fields_container.nps_question.hidden
+            = question_form.hidden_field :nps, value: true, disabled: true
+
+            = question_form.simple_fields_for :additional_question_fields do |additional_question_fields|
+              .surveys-controller
+                .survey-formatting
+                  .survey-fields-wrapper
+                    .sub-fields
+                      = render "control/surveys/localization/nps_question_options", survey: base_survey, follow_up_questions_fields: additional_question_fields
+
+        .modal-footer
+          = question_form.submit 'Add Question', class: 'btn btn-primary'

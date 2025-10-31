@@ -1,0 +1,44 @@
+sequenceDiagram
+    participant UserUI as Preview UI (Control Rail)
+    participant Bridge as Survey Bridge (preview/app/survey/bridge.js)
+    participant Overlay as Overlay Container (survey iframe)
+    participant Player as Survey Player iframe (preview/app/survey/player.html)
+    participant Tag as Pulse Tag Runtime (surveys.js)
+    participant Host as Background Host iframe/page
+    participant ThirdParty as External Services (Google Sheets, Proxy, etc.)
+
+    Note over UserUI,ThirdParty: Preview boot sequence
+    UserUI->>ThirdParty: Fetch survey sheet / theme data (HTTP)
+    UserUI->>Host: Load host page (via proxy if required)
+    UserUI->>Bridge: initialize bridge(container, callbacks)
+
+    Note over Bridge,Player: Player load
+    Bridge->>Overlay: Create iframe for survey player
+    Bridge->>Player: set src with account, host, proxyOrigin, etc.
+    Player-->>Bridge: Window message: player-ready
+    Bridge-->>UserUI: onReady callback
+
+    Note over UserUI,Host: Background management
+    UserUI->>Host: Apply theme CSS (if same-origin)
+    Host-->>UserUI: Geometry/layout updates (observed via widget-geometry messages)
+
+    Note over UserUI,Tag: Present workflow
+    UserUI->>Bridge: present(selectedSurvey)
+    alt Player not ready
+        Bridge->>Bridge: Queue present command
+    else Player ready
+        Bridge->>Player: postMessage {type: present, surveyId}
+    end
+
+    Note over Player,Tag: Pulse runtime
+    Player->>Tag: Boot surveys.js (resolved via proxy)
+    Tag->>Tag: Load external assets / command queue
+    Tag-->>Player: Widget render lifecycle
+    Player-->>Bridge: Widget status/geometry updates (postMessage)
+    Bridge-->>UserUI: Log updates / overlay positioning
+
+    Note over UserUI: Additional actions
+    UserUI->>Bridge: applyTheme/manualCss/sendTrigger commands
+    Bridge->>Player: postMessage with commands
+    Player->>Tag: Whisper commands to Pulse runtime
+    Tag-->>Player: Updated widget frame/content

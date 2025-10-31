@@ -1,0 +1,26 @@
+$asset-pos-right: 7px !default;
+$asset-pos-bottom: -25px !default;
+$asset-pos-offset-custom-content: 5px !default; //difference in bottom margin on custom content cards
+$asset-pos-right-offset-custom-content: 0px !default; //difference in bottom margin on custom content cards
+
+div#_pi_surveyWidgetContainer div#_pi_surveyWidget{
+    justify-content: flex-start !important;
+}
+div#_pi_surveyWidgetContainer div#_pi_surveyWidget ._pi_widgetContentContainer{
+    position: relative;
+}
+div#_pi_surveyWidgetContainer div#_pi_surveyWidget ._pi_widgetContentContainer::after {
+    position: absolute;
+    line-height: 120%;
+    right: $asset-pos-right;
+    bottom: $asset-pos-bottom;
+    font-family: $font-sm-family;
+    font-size: $font-sm-size;
+    color: $font-sm-color;
+}
+div#_pi_surveyWidgetContainer div#_pi_surveyWidget[data-question-type="custom_content_question"]{
+    ._pi_widgetContentContainer::after{
+        bottom: $asset-pos-bottom + $asset-pos-offset-custom-content;
+        right: calc(#{$asset-pos-right} + #{$asset-pos-right-offset-custom-content});
+    }
+}

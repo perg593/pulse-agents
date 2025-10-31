@@ -1,0 +1,12 @@
+- title "Sign In with MFA"
+
+= form_with url: complete_mfa_url(user_id: @user.id), model: @user do |form|
+  .form-title Sign In with MFA
+
+  .controls
+    = form.text_field :otp_attempt, placeholder: "Authentication Code", required: true, autofocus: true, autocomplete: "off", class: "signin-input"
+
+  %p.signin-instructions Enter the code from your multi-factor authenticator app. If you've lost your device, you can enter one of your recovery codes.
+
+  .form-action
+    = form.submit "Sign In"

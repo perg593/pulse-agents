@@ -1,0 +1,32 @@
+- content_for :full_width_navbar, true
+- content_for :content_container_class, "survey-report-content"
+- content_for :css_scope, "surveys-controller survey-report"
+
+= react_component("survey_report/QrveySidebar", authenticityToken: form_authenticity_token, links: @qrvey_sidebar_presenter.links, shareOptions: @qrvey_sidebar_presenter.share_options[:options], surveyId: @survey&.id, authorization: @qrvey_sidebar_presenter.authorization, usingHardcodedDefaults: !@qrvey_sidebar_presenter.using_hardcoded_defaults?)
+
+.survey-wrapper
+  .survey-report-container
+    - selected_tab = "#{@qrvey_mode}_report"
+
+    :ruby
+      edit_link = if @can_edit
+        editing = @qrvey_mode == "edit"
+        other_mode = editing ? "view" : "edit"
+
+        {
+          editing: editing,
+          url: client_reports_qrvey_path(survey_id: @survey&.id, dashboard_id: @dashboard_id, mode: other_mode),
+          label: "Edit Report",
+          name: "edit_report"
+        }
+      end
+
+    = react_component("SurveySubNav", subnavLinks: client_reports_subnav_links, selectedTab: selected_tab, qrveyReportEditLink: edit_link)
+
+    - if @qrvey_mode == "view"
+      <qrvey-end-user settings="config"></qrvey-end-user>
+    - elsif @can_edit && @qrvey_mode == "edit"
+      <qrvey-builders settings="config"></qrvey-builders>
+
+= render "qrvey_widget_config"
+= render "qrvey_widget_launcher"

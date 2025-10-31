@@ -1,0 +1,156 @@
+/* ------------------------------------------------------------------------
+	                					 FONTS
+------------------------------------------------------------------------ */
+
+
+// ______________________________ GLOBAL __________________________________
+div._pi_question,
+div._pi_thankYouSurvey,
+
+ul._pi_answers_container li a label, 
+
+input._pi_free_text_question_field,
+textarea._pi_free_text_question_field,
+
+div._pi_free_text_question_characters_count,
+
+label._pi-control._pi-control-checkbox,
+div._pi_multiple_choices_count, 
+
+._pi_question_custom_content_question,
+._pi_question_custom_content_question p,
+
+._pi_invitationTextContainer,
+
+a._pi_branding,
+a._pi_branding:hover
+
+{
+	font-family: 'XfinityStandard', Helvetica, Arial, sans-serif;
+	font-weight: 400;
+	line-height: 100%;
+	text-transform: none;
+	white-space: normal;
+}
+
+
+
+
+
+// __________________ QUESTION, THANK YOU, CUSTOM CONTENT | QUESTION, INVITATION __________________
+div._pi_question, 
+div._pi_thankYouSurvey,
+div._pi_question_custom_content_question,
+div._pi_question_custom_content_question p:first-child,
+div._pi_invitationTextContainer	{
+	font-family: 'XfinityStandard', Helvetica, Arial, sans-serif;
+	color: #191919 !important;
+	font-size: 20px !important;
+	font-weight: 200;
+	text-align: center;
+	text-transform: none;
+	letter-spacing: 0px;
+	line-height: 120%;
+}
+
+#_pi_surveyWidgetContainer.mobile-enabled div._pi_question, 
+#_pi_surveyWidgetContainer.mobile-enabled div._pi_thankYouSurvey,
+#_pi_surveyWidgetContainer.mobile-enabled div._pi_question_custom_content_question,
+#_pi_surveyWidgetContainer.mobile-enabled div._pi_question_custom_content_question p:first-child,
+#_pi_surveyWidgetContainer.mobile-enabled div._pi_invitationTextContainer	{
+	font-size: 16px !important;
+	font-weight: 200;
+}
+
+
+
+
+
+// ______________________________ BUTTONS _______________________________________________________________
+input._pi_free_text_question_submit_button,
+input._pi_multiple_choices_question_submit_button,
+._pi_question_custom_content_question button.pi_question_link,
+._pi_startButton,
+#_pi_surveyWidgetContainer.mobile-enabled input._pi_free_text_question_submit_button,
+#_pi_surveyWidgetContainer.mobile-enabled input._pi_multiple_choices_question_submit_button,
+#_pi_surveyWidgetContainer.mobile-enabled ._pi_question_custom_content_question button.pi_question_link,
+#_pi_surveyWidgetContainer.mobile-enabled ._pi_startButton {
+	font-family: 'XfinityStandard', Helvetica, Arial, sans-serif;
+	font-weight: 400;
+	line-height: 100%;
+
+	color: #fff;
+	cursor: pointer;
+
+	text-decoration: none;
+	text-align: center;
+	text-transform: none;
+	letter-spacing: 0.2px;
+}
+
+
+
+
+
+// ______________________________ CUSTOM CONTENT | BODY __________________________________________________
+._pi_question_custom_content_question {
+	padding-bottom: 0px !important;
+}
+
+._pi_question_custom_content_question p {
+	color: #44484C !important;
+	font-size: 15px !important;
+	text-align: center !important;
+	margin-top: 0 !important;
+	margin-bottom: 1rem !important;
+}
+
+#_pi_surveyWidgetContainer.mobile-enabled ._pi_question_custom_content_question p {
+	font-size: 15px !important;
+}
+
+._pi_question_custom_content_question p:last-child {
+	margin-bottom: 0 !important;
+}
+
+
+
+
+
+// ______________________________ BRANDING, CHARACTER COUNTS ____________________________________________
+div._pi_free_text_question_characters_count,
+div._pi_multiple_choices_count,
+a._pi_branding,
+a._pi_branding:hover {
+	// font-family: Arial, Helvetica, sans-serif;
+	font-family: 'XfinityStandard', Helvetica, Arial, sans-serif;
+	font-weight: normal;
+	color: #888;
+	text-decoration: none;
+	text-align: left;
+	letter-spacing: 0px;
+	line-height: 100% !important;
+
+	font-size: 12px;	
+}
+
+#_pi_surveyWidgetContainer.mobile-enabled div._pi_free_text_question_characters_count,
+#_pi_surveyWidgetContainer.mobile-enabled div._pi_multiple_choices_count,
+#_pi_surveyWidgetContainer.mobile-enabled a._pi_branding,
+#_pi_surveyWidgetContainer.mobile-enabled a._pi_branding:hover {
+	font-size: 11px;
+}
+
+a._pi_branding:hover {
+	// background-color: transparent !important;
+	// color: transparent !important;
+	color: #0272b6 !important;
+	text-decoration: none;
+}
+
+#_pi_surveyWidgetContainer.mobile-enabled a._pi_branding:hover {
+	color: #888;		
+}
+
+
+

@@ -1,0 +1,6 @@
+%p #{@automation_names.count} of your Automations #{@automation_names.one? ? 'has' : 'have'} been triggered:
+
+%p Matching automation(s): #{@automation_names.join(', ')}
+%p Survey: #{@survey_name}.
+%p Question: #{@question_name}.
+%p Answer: #{@answer}.

@@ -1,0 +1,160 @@
+// THE _selectors FILE:
+@import '../../01-css-pulse/_selectors';
+
+// DEFAULT VARIABLES
+@import '../_default/_default-1-variables';
+
+// CLIENT-SPECIFIC DESIGN VARIABLES
+@import './_canopy_growth_variables';
+
+// GLOBAL MAPS:
+@import '../../01-css-pulse/_maps';
+
+// GLOBAL MIXINS
+@import '../../01-css-pulse/_mixins';
+
+// THE GLOBAL STRUCTURE FOR FRAMEWORK V2:
+@import '../../01-css-pulse/_theme-structure';
+#_pi_surveyWidgetContainer{
+  position: relative;
+  background-color: transparent !important;
+  #_pi_surveyWidget{
+     border: none !important;
+  }
+}
+
+
+#_pi_surveyWidgetContainer #_pi_surveyWidget ._pi_widgetContentContainer{
+  ._pi_question:not(._pi_question_custom_content_question){
+    padding-bottom: 26px !important;
+  }
+  ._pi_question._pi_question_custom_content_question{
+    h1,h2,h3,h4,h5{
+      color: #181818;
+    }
+    h2{
+      font-size: 26px !important;
+    }
+    text-align: center;
+    *{
+      text-align: center;
+    }
+    a{
+      color: #7a6022;
+      font-weight: 700;
+      text-decoration: underline;
+      &:hover{
+        color: #a27f2d;
+      }
+    }
+    b{
+      font-weight: 700 !important;
+    }
+  }
+  ul._pi_answers_container{
+    overflow: visible !important;
+    input[type="submit"]{
+      // background-color: #f08b1d !important;
+      color: #181818 !important;
+      &:hover {
+        color: #ffffff !important;
+        background-color: #a27f2d !important;
+           // transform: scale(1.1);
+       }
+    }
+    li{
+      margin: 8px 1% !important;
+      background-color: #a27f2d;
+      a{
+        label{
+          background-color: #a27f2d;
+          color: #ffffff !important;
+          font-family: bebas-neue,"Helvetica Neue",Helvetica,Arial,sans-serif !important;
+        }
+      }
+      label{
+        background-color: #a27f2d;
+        color: #ffffff !important;
+        font-family: bebas-neue,"Helvetica Neue",Helvetica,Arial,sans-serif !important;
+      }
+      &:hover{
+        background-color: #7a6022 !important;
+        a{
+          label{
+            background-color: #7a6022 !important;
+          }
+        }
+        label{
+          background-color: #7a6022 !important;
+        }
+      }
+    }
+    &[data-question-nps="t"]{
+      li{
+        label{
+          padding: 10px !important;
+        }
+      }
+    }
+    &[data-question-type="multiple_choices_question"]{
+      li{
+        label{
+          // color: #222 !important;
+          color: #ffffff !important;
+          padding: 15px !important;
+        }
+        &:hover{
+          label{
+            color: #fff !important;
+            font-family: bebas-neue,"Helvetica Neue",Helvetica,Arial,sans-serif !important;
+          }
+        }
+      }
+    }
+    &[data-radio-button="off"], &[data-radio-button="on"]{
+      li {
+         border-radius: 0px !important;
+         a{
+           label{
+             color: #ffffff;
+           }
+         }
+         &:hover {
+              // transform: scale(1.1);
+              a{
+                background-color: transparent !important;
+                label{
+                  background-color: transparent !important;
+                  color: #ffffff !important;
+                }
+              }
+         }
+      }
+    }
+  }
+}
+#_pi_surveyWidgetContainer #_pi_surveyWidget ._pi_widgetContentContainer ul._pi_answers_container[data-radio-button="off"] li label{
+ margin: 0px !important;
+ width: 100% !important;
+}
+#_pi_surveyWidgetContainer #_pi_surveyWidget ._pi_widgetContentContainer ._pi_thankYouSurvey{
+    color: #181818;
+}
+div#_pi_surveyWidgetContainer:not(.mobile-enabled) ul[data-radio-button="on"] li{
+  a span._pi_radio_button_outer{
+    min-width: 14px !important;
+    min-height: 14px !important;
+    > span{
+      left: 1px !important;
+      top: 1px !important;
+    }
+  }
+  &:hover a span._pi_radio_button_outer{
+    min-width: 14px !important;
+    min-height: 14px !important;
+    > span{
+      left: 1px !important;
+      top: 1px !important;
+    }
+  }
+}

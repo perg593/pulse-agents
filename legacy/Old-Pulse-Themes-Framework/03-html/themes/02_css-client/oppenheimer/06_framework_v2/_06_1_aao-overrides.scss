@@ -1,0 +1,118 @@
+
+$aao-top-container: 			'#_pi_surveyWidgetContainer.all-at-once';
+$aao-top-container-mobi: 	'#_pi_surveyWidgetContainer.all-at-once.mobile-enabled';
+
+$aao-widget: 							#{$aao-top-container} '#_pi_surveyWidget[data-survey-display="all-at-once"]';
+$aao-widget-mobi: 				#{$aao-top-container-mobi} '#_pi_surveyWidget[data-survey-display="all-at-once"]';
+
+.nav-controls { display: none !important; }
+.widgets, #desktop-div, #tablet-div, #mobile-div { margin: 0 !important; }
+
+
+#{$aao-top-container} {
+	background-color: rgba(0,0,0,0.75) !important;
+	width: 100vw !important;
+	height: 100vh !important;
+	position: fixed !important;
+	top: 0 !important;
+	left: 0 !important;
+	
+	display: flex;
+	flex-direction: column !important;
+	flex-wrap: nowrap !important;
+	justify-content: stretch !important;
+	align-items: center !important;
+	align-content: center !important;
+
+}
+
+#{$aao-widget} {
+	position: initial;
+	top: initial;
+	left: initial;
+	padding: 0;
+	margin: 0;
+	border-top: 5px solid #BFD917 !important;
+	
+	max-width: 1000px;
+	
+	flex-basis: auto;
+	flex-grow: 0;
+	flex-shrink: 0;	
+}
+
+#{$aao-widget} ._pi_closeButton {
+	// margin: 0;
+	padding: 5px 15px 0px 0px;
+}
+
+#{$aao-widget-mobi} ._pi_closeButton {
+	margin: 0 0 0 auto !important;
+	padding: 5px 15px 0px 0px !important;
+	font-size: 35px !important;
+}
+
+
+#{$aao-top-container} ._pi_widgetContentContainer {
+	background-color: white !important;
+	// background-color: pink !important;
+	
+	height: auto;
+	
+	align-items: flex-start !important;
+	justify-content: flex-start !important;
+	
+	padding: 0 20px;
+	
+	flex-basis: auto;
+	flex-grow: 0;
+	flex-shrink: 1;
+}
+
+#{$aao-top-container-mobi} ._pi_widgetContentContainer {
+	padding: 0 12px;
+}
+
+
+#{$aao-top-container} ._pi_question {
+	padding: 25px 0 15px !important;
+	background-color: white !important;
+	width: 100% !important;
+}
+
+#{$aao-top-container-mobi} ._pi_question {
+	padding: 15px 0 10px !important;
+}
+
+
+/* qqq */
+._pi_question:nth-child(1):before {
+	content: 'Do You Have Time To Give Us Feedback?';
+	width: 100%;
+	min-width: 100%;
+	display: block;
+	padding: 0px;
+	padding-bottom: 30px;
+	text-align: left;
+	
+	font-family: 	"Helvetica Neue", Helvetica, Helvetica, Arial, sans-serif;
+	font-size: 		36px;
+	font-style: 	normal;
+	font-weight: 	300;
+	color: 				black;
+	height: 			auto;
+	line-height: 	110%;
+	position: 		relative;
+	text-decoration: none;	
+}
+
+#{$aao-widget-mobi} ._pi_question:nth-child(1):before {
+	font-size: 		24px !important;	
+	line-height: 	28px !important;
+}
+
+ul[data-answer-widths="fixed"][data-answers-per-row="1"] li {
+    margin: 5px 0% !important;
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+}

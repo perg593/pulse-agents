@@ -1,0 +1,77 @@
+// THE _selectors FILE:
+@import '../../../01-css-pulse/_selectors';
+
+// DEFAULT VARIABLES
+@import '../_default/_default-1-variables';
+
+// CLIENT-SPECIFIC DESIGN VARIABLES
+@import '_openstax_variables_3.scss';
+
+// GLOBAL MAPS:
+@import '../../../01-css-pulse/_maps';
+
+// GLOBAL MIXINS
+@import '../../../01-css-pulse/_mixins';
+
+// THE GLOBAL STRUCTURE FOR FRAMEWORK V2:
+@import '../../../01-css-pulse/_theme-structure';
+
+div#_pi_surveyWidget {
+  li, li a, li a label {
+    transition: all 0.2s ease-in-out;
+  }
+}
+
+// SINGLE CHOICE BUTTON PADDING
+div#_pi_surveyWidget[data-question-type="single_choice_question"] li a label {
+  padding: 10px 20px;}
+
+@media (min-width: 415px) and (max-width: 768px) {
+  div#_pi_surveyWidget[data-question-type="single_choice_question"] li a label {
+    padding: 10px 20px;} }
+
+div#_pi_surveyWidgetContainer.mobile-enabled div#_pi_surveyWidget[data-question-type="single_choice_question"] li a label {
+  padding: 10px 15px !important;}
+
+div#_pi_surveyWidget[survey-widget-type="bottombarsurvey"] ._pi_closeButton,
+div#_pi_surveyWidgetContainer.mobile-enabled div#_pi_surveyWidget[survey-widget-type="bottombarsurvey"] ._pi_closeButton {
+  padding: 1px 12px !important;
+}
+
+div#_pi_surveyWidget[survey-widget-type="inlinesurvey"] ._pi_closeButton,
+div#_pi_surveyWidgetContainer.mobile-enabled div#_pi_surveyWidget[survey-widget-type="inlinesurvey"] ._pi_closeButton {
+  padding: 0 12px !important;
+  color: white !important;
+}
+
+div#_pi_surveyWidget[survey-widget-type="bottombarsurvey"] div._pi_widgetContentContainer,
+div#_pi_surveyWidgetContainer.mobile-enabled div#_pi_surveyWidget[survey-widget-type="bottombarsurvey"] div._pi_widgetContentContainer {
+  margin: 0 !important;
+}
+._pi_scale_container {
+  margin-top: 0 !important;
+  padding: 0 !important;
+}
+
+div#_pi_surveyWidget[survey-widget-type="bottombarsurvey"] ul._pi_answers_container {
+  margin: 5px 0 !important;
+}
+
+// Subjects page filter
+div.filter{
+  z-index:2000!important;
+}
+
+div#_pi_surveyWidget[survey-widget-type="fullscreensurvey"] div._pi_widgetContentContainer,
+div#_pi_surveyWidgetContainer.mobile-enabled div#_pi_surveyWidget[survey-widget-type="fullscreensurvey"] div._pi_widgetContentContainer {
+  background-color: #f5f5f5;
+  padding: 30px 10px;
+}
+
+div#_pi_surveyWidgetContainer.mobile-enabled div#_pi_surveyWidget[survey-widget-type="fullscreensurvey"] div._pi_widgetContentContainer {
+  padding: 20px 10px !important;
+}
+
+div#_pi_surveyWidgetContainer.mobile-enabled div#_pi_surveyWidget[survey-widget-type="fullscreensurvey"] ._pi_closeButton {
+  font-size: 45px;
+}

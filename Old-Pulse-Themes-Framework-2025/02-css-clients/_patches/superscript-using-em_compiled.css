@@ -1,0 +1,8 @@
+div#_pi_surveyWidgetContainer div#_pi_surveyWidget ._pi_widgetContentContainer ._pi_question em, div#_pi_surveyWidgetContainer div#_pi_surveyWidget ._pi_widgetContentContainer ._pi_answers_container li em {
+  font-style: normal;
+  font-size: .6rem;
+  position: relative;
+  line-height: 0;
+  vertical-align: baseline;
+  top: -0.4rem;
+}

@@ -1,0 +1,251 @@
+// ================== 0.4 DEFAULT | SURVEY WIDGET ==================
+	//  SURVEY WIDGET
+div#_pi_surveyWidget {
+    height: auto;
+    width: 100%;
+    margin: auto;
+    padding-bottom: 0;
+    z-index: 50;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    -ms-flex-wrap: nowrap;
+    flex-wrap: nowrap;
+    -ms-flex-pack: start;
+    justify-content: flex-start;
+    -ms-flex-align: center;
+    align-items: center
+}
+
+div#_pi_surveyWidgetCustom {
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    -ms-flex-wrap: nowrap;
+    flex-wrap: nowrap;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    -ms-flex-align: center;
+    align-items: center;
+    -ms-flex-line-pack: justify;
+    align-content: space-between
+}
+
+// ================== DEFAULT | CLOSE BUTTON ==================
+// 	A) CLOSE BUTTON
+div._pi_closeButton,
+div._pi_closeCustomButton {
+    position: static!important
+}
+
+// ================== DEFAULT | CONTENT CONTAINER ==================
+// 	B) CONTENT CONTAINER
+#_pi_surveyWidget div._pi_widgetContentContainer,
+#_pi_surveyWidgetCustom div._pi_widgetContentContainer {
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-direction: row;
+    flex-direction: row;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    -ms-flex-pack: center;
+    justify-content: center;
+    -ms-flex-align: center;
+    align-items: center;
+    height: auto;
+    width: 100%;
+    margin: 0!important;
+    padding: 0
+}
+
+div#_pi_surveyWidgetCustom ._pi_widgetContentContainer {
+    padding: 15px
+}
+
+// 	B) CONTENT CONTAINER | desktop
+@media (min-width:769px) {
+    #_pi_surveyWidget div._pi_widgetContentContainer,
+    #_pi_surveyWidgetCustom div._pi_widgetContentContainer {
+        max-width: 900px
+    }
+}
+
+// 	B) CONTENT CONTAINER | tablet
+@media (max-width:768px) {
+    #_pi_surveyWidget div._pi_widgetContentContainer,
+    #_pi_surveyWidgetCustom div._pi_widgetContentContainer {
+        max-width: 750px
+    }
+}
+
+// 	B) CONTENT CONTAINER | IPHONE 6S PLUS
+@media (max-width:414px) {
+    #_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget div._pi_widgetContentContainer,
+    #_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidgetCustom div._pi_widgetContentContainer {
+        max-width: calc(100% - 40px)!important
+    }
+}
+
+// 	B) CONTENT CONTAINER | IPHONE 6 AND SMALLER
+@media (max-width:375px) {
+    #_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget div._pi_widgetContentContainer,
+    #_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidgetCustom div._pi_widgetContentContainer {
+        max-width: calc(100% - 40px)!important
+    }
+}
+
+// ================== DEFAULT | QUESTION ==================
+//  B1) QUESTION | desktop
+div._pi_question,
+div._pi_question_custom_content_question,
+div._pi_question_custom_content_question_fullscreen {
+    height: auto;
+    width: 90%;
+    margin: 0;
+    padding: 0 0 10px 0
+}
+
+//  B1) QUESTION | mobile
+#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget ._pi_widgetContentContainer div._pi_question,
+#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidgetCustom ._pi_widgetContentContainer div._pi_question_custom_content_question,
+#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidgetCustom ._pi_widgetContentContainer div._pi_question_custom_content_question_fullscreen {
+    width: 95%;
+    margin: 0!important;
+    padding: 0 0 10px 0
+}
+
+// ================== ANSWERS CONTAINER ==================
+#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget ._pi_widgetContentContainer ._pi_answers_container {
+  padding: 0 !important;
+}
+
+
+// ================== FREE TEXT ==================
+//  B3) ANSWERS CONTAINER | desktop
+div[data-question-type=free_text_question] ul._pi_answers_container {
+    width: 80%!important;
+    padding: 0!important;
+    margin: 0!important;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-direction: row;
+    flex-direction: row;
+    -ms-flex-wrap: nowrap;
+    flex-wrap: nowrap;
+    -ms-flex-pack: distribute;
+    justify-content: space-around;
+    -ms-flex-align: start;
+    align-items: flex-start
+}
+
+//  B3) ANSWERS CONTAINER | mobile
+#_pi_surveyWidgetContainer.mobile-enabled div[data-question-type=free_text_question] ul._pi_answers_container {
+    width: 95%!important;
+    margin: 0;
+    -ms-flex-wrap: nowrap!important;
+    flex-wrap: nowrap!important
+}
+
+//  B3.a) FIELD CONTAINER | desktop
+._pi_free_text_question_field_container {
+    padding: 0!important;
+    margin: 0!important;
+    -ms-flex: 1 1 auto;
+    flex: 1 1 auto
+}
+
+//  B3.a) FIELD CONTAINER | mobile
+#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget ._pi_widgetContentContainer ul._pi_answers_container ._pi_free_text_question_field_container {
+    padding: 0;
+    margin: 0;
+    -ms-flex: 1 1 auto;
+    flex: 1 1 auto
+}
+
+//  B3.a1) INPUT AND TEXTAREA FIELDS
+input._pi_free_text_question_field {
+    height: auto;
+    padding: .5rem!important;
+    box-sizing: border-box
+}
+
+textarea._pi_free_text_question_field {
+    height: auto;
+    padding: .5rem!important;
+    box-sizing: border-box
+}
+
+//  B3.a2) CHARACTERS COUNT
+._pi_free_text_question_characters_count {
+    padding: 3px 0 0 0!important;
+    margin: 0!important
+}
+
+//  B3.b) SUBMIT BUTTON CONTAINER | desktop
+._pi_free_text_question_submit_button_container {
+    padding: 0!important;
+    padding-left: 10px!important;
+    margin: 0!important;
+    -ms-flex: 0 1 auto;
+    flex: 0 1 auto;
+    -ms-flex-item-align: start;
+    align-self: flex-start
+}
+
+// Button under the text box in Docked Widget
+#_pi_surveyWidget[survey-widget-type=dockedwidgetsurvey] ._pi_free_text_question_submit_button_container {
+    padding: 4px 0 2px 0!important;
+    -ms-flex: 1 1 auto;
+    flex: 1 1 auto
+}
+
+//  B3.b) SUBMIT BUTTON CONTAINER | mobile
+#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget ._pi_widgetContentContainer ul._pi_answers_container ._pi_free_text_question_submit_button_container {
+    padding: 0!important;
+    padding-left: 5px!important;
+    margin: 0!important;
+    -ms-flex: 0 1 auto;
+    flex: 0 1 auto
+}
+
+//  B3.b1) SUBMIT BUTTON
+._pi_free_text_question_submit_button {
+    margin-right: 0
+}
+
+// ================== INVITATION ==================
+//  B5) INVITATION CONTAINER
+._pi_invitationTextContainer {
+    width: 100%;
+    margin: 0 0 15px!important
+}
+
+//  B6) INVITATION START BUTTON
+#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget ._pi_widgetContentContainer ul._pi_answers_container ._pi_startButton,
+._pi_startButton {
+    width: 100px;
+    margin-right: auto;
+    margin-left: auto
+}
+
+// ================== DEFAULT | BRANDING ==================
+//  C) BRANDING
+#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget a._pi_branding,
+a._pi_branding {
+    display: block;
+    position: relative;
+    bottom: 0;
+    left: 0;
+    width: 170px;
+    max-width: 170px;
+    padding-top: 7px;
+    padding-bottom: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
+    margin-top: 0;
+    margin-right: auto;
+    margin-bottom: 0;
+    margin-left: 0
+}

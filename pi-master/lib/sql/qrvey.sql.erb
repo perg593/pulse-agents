@@ -1,0 +1,464 @@
+/*
+  This query defines the dataset in Qrvey.
+
+  Bindings:
+    @start_time - defines the oldest answers to fetch
+    @end_time   - defines the newest answers to fetch
+*/
+SELECT s.answer_created,
+       s.survey_name,
+       s.question,
+       s.response,
+       s.response_translated,
+       s.possible_answer,
+       s.sort_id,
+       s.sort_group_id,
+       s.survey_canonical,
+       s.question_canonical,
+       s.response_canonical,
+       s.survey_id_base,
+       s.question_id_base,
+       s.possible_answer_id_base,
+       s.survey_base,
+       s.question_base,
+       s.response_base,
+       s.survey_id,
+       s.survey_id_canonical,
+       s.survey_canonical_updated,
+       s.survey_created,
+       s.survey_updated,
+       s.survey_first_call,
+       s.survey_starts,
+       s.survey_ends,
+       s.survey_live,
+       s.survey_goal,
+       s.survey_sample_rate,
+       s.survey_invitation,
+       s.survey_thank_you,
+       s.survey_desktop_enabled,
+       s.survey_tablet_enabled,
+       s.survey_mobile_enabled,
+       s.survey_ios_enabled,
+       s.survey_android_enabled,
+       s.survey_email_enabled,
+       s.survey_poll_enabled,
+       s.survey_all_at_once,
+       s.survey_stop_showing_without_answer,
+       s.survey_ignore_frequency_cap,
+       s.survey_randomize_question_order,
+       s.survey_language_code,
+       s.survey_locale_code,
+       s.survey_status_id,
+       s.survey_type_id,
+       s.survey_status,
+       s.survey_type,
+       s.question_id,
+       s.question_id_canonical,
+       s.next_question_id,
+       s.question_canonical_updated,
+       s.question_created,
+       s.question_updated,
+       s.question_position,
+       s.question_nps,
+       s.question_type_id,
+       s.question_type,
+       s.possible_answer_id,
+       s.possible_answer_id_canonical,
+       s.possible_answer_canonical_updated,
+       s.possible_answer_created,
+       s.possible_answer_updated,
+       s.possible_answer_position,
+       s.account_id,
+       s.account_created,
+       s.account_updated,
+       s.account_identifier,
+       s.account_name,
+       s.account_enabled,
+       s.account_is_observed,
+       s.account_freq_cap_enabled,
+       s.account_freq_cap_limit,
+       s.account_freq_cap_duration,
+       s.account_freq_cap_type,
+       s.account_ip_storage_policy,
+       s.account_custom_content_link_click_enabled,
+       s.account_tag_automation_enabled,
+       s.submission_id,
+       s.submission_created,
+       s.submission_viewed_at,
+       s.url,
+       s.pseudo_event,
+       s.context_data,
+       s.view_name,
+       s.answers_count,
+       s.pageview_count,
+       s.visit_count,
+       s.ip_address,
+       s.device_type,
+       s.user_agent,
+       s.mobile_type,
+       s.mobile_launch_times,
+       s.mobile_days_installed,
+       s.channel,
+       s.answer_id,
+       s.answer_updated,
+       s.answer_analyzed,
+       s.answer_keyword_extraction,
+       s.answer_sentiment_score,
+       s.answer_sentiment_magnitude,
+       s.device_id,
+       s.device_udid,
+       s.device_client_key,
+       s.device_data_id,
+       s.device_data,
+       s.browser, /*
+
+  NEXT QUESTION
+  */
+  (SELECT content
+   FROM questions
+   WHERE questions.id = s.next_question_id
+   ORDER BY created_at
+   LIMIT 1) AS next_question,
+
+  (SELECT name
+   FROM locale_groups
+   WHERE locale_groups.type = 'QuestionLocaleGroup'
+     AND locale_groups.id =
+       (SELECT question_locale_group_id
+        FROM questions
+        WHERE questions.id = s.next_question_id )
+   ORDER BY created_at
+   LIMIT 1) AS next_question_canonical,
+
+  (SELECT question_locale_group_id
+   FROM questions
+   WHERE questions.id = s.next_question_id
+   ORDER BY created_at
+   LIMIT 1) AS next_question_id_canonical,
+
+  (SELECT content
+   FROM questions
+   WHERE questions.question_locale_group_id =
+       (SELECT question_locale_group_id
+        FROM questions
+        WHERE questions.id = s.next_question_id )
+   ORDER BY created_at ASC
+   LIMIT 1) AS next_question_base,
+
+  (SELECT id
+   FROM questions
+   WHERE questions.question_locale_group_id =
+       (SELECT question_locale_group_id
+        FROM questions
+        WHERE questions.id = s.next_question_id )
+   ORDER BY created_at ASC
+   LIMIT 1) AS next_question_id_base, /*
+
+  FREE TEXT AND SURVEY TAGS
+  */
+  (SELECT string_agg(tags.name, '; ')
+   FROM answers
+   LEFT JOIN applied_tags ON applied_tags.answer_id = answers.id
+   LEFT JOIN tags ON tags.id = applied_tags.tag_id
+   WHERE answers.id = s.answer_id
+   GROUP BY answers.id) AS tags,
+
+  (SELECT string_agg(survey_tags.name, '; ')
+   FROM surveys
+   LEFT JOIN applied_survey_tags ON applied_survey_tags.survey_id = surveys.id
+   LEFT JOIN survey_tags ON survey_tags.id = applied_survey_tags.survey_tag_id
+   WHERE surveys.id = s.survey_id
+   GROUP BY surveys.id) AS survey_tags,
+   substring(
+               (SELECT string_agg(survey_tags.name, '; ')
+                FROM surveys
+                LEFT JOIN applied_survey_tags ON applied_survey_tags.survey_id = surveys.id
+                LEFT JOIN survey_tags ON survey_tags.id = applied_survey_tags.survey_tag_id
+                WHERE surveys.id = s.survey_id
+                GROUP BY surveys.id)
+             FROM 'staging') AS survey_tag_staging, /*
+
+   USER AGENT
+*/ substring(s.user_agent
+             FROM '\((.*?)\)') AS operating_system,
+   (CASE
+        WHEN s.browser = 'Firefox' THEN substring(s.user_agent, position('Firefox' IN s.user_agent) + 8, 100)
+        WHEN s.browser = 'Safari' THEN substring(s.user_agent, position('Safari' IN s.user_agent) + 7, 100)
+        WHEN s.browser = 'Chrome' THEN left(substring(s.user_agent, position('Chrome' IN s.user_agent) + 7, 100), position(' ' IN substring(s.user_agent, position('Chrome' IN s.user_agent) + 7, 100)))
+        WHEN s.user_agent LIKE '%Trident%' THEN '11.0'
+        WHEN s.browser = 'Internet Explorer' THEN substring(s.user_agent, position('MSIE' IN s.user_agent) + 5, 4)
+        WHEN s.browser = 'Edge' THEN substring(s.user_agent, position('Edge' IN s.user_agent) + 5, 100)
+        WHEN s.browser = 'iPhone Safari' THEN substring(s.user_agent, position('Safari' IN s.user_agent) + 7, 100)
+        WHEN s.browser = 'iPad Safari' THEN substring(s.user_agent, position('Safari' IN s.user_agent) + 7, 100)
+        ELSE 'Unknown'
+    END)::text browser_version, /*
+
+   URL PARTS
+*/ s.u[1] AS url_protocol,
+   s.u[2] AS url_domain,
+   s.u[3] AS url_path,
+   s.u[5] AS url_querystring,
+   substring(s.u[6]
+             FROM '(?:#((?!access)[^&?\/]*))') AS url_anchor,
+   split_part(s.u[3], '/', 1) AS url_l1,
+   split_part(s.u[3], '/', 2) AS url_l2,
+   split_part(s.u[3], '/', 3) AS url_l3,
+   split_part(s.u[3], '/', 4) AS url_l4,
+   split_part(s.u[3], '/', 5) AS url_l5,
+   split_part(s.u[3], '/', 6) AS url_l6,
+   split_part(s.u[3], '/', 7) AS url_l7,
+   split_part(s.u[3], '/', 8) AS url_l8,
+   substring(s.u[4]
+             FROM 'utm_campaign=([^&]*)') AS url_p_campaign,
+   substring(s.u[4]
+             FROM 'utm_content=([^&]*)') AS url_p_content,
+   substring(s.u[4]
+             FROM 'utm_medium=([^&]*)') AS url_p_medium,
+   substring(s.u[4]
+             FROM 'utm_source=([^&]*)') AS url_p_source,
+   substring(s.u[4]
+             FROM 'utm_term=([^&]*)') AS url_p_term,
+   substring(s.u[4]
+             FROM 'utm_keyword=([^&]*)') AS url_p_keyword,
+   substring(s.u[4]
+             FROM '(?:[\?&]q=|keyword=|query=)(.[^&]*)') AS url_p_question,
+   substring(s.u[5]
+             FROM '(?:[&]search=|searchTerm=|searchData=)(.[^&]*)') AS url_p_search
+FROM
+  (SELECT /*
+   
+    CONCATENATED
+ */ (CASE
+         WHEN (questions.question_type IN (1,2)) THEN concat(surveys.id, '.', to_char(questions.position, 'FM000'), '000')
+         ELSE concat(surveys.id, '.', to_char(questions.position, 'FM000'), to_char(possible_answers.position, 'FM000'))
+     END) AS sort_id,
+    (CASE
+         WHEN surveys.survey_locale_group_id IS NULL
+              AND (questions.question_type IN (1,2)) THEN concat('000.', to_char(questions.position, 'FM000'), '000')
+         WHEN surveys.survey_locale_group_id IS NULL
+              AND (questions.question_type NOT IN (1,2)) THEN concat('000.', to_char(questions.position, 'FM000'), to_char(possible_answers.position, 'FM000'))
+         WHEN surveys.survey_locale_group_id IS NOT NULL
+              AND (questions.question_type IN (1,2)) THEN concat(surveys.survey_locale_group_id, '.', to_char(questions.position, 'FM000'), '000')
+         WHEN surveys.survey_locale_group_id IS NOT NULL
+              AND (questions.question_type NOT IN (1,2)) THEN concat(surveys.survey_locale_group_id, '.', to_char(questions.position, 'FM000'), to_char(possible_answers.position, 'FM000'))
+     END) AS sort_group_id, /*
+
+    BASICS
+ */ survey_locale_groups.name AS survey_canonical,
+    surveys.name AS survey_name,
+    questions.content AS question,
+    (CASE
+         WHEN questions.question_type = 1 THEN answers.text_answer
+         ELSE possible_answers.content
+     END) AS response,
+    answers.translated_answer AS response_translated,
+    question_locale_groups.name AS question_canonical,
+    possible_answer_locale_groups.name AS response_canonical, /*
+
+    BASE
+ */ base_survey.id AS survey_id_base,
+    base_question.id AS question_id_base,
+    base_possible_answer.id AS possible_answer_id_base,
+    base_survey.name AS survey_base,
+    base_question.content AS question_base,
+    base_possible_answer.content AS response_base, /*
+
+    SURVEYS
+ */ surveys.id AS survey_id,
+    survey_locale_groups.id AS survey_id_canonical,
+    survey_locale_groups.updated_at AS survey_canonical_updated,
+    surveys.created_at AS survey_created,
+    surveys.updated_at AS survey_updated,
+    surveys.first_call_at AS survey_first_call,
+    surveys.starts_at AS survey_starts,
+    surveys.ends_at AS survey_ends,
+    surveys.live_at AS survey_live,
+    surveys.goal AS survey_goal,
+    surveys.sample_rate AS survey_sample_rate,
+    surveys.invitation AS survey_invitation,
+    surveys.thank_you AS survey_thank_you,
+    surveys.desktop_enabled AS survey_desktop_enabled,
+    surveys.tablet_enabled AS survey_tablet_enabled,
+    surveys.mobile_enabled AS survey_mobile_enabled,
+    surveys.ios_enabled AS survey_ios_enabled,
+    surveys.android_enabled AS survey_android_enabled,
+    surveys.email_enabled AS survey_email_enabled,
+    surveys.poll_enabled AS survey_poll_enabled,
+    surveys.display_all_questions AS survey_all_at_once,
+    surveys.stop_showing_without_answer AS survey_stop_showing_without_answer,
+    surveys.ignore_frequency_cap AS survey_ignore_frequency_cap,
+    surveys.randomize_question_order AS survey_randomize_question_order,
+    surveys.language_code AS survey_language_code,
+    surveys.locale_code AS survey_locale_code,
+    surveys.status AS survey_status_id,
+    surveys.survey_type AS survey_type_id,
+    (CASE surveys.status
+         WHEN 0 THEN 'Draft'
+         WHEN 1 THEN 'Live'
+         WHEN 2 THEN 'Paused'
+         WHEN 3 THEN 'Complete'
+         WHEN 4 THEN 'Archived'
+     END)::text AS survey_status,
+    (CASE surveys.survey_type
+         WHEN 0 THEN 'Docked Widget'
+         WHEN 1 THEN 'Inline'
+         WHEN 2 THEN 'Top Bar'
+         WHEN 3 THEN 'Bottom Bar'
+         WHEN 4 THEN 'Fullscreen'
+     END)::text AS survey_type, /*
+
+    QUESTIONS
+ */ questions.id AS question_id,
+    question_locale_groups.id AS question_id_canonical,
+    question_locale_groups.updated_at AS question_canonical_updated,
+    questions.created_at AS question_created,
+    questions.updated_at AS question_updated,
+    questions.position AS question_position,
+    questions.nps AS question_nps,
+    questions.question_type AS question_type_id,
+    (CASE
+         WHEN (questions.question_type = 0
+               AND questions.nps = TRUE) THEN 'NPS'
+         WHEN questions.question_type = 0 THEN 'Single Choice'
+         WHEN questions.question_type = 1 THEN 'Free Text'
+         WHEN questions.question_type = 3 THEN 'Multiple Choice'
+         WHEN questions.question_type = 4 THEN 'Slider'
+     END)::text AS question_type,
+    (CASE
+         WHEN possible_answers.next_question_id IS NOT NULL THEN possible_answers.next_question_id
+         WHEN questions.next_question_id IS NOT NULL THEN questions.next_question_id
+         ELSE questions.free_text_next_question_id
+     END) AS next_question_id, /*
+
+    POSSIBLE ANSWERS
+ */ possible_answers.id AS possible_answer_id,
+    (CASE                                                    /* https://gitlab.ekohe.com/ekohe/pulseinsights/pi/-/issues/2537#note_1093681 */
+       WHEN questions.question_type = 1 THEN '[ Free Text ]' /*   We now have a response field that combines structured and free text answers, */
+       ELSE possible_answers.content                         /*   and a possible_answer field that allows better grouping in summary charts */
+    END) AS possible_answer,
+    possible_answer_locale_groups.id AS possible_answer_id_canonical,
+    possible_answer_locale_groups.updated_at AS possible_answer_canonical_updated,
+    possible_answers.created_at AS possible_answer_created,
+    possible_answers.updated_at AS possible_answer_updated,
+    possible_answers.position AS possible_answer_position, /*
+
+    ACCOUNTS
+ */ accounts.id AS account_id,
+    accounts.created_at AS account_created,
+    accounts.updated_at AS account_updated,
+    accounts.identifier AS account_identifier,
+    accounts.name AS account_name,
+    accounts.enabled AS account_enabled,
+    accounts.is_observed AS account_is_observed,
+    accounts.frequency_cap_enabled AS account_freq_cap_enabled,
+    accounts.frequency_cap_limit AS account_freq_cap_limit,
+    accounts.frequency_cap_duration AS account_freq_cap_duration,
+    accounts.frequency_cap_type AS account_freq_cap_type,
+    accounts.ip_storage_policy AS account_ip_storage_policy,
+    accounts.custom_content_link_click_enabled AS account_custom_content_link_click_enabled,
+    accounts.tag_automation_enabled AS account_tag_automation_enabled, /*
+
+    SUBMISSIONS
+ */ submissions.id AS submission_id,
+    submissions.created_at AS submission_created,
+    submissions.viewed_at AS submission_viewed_at,
+    submissions.url,
+
+    (SELECT (regexp_match(url, '^(?:([^:\/?#]+):)?(?:\/\/([^\/?#]*))?(?:\/([^?#]*))(\?([^#]*))?(.*)?'))) AS u,
+    submissions.pseudo_event,
+    submissions.custom_data::text AS context_data,
+    submissions.view_name,
+    submissions.answers_count,
+    submissions.pageview_count,
+    submissions.visit_count,
+    submissions.ip_address,
+    submissions.device_type,
+    submissions.user_agent,
+    submissions.mobile_type,
+    submissions.mobile_launch_times,
+    submissions.mobile_days_installed,
+    (CASE
+         WHEN submissions.device_type = 'email' THEN 'Email'
+         WHEN submissions.device_type = 'native_mobile' THEN 'Native SDK'
+         WHEN submissions.device_type = 'desktop'
+              OR submissions.device_type = 'mobile'
+              OR submissions.device_type = 'tablet' THEN 'Browser'
+         ELSE 'Direct'
+     END)::text AS channel, /*
+
+    ANSWERS
+ */ answers.id AS answer_id,
+    answers.created_at AS answer_created,
+    answers.updated_at AS answer_updated,
+    answers.analyzed AS answer_analyzed,
+    answers.keyword_extraction::text AS answer_keyword_extraction,
+    round((answers.sentiment ->> 'score')::numeric, 1) AS answer_sentiment_score,
+    round((answers.sentiment ->> 'magnitude')::numeric, 1) AS answer_sentiment_magnitude, /*
+
+    DEVICES
+ */ devices.id AS device_id,
+    devices.udid AS device_udid,
+    devices.client_key AS device_client_key,
+    device_data.id AS device_data_id,
+    device_data.device_data::text AS device_data,/*
+
+    USER AGENT
+ */ (CASE
+         WHEN submissions.user_agent LIKE '%Firefox/%' THEN 'Firefox'
+         WHEN submissions.user_agent LIKE '%Edge/%' THEN 'Edge'
+         WHEN submissions.user_agent LIKE '%Edg%' THEN 'Edge'
+         WHEN submissions.user_agent LIKE '%Chrome/%'
+              OR submissions.user_agent LIKE '%CriOS%' THEN 'Chrome'
+         WHEN submissions.user_agent LIKE '%MSIE %' THEN 'Internet Explorer'
+         WHEN submissions.user_agent LIKE '%MSIE+%' THEN 'Internet Explorer'
+         WHEN submissions.user_agent LIKE '%Trident%' THEN 'Internet Explorer'
+         WHEN submissions.user_agent LIKE '%iPhone%' THEN 'iPhone Safari'
+         WHEN submissions.user_agent LIKE '%iPad%' THEN 'iPad Safari'
+         WHEN submissions.user_agent LIKE '%Opera%' THEN 'Opera'
+         WHEN submissions.user_agent LIKE '%BlackBerry%'
+              AND submissions.user_agent LIKE '%Version/%' THEN 'BlackBerry WebKit'
+         WHEN submissions.user_agent LIKE '%BlackBerry%' THEN 'BlackBerry'
+         WHEN submissions.user_agent LIKE '%Android%' THEN 'Android'
+         WHEN submissions.user_agent LIKE '%Safari%' THEN 'Safari'
+         WHEN submissions.user_agent LIKE '%bot%' THEN 'Bot'
+         WHEN submissions.user_agent LIKE '%http://%' THEN 'Bot'
+         WHEN submissions.user_agent LIKE '%www.%' THEN 'Bot'
+         WHEN submissions.user_agent LIKE '%Wget%' THEN 'Bot'
+         WHEN submissions.user_agent LIKE '%curl%' THEN 'Bot'
+         WHEN submissions.user_agent LIKE '%urllib%' THEN 'Bot'
+         ELSE 'Unknown'
+     END)::text AS browser
+   FROM answers
+   LEFT JOIN submissions ON submissions.id = answers.submission_id
+   RIGHT JOIN surveys ON surveys.id = submissions.survey_id
+   RIGHT JOIN questions ON questions.id = answers.question_id
+   LEFT JOIN possible_answers ON possible_answers.id = answers.possible_answer_id
+   RIGHT JOIN accounts ON accounts.id = surveys.account_id
+   LEFT JOIN devices ON submissions.device_id = devices.id
+   LEFT JOIN device_data ON device_data.device_id = devices.id
+   LEFT JOIN locale_groups AS survey_locale_groups ON survey_locale_groups.type = 'SurveyLocaleGroup'
+   AND survey_locale_groups.id = surveys.survey_locale_group_id
+   LEFT JOIN locale_groups AS question_locale_groups ON question_locale_groups.type = 'QuestionLocaleGroup'
+   AND question_locale_groups.id = questions.question_locale_group_id
+   LEFT JOIN locale_groups AS possible_answer_locale_groups ON possible_answer_locale_groups.type = 'PossibleAnswerLocaleGroup'
+   AND possible_answer_locale_groups.id = possible_answers.possible_answer_locale_group_id
+   LEFT JOIN surveys AS base_survey ON base_survey.id =
+     (SELECT id
+      FROM surveys
+      WHERE surveys.survey_locale_group_id = survey_locale_groups.id
+      ORDER BY created_at
+      LIMIT 1)
+   LEFT JOIN questions AS base_question ON base_question.id =
+     (SELECT id
+      FROM questions
+      WHERE questions.question_locale_group_id = question_locale_groups.id
+      ORDER BY created_at
+      LIMIT 1)
+   LEFT JOIN possible_answers AS base_possible_answer ON base_possible_answer.id =
+     (SELECT id
+      FROM possible_answers
+      WHERE possible_answers.possible_answer_locale_group_id = possible_answer_locale_groups.id
+      ORDER BY created_at
+      LIMIT 1)
+   WHERE answers.updated_at BETWEEN '<%= @start_time.strftime("%Y-%m-%d %H:%M:%S") %>' AND '<%= @end_time.strftime("%Y-%m-%d %H:%M:%S") %>'
+ ) s

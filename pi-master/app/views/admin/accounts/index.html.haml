@@ -1,0 +1,58 @@
+.users-accounts-count
+  .count-link
+    = link_to 'Accounts', admin_accounts_path
+    (#{Account.count})
+  .count-link
+    = link_to 'Users', admin_users_path
+    (#{User.count})
+  = link_to 'Audit All', audit_all_admin_accounts_path
+.list-header
+  = form_tag url_for({}), method: 'get', class: 'inline-search-form survey-search-form' do
+    = text_field_tag :keyword, params[:keyword], autofocus: true
+  %h1.list-title= user_list? ? 'Users' : 'Accounts'
+  .right-btns
+    = link_to 'Export', url_for(params.permit(:utf8, :keyword).merge(format: :xlsx)), class: 'btn btn-default'
+
+%table.table.table-hover.table-responsive.list-table.account-list
+  %thead
+    %tr
+      %th(data-sort='string')
+        Account
+        .arrow.arrow-up.hide
+      %th(data-sort='int')
+        Surveys
+        .arrow.arrow-up.hide
+      %th(data-sort='int')
+        Server Calls
+        .arrow.arrow-up.hide
+      %th(data-sort='int')
+        Impressions
+        .arrow.arrow-up.hide
+      %th(data-sort='int')
+        Submissions
+        .arrow.arrow-up.hide
+      %th(data-sort='int')
+        Last Login
+        .arrow.arrow-up.hide
+      %th(data-sort='int')
+        Join Date
+        .arrow.arrow-up.hide
+      %th(data-sort='int')
+        Logins
+        .arrow.arrow-up.hide
+      - unless user_list?
+        %th(data-sort='int')
+          Users
+          .arrow.arrow-up.hide
+        %th(data-sort='int')
+          Observed
+          .arrow.arrow-up.hide
+  %tbody
+    - @objects.each do |object|
+      %tr{:'account-id' => object.id}
+        - if user_list?
+          = render 'admin/accounts/users_table', object: object
+        - else
+          = render 'admin/accounts/accounts_table', object: object
+
+- content_for :js, javascript_include_tag('list_page_common')

@@ -1,0 +1,60 @@
+<%= prompt_text %>
+
+## Survey Information
+**Survey Name**: <%= survey.name %>
+**Total Responses**: <%= survey_data[:answer_count] %> (filtered)
+**Questions**: <%= survey_data[:question_count] %>
+**Device Summary**: <%= device_summary %>
+
+**Question Details**:
+<% questions_data.each do |question_text, responses| %>
+<% response_count = responses.count %>
+<% sample_responses = responses.first(3).map { |r| r['response'] }.compact.uniq %>
+### <%= question_text %>
+- **Response Count**: <%= response_count %>
+- **Sample Responses**: <%= sample_responses.join('; ') %>
+<% end %>
+
+**Response Data**:
+<% if survey_data[:devices_data].empty? %>
+No response data available.
+<% else %>
+<% survey_data[:devices_data].first(5).each do |row| %>
+- **Date**: <%= row['date'] %> <%= row['time'] %>
+- **Question**: <%= row['question_content'] %>
+- **Response**: <%= row['response'] %>
+- **Device**: <%= row['device_type'] %> (<%= row['browser'] %> <%= row['browser_version'] %>) on <%= row['os'] %>
+- **Pageviews**: <%= row['pageview_count'] %>
+- **Visits**: <%= row['visit_count'] %>
+- **Channel**: <%= row['channel'] || 'Direct' %>
+- **URL**: <%= row['url'] || 'N/A' %>
+- **Tags**: <%= row['tags'] || 'None' %>
+- **Custom Data**: <%= row['custom_data']&.keys&.join(', ') || 'None' %>
+<% end %>
+<% end %>
+
+## Previous AI Analysis
+<% if ai_analysis_data[:summary] %>
+**Previous Analysis**: <%= ai_analysis_data[:summary] %>
+<% end %>
+
+<% if ai_analysis_data[:insights] %>
+**Free Text Insights**: <%= ai_analysis_data[:insights] %>
+<% end %>
+
+<% if ai_analysis_data[:recommendations] %>
+**Previous Recommendations**: <%= ai_analysis_data[:recommendations] %>
+<% end %>
+
+<% if ai_analysis_data[:summary].blank? && ai_analysis_data[:insights].blank? && ai_analysis_data[:recommendations].blank? %>
+No previous AI analysis available.
+<% end %>
+
+Please generate a comprehensive survey analysis report in markdown format. The report should include:
+- Executive Summary
+- Key Findings
+- Detailed Analysis
+- Recommendations
+- Next Steps
+
+Focus on actionable insights and clear recommendations based on the data provided.

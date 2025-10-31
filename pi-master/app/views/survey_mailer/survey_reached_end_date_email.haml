@@ -1,0 +1,11 @@
+%p Hello,
+
+%p Your survey [#{@survey.name}] has reached its end date and is no longer collecting responses.
+%br= link_to 'View results', report_survey_url(@survey)
+%br= link_to 'Edit survey status', edit_survey_url(@survey)
+
+%br
+%p
+  Sincerely,
+  %br
+  The Pulse Insights Team

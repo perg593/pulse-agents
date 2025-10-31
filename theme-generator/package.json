@@ -1,0 +1,30 @@
+{
+  "name": "theme-generator",
+  "version": "1.0.0",
+  "description": "Theme Generator MVP for Pulse Widgets - Clean Version",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js",
+    "analyze": "node analyze-site.js",
+    "generate": "node theme-generator.js",
+    "test": "node main.js https://example.com test-client",
+    "test:unit": "node --test ../../tests/unit/generators/**/*.test.js",
+    "generate:v2": "node generate-theme-v2.mjs",
+    "preview:build": "node ../../scripts/build/preview-data.js",
+    "preview:theme": "node ../../scripts/build/apply-theme.js",
+    "examples:export": "node scripts/export-example-themes.js"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.12",
+    "puppeteer": "^24.23.0"
+  },
+  "keywords": [
+    "theme",
+    "generator",
+    "widgets",
+    "css",
+    "automation"
+  ],
+  "author": "Pulse Insights",
+  "license": "MIT"
+}

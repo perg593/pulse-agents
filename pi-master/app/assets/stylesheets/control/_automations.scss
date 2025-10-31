@@ -1,0 +1,41 @@
+.automations {
+  .url {
+    label {
+      line-height: 33px;
+      font-size: 12px;
+    }
+    input {
+      width: 55%;
+      margin-left: 30px;
+    }
+    .url-matcher-input {
+      display: inline-block;
+    }
+  }
+  .email {
+    .action-type-label {
+      width: 15%;
+      vertical-align: top;
+      font-family: 'Bree Serif';
+      font-size: 16px;
+      color: #1a537e;
+    }
+    .email-inputs {
+      display: inline-block;
+    }
+    .checkbox {
+      display: inline-block;
+      font-size: 14px;
+    }
+  }
+  .event {
+    input {
+      width: 97%;
+    }
+    textarea {
+      width: 97%;
+      height: 100px;
+      background-color: white;
+    }
+  }
+}

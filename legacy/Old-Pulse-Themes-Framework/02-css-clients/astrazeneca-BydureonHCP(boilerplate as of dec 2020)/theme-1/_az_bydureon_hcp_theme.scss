@@ -1,0 +1,297 @@
+// THE _selectors FILE:
+@import '../../01-css-pulse/_selectors';
+
+// DEFAULT VARIABLES
+@import '../_default/_default-1-variables';
+
+// CLIENT-SPECIFIC DESIGN VARIABLES
+@import './_az_bydureon_hcp_variables';
+
+// GLOBAL MAPS:
+@import '../../01-css-pulse/_maps';
+
+// GLOBAL MIXINS
+@import '../../01-css-pulse/_mixins';
+
+// THE GLOBAL STRUCTURE FOR FRAMEWORK V2:
+@import '../../01-css-pulse/_theme-structure';
+#_pi_surveyWidgetContainer{
+  #_pi_surveyWidget{
+    ._pi_closeButton {
+      background-color: transparent;
+      opacity: 1 !important;
+      color: #00673e !important;
+      &:hover{
+        color: #333 !important;
+      }
+    }
+    ._pi_widgetContentContainer{
+      ul._pi_answers_container{
+        &[data-question-type="multiple_choices_question"]{
+          li{
+            align-content: center;
+            align-items: center !important;
+            display: flex;
+          }
+        }
+      }
+      li{
+        color: #333 !important;
+        background-color: #f9f9f9 !important;
+        border: solid 2px #f7901e !important;
+        border-radius: 3px !important;
+        *{
+          color: inherit !important;
+          background-color: transparent !important;
+        }
+        &:hover{
+          background-image: linear-gradient(to left, #eda913, #f29d18 45%, #f7901e) !important;
+          color: #fff !important;
+        }
+      }
+      input[type="submit"]{
+        color: #f7901e !important;
+        background-color: #f9f9f9 !important;
+        border: solid 2px #f7901e !important;
+        border-radius: 3px !important;
+        &:hover{
+          background-image: linear-gradient(to left, #eda913, #f29d18 45%, #f7901e) !important;
+          color: #fff !important;
+        }
+      }
+      ._pi_question._pi_question_custom_content_question{
+        h1,h2,h3,h4,h5{
+          color: #00673e !important;
+          font-size: 20px !important;
+          font-weight: 700 !important;
+          font-family: Montserrat-Regular !important;
+        }
+        a{
+          color: #e98300 !important;
+          &:hover{
+            text-decoration: underline !important;
+          }
+        }
+      }
+    }
+  }
+}
+// #_pi_surveyWidgetContainer{
+//   z-index: 0 !important;
+//   position: relative;
+//   background-color: transparent !important;
+//   #_pi_surveyWidget{
+//      border: none !important;
+//      padding-top: 50px;
+//      &[survey-widget-type="inlinesurvey"]{
+//        padding-bottom: 36px !important;
+//        z-index: 0 !important;
+//      }
+//   }
+//   &.mobile-enabled{
+//     #_pi_surveyWidget{
+//       ._pi_widgetContentContainer{
+//         ul._pi_answers_container[data-question-type="multiple_choices_question"]{
+//           li{
+//             label{
+//               // color: #222 !important;
+//               color: #e98300 !important;
+//             }
+//             &:hover{
+//               label{
+//                 color: #fff !important;
+//                 // font-family: 'Montserrat-ExtraBold' !important;
+//               }
+//             }
+//           }
+//         }
+//       }
+//     }
+//   }
+// }
+//
+// #_pi_surveyWidgetContainer:not(.mobile-enabled){
+//   #_pi_surveyWidget{
+//     box-shadow: none !important;
+//     ._pi_closeButton{
+//       // opacity: 1 !important;
+//       position: absolute !important;
+//       top: 0;
+//       left: auto;
+//       right: 0;
+//     }
+//   }
+// }
+//
+// #_pi_surveyWidgetContainer #_pi_surveyWidget ._pi_widgetContentContainer{
+//   ._pi_question:not(._pi_question_custom_content_question){
+//     padding-bottom: 26px !important;
+//   }
+//   ._pi_question._pi_question_custom_content_question{
+//     h1,h2,h3,h4,h5{
+//       color: #00cabd;
+//     }
+//     h2{
+//       font-size: 20px !important;
+//     }
+//     text-align: center;
+//     *{
+//       text-align: center;
+//     }
+//     a{
+//       color: #e98300;
+//       font-weight: 700;
+//       text-decoration: underline;
+//       &:hover{
+//         color: #00cabd;
+//       }
+//     }
+//     b{
+//       font-weight: 700 !important;
+//     }
+//   }
+//   ul._pi_answers_container{
+//     overflow: visible !important;
+//     ._pi_free_text_question_field_container{
+//       width: 100% !important;
+//       input{
+//         max-width: none !important;
+//       }
+//     }
+//     input[type="submit"]{
+//       // background-color: #f08b1d !important;
+//       color: #e98300 !important;
+//       &:hover {
+//         background-color: #e98300 !important;
+//         color: #ffffff !important;
+//        }
+//     }
+//     li{
+//       // margin: 8px 1% !important;
+//       background-color: #ffffff;
+//       a{
+//         label{
+//           background-color: #ffffff;
+//           // font-family: 'Montserrat-ExtraBold' !important;
+//         }
+//       }
+//       label{
+//         background-color: #ffffff;
+//         // font-family: 'Montserrat-ExtraBold' !important;
+//       }
+//       &:hover{
+//         background-color: #E98300 !important;
+//         a{
+//           label{
+//             background-color: #E98300 !important;
+//           }
+//         }
+//         label{
+//           background-color: #E98300 !important;
+//         }
+//       }
+//     }
+//     &[data-question-nps="t"]{
+//       li{
+//         label{
+//           padding: 10px !important;
+//         }
+//       }
+//     }
+//     &[data-question-type="multiple_choices_question"]{
+//       li{
+//         label{
+//           // color: #222 !important;
+//           color: #e98300;
+//           padding: 12px 15px 12px 0px !important;
+//         }
+//         &:hover{
+//           label{
+//             color: #fff !important;
+//             // font-family: 'Montserrat-ExtraBold' !important;
+//           }
+//         }
+//       }
+//     }
+//     &[data-radio-button="off"], &[data-radio-button="on"]{
+//       li {
+//          // background-color: #f08b1d;
+//          // font-weight: 300;
+//          // font-style: normal;
+//          // color: #fff;
+//          // text-transform: uppercase;
+//          // padding: 1.5px 5px;
+//          // line-height: 35px;
+//          // font-size: 12px;
+//          // margin-bottom: 30px;
+//          // padding: 0 30px;
+//          // text-align: center;
+//          a{
+//            label{
+//              color: #e98300;
+//            }
+//          }
+//          &:hover {
+//               // transform: scale(1.1);
+//               a{
+//                 background-color: transparent !important;
+//                 label{
+//                   background-color: transparent !important;
+//                   color: #ffffff !important;
+//                 }
+//               }
+//          }
+//       }
+//     }
+//   }
+// }
+// #_pi_surveyWidgetContainer #_pi_surveyWidget ._pi_widgetContentContainer ul._pi_answers_container[data-radio-button="off"] li label{
+//  margin: 0px !important;
+//  width: 100% !important;
+// }
+// #_pi_surveyWidgetContainer #_pi_surveyWidget ._pi_widgetContentContainer ._pi_thankYouSurvey{
+//     color: #00cabd;
+// }
+div#_pi_surveyWidgetContainer.mobile-enabled{
+  div#_pi_surveyWidget{
+    div._pi_widgetContentContainer{
+      ul._pi_answers_container{
+         li{
+            background-image: linear-gradient(to left, #eda913, #f29d18 45%, #f7901e) !important;
+            color: #fff !important;
+           *{
+             color: inherit !important;
+             background-color: transparent !important;
+           }
+         }
+      }
+    }
+  }
+}
+@media(max-height: 768px){
+  div#_pi_surveyWidgetContainer:not(.mobile-enabled) div#_pi_surveyWidget[survey-widget-type="inlinesurvey"] div._pi_widgetContentContainer ul._pi_answers_container li label{
+    padding: 7px 20px !important;
+    font-size: 12px !important;
+  }
+  div#_pi_surveyWidgetContainer:not(.mobile-enabled) div#_pi_surveyWidget[survey-widget-type="inlinesurvey"] div._pi_widgetContentContainer div._pi_question{
+    font-size: 16px !important;
+  }
+}
+div#_pi_surveyWidgetContainer:not(.mobile-enabled) ul[data-radio-button="on"] li{
+  a span._pi_radio_button_outer{
+    min-width: 14px !important;
+    min-height: 14px !important;
+    > span{
+      left: 1px !important;
+      top: 1px !important;
+    }
+  }
+  &:hover a span._pi_radio_button_outer{
+    min-width: 14px !important;
+    min-height: 14px !important;
+    > span{
+      left: 1px !important;
+      top: 1px !important;
+    }
+  }
+}

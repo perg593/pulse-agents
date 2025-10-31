@@ -1,0 +1,32 @@
+{
+  "typography": {
+    "fontFamily": "system-ui, sans-serif",
+    "closeButtonFamily": "system-ui, sans-serif",
+    "closeButtonSize": "32px",
+    "sizes": {
+      "question": "28px",
+      "answer": "16px",
+      "body": "16px",
+      "caption": "14px"
+    },
+    "weights": {
+      "question": "500",
+      "answer": "400",
+      "body": "400",
+      "caption": "400"
+    }
+  },
+  "colors": {
+    "text": "#222",
+    "bg": "#fff",
+    "primary": "#0067b8",
+    "primaryHover": "#00579d",
+    "primaryActive": "#004a86",
+    "onPrimary": "#ffffff",
+    "answerBorder": "#00579d",
+    "radioBorder": "#00579d",
+    "inputBorder": "#0d6efd",
+    "inputFocus": "#0b5fff",
+    "muted": "#6b7280"
+  }
+}

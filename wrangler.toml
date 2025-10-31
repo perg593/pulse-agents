@@ -1,0 +1,7 @@
+name = "pulse-agents"
+compatibility_date = "2024-12-01"
+pages_build_output_dir = "."
+
+[vars]
+BACKGROUND_PROXY_ALLOWLIST = "*"
+BACKGROUND_PROXY_BLOCKLIST = "localhost,127.,::1"

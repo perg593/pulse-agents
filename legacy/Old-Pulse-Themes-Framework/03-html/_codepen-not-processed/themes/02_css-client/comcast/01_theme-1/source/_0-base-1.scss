@@ -1,0 +1,58 @@
+/* ----------- BACKGROUNDS, BORDERS, COLORS ----------- */
+	#_pi_surveyWidgetContainer,
+	#_pi_surveyWidgetContainer.mobile-enabled {
+		background-color: rgba(0, 0, 0, 0.0);
+		border: 0px solid #DCDCDB;
+		border-top: 0;
+	}
+
+	#_pi_surveyWidget,
+	#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget {
+		border-radius: 0;
+		background-color: #fff !important;
+	}
+
+	._pi_widgetContentContainer,
+	#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget ._pi_widgetContentContainer {
+	}
+
+	#_pi_surveyWidgetCustom ._pi_widgetContentContainer {
+		background-color: #fff;
+	}
+
+	._pi_question,
+	#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget ._pi_question {
+		background-color: transparent;
+	}
+	
+	._pi_answers_container,
+	#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget ._pi_widgetContentContainer ._pi_answers_container {
+		background-color: transparent;
+	}
+
+	._pi_free_text_question_field_container,
+	#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget ._pi_widgetContentContainer ul._pi_answers_container ._pi_free_text_question_field_container {
+	}
+
+	._pi_thankYouSurvey,
+	#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget ._pi_widgetContentContainer ._pi_thankYouSurvey {
+		margin: 10px 0 10px 0;
+		background-color: transparent;
+	}
+
+	a._pi_branding,
+	#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget a._pi_branding {
+		background-color: transparent;
+	}
+
+	._pi_closeButton,
+	#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget ._pi_closeButton {
+		border-bottom-left-radius: 5px;
+		background-color: transparent;
+	}
+
+	._pi_closeCustomButton,
+	#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidgetCustom ._pi_closeCustomButton {
+		border-bottom-left-radius: 0px;
+		background-color: #fff;
+	}

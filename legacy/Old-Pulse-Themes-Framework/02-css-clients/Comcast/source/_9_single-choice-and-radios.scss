@@ -1,0 +1,124 @@
+// ================== 9 - COMCAST SINGLE CHOICE AND RADIOS ==================
+// CANCELLING OUT COMCAST'S CSS
+#_pi_surveyWidgetContainer .link:focus,
+#_pi_surveyWidgetContainer a:focus {
+    outline: 0;
+    box-shadow: none!important;
+    border: 0!important
+}
+
+// ------------------ FIXED - SINGLE CHOICE ---------------------------------
+	// FIXED WITHOUT RADIO ---------------------------------
+	// BLUE background
+	// CENTERED text
+	// NO border
+
+#_pi_surveyWidget[data-question-type=single_choice_question] ul._pi_answers_container {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+#_pi_surveyWidget[data-question-type=single_choice_question][data-answer-widths=fixed][data-radio-button=off] li,
+#_pi_surveyWidget[data-question-type=single_choice_question][data-answer-widths=fixed][data-radio-button=off] li a,
+#_pi_surveyWidget[data-question-type=single_choice_question][data-answer-widths=fixed][data-radio-button=off] li a label {
+    background-color: #0272b6!important;
+    border: 0!important;
+    color: #fff!important
+}
+
+#_pi_surveyWidget[data-question-type=single_choice_question][data-answer-widths=fixed][data-radio-button=off] li a label {
+    padding: 14px 25px!important
+}
+
+// FIXED WITH RADIO ---------------------------------
+// WHITE background
+// RADIO BUTTON
+// LEFT-ALIGNED text
+// NO border
+// NO margin on the left of the RADIO BUTTON
+#_pi_surveyWidget[data-question-type=single_choice_question][data-answer-widths=fixed][data-radio-button=on] li,
+#_pi_surveyWidget[data-question-type=single_choice_question][data-answer-widths=fixed][data-radio-button=on] li a,
+#_pi_surveyWidget[data-question-type=single_choice_question][data-answer-widths=fixed][data-radio-button=on] li a label {
+    background-color: #fff!important;
+    border: 0!important;
+    color: #44484c!important;
+    border-radius: 0 !important;
+}
+
+#_pi_surveyWidget[data-question-type=single_choice_question][data-answer-widths=fixed][data-radio-button=on] li {
+    padding: 0!important
+}
+
+#_pi_surveyWidget[data-question-type=single_choice_question][data-answer-widths=fixed][data-radio-button=on] li a label {
+    padding: 10px 22px 10px 7px!important;
+}
+
+#_pi_surveyWidget[data-question-type=single_choice_question][data-answer-widths=fixed][data-radio-button=on] li a span._pi_radio_button_outer {
+    margin: 0!important
+}
+
+// RADIO BUTTONS
+ul._pi_answers_container li a span._pi_radio_button_outer {
+    background-color: #f2f4f5!important;
+    border: 1px solid #b1b9bf!important
+}
+
+// RADIO BUTTONS - Tablet and Desktop Hover
+@media (min-width:769px) {
+    ul._pi_answers_container li:hover a span._pi_radio_button_outer {
+        background-color: #2b9cd8!important;
+        border: 1px solid #2b9cd8!important
+    }
+    ul._pi_answers_container li:hover a span._pi_radio_button_inner {
+        background-color: #f2f4f5!important;
+        border: 1px solid #2b9cd8!important
+    }
+}
+
+// ------------------ FIXED - MULTIPLE CHOICE ---------------------------------=
+	// FIXED LEFT - MULTIPLE CHOICE ONLY ------------------
+	// Multiple Choice Answers left
+	// Submit button right#_pi_surveyWidget[data-question-type=multiple_choices_question][data-answer-widths=fixed] li,
+#_pi_surveyWidget[data-question-type=multiple_choices_question][data-answer-widths=fixed] li label._pi-control._pi-control-checkbox {
+    background-color: #fff!important;
+    border: 0!important;
+    color: #44484c!important
+}
+
+// ------------------ VARIABLE - YES / NO -------------------------------------------------------
+	// Blue background
+	// NO hover
+	// NO radio button
+	// Minimum width: 130px
+#_pi_surveyWidget[data-question-type=single_choice_question][data-answer-widths=variable-center][data-radio-button=off] li,
+#_pi_surveyWidget[data-question-type=single_choice_question][data-answer-widths=variable-center][data-radio-button=off] li a,
+#_pi_surveyWidget[data-question-type=single_choice_question][data-answer-widths=variable-center][data-radio-button=off] li a label,
+#_pi_surveyWidget[data-question-type=single_choice_question][data-answer-widths=variable-left][data-radio-button=off] li,
+#_pi_surveyWidget[data-question-type=single_choice_question][data-answer-widths=variable-left][data-radio-button=off] li a,
+#_pi_surveyWidget[data-question-type=single_choice_question][data-answer-widths=variable-left][data-radio-button=off] li a label {
+    background-color: #0272b6!important;
+    color: #fff!important;
+    border: 0!important;
+    border-color: transparent!important;
+    min-width: 130px;
+}
+
+#_pi_surveyWidget[data-question-type=single_choice_question][data-answer-widths=variable-center][data-radio-button=off] li a label,
+#_pi_surveyWidget[data-question-type=single_choice_question][data-answer-widths=variable-left][data-radio-button=off] li a label {
+    padding: 14px 25px!important
+}
+
+// HARDCODED VALUES FOR YES/NO
+#_pi_surveyWidget[data-question-type=single_choice_question][data-answer-widths=variable-center][data-radio-button=off][data-possible-answers="2"] li,
+#_pi_surveyWidget[data-question-type=single_choice_question][data-answer-widths=variable-center][data-radio-button=off][data-possible-answers="2"] li a,
+#_pi_surveyWidget[data-question-type=single_choice_question][data-answer-widths=variable-center][data-radio-button=off][data-possible-answers="2"] li a label,
+#_pi_surveyWidget[data-question-type=single_choice_question][data-answer-widths=variable-left][data-radio-button=off][data-possible-answers="2"] li,
+#_pi_surveyWidget[data-question-type=single_choice_question][data-answer-widths=variable-left][data-radio-button=off][data-possible-answers="2"] li a,
+#_pi_surveyWidget[data-question-type=single_choice_question][data-answer-widths=variable-left][data-radio-button=off][data-possible-answers="2"] li a label {
+    max-width: 130px!important;
+    min-width: 0!important;
+}
+
+#_pi_surveyWidget[data-question-type=single_choice_question][data-answer-widths=variable-center][data-radio-button=off] li a {
+    padding: 0!important
+}

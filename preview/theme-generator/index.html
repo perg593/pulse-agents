@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pulse Theme Generator</title>
+  <link rel="stylesheet" href="./style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>🎨 Pulse Theme Generator</h1>
+      <p>Analyze any website and generate downloadable CSS themes for Pulse Insights surveys</p>
+    </header>
+
+    <main class="main">
+      <!-- URL Analysis Section -->
+      <section class="analysis-section">
+        <h2>📊 Website Analysis</h2>
+        <div class="analysis-form">
+          <div class="input-group">
+            <label for="url-input">Website URL</label>
+            <input 
+              id="url-input" 
+              type="url" 
+              placeholder="https://example.com" 
+              value="https://"
+            />
+          </div>
+          <div class="input-group">
+            <label for="client-input">Client Name (optional)</label>
+            <input 
+              id="client-input" 
+              type="text" 
+              placeholder="example-client"
+            />
+          </div>
+          <button id="analyze-btn" class="analyze-btn">Analyze Site</button>
+        </div>
+        
+        <!-- Analysis Status -->
+        <div id="analysis-status" class="analysis-status hidden">
+          <div class="status-content">
+            <div class="spinner"></div>
+            <span id="status-text">Analyzing website...</span>
+          </div>
+        </div>
+
+        <!-- Analysis Results -->
+        <div id="analysis-results" class="analysis-results hidden">
+          <h3>Analysis Results</h3>
+          <div class="results-grid">
+            <div class="result-item">
+              <label>Detected Colors:</label>
+              <div id="detected-colors" class="color-palette"></div>
+            </div>
+            <div class="result-item">
+              <label>Detected Fonts:</label>
+              <div id="detected-fonts" class="font-list"></div>
+            </div>
+            <div class="result-item">
+              <label>:root Variables:</label>
+              <div id="detected-root-vars" class="root-vars-list"></div>
+            </div>
+            <div class="result-item">
+              <label>Logo Colors:</label>
+              <div id="detected-logo-colors" class="color-palette"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Theme Generation Section -->
+      <section id="themes-section" class="themes-section hidden">
+        <h2>🎨 Generated Themes</h2>
+        <div class="theme-controls">
+          <div class="control-row">
+            <label for="preset-select">Highlight preset</label>
+            <select id="preset-select">
+              <option value="all" selected>All themes</option>
+            </select>
+          </div>
+          <details class="advanced-settings">
+            <summary>Advanced settings</summary>
+            <div class="advanced-grid">
+              <label class="toggle">
+                <input type="checkbox" id="focus-toggle" checked />
+                <span>Enable focus outlines</span>
+              </label>
+              <label class="toggle">
+                <input type="checkbox" id="legacy-toggle" />
+                <span>Include legacy CSS overlay</span>
+              </label>
+              <label class="toggle">
+                <input type="checkbox" id="slider-toggle" checked />
+                <span>Include slider styling</span>
+              </label>
+              <label class="toggle">
+                <input type="checkbox" id="aao-toggle" checked />
+                <span>Include all-at-once layout</span>
+              </label>
+            </div>
+          </details>
+        </div>
+        <div class="themes-grid">
+          <!-- Theme cards will be populated by JavaScript -->
+        </div>
+        
+        <!-- Actions -->
+        <div class="actions">
+          <button id="download-all-btn" class="download-all-btn">Download All as ZIP</button>
+          <button id="save-server-btn" class="save-server-btn">Save to Server</button>
+          <button id="clear-btn" class="clear-btn">Clear</button>
+        </div>
+      </section>
+
+      <!-- Error Display -->
+      <div id="error-display" class="error-display hidden">
+        <h3>⚠️ Analysis Error</h3>
+        <p id="error-message"></p>
+        <button id="dismiss-error-btn" class="dismiss-btn">Dismiss</button>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <p>Generated themes are ready for production use. Drop the CSS files after your default Pulse Insights styles.</p>
+    </footer>
+  </div>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

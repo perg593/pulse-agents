@@ -1,0 +1,98 @@
+//~~~~~~~~~~~~~~~~~~~ survey impression ~~~~~~~~~~~~~~~~~~~//
+console.log("Triggering pulse_survey_impression event");
+var uuid = window.PulseInsightsObject.udid;
+
+var eventSpec = {
+    tealium_event : "pulse_impression_delivered",
+    pulse_id : uuid
+};
+
+console.log(eventSpec);
+utag.link(eventSpec);
+
+
+//~~~~~~~~~~~~~~~~~~~ survey viewed ~~~~~~~~~~~~~~~~~~~//
+console.log("Triggering pulse_survey_viewed event");
+
+var uuid = window.PulseInsightsObject.udid;
+
+var eventSpec = {
+    tealium_event : "pulse_survey_viewed",
+    pulse_id : uuid
+};
+
+console.log(eventSpec);
+utag.link(eventSpec);
+
+
+//~~~~~~~~~~~~~~~~~~~ survey answered ~~~~~~~~~~~~~~~~~~~//
+var uuid1 = window.PulseInsightsObject.udid;
+var questionId1 = question.id;
+var questionText1 = question.content;
+var eventUrl1 = location.href;
+var questionPosition1 = question.position + 1;
+var totalQuestions1 = survey.questions.length;
+var answerText1;
+var answerId1;
+if (answer.id == null) {
+  answerId1 = "Free text";
+  answerText1 = "Free text";
+} else {
+  answerId1 = answer.id;
+  answerText1 = answer.content;
+}
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ NEW EVENT LOGIC FOR SURVEY STARTED ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+var isFirstQ = function (){
+  if(PulseInsightsObject.survey.question.id === PulseInsightsObject.survey.questions[0].id){
+    return true;
+  }
+  return false;
+}
+
+if(isFirstQ()){
+console.log("Triggering pulse_survey_started event");
+  var eventSpec = {
+    tealium_event: "pulse_survey_started",
+    pulse_id : uuid1,
+    pulse_question_id : questionId1,
+    pulse_answer_id : answerId1,
+    pulse_question_text : questionText1,
+    pulse_answer_text :  answerText1,
+    pulse_answer_set : ""
+  };
+  console.log(eventSpec);
+  utag.link(eventSpec);
+}
+else {
+console.log("Triggering pulse_survey_answered event");
+  var eventSpec = {
+    tealium_event: "pulse_survey_answered",
+    pulse_id : uuid1,
+    pulse_question_id : questionId1,
+    pulse_answer_id : answerId1,
+    pulse_question_text : questionText1,
+    pulse_answer_text :  answerText1,
+    pulse_answer_set : ""
+  };
+  console.log(eventSpec);
+  utag.link(eventSpec);
+}
+console.log("Triggering Proclivity Event");
+if (typeof window.PulseInsightsObject.survey == "object" && window.PulseInsightsObject.survey != null) {
+  var udid = window.PulseInsightsObject.udid;
+  wec.browse( { token: "ps_action_click_pulseinsights_" + udid } );
+}
+
+//~~~~~~~~~~~~~~~~~~~ survey completed ~~~~~~~~~~~~~~~~~~~//
+console.log("Triggering pulse_survey_complete event");
+
+var uuid = window.PulseInsightsObject.udid;
+
+var eventSpec = {
+    tealium_event : "pulse_survey_completed",
+    pulse_id : uuid
+};
+
+utag.link(eventSpec);
+console.log(eventSpec);

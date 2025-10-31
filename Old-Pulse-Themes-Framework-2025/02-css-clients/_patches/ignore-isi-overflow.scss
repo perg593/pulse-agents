@@ -1,0 +1,23 @@
+div#_pi_surveyWidgetContainer{
+    //get out of the stacking context
+    &:not(.mobile-enabled){
+        position: absolute !important;
+        z-index: unset !important; //was -1 safari didn't like that
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        overflow: visible;
+        div#_pi_surveyWidget[survey-widget-type="inlinesurvey"] {
+            height: auto;
+            width: 100vw;
+            right: 0;
+            left: 0;
+            top: auto !important;
+            z-index: 9 !important;
+            position: fixed !important;
+            //gotta do a transform
+            transform: translateY(-100%) !important;
+        }
+    }
+}

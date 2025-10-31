@@ -1,0 +1,10 @@
+= simple_form_for @theme, html: { role: 'form', class: 'form-horizontal' } do |form|
+  = form.input :name
+
+  - if @theme.css?
+    = form.input :css, label: 'CSS'
+  - else
+    = form.input :native_content, as: :text, label: 'JSON', input_html: { value: JSON.pretty_generate(@theme.reload.native_content) }
+
+  .form-action
+    = form.submit 'Update', class: 'btn btn-default'

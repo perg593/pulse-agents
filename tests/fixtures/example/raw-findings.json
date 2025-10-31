@@ -1,0 +1,470 @@
+[
+  {
+    "name": "body::background-color",
+    "normalizedName": "body.backgroundColor",
+    "category": "color",
+    "value": "rgb(238, 238, 238)",
+    "sources": [
+      {
+        "type": "css-prop",
+        "selector": "body",
+        "property": "background-color",
+        "value": "rgb(238, 238, 238)",
+        "important": false,
+        "href": null
+      },
+      {
+        "type": "computed",
+        "selector": "body[0]",
+        "property": "background-color",
+        "value": "rgb(238, 238, 238)"
+      }
+    ]
+  },
+  {
+    "name": "body::font-family",
+    "normalizedName": "body.fontFamily",
+    "category": "font",
+    "value": "system-ui, sans-serif",
+    "sources": [
+      {
+        "type": "css-prop",
+        "selector": "body",
+        "property": "font-family",
+        "value": "system-ui, sans-serif",
+        "important": false,
+        "href": null
+      },
+      {
+        "type": "computed",
+        "selector": "body[0]",
+        "property": "font-family",
+        "value": "system-ui, sans-serif"
+      }
+    ]
+  },
+  {
+    "name": "a:link::color",
+    "normalizedName": "aLink.color",
+    "category": "color",
+    "value": "rgb(51, 68, 136)",
+    "sources": [
+      {
+        "type": "css-prop",
+        "selector": "a:link",
+        "property": "color",
+        "value": "rgb(51, 68, 136)",
+        "important": false,
+        "href": null
+      }
+    ]
+  },
+  {
+    "name": "a:visited::color",
+    "normalizedName": "aVisited.color",
+    "category": "color",
+    "value": "rgb(51, 68, 136)",
+    "sources": [
+      {
+        "type": "css-prop",
+        "selector": "a:visited",
+        "property": "color",
+        "value": "rgb(51, 68, 136)",
+        "important": false,
+        "href": null
+      }
+    ]
+  },
+  {
+    "name": "body::color",
+    "normalizedName": "body.color",
+    "category": "color",
+    "value": "rgb(0, 0, 0)",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "body[0]",
+        "property": "color",
+        "value": "rgb(0, 0, 0)"
+      }
+    ]
+  },
+  {
+    "name": "body::background",
+    "normalizedName": "body.background",
+    "category": "radius",
+    "value": "rgb(238, 238, 238) none repeat scroll 0% 0% / auto padding-box border-box",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "body[0]",
+        "property": "background",
+        "value": "rgb(238, 238, 238) none repeat scroll 0% 0% / auto padding-box border-box"
+      }
+    ]
+  },
+  {
+    "name": "body::font-size",
+    "normalizedName": "body.fontSize",
+    "category": "font",
+    "value": "16px",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "body[0]",
+        "property": "font-size",
+        "value": "16px"
+      }
+    ]
+  },
+  {
+    "name": "body::line-height",
+    "normalizedName": "body.lineHeight",
+    "category": "font",
+    "value": "normal",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "body[0]",
+        "property": "line-height",
+        "value": "normal"
+      }
+    ]
+  },
+  {
+    "name": "body::border-radius",
+    "normalizedName": "body.borderRadius",
+    "category": "radius",
+    "value": "0px",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "body[0]",
+        "property": "border-radius",
+        "value": "0px"
+      }
+    ]
+  },
+  {
+    "name": "body::box-shadow",
+    "normalizedName": "body.boxShadow",
+    "category": "shadow",
+    "value": "none",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "body[0]",
+        "property": "box-shadow",
+        "value": "none"
+      }
+    ]
+  },
+  {
+    "name": "body::letter-spacing",
+    "normalizedName": "body.letterSpacing",
+    "category": "font",
+    "value": "normal",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "body[0]",
+        "property": "letter-spacing",
+        "value": "normal"
+      }
+    ]
+  },
+  {
+    "name": "body::padding",
+    "normalizedName": "body.padding",
+    "category": "spacing",
+    "value": "0px",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "body[0]",
+        "property": "padding",
+        "value": "0px"
+      }
+    ]
+  },
+  {
+    "name": "h1::color",
+    "normalizedName": "h1.color",
+    "category": "color",
+    "value": "rgb(0, 0, 0)",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "h1[0]",
+        "property": "color",
+        "value": "rgb(0, 0, 0)"
+      }
+    ]
+  },
+  {
+    "name": "h1::background",
+    "normalizedName": "h1.background",
+    "category": "radius",
+    "value": "rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "h1[0]",
+        "property": "background",
+        "value": "rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box"
+      }
+    ]
+  },
+  {
+    "name": "h1::background-color",
+    "normalizedName": "h1.backgroundColor",
+    "category": "color",
+    "value": "rgba(0, 0, 0, 0)",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "h1[0]",
+        "property": "background-color",
+        "value": "rgba(0, 0, 0, 0)"
+      }
+    ]
+  },
+  {
+    "name": "h1::font-family",
+    "normalizedName": "h1.fontFamily",
+    "category": "font",
+    "value": "system-ui, sans-serif",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "h1[0]",
+        "property": "font-family",
+        "value": "system-ui, sans-serif"
+      }
+    ]
+  },
+  {
+    "name": "h1::font-size",
+    "normalizedName": "h1.fontSize",
+    "category": "font",
+    "value": "24px",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "h1[0]",
+        "property": "font-size",
+        "value": "24px"
+      }
+    ]
+  },
+  {
+    "name": "h1::line-height",
+    "normalizedName": "h1.lineHeight",
+    "category": "font",
+    "value": "normal",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "h1[0]",
+        "property": "line-height",
+        "value": "normal"
+      }
+    ]
+  },
+  {
+    "name": "h1::border-radius",
+    "normalizedName": "h1.borderRadius",
+    "category": "radius",
+    "value": "0px",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "h1[0]",
+        "property": "border-radius",
+        "value": "0px"
+      }
+    ]
+  },
+  {
+    "name": "h1::box-shadow",
+    "normalizedName": "h1.boxShadow",
+    "category": "shadow",
+    "value": "none",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "h1[0]",
+        "property": "box-shadow",
+        "value": "none"
+      }
+    ]
+  },
+  {
+    "name": "h1::letter-spacing",
+    "normalizedName": "h1.letterSpacing",
+    "category": "font",
+    "value": "normal",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "h1[0]",
+        "property": "letter-spacing",
+        "value": "normal"
+      }
+    ]
+  },
+  {
+    "name": "h1::padding",
+    "normalizedName": "h1.padding",
+    "category": "spacing",
+    "value": "0px",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "h1[0]",
+        "property": "padding",
+        "value": "0px"
+      }
+    ]
+  },
+  {
+    "name": "a::color",
+    "normalizedName": "a.color",
+    "category": "color",
+    "value": "rgb(51, 68, 136)",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "a[0]",
+        "property": "color",
+        "value": "rgb(51, 68, 136)"
+      }
+    ]
+  },
+  {
+    "name": "a::background",
+    "normalizedName": "a.background",
+    "category": "radius",
+    "value": "rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "a[0]",
+        "property": "background",
+        "value": "rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box"
+      }
+    ]
+  },
+  {
+    "name": "a::background-color",
+    "normalizedName": "a.backgroundColor",
+    "category": "color",
+    "value": "rgba(0, 0, 0, 0)",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "a[0]",
+        "property": "background-color",
+        "value": "rgba(0, 0, 0, 0)"
+      }
+    ]
+  },
+  {
+    "name": "a::font-family",
+    "normalizedName": "a.fontFamily",
+    "category": "font",
+    "value": "system-ui, sans-serif",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "a[0]",
+        "property": "font-family",
+        "value": "system-ui, sans-serif"
+      }
+    ]
+  },
+  {
+    "name": "a::font-size",
+    "normalizedName": "a.fontSize",
+    "category": "font",
+    "value": "16px",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "a[0]",
+        "property": "font-size",
+        "value": "16px"
+      }
+    ]
+  },
+  {
+    "name": "a::line-height",
+    "normalizedName": "a.lineHeight",
+    "category": "font",
+    "value": "normal",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "a[0]",
+        "property": "line-height",
+        "value": "normal"
+      }
+    ]
+  },
+  {
+    "name": "a::border-radius",
+    "normalizedName": "a.borderRadius",
+    "category": "radius",
+    "value": "0px",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "a[0]",
+        "property": "border-radius",
+        "value": "0px"
+      }
+    ]
+  },
+  {
+    "name": "a::box-shadow",
+    "normalizedName": "a.boxShadow",
+    "category": "shadow",
+    "value": "none",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "a[0]",
+        "property": "box-shadow",
+        "value": "none"
+      }
+    ]
+  },
+  {
+    "name": "a::letter-spacing",
+    "normalizedName": "a.letterSpacing",
+    "category": "font",
+    "value": "normal",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "a[0]",
+        "property": "letter-spacing",
+        "value": "normal"
+      }
+    ]
+  },
+  {
+    "name": "a::padding",
+    "normalizedName": "a.padding",
+    "category": "spacing",
+    "value": "0px",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "a[0]",
+        "property": "padding",
+        "value": "0px"
+      }
+    ]
+  }
+]

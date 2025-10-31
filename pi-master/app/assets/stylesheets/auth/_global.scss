@@ -1,0 +1,143 @@
+//= depend_on_asset "background.png"
+
+body {
+  padding-top: 40px;
+  padding-bottom: 40px;
+  background-color: #ffffff;
+}
+
+ input {
+  outline: none;
+ }
+
+.logo {
+  text-align: center;
+  margin-bottom: 30px;
+  .links {
+    @extend .logo;
+    font-weight: 300;
+    margin: 15px 0 0 0;
+  }
+}
+
+.alert {
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.signin-input {
+  width: 100%;
+}
+
+.signin-instructions {
+  margin: 10px;
+}
+
+.form-wrapper {
+  @include center-block;
+  position: relative;
+  padding: 20px 50px;
+  background-color: #f4f4f4;
+  border-radius: 15px;
+  max-width: 513px;
+  // max-height: 418px;
+
+  .full-width-input {
+    width: 100%;
+  }
+
+  form {
+    .form-title {
+      font-size: 25px;
+      font-weight: 300;
+      text-align: center;
+      margin: 0 0 40px;
+    }
+
+    .form-group {
+      // height: 70px;
+      min-height: 50px;
+      &.user_first_name, &.user_last_name {
+        width: 45%;
+        overflow: hidden;
+      }
+
+      .error {
+        display: block;
+        padding: 5px 0 0 23px;
+        color: #8f9dc6;
+        background: image-url('icons/alert.png') no-repeat left center;
+
+        a {
+          text-decoration: underline;
+        }
+      }
+    }
+
+    input {
+      $boder-color: #57636e;
+
+      &[type=email], &[type=text], &[type=password] {
+        border: none;
+        color: $text-color;
+        font-size: 15px;
+        font-weight: 300;
+        padding: 3px 5px;
+        background-color: transparent;
+        border-bottom: 1px solid $boder-color;
+
+        &:focus {
+          border-bottom: 1px solid #8fa9b6;
+        }
+
+        &#user_email, &#user_password, &#user_password_confirmation {
+          width: 100%;
+        }
+      }
+
+      &[type=submit] {
+        @include button-variant($text-color, #ffffff, $boder-color);
+        @include button-size(5px, 15px, 18px, 18px, 5px);
+        border-style: solid;
+        border-width: 1px;
+        font-weight: 300;
+      }
+    }
+
+    .form-action {
+      text-align: right;
+    }
+  }
+}
+
+.google_signin_button_container {
+  text-align: center;
+  margin-top: 30px;
+}
+
+.google_signin_button {
+  width: 191px;
+  height: 46px;
+  border: none;
+  padding: 0;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-image: image-url('google/btn_google_signin_light_normal_web@2x.png');
+
+  &:focus {
+    background-image: image-url('google/btn_google_signin_light_focus_web@2x.png');
+  }
+
+  &:active {
+    background-image: image-url('google/btn_google_signin_light_pressed_web@2x.png');
+  }
+}
+
+.footer {
+  margin-top: 30px;
+  text-align: center;
+
+  a {
+    margin: 0 5px;
+  }
+}

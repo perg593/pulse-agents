@@ -1,0 +1,26 @@
+:ruby
+  content_for :content_container_class, "survey-dashboard"
+
+- if current_user.admin? && @audits.present?
+  .localization-modal-container
+    .modal.fade{id: "auditing_modal", :role => "dialog", :tabindex => "-1"}
+      .modal-dialog{:role => "document"}
+        .modal-content
+          .modal-header
+            %button.close{"aria-label" => "Close", "data-dismiss" => "modal", :type => "button"}
+              %span{"aria-hidden" => "true"} ×
+            %h5.modal-title Activity Log
+          .modal-content
+            = render "application/audits", audits: @audits, filter_fields: {"Survey" => ["name", "status", "goal"]}
+          .modal-footer
+            = link_to "show full audit log", audit_my_account_path
+
+- @surveys.reject { |survey| survey.localized? }.each do |survey|
+  - modal_id = "localize_modal_#{survey.id}"
+  .placeholder{id: "#{modal_id}_placeholder"}
+
+- @surveys.each do |survey|
+  - modal_id = "survey_deletion_modal_#{survey.id}"
+  .placeholder{id: "#{modal_id}_placeholder"}
+
+= react_component("SurveyDashboard", @presenter.dashboard_props, class: 'survey-dashboard-component')

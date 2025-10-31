@@ -1,0 +1,15 @@
+$arrow-bg: #607586;
+$arrow-width-default: 16px;
+
+.arrow {
+  margin: 0 2px;
+  display: inline-block;
+
+  &.arrow-up {
+    @include arrow-up($arrow-bg, $arrow-width-default, $arrow-width-default / 2);
+  }
+
+  &.arrow-down {
+    @include arrow-down($arrow-bg, $arrow-width-default, $arrow-width-default / 2);
+  }
+}

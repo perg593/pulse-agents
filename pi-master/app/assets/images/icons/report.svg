@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="13px" height="17px" viewBox="0 0 13 17" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>report-white</title>
+    <g id="report-white" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Sparkline" transform="translate(1.8056, 7.5762)" fill="#FFFFFF">
+            <polygon id="Line" fill-rule="nonzero" points="2.97916667 0.678442814 3.4898549 1.20108696 0.631944444 4.12590501 0.121256214 3.60326087 0.376600329 3.3419388 2.72382255 0.939764885"></polygon>
+            <polygon id="Line" fill-rule="nonzero" points="8.51999281 0.496856835 9.08395362 0.958587958 8.85836929 1.24716991 5.9694804 4.94282208 5.74389608 5.23140403 5.17993527 4.76967291 5.4055196 4.48109096 8.29440849 0.785438787"></polygon>
+            <polygon id="Line" fill-rule="nonzero" transform="translate(4.3333, 2.9565) scale(-1, 1) translate(-4.3333, -2.9565)" points="5.83972767 0.679247501 6.37795751 1.17209588 6.13717047 1.44751114 3.06772603 4.95838071 2.826939 5.23379598 2.28870916 4.7409476 2.52949619 4.46553233 5.59894064 0.954662769"></polygon>
+            <ellipse id="Oval" cx="0.8125" cy="3.60326087" rx="1" ry="1"></ellipse>
+            <ellipse id="Oval" cx="2.79861111" cy="1.38586957" rx="1" ry="1"></ellipse>
+            <ellipse id="Oval" cx="5.6875" cy="4.71195652" rx="1" ry="1"></ellipse>
+            <ellipse id="Oval" cx="8.75694444" cy="0.831521739" rx="1" ry="1"></ellipse>
+        </g>
+        <g id="Group-2" transform="translate(0, -0)" fill="#FFFFFF" fill-rule="nonzero">
+            <g id="Group">
+                <polygon id="left" points="0 0 0 17 1 17 1 0"></polygon>
+                <polygon id="bottom" points="1 17 12 17 12 16 1 16"></polygon>
+                <polygon id="right" points="12 5.5 12 17 13 17 13 5.5"></polygon>
+                <polygon id="top" points="1 1 7.5 1 7.5 0 1 0"></polygon>
+            </g>
+            <path d="M7.5,-1.33226763e-15 L13,5.5 L7.5,5.5 L7.5,-1.33226763e-15 Z M8.21966991,1.80545635 L8.21966991,4.80545635 L11.2196699,4.80545635 L8.21966991,1.80545635 Z" id="white-triangle"></path>
+        </g>
+    </g>
+</svg>

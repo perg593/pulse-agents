@@ -1,0 +1,53 @@
+:ruby
+  modal_id ||= nil
+  survey ||= nil
+
+.modal.fade{id: modal_id, :role => "dialog", :tabindex => "-1"}
+  .modal-dialog.css-triggers{:role => "document"}
+    .modal-content
+      = form_for survey, url: localization_form_update_survey_path(survey) do |survey_form|
+        .modal-header
+          %button.close{"aria-label" => "Close", "data-dismiss" => "modal", :type => "button"}
+            %span{"aria-hidden" => "true"} ×
+          %h5.modal-title Behavioral Triggers
+        .modal-body
+          .basic-fields-container
+            .basic-fields-row
+              %label Click:
+              .input-column
+                = survey_form.fields_for :page_element_clicked_trigger, survey.page_element_clicked_trigger || survey.build_page_element_clicked_trigger do |page_behavior_trigger_form|
+                  = page_behavior_trigger_form.check_box :render_after_element_clicked_enabled
+
+                  .time-on-page-label
+                    Show after user clicks element with CSS selector
+                  = page_behavior_trigger_form.text_field :render_after_element_clicked, required: page_behavior_trigger_form.object.render_after_element_clicked_enabled
+
+            .basic-fields-row
+              %label Content In View:
+              .input-column
+                = survey_form.fields_for :page_element_visible_trigger, survey.page_element_visible_trigger || survey.build_page_element_visible_trigger do |page_behavior_trigger_form|
+                  = page_behavior_trigger_form.check_box :render_after_element_visible_enabled
+
+                  .time-on-page-label
+                    Show after element with CSS selector
+
+                  = page_behavior_trigger_form.text_field :render_after_element_visible, required: page_behavior_trigger_form.object.render_after_element_visible_enabled
+
+                  .time-on-page-hint
+                    scrolls into the viewport
+
+            .basic-fields-row
+              %label Text On Page:
+              .input-column
+                = survey_form.fields_for :text_on_page_trigger, survey.text_on_page_trigger || survey.build_text_on_page_trigger do |page_behavior_trigger_form|
+                  = page_behavior_trigger_form.check_box :text_on_page_enabled
+                  .time-on-page-label
+                    Text of element with CSS selector
+                  = page_behavior_trigger_form.text_field :text_on_page_selector, required: page_behavior_trigger_form.object.text_on_page_enabled
+                  = page_behavior_trigger_form.select :text_on_page_presence, options_for_select([['contains', true], ['does not contain', false]])
+                  .text-on-page
+                    text:
+                  = page_behavior_trigger_form.text_field :text_on_page_value, required: page_behavior_trigger_form.object.text_on_page_enabled
+
+        .modal-footer
+          = survey_form.submit 'Save Triggers', class: 'btn btn-primary'

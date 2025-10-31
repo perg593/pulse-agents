@@ -1,0 +1,31 @@
+/ User Management
+.panel.panel-default
+  .panel-heading
+    %h4.panel-title User Management
+  .panel-body
+    = simple_form_for Invitation.new, url: invite_path, html: { role: 'form', class: 'form-horizontal' } do |invitation_form|
+      = render 'invite_user_form', invitation_form: invitation_form, account_id: @account.id
+    .users
+      %table.table.table-hover
+        %thead
+          %tr
+            %th Name
+            %th Email
+            %th= t('user.level')
+            %th Join Date
+        %tbody
+          - @users.each do |user|
+            %tr.user-details
+              %td
+                = user.name
+                - unless user.id == current_user.id
+                  .actions{ style: 'display: none;' }
+                    = link_to 'Delete', admin_user_path(user), method: :delete, data: { confirm: 'Are you sure?' }
+              %td= user.email
+              %td= select_tag "user[level]", options_for_select(User.levels.map {|choice| [t('user.levels.'+choice[0]), choice[1]]}, user.level_before_type_cast), include_blank: false, disabled: (user==current_user ? 'disabled' : nil), class: 'user_level', data: {url: set_user_level_path(user)}
+              %td= user.created_at.to_date
+
+- if current_user.admin? && @audits.present?
+  = render "application/audits", audits: @audits, filter_fields: { "Invitation" => ["email", "level"], "User" => ["name", "email", "level", "join_date"] }
+
+- content_for :js, javascript_include_tag('control/user_management')

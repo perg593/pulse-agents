@@ -1,0 +1,245 @@
+div#_pi_surveyWidgetContainer{
+  &.mobile-enabled{
+    #_pi_surveyWidget ._pi_widgetContentContainer ul._pi_answers_container[data-question-type="single_choice_question"][data-radio-button="off"][data-question-id="13883"]{
+      height: 50px !important;
+    }
+  }
+  div#_pi_surveyWidget[data-question-id="13883"]{
+    div._pi_widgetContentContainer{
+      ul._pi_answers_container[data-question-type="single_choice_question"][data-radio-button="off"]{
+        height: 50px !important;
+        width: 246px !important;
+        position: relative;
+        margin: 0px !important;
+        overflow: visible !important;
+        margin-bottom: 10px !important;
+        *{
+          background-color: transparent !important;
+        }
+        &[data-answer]:not([data-answer=""]){
+          a:after{
+            color: transparent !important;
+          }
+          li{
+
+            &.selected{
+              a:after{
+                color: #333 !important;
+              }
+              & ~ li a:after{
+                color: #cccccc !important;
+              }
+            }
+          }
+          &:hover{
+            li{
+              a:after{
+                color: transparent !important;
+              }
+              & ~ li a:after {
+                color: transparent !important;
+              }
+              &:hover{
+                a:after{
+                  color: #2475c7 !important;
+                }
+                & ~ li a:after{
+                  color: #cccccc !important;
+                }
+              }
+            }
+          }
+        }
+        &:hover{
+          a:after{
+            color: transparent !important;
+          }
+        }
+        li{
+          &:hover{
+            a:after{
+              color: #2475c7 !important;
+            }
+            & ~ li a:after{
+              color: #cccccc !important;
+            }
+          }
+        }
+        *{
+          width: auto !important;
+          display: inline-block;
+          text-align: right;
+        }
+        li{
+          border-radius: 0px !important;
+          overflow: visible !important;
+          border: none !important;
+          margin: 0px !important;
+          max-width: 30px !important;
+          width: 30px;
+          height: 50px !important;
+          position: absolute;
+          top: 0;
+          left: 0;
+          text-align: right;
+          letter-spacing: 24px;
+          a{
+            margin-top: 10px !important;
+            font-size: 30px;
+            label{
+              display: none !important;
+            }
+            &:after{
+              // content: "\2605";
+              color: #cccccc;
+            }
+            &:focus{
+              outline: none;
+            }
+          }
+          &:nth-child(1){
+            width: 20% !important;
+            max-width: 20% !important;
+            z-index: 50;
+            a{
+              &:after{
+                content: "\2605";
+              }
+            }
+            &:hover, &.selected{
+              a{
+                &:after{
+                  content: "\2605";
+                }
+              }
+            }
+          }
+          &:nth-child(2){
+            width: 40% !important;
+            max-width: 40% !important;
+            z-index: 40;
+            a{
+              &:after{
+                content: "\2605 \2605";
+              }
+            }
+            &:hover, &.selected{
+              a{
+                &:after{
+                  content: "\2605 \2605";
+                }
+              }
+            }
+          }
+          &:nth-child(3){
+            width: 60% !important;
+            max-width: 60% !important;
+            z-index: 30;
+            a{
+              &:after{
+                content: "\2605 \2605 \2605";
+              }
+            }
+            &:hover, &.selected{
+              a{
+                &:after{
+                  content: "\2605 \2605 \2605";
+                }
+              }
+            }
+          }
+
+          &:nth-child(4){
+            width: 80% !important;
+            max-width: 80% !important;
+            z-index: 20;
+            a{
+              &:after{
+                content: "\2605 \2605 \2605 \2605";
+              }
+            }
+            &:hover, &.selected{
+              a{
+                &:after{
+                  content: "\2605 \2605 \2605 \2605";
+                }
+              }
+            }
+          }
+          &:nth-child(5){
+            width: 100% !important;
+            max-width: 100% !important;
+            z-index: 10;
+            a{
+              &:after{
+                content:"\2605 \2605 \2605 \2605 \2605";
+              }
+            }
+            &:hover, &.selected{
+              a{
+                &:after{
+                  content:"\2605 \2605 \2605 \2605 \2605";
+                }
+              }
+            }
+          }
+        }
+      }
+      ._pi_scale_container._pi_scale_container_after{
+        width: 100% !important;
+        justify-content: space-between !important;
+        ._pi_scale._pi_scale_first{
+          max-width: calc(50% - 123px) !important;
+          text-align: right !important;
+          width: 100% !important;
+        }
+        ._pi_scale._pi_scale_last{
+          max-width: calc(50% - 123px) !important;
+          text-align: left !important;
+          width: 100% !important;
+        }
+      }
+    }
+  }
+  &.mobile-enabled{
+    #_pi_surveyWidget[data-question-id="13883"]{
+      div._pi_widgetContentContainer{
+        ul._pi_answers_container[data-question-type="single_choice_question"][data-radio-button="off"]{
+          width: 223px ​!important;
+          li{
+            label::after{
+              font-size: 25px;
+            }
+          }
+        }
+        ._pi_scale_container._pi_scale_container_after{
+          width: 100% !important;
+          ._pi_scale._pi_scale_first{
+            max-width: calc(50% - 112px) !important;
+            text-align: right !important;
+            width: 100% !important;
+          }
+          ._pi_scale._pi_scale_last{
+            max-width: calc(50% - 112px) !important;
+            text-align: left !important;
+            width: 100% !important;
+          }
+          @media(max-width: 480px){
+            ._pi_scale._pi_scale_first{
+              max-width: calc(50% - 52px) !important;
+              text-align: left !important;
+              width: 100% !important;
+              margin-left: 10px;
+            }
+            ._pi_scale._pi_scale_last{
+              max-width: calc(50% - 52px) !important;
+              text-align: right !important;
+              width: 100% !important;
+              right: 10px;
+            }
+          }
+        }
+      }
+    }
+  }
+}

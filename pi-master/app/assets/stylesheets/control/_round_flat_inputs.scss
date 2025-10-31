@@ -1,0 +1,49 @@
+@import 'common/variables';
+@import 'control/ext/mixins';
+
+.text-response-content-wrapper,
+.survey-edit,
+.modal-dialog,
+.pi-modal,
+.sidebar-body {
+  input {
+    &[type='checkbox'] {
+      @include custom-checkbox(#909ba7, #909ba7, #5181bd, $pi-neutral-color, $pi-neutral-color);
+    }
+
+    &[type='radio'] {
+      @include custom-radio-button($pi-highlight-color-border, #979797, #fff, $pi-highlight-color-border, $pi-neutral-background-color);
+    }
+
+    // This is basically an input[type='text'] selector
+    &[type='text'],
+    &:not([type='button'], [type='radio'], [type='checkbox'], [type='submit'], [type='file']) {
+      @include custom-text-input();
+
+      height: 35px;
+      padding-left: 14px;
+      padding-right: 20px;
+      font-size: 13px;
+    }
+  }
+
+  select {
+    border-bottom: none !important; // overriding global style's overreach
+    padding-left: 14px;
+    font-size: 13px;
+    background: image-url('icons/survey_editor/arrow_down.svg') no-repeat right rgba(0, 0, 0, 0);
+  }
+
+  textarea {
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 1px $pi-highlight-color;
+    }
+  }
+}
+
+.basic-multi-select {
+  input {
+    box-shadow: none !important;
+  }
+}

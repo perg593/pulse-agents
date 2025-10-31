@@ -1,0 +1,37 @@
+# Ignore generated documentation and scratch files for Cursor indexing
+
+# Temporary or auto-generated Ask/Plan scratchpads
+docs/ask/tmp/
+docs/plan/tmp/
+docs/weekly/tmp/
+
+# Cached outputs or AI summaries
+*.ask.log
+*.plan.log
+*_summary.tmp.md
+cursor_cache/
+cursor_tmp/
+
+# Project-specific noise
+node_modules/
+dist/
+build/
+.env
+.DS_Store
+
+# Transient notes or experimental plans
+sandbox/
+scratchpad/
+**/draft_*.md
+
+# Large data or binary files
+*.csv
+*.zip
+*.tar.gz
+*.db
+*.sqlite
+
+# Local AI or automation artifacts
+.llm_context/
+cursor_sessions/
+codex_temp/

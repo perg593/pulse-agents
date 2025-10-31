@@ -1,0 +1,201 @@
+$desktop-color:	#00A56B;
+$tablet-color:		#327DCA;
+$phone414-color:	#EF3C3A;
+$phone375-color:	#FF9C0C;
+$phone320-color:	#F6DA00;
+
+
+
+
+/* ------- Hiding of Survey Types ------- */
+	// #single			{display:none;}
+	// #free-1			{display:none;}
+	// #free-x			{display:none;}
+	// #multi			{display:none;}
+	// #custom			{display:none;}
+	// #invite			{display:none;}
+	#thanks			{display:none;}
+
+	div[theme="default"] 	{display:none;}
+	// div[theme="custom-1"] 	{display:none;}		// OFI: product 1
+	// div[theme="custom-2"] 	{display:none;}		// OFI: product 2
+	// div[theme="custom-3"] 	{display:none;}		// OFI: nav
+	// div[theme="fullscreen"] {display:none;}
+
+
+/* ------- Control 1) Checkboxes ------- */
+	.pi-checkboxes-all {
+		display: 			flex;
+		justify-content: 	center;
+		flex-wrap: 			wrap;
+		background-color: 	#333;
+		line-height: 		100%;
+		padding: 			5px 0 5px 0;
+		margin-bottom: 		0px;
+	}
+
+	// The checkbox/radio + label pair, in flex mode
+	.pi-checkboxes-all div {
+		flex: 				0 1 auto;
+		margin: 			0 8px;
+		border: 			1px solid rgba(255,255,255,0.08);
+		border-radius: 		3px;
+		background-color: 	rgba(255,255,255,0.05);
+		padding: 			4px 10px;
+	}
+
+	.pi-checkboxes-all input {
+		margin: 0;
+	}
+
+	// The label for both checkbox and radio
+	.pi-checkbox {
+		color: 			white;
+		font-family: 	'helvetica';
+		font-size: 		12px; 
+		line-height: 	normal;
+		padding-top: 	0px;
+		padding-bottom: 0px;
+		margin-right: 	0px;
+		margin-left: 	4px;
+	}
+
+
+
+
+/* ------- Control 3) Rulers ------- */
+	#pi-rulers {
+		margin-bottom: 		20px;
+	}
+
+	#pi-rulers div {
+		display: 		 	flex;
+		justify-content: 	center;
+		flex-wrap: 		 	wrap;		
+		
+		font-size: 			12px;
+		font-family: 		'helvetica';
+		font-weight: 		normal;
+		font-style: 		normal;
+		text-align: 		center;
+		color: 				white;
+		line-height: 		100%;
+		border-bottom: 		0px dashed black;
+		border-top: 		0px dashed black;
+		margin-bottom: 		0;
+		padding: 			3px 0 !important;
+		border-bottom-left-radius: 100px;
+		border-bottom-right-radius: 100px;
+	}
+
+	#pi-rulers div span {
+		flex: 				0 1 auto;
+		margin: 			0 10px;
+		border: 			1px solid rgba(255,255,255,0.2);
+		border-radius: 		3px;
+		background-color: 	rgba(255,255,255,0.1);
+		padding: 			3px 12px;
+	}
+
+	#pi-rulers div:nth-child(1) {
+		background-color: $desktop-color;
+	}
+	#pi-rulers div:nth-child(2) {
+		background-color: $tablet-color;
+	}
+	#pi-rulers div:nth-child(3) {
+		background-color: $phone414-color;
+	}
+	#pi-rulers div:nth-child(4) {
+		background-color: $phone375-color;
+	}
+	#pi-rulers div:nth-child(5) {
+		background-color: $phone320-color;
+	}
+
+
+
+
+// ------- Widget Labels ------- 
+// 	#single.desktop:after 	{content:"// Single Choice | Desktop"}
+// 	#single.tablet:after 	{content:"// Single Choice | Tablet"}
+// 	#single.phone414:after 	{content:"// Single Choice | 414px"}
+// 	#single.phone375:after 	{content:"// Single Choice | 375px"}
+// 	#single.phone320:after 	{content:"// Single Choice | 320px"}
+	
+// 	#thanks.desktop:after 	{content:"// Thanks | Desktop"}
+// 	#thanks.tablet:after 	{content:"// Thanks | Tablet"}
+// 	#thanks.phone414:after 	{content:"// Thanks | 414px"}
+// 	#thanks.phone375:after 	{content:"// Thanks | 375px"}
+// 	#thanks.phone320:after 	{content:"// Thanks | 320px"}
+	
+// 	#free-1.desktop:after 	{content:"// Free Text - 1 Line | Desktop"}
+// 	#free-1.tablet:after 	{content:"// Free Text - 1 Line | Tablet"}
+// 	#free-1.phone414:after 	{content:"// Free Text - 1 Line | 414px"}
+// 	#free-1.phone375:after 	{content:"// Free Text - 1 Line | 375px"}
+// 	#free-1.phone320:after 	{content:"// Free Text - 1 Line | 320px"}
+	
+// 	#free-x.desktop:after 	{content:"// Free Text Multi Line | Desktop"}
+// 	#free-x.tablet:after 	{content:"// Free Text Multi Line | Tablet"}
+// 	#free-x.phone414:after 	{content:"// Free Text Multi Line | 414px"}
+// 	#free-x.phone375:after 	{content:"// Free Text Multi Line | 375px"}
+// 	#free-x.phone320:after 	{content:"// Free Text Multi Line | 320px"}
+	
+// 	#multi.desktop:after 	{content:"// Multiple Choice | Desktop"}
+// 	#multi.tablet:after 	{content:"// Multiple Choice | Tablet"}
+// 	#multi.phone414:after 	{content:"// Multiple Choice | 414px"}
+// 	#multi.phone375:after 	{content:"// Multiple Choice | 375px"}
+// 	#multi.phone320:after 	{content:"// Multiple Choice | 320px"}
+	
+// 	#custom.desktop:after 	{content:"// Custom Content | Desktop"}
+// 	#custom.tablet:after 	{content:"// Custom Content | Tablet"}
+// 	#custom.phone414:after 	{content:"// Custom Content | 414px"}
+// 	#custom.phone375:after 	{content:"// Custom Content | 375px"}
+// 	#custom.phone320:after 	{content:"// Custom Content | 320px"}
+	
+// 	#invite.desktop:after 	{content:"// Invite | Desktop"}
+// 	#invite.tablet:after 	{content:"// Invite | Tablet"}
+// 	#invite.phone414:after 	{content:"// Invite | 414px"}
+// 	#invite.phone375:after 	{content:"// Invite | 375px"}
+// 	#invite.phone320:after 	{content:"// Invite | 320px"}
+
+
+
+
+/* ------- Survey Widget: Container and Label ------- */
+.widgetPad {
+	font-family: 	'helvetica';
+	font-size: 		11px;
+	font-weight: 	normal;
+	text-align: 	center;
+	text-transform: uppercase;
+	margin-bottom: 	30px;
+	border-bottom: 	0px dashed #ccc;
+	border-top: 	0px dotted blue;
+	border-radius: 	0px 0 100px 0;
+}
+
+
+
+
+/* ------- Survey Widget: Widths and Tab Colors ------- */
+	// .desktop 	{background-color: $desktop-color; 	min-width:769px !important}
+	.desktop 	{ min-width:769px !important }
+	.tablet 	{ max-width:768px }
+	.phone414 	{ max-width:414px }
+	.phone375 	{ max-width:375px }
+	.phone320 	{ max-width:320px }
+
+
+
+
+/* -------------- Media Queries to Hide Device Types -------------- */
+	@media (max-width:768px) {	.desktop	{ display: none !important; } }
+	@media (min-width:769px) {	.tablet		{ display: none !important; } }
+	@media (max-width:414px) {	.tablet		{ display: none !important; } }
+	@media (min-width:415px) {	.phone414	{ display: none !important; } }
+	@media (max-width:375px) {	.phone414	{ display: none !important; } }
+	@media (min-width:376px) {	.phone375	{ display: none !important; } }
+	@media (max-width:320px) {	.phone375	{ display: none !important; } }
+	@media (min-width:321px) {	.phone320	{ display: none !important; } }
+

@@ -1,0 +1,12 @@
+.results
+  .panel.panel-default
+    .panel-heading.clearfix
+      %h4.panel-title.pull-left
+        Event Occurrence
+    .panel-body
+      - if page_event_params = @page_event_presenter.page_event_params
+        = react_component("survey_report/PageEvent", page_event_params)
+      - else # Just a friendly message to users who wound up on the page
+        %h2.no-data-message
+          No data to display
+

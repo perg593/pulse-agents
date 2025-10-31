@@ -1,0 +1,1 @@
+$('#possible_answer_image').modal('hide');

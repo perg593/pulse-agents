@@ -1,0 +1,24 @@
+:ruby
+  audits ||= nil
+  filter_fields ||= {} # hash of ModelName => [ column_names ]
+  max_audits ||= 10
+
+  num_audits = if filter_fields.present?
+                 audits.count { |audit| audit.audited_changes.slice(*filter_fields[audit.auditable_type]).present? }
+               else
+                 audits.count
+               end
+
+.auditing-container
+  - audits.first(max_audits).each do |audit|
+    = render "application/audit", audit: audit, filter_fields: filter_fields[audit.auditable_type]
+
+  - if max_audits < num_audits
+    = link_to "Show #{ num_audits - max_audits } more audits", "javascript: void(0);", class: "show-more-audits-button"
+
+- if max_audits < num_audits
+  .auditing-container.overflow.hidden
+    - (audits - audits.first(max_audits)).each do |audit|
+      = render "application/audit", audit: audit, filter_fields: filter_fields[audit.auditable_type]
+
+    = link_to "Hide #{ num_audits - max_audits } audits", "javascript: void(0);", class: "hide-more-audits-button"

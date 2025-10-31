@@ -1,0 +1,85 @@
+flowchart LR
+  %% ======= LAYOUT =======
+  %% Clusters
+  subgraph PREVIEW["Preview App (browser)"]
+    direction TB
+
+    PI[/"preview/basic/index.html"/]
+    LR[Left Rail<br/>Manual Controls]
+    DL[Demo Library<br/>(overlay)]
+    BL[Behavior Lab<br/>(overlay, hidden by default)]
+    STAGE[#behavior-stage<br/>(scroll container)]
+
+    subgraph BUS["Behavior Bus (EventTarget)"]
+      EV1(behavior:scroll-depth)
+      EV2(catalog:loaded)
+      LOG[(Unified Logging)]
+    end
+
+    subgraph ENGINE["Behavior Engine"]
+      SD[ScrollDepth Engine<br/>(10% milestones)]
+    end
+
+    subgraph RULES["Rules & Responses"]
+      RS[RulesStore<br/>(normalized rules)]
+      RD[Responses Driver<br/>(evaluate rules)]
+    end
+
+    subgraph CTRL["Presentation Controller"]
+      PC[Manual Wins · Single-Flight · Cooldown]
+    end
+
+    subgraph BRIDGE["Bridge (Protocol v1 wrapper)"]
+      BLOAD[load()]
+      BPRES[present()]
+      BSTA[status/ready/error]
+    end
+
+    HOST[Host iframe<br/>pulseinsights.com/agents]
+  end
+
+  subgraph PLAYER["Player iframe"]
+    TAG[Pulse Tag<br/>(survey engine)]
+    ACK[ack: present-called]
+  end
+
+  subgraph DATA["Demo Catalog"]
+    SHEET[(Google Sheet<br/>Demo/Rules)]
+  end
+
+  %% ======= FLOWS =======
+
+  %% Boot / UI
+  PI --> HOST
+  PI --> DL
+  PI --> BL
+
+  %% Catalog ingestion → Rules
+  DL -->|select demo| EV2
+  SHEET -->|ingest/normalize| RS
+  EV2 --> RS
+
+  %% Scroll signals
+  STAGE -->|scroll| SD
+  SD -->|emit 10/20/.../100%| EV1
+  EV1 --> RD
+
+  %% Rules evaluation
+  RS <-->|current rules| RD
+  RD -->|rule matched| PC
+
+  %% Manual path
+  LR -->|manual present| PC
+
+  %% Controller → presentation
+  PC -->|present(id)| BPRES
+  BLOAD --> BPRES
+  BPRES -->|postMessage| TAG
+  TAG --> ACK
+  ACK -->|status: present-called| BSTA
+  BSTA --> LOG
+
+  %% Logging taps
+  EV1 --> LOG
+  EV2 --> LOG
+  LR  --> LOG

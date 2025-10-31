@@ -1,0 +1,118 @@
+:ruby
+  modal_id ||= nil
+  possible_answer ||= nil
+
+.modal.fade{id: modal_id, 'aria-hidden' => 'true', 'aria-labelledby' => "possibleAnswerImageModal#{possible_answer.id}", role: 'dialog', tabindex: '-1', class: "possible_answer_image possible_answer_image#{possible_answer.id}" }
+  .modal-dialog.modal-lg
+    .modal-content
+      = simple_form_for possible_answer, url: update_settings_possible_answers_path(possible_answer) do |f|
+        .modal-header
+          %button.close{'aria-hidden' => 'true', 'data-dismiss' => 'modal', type: 'button'} ×
+
+        .possible-answer-modal-step1
+          .modal-body.possible-answer-body
+            %h4 New Image
+            .possible-answer-new-image
+              = f.input :image, as: :file, label: false, hint: 'Maximum 3MB'
+              .size-error.hidden
+                Image size should not exceed 3MB.
+              = f.hidden_field :answer_image_id, class: "possible_answer_answer_image_id"
+
+            .delimiter
+            %h4 Select Existing Image
+            .possible-answer-images
+              - AnswerImage.where(imageable_type: 'Account', imageable_id: f.object.question.survey.account_id).each do |other_image|
+                - if other_image.image.url
+                  .possible-answer-image-wrapper{ class: ('selected' if f.object.answer_image.try(:image).try(:url) == other_image.image.url) }
+                    = image_tag other_image.image.url, class: 'other-possible-answer-image',
+                      alt: f.object.image_alt, 'data-id': other_image.id
+
+          .modal-footer
+            = link_to 'Next', '#', class: 'btn btn-default answer-image-next', disabled: f.object.answer_image_id.nil?
+
+        .possible-answer-modal-step2.hidden
+          .modal-body.possible-answer-body
+            .possible-answer-settings
+              %h4 Settings
+              = f.input :image_settings, as: :radio_buttons, label: false, collection: Question.image_settings_for_select, required: true,
+                required: true, input_html: { class: 'image_settings_input' }
+
+              = f.input :image_position_cd, as: :radio_buttons, label: false, collection: PossibleAnswer.image_position_cds, required: true,
+                input_html: { class: 'select_image_position' }, wrapper_html: { style: 'display: none' }
+
+              .image-positions{ class: ('hidden' unless f.object.question.text_and_image?) }
+                .image-position-wrapper.top-position{ class: ('selected' if f.object.top? || f.object.image_position_cd.nil?) }
+                  .image-position-block.top-position-block
+                  .image-position-text= 'ABC'
+
+                .image-position-wrapper.bottom-position{ class: ('selected' if f.object.bottom?) }
+                  .image-position-text= 'ABC'
+                  .image-position-block.bottom-position-block
+
+                .image-position-wrapper.left-position{ class: ('selected' if f.object.left?) }
+                  .image-position-block.left-position-block
+                  .image-position-text= 'ABC'
+
+                .image-position-wrapper.right-position{ class: ('selected' if f.object.right?) }
+                  .image-position-text= 'ABC'
+                  .image-position-block.right-position-block
+
+              .error.text-danger
+            .delimiter
+            .possible-answer-new-image
+              %h4 Image Configuration
+
+              = image_tag '', class: 'preview-possible-answer-new-image', height: f.object.image_height, width: f.object.image_width
+
+              .preview-image-filename
+
+              .image-options
+                .row
+                  .col-md-2
+                  .col-md-2
+                    = image_tag ('devices/desktop_alt.png')
+                    .device-type Desktop
+                  .col-md-2
+                    = image_tag ('devices/tablet_alt.png')
+                    .device-type Tablet
+                  .col-md-2
+                    = image_tag ('devices/mobile_alt.png')
+                    .device-type Mobile
+                  .col-md-4
+                .row
+                  .col-md-2.left-aligned.image-options-label
+                    Width:
+                  .col-md-2
+                    = f.input :image_width, label: false, placeholder: 'Width', required: true, class: "possible_answer_image_width"
+                  .col-md-2
+                    = f.input :image_width_tablet, label: false, placeholder: 'Width', required: true, class: "possible_answer_image_width_tablet"
+                  .col-md-2
+                    = f.input :image_width_mobile, label: false, placeholder: 'Width', required: true, class: "possible_answer_image_width_mobile"
+                  .col-md-4.left-aligned.hint
+                    px or %
+                .row
+                  .col-md-2.left-aligned.image-options-label
+                    Height:
+                  .col-md-2
+                    = f.input :image_height, label: false, placeholder: 'Height', required: true, class: "possible_answer_image_height"
+                  .col-md-2
+                    = f.input :image_height_tablet, label: false, placeholder: 'Height', required: true, class: "possible_answer_image_height_tablet"
+                  .col-md-2
+                    = f.input :image_height_mobile, label: false, placeholder: 'Height', required: true, class: "possible_answer_image_height_mobile"
+                  .col-md-4.left-aligned.hint
+                    px or %
+                .row
+                  .col-md-2.left-aligned.image-options-label
+                    Alt. Text:
+                  .col-md-6
+                    = f.input :image_alt, label: false, placeholder: 'Alt', required: true, class: "possible_answer_image_alt"
+                  .col-md-4
+
+          .modal-footer
+            = link_to 'Change image', '#', class: 'btn btn-default answer-image-back'
+            = link_to 'Remove image', remove_image_possible_answers_path(possible_answer), class: 'btn btn-danger answer-image-remove',
+              data: { confirm: 'Are you sure?' }, method: :patch
+
+            = f.submit 'Save', class: 'btn btn-default'
+
+

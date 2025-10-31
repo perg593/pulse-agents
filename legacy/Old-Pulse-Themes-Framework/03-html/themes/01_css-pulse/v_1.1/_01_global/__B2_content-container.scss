@@ -1,0 +1,69 @@
+	/* ================== B2. CONTENT CONTAINER ================== */
+	// Shared
+	#_pi_surveyWidget div._pi_widgetContentContainer,
+	#_pi_surveyWidgetCustom div._pi_widgetContentContainer {
+		display: 			flex;
+      flex-direction: 	row;
+   	flex-wrap:			wrap;
+		justify-content:	center;
+      align-items: 		center;
+
+		height: 		auto;
+		width: 		100%;
+		margin: 		0 !important;
+		padding: 	0;
+	}
+
+	 			// Left-aligned Theme
+				#_pi_surveyWidget div._pi_widgetContentContainer,
+				#_pi_surveyWidgetCustom div._pi_widgetContentContainer {
+					// justify-content:	flex-start !important;
+				}
+
+	 			// Centered Theme
+				#_pi_surveyWidget div._pi_widgetContentContainer,
+				#_pi_surveyWidgetCustom div._pi_widgetContentContainer {
+					// justify-content:	center !important;
+				}
+
+	// Fullscreen
+	div#_pi_surveyWidgetCustom ._pi_widgetContentContainer {
+		padding: 15px;
+		background-color: #fff;
+	}
+
+	// CONTENT CONTAINER | desktop large
+
+	// CONTENT CONTAINER | desktop small
+	@media (min-width:769px) {
+		#_pi_surveyWidget div._pi_widgetContentContainer,
+		#_pi_surveyWidgetCustom div._pi_widgetContentContainer {
+			max-width: 	900px;
+		}
+	}
+
+	// CONTENT CONTAINER | tablet
+	@media (max-width:768px) {
+		#_pi_surveyWidget div._pi_widgetContentContainer,
+		#_pi_surveyWidgetCustom div._pi_widgetContentContainer {
+			max-width: 	750px;
+		}
+	}
+
+	// CONTENT CONTAINER | mobile 414px
+	@media (max-width:414px) {
+		#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget div._pi_widgetContentContainer,
+		#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidgetCustom div._pi_widgetContentContainer {
+			max-width: 	400px;
+			// background-color: yellow;
+		}
+	}
+
+	// CONTENT CONTAINER | mobile 375px and smaller
+	@media (max-width:375px) {
+		#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget div._pi_widgetContentContainer,
+		#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidgetCustom div._pi_widgetContentContainer {
+			max-width: 	355px;
+			// background-color: pink;
+		}
+	}

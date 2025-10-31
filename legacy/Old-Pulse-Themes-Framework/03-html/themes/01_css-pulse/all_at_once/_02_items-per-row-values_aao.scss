@@ -1,0 +1,121 @@
+/* itr 2 */
+
+/* ------------------------------ RADIO BUTTONS ON/OFF -------------------------------------------- */
+ul[data-radio-button="off"] li a span._pi_radio_button_outer {
+	display: none !important; }
+
+ul[data-radio-button="on"] li a span._pi_radio_button_outer {
+	display: block !important; }
+
+
+
+
+
+/* ------------------------------ TEXT ALIGNMENT: RADIO AND CHECKBOX ------------------------------ */
+ul[data-radio-button="off"] li a label {
+	text-align: center !important; }
+
+ul[data-radio-button="on"] li a label {
+	text-align: left !important; }
+
+ul[data-answer-widths="fixed"] li label._pi-control-checkbox {
+	text-align: left !important; }
+
+
+
+
+
+/* ------------------------------ BUTTON GROUP ALIGNMENT: FIXED, VARIABLE LEFT/RIGHT ------------- */
+ul[data-answer-widths="variable-center"] {
+	justify-content: 	center;	}
+
+ul[data-answer-widths="variable-center"] li {
+	margin: 5px 1% !important; }
+
+
+
+
+ul[data-answer-widths="variable-left"] {
+	justify-content: 	flex-start;	}
+
+ul[data-answer-widths="variable-left"] li {
+	margin: 5px 1% !important; }
+
+
+
+
+ul[data-answer-widths="fixed"] {
+	justify-content: 	flex-start;	}
+
+ul[data-answer-widths="fixed"] li {
+	margin: 5px 0.9% !important; }
+
+
+
+
+
+
+
+
+
+/* ------------------------------ BUTTON WIDTHS: VARIABLE ---------------------------------------- */
+ul[data-answer-widths="variable-left"] li,
+ul[data-answer-widths="variable-center"] li {
+/* 	flex: 0 0 auto; */
+	flex-grow: 0;
+	flex-shrink: 0;
+	flex-basis: auto;
+}
+/* 	flex: 1 0 auto;	} */
+
+
+
+
+
+/* ------------------------------ BUTTON WIDTHS: FIXED ------------------------------------------- */
+/* THE DEFAULT FOR FIXED: 3 PER ROW ------------------------------ */
+ul[data-answer-widths="fixed"] li {
+	flex: 0 0 31%; 
+	max-width: 31%; }
+	
+ul[data-answer-widths="fixed"][data-answers-per-row="1"] li {
+	margin: 5px 7% !important;
+	flex: 0 0 86% !important; 
+	max-width: 86% !important; }
+
+ul[data-answer-widths="fixed"][data-answers-per-row="2"] li {
+	flex: 0 0 48% !important; 
+	max-width: 48% !important; }
+	
+ul[data-answer-widths="fixed"][data-answers-per-row="3"] li {
+	flex: 0 0 31% !important; 
+	max-width: 31% !important; }	
+
+ul[data-answer-widths="fixed"][data-answers-per-row="4"] li {
+	flex: 0 0 23% !important; 
+	max-width: 23% !important; }
+
+ul[data-answer-widths="fixed"][data-answers-per-row="5"] li {
+	flex: 0 0 18% !important; 
+	max-width: 18% !important; }
+
+ul[data-answer-widths="fixed"][data-answers-per-row="6"] li {
+	flex: 0 0 14.5% !important; 
+	max-width: 14.5% !important; }
+
+ul[data-answer-widths="fixed"][data-answers-per-row="7"] li {
+	flex: 0 0 12.25% !important; 
+	max-width: 12.25% !important; }
+
+ul[data-answer-widths="fixed"][data-answers-per-row="8"] li {
+	flex: 0 0 10.5% !important; 
+	max-width: 10.5% !important; }
+	
+ul[data-answer-widths="fixed"][data-answers-per-row="9"] li {
+	flex: 0 0 9.1% !important; 
+	max-width: 9.1% !important; }
+	
+ul[data-answer-widths="fixed"][data-answers-per-row="10"] li {
+	flex: 0 0 8% !important; 
+	max-width: 8% !important; }	
+

@@ -1,0 +1,278 @@
+/* ----------- FONTS, BUTTONS, TEXT FIELDS ------- */
+/* FONT: Global */
+	div._pi_question,
+	div._pi_thankYouSurvey,
+	
+	ul._pi_answers_container li a label, 
+
+	input._pi_free_text_question_field,
+	textarea._pi_free_text_question_field,
+
+	input._pi_free_text_question_submit_button,
+	input._pi_multiple_choices_question_submit_button,
+	div._pi_free_text_question_characters_count,
+
+	label._pi-control._pi-control-checkbox,
+	div._pi_multiple_choices_count, 
+	
+	._pi_question_custom_content_question,
+	._pi_question_custom_content_question p,
+	._pi_question_custom_content_question button.pi_question_link,
+	
+	._pi_invitationTextContainer,
+	._pi_startButton,
+
+	a._pi_branding,
+	a._pi_branding:hover
+
+		{
+		font-family: 'XfinityStandard', Helvetica, Arial, sans-serif;
+		font-weight: 400;
+		line-height: 100%;
+		text-transform: none;
+		white-space: normal;
+		}
+
+
+
+/* FONT: Question, Thank You, Custom Content Question, Invitation */
+	div._pi_question, 
+	div._pi_thankYouSurvey,
+	div._pi_question_custom_content_question,
+	div._pi_question_custom_content_question p:first-child,
+	div._pi_invitationTextContainer	{
+		font-family: 'XfinityStandard', Helvetica, Arial, sans-serif;
+		color: #191919 !important;
+		font-size: 20px !important;
+		font-weight: 200;
+		text-align: center;
+		text-transform: none;
+		letter-spacing: 0px;
+		line-height: 120%;
+	}
+
+	#_pi_surveyWidgetContainer.mobile-enabled div._pi_question, 
+	#_pi_surveyWidgetContainer.mobile-enabled div._pi_thankYouSurvey,
+	#_pi_surveyWidgetContainer.mobile-enabled div._pi_question_custom_content_question,
+	#_pi_surveyWidgetContainer.mobile-enabled div._pi_question_custom_content_question p:first-child,
+	#_pi_surveyWidgetContainer.mobile-enabled div._pi_invitationTextContainer	{
+		font-size: 16px !important;
+		font-weight: 200;
+	}
+
+
+/* FONT: Custom Content */
+	._pi_question_custom_content_question {
+		padding-bottom: 0px !important;
+	}
+
+	._pi_question_custom_content_question p {
+		color: #44484C !important;
+		font-size: 15px !important;
+		text-align: center !important;
+		margin-top: 0 !important;
+		margin-bottom: 1rem !important;
+	}
+
+	#_pi_surveyWidgetContainer.mobile-enabled ._pi_question_custom_content_question p {
+		font-size: 15px !important;
+	}
+
+	._pi_question_custom_content_question p:last-child {
+		margin-bottom: 0 !important;
+	}
+
+
+/* ANSWERS: Single Choice */
+
+
+
+
+/* BUTTONS: Free Text Submit, Multi Choice Submit, Custom Content */
+	input._pi_free_text_question_submit_button,
+	input._pi_multiple_choices_question_submit_button,
+	._pi_question_custom_content_question button.pi_question_link,
+	._pi_startButton,
+	#_pi_surveyWidgetContainer.mobile-enabled input._pi_free_text_question_submit_button,
+	#_pi_surveyWidgetContainer.mobile-enabled input._pi_multiple_choices_question_submit_button,
+	#_pi_surveyWidgetContainer.mobile-enabled ._pi_question_custom_content_question button.pi_question_link,
+	#_pi_surveyWidgetContainer.mobile-enabled ._pi_startButton {
+		font-family: 'XfinityStandard', Helvetica, Arial, sans-serif;	
+		color: #fff;
+		font-size: 16px;
+		font-weight: 400;
+
+		text-decoration: none;
+		text-align: center;
+		text-transform: none;
+		letter-spacing: 0.2px;
+
+		border-radius: 40px;
+		cursor: pointer;
+		padding: 12px 30px !important;
+
+		border: 1px solid #0272b6;
+		background-color: #0272b6;
+	}
+
+	#_pi_surveyWidgetContainer.mobile-enabled input._pi_free_text_question_submit_button,
+	#_pi_surveyWidgetContainer.mobile-enabled input._pi_multiple_choices_question_submit_button,
+	#_pi_surveyWidgetContainer.mobile-enabled ._pi_question_custom_content_question button.pi_question_link,
+	#_pi_surveyWidgetContainer.mobile-enabled ._pi_startButton {
+		font-size: 	14px;
+		padding: 	8px 20px !important;
+	}
+
+	input._pi_free_text_question_submit_button:hover,
+	input._pi_multiple_choices_question_submit_button:hover,
+	._pi_question_custom_content_question button.pi_question_link:hover,
+	._pi_startButton:hover {
+		color: #fff;
+		text-decoration: none;
+		border: 1px solid #00619A;
+		background-color: #00619A;		
+	}
+
+	input._pi_free_text_question_submit_button:after,
+	input._pi_multiple_choices_question_submit_button:after,
+	._pi_question_custom_content_question button.pi_question_link:after,
+	._pi_startButton:after {
+		// content: '\27eb';
+	}
+
+
+
+
+/* FONT: Branding, Character Counts */
+	div._pi_free_text_question_characters_count,
+	div._pi_multiple_choices_count,
+	a._pi_branding,
+	a._pi_branding:hover {
+		// font-family: Arial, Helvetica, sans-serif;
+		font-family: 'XfinityStandard', Helvetica, Arial, sans-serif;
+		color: #888;
+		font-size: 12px;
+		font-weight: normal;
+		text-decoration: none;
+		text-align: left;
+		letter-spacing: 0px;
+		line-height: 100% !important;
+	}
+
+	#_pi_surveyWidgetContainer.mobile-enabled div._pi_free_text_question_characters_count,
+	#_pi_surveyWidgetContainer.mobile-enabled div._pi_multiple_choices_count,
+	#_pi_surveyWidgetContainer.mobile-enabled a._pi_branding,
+	#_pi_surveyWidgetContainer.mobile-enabled a._pi_branding:hover {
+		font-size: 11px;
+
+		// background-color: lightgreen !important;
+	}
+
+	a._pi_branding:hover {
+		color: #0272b6 !important;
+		text-decoration: none;
+	}
+
+	#_pi_surveyWidgetContainer.mobile-enabled a._pi_branding:hover {
+		color: #888;		
+	}
+
+
+
+/* CLOSE BUTTON */
+	div._pi_closeButton {
+		color: 		 	#888;
+		// font-family: 	sans-serif;
+		// font-weight: 	lighter;
+		font-family: 	'XfinityStandard', Helvetica, Arial, sans-serif;
+		font-weight: 	200;
+
+		font-size: 	 	28px;
+		text-align:  	center;
+		line-height: 	100% !important;
+
+		height: 			30px;
+		width: 			45px;
+		padding: 		0;
+		margin: 			0;
+		margin-left: 	auto;
+
+		// background-color: lightgreen !important;
+	}
+
+	div._pi_closeCustomButton {
+		color: 		 	#888;
+		font-family: 	sans-serif;
+		font-weight: 	lighter;
+
+		font-size: 	 	24px;
+		text-align:  	center;
+		line-height: 	100% !important;
+
+		height: 			30px;
+		width: 			40px;
+		padding: 		0;
+		margin: 			0;
+		margin-left: 	calc(100% - 70px);
+		margin-top: 	20px;
+
+/* 		background-color: lightgreen !important; */
+	}
+
+	div._pi_closeButton:hover {
+		color: #0272b6;
+	}
+
+	#_pi_surveyWidgetContainer.mobile-enabled div._pi_closeButton,
+	#_pi_surveyWidgetContainer.mobile-enabled div._pi_closeButton:hover {
+		color: 			#888;
+		font-size: 	 	22px;
+		text-align:  	center;
+		line-height: 	70% !important;
+
+		height: 			20px !important;
+		width: 			30px !important;
+		padding: 		0 !important;
+		margin: 			0 !important;
+		margin-left: 	auto !important;
+
+		// background-color: lightblue !important;
+	}
+
+	/* 	Bottom Bar */
+	#_pi_surveyWidget[survey-widget-type="bottombarsurvey"] div._pi_closeButton, 
+	#_pi_surveyWidget[survey-widget-type="bottombarsurvey"] div._pi_closeButton:hover {
+		color: #888;
+		// background-color: red !important;
+	}
+
+	#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget[survey-widget-type="bottombarsurvey"] div._pi_closeButton,
+	#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget[survey-widget-type="bottombarsurvey"] div._pi_closeButton:hover {
+		color: #888;
+		// background-color: white !important;
+	} 
+
+
+	/* 	Docked Widget */
+	#_pi_surveyWidget[survey-widget-type="dockedwidgetsurvey"] div._pi_closeButton, 
+	#_pi_surveyWidget[survey-widget-type="dockedwidgetsurvey"] div._pi_closeButton:hover {
+		color: 		 #999;
+		font-size: 	 22px;
+		font-weight: lighter;
+		text-align:  center;
+		line-height: 80% !important;
+
+		height: 		20px;
+		width: 		20px;		
+		// background-color: red !important;
+	}
+
+	#_pi_surveyWidget[survey-widget-type="dockedwidgetsurvey"] div._pi_closeButton:hover {
+		color: 		 #000;
+	}
+
+	#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget[survey-widget-type="dockedwidgetsurvey"] div._pi_closeButton,
+	#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget[survey-widget-type="dockedwidgetsurvey"] div._pi_closeButton:hover {
+		color: #999;
+		// background-color: white !important;
+	} 

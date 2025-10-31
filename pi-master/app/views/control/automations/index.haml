@@ -1,0 +1,44 @@
+.list-header
+  %h1.list-title Automations
+  .right-btns
+    = link_to 'New Automation', new_automation_path, class: 'btn btn-default'
+
+
+%table.table.table-hover.table-responsive.list-table
+  %thead
+    %tr
+      %th.hidden-sm.hidden-xs(data-sort='string')
+        Name
+        .arrow.arrow-up.hide
+      %th.hidden-sm.hidden-xs(data-sort='data-string')
+        Status
+        .arrow.arrow-up.hide
+      %th.hidden-sm.hidden-xs(data-sort='int')
+        Times triggered
+        .arrow.arrow-up.hide
+      %th.hidden-sm.hidden-xs(data-sort='data-string')
+        Last triggered at
+        .arrow.arrow-up.hide
+      %th.hidden-sm.hidden-xs(data-sort='data-string')
+        Action type
+        .arrow.arrow-up.hide
+  %tbody
+    - @automations.each do |automation|
+      %tr.scheduled-survey-name
+        %td.hidden-sm.hidden-xs{:'data-sort-value' => automation.name}
+          = automation.name
+          %div.actions{style:  'display: none;'}
+            = "#{link_to 'Edit', edit_automation_path(automation)} | #{link_to 'Delete',  automation_path(automation), method: :delete, data: { confirm: 'Are you sure?' }}".html_safe
+        %td.hidden-sm.hidden-xs
+          = automation.enabled? ? 'On' : 'Off'
+        %td.hidden-sm.hidden-xs
+          = automation.times_triggered || 0
+        %td.hidden-sm.hidden-xs
+          = automation.last_triggered_at&.strftime('%m/%d/%Y %H:%M')
+        %td.hidden-sm.hidden-xs
+          = automation.action_type
+
+- if current_user.admin? && @audits.present?
+  = render "application/audits", audits: @audits
+
+- content_for :js, javascript_include_tag('list_page_common')

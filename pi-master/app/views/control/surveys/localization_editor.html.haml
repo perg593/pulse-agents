@@ -1,0 +1,886 @@
+:ruby
+  surveys = @survey_locale_group.surveys.order(:created_at)
+  base_survey = @survey_locale_group.base_survey
+  question_locale_groups = @survey_locale_group.question_locale_groups.order(:created_at)
+
+  css_scope("localization-editor")
+
+%h1= @survey_locale_group.name
+
+- # we want modals defined as high up in the DOM as possible
+- possible_answer_modal_ids = {}
+- PossibleAnswerLocaleGroup.where(owner_record_id: question_locale_groups.pluck(:id)).pluck(:id).each do |possible_answer_locale_group_id|
+  - modal_id = "possible_answer_locale_group_#{possible_answer_locale_group_id}"
+  - possible_answer_modal_ids[possible_answer_locale_group_id] = modal_id
+  .placeholder{id: "#{modal_id}_placeholder"}
+
+:ruby
+  base_question_modal_ids = {}
+  new_possible_answer_modal_ids = {}
+
+- question_locale_groups.each do |question_locale_group|
+  - modal_id = "question_locale_group_#{question_locale_group.id}"
+  - base_question_modal_ids[question_locale_group.id] = modal_id
+  .placeholder{id: "#{modal_id}_placeholder"}
+
+  - modal_id = "new_possible_answer_#{question_locale_group.id}"
+  - new_possible_answer_modal_ids[question_locale_group.id] = modal_id
+  .placeholder{id: "#{modal_id}_placeholder"}
+
+- possible_answer_image_modal_ids = {}
+- surveys.includes(:possible_answers).each do |survey|
+  - survey.possible_answers.each do |possible_answer|
+    - modal_id = "possible_answer_image_modal_#{ possible_answer.id }"
+    - possible_answer_image_modal_ids[possible_answer.id] = modal_id
+    .placeholder{id: "#{modal_id}_placeholder"}
+
+:ruby
+  survey_modal_ids = {
+    survey_image: {},
+    survey_css: {},
+    survey_refire: {},
+    survey_tag: {},
+    survey_docked_widget_placement: {},
+    css_selector_trigger: {},
+    custom_data_trigger: {},
+    url_trigger: {},
+    url_suppresser: {}
+  }
+
+- surveys.each do |survey|
+  - survey_modal_ids.keys.each do |survey_modal_key|
+    - modal_id = "#{ survey_modal_key.to_s }_#{survey.id}"
+    - survey_modal_ids[survey_modal_key][survey.id] = modal_id
+    .placeholder{id: "#{modal_id}_placeholder"}
+
+#inline_survey_target_area
+
+%table.localization-table
+  %tr.header-row
+    %th
+      Name
+    - surveys.each do |survey|
+      %th
+        = link_to survey.name, edit_survey_path(survey.id)
+        %br
+        = link_to "(preview)", "#", class: "preview_link", data: { survey_attributes: survey.attributes_for_javascript.to_json.html_safe }
+
+        - if survey == base_survey
+          = link_to "", localization_duplicate_path(@survey_locale_group.id), method: :post, class: "glyphicon glyphicon-plus-sign"
+
+  %tr.survey-row.sub-divider-row
+    %td
+      = link_to "", "javascript:void(0)", class: "toggle-rows-button glyphicon glyphicon-minus-sign", data: { row_selector: '.survey-row.fold-general' }
+      General
+    %td
+      -# intentionally blank
+    - if surveys.many?
+      %td{ colspan: surveys.count - 1 }
+
+  %tr.survey-row.fold-general
+    %td
+      Name
+    - surveys.each do |survey|
+      - if current_user.admin?
+        %td.editable-cell
+          = text_field_tag :name, survey.name, href: localization_update_path(@survey_locale_group.id, survey_id: survey.id), required: true
+          %span.cell-label= survey.name
+      - else
+        %td
+          %span.cell-label= survey.name
+
+  %tr.survey-row.fold-general
+    %td
+      Language Code
+    - surveys.each do |survey|
+      %td.editable-cell.language-code.lockable{ class: ("locked" if survey.live?) }
+        = text_field_tag :language_code, survey.language_code, href: localization_update_path(@survey_locale_group.id, survey_id: survey.id)
+        %span.cell-label= survey.language_code
+
+  %tr.survey-row.fold-general
+    %td
+      Country Code
+    - surveys.each do |survey|
+      %td.editable-cell.lockable{ class: ("locked" if survey.live?) }
+        = text_field_tag :locale_code, survey.locale_code, href: localization_update_path(@survey_locale_group.id, survey_id: survey.id)
+        %span.cell-label= survey.locale_code
+
+  %tr.survey-row.fold-general
+    %td
+      Status
+    - surveys.each do |survey|
+      %td{ class: ("base" if survey == base_survey)}
+        = select_tag :status, options_for_select(survey_statuses_for_select, selected: survey.status, disabled: ""), include_blank: false, href: localization_cell_endpoint(@survey_locale_group.id, base_survey.id, survey.id), class: "survey-status-selector", data: { old_value: survey.status }
+
+  %tr.survey-row.fold-general{ data: { has_diff_tooltip: "true", base_value: base_survey.goal }}
+    %td
+      Goal
+    - surveys.each do |survey|
+      %td.editable-cell{ class: ("base" if survey == base_survey)}
+        = text_field_tag :goal, survey.goal, href: localization_cell_endpoint(@survey_locale_group.id, base_survey.id, survey.id), type: :number, min: 0
+        %span.cell-label= survey.goal
+        = compare_and_print_tooltip(base_survey, survey, :goal)
+
+  %tr.survey-row.fold-general
+    %td
+      Tags
+    - surveys.each do |survey|
+      %td
+        .survey-tags-container
+          - modal_id = survey_modal_ids[:survey_tag][survey.id]
+          - modal_url = localization_editor_survey_modal_path(survey_id: survey.id, modal_id: modal_id, modal_partial: Control::SurveysController::SURVEY_TAG)
+          = link_to "edit tags", modal_url, class: "edit-tag-modal-button", data: { modal_id: modal_id }
+          - tag_names = survey.survey_tags.pluck(:name)
+          - num_tags = tag_names.count
+          - num_tags_to_show = 2
+          - if tag_names.present?
+            %ul
+              - tag_names.each_with_index do |tag_name, i|
+                %li{ class: ("overflow hidden" if i >= num_tags_to_show) }= tag_name
+
+          - if num_tags > num_tags_to_show
+            = link_to "show #{ num_tags - num_tags_to_show } more", "javascript:void(0)", class: "toggle-overflow-button"
+            = link_to "hide #{ num_tags - num_tags_to_show }", "javascript:void(0)", class: "toggle-overflow-button hidden"
+
+  %tr.survey-row.divider-row
+    %td
+      Formatting
+    %td
+      -# intentionally blank
+    - if surveys.many?
+      %td{ colspan: surveys.count - 1 }
+
+  %tr.survey-row.sub-divider-row
+    %td
+      = link_to "", "javascript:void(0)", class: "toggle-rows-button glyphicon glyphicon-minus-sign", data: { row_selector: '.survey-row.fold-widget' }
+      Widget
+    %td
+      -# intentionally blank
+    - if surveys.many?
+      %td{ colspan: surveys.count - 1 }
+
+  %tr.survey-row.fold-widget
+    %td
+      Widget Type
+    - surveys.each do |survey|
+      %td.lockable{ class: [("base" if survey == base_survey), ("locked" if survey.live?)]}
+        = select_tag :survey_type, options_for_select(survey_type_options, selected: survey.survey_type), href: localization_update_path(@survey_locale_group.id, survey_id: survey.id), class: "widget-type-selector"
+
+  %tr.survey-row.fold-widget{ data: { has_diff_tooltip: "true", base_value: base_survey.theme&.id.to_s }}
+    %td
+      Theme
+    - surveys.includes(:theme).each do |survey|
+      %td.lockable{ class: [("base" if survey == base_survey), ("locked" if survey.live?)]}
+        :ruby
+        - initial_selection = themes_for_survey(:css).detect {|_theme_name, theme_id| survey.theme_id == theme_id}
+        = select_tag :theme_id, options_for_select(themes_for_survey(:css), initial_selection.last), include_blank: false, href: localization_cell_endpoint(@survey_locale_group.id, base_survey.id, survey.id), class: "theme-input"
+        = print_tooltip(base_survey.name, base_survey.theme&.name.to_s, survey.theme&.name.to_s)
+
+  - widget_type = base_survey.survey_type
+  -# "docked_widget"
+  %tr.survey-row.widget-row.docked_widget.fold-widget{ class: ("hidden" if widget_type != "docked_widget")}
+    %td
+      Docked Widget Placement from Edge
+    - surveys.each do |survey|
+      %td.lockable{ class: ("locked" if survey.live?) }
+        - edge_offset = survey.position_type.present? ? "#{ survey.position_content } from #{ Survey::POSITION_TYPES[survey.position_type.to_sym] }" : "unspecified"
+        - modal_id = survey_modal_ids[:survey_docked_widget_placement][survey.id]
+        - modal_url = localization_editor_survey_modal_path(survey_id: survey.id, modal_id: modal_id, modal_partial: Control::SurveysController::DOCKED_WIDGET_PLACEMENT)
+        = link_to edge_offset, modal_url, class: "docked-widget-placement-modal-button", data: { modal_id: modal_id }
+  -# "inline"
+  %tr.survey-row.widget-row.inline.fold-widget{ class: ("hidden" if widget_type != "inline")}
+    %td
+      Web Inline Selector
+      - surveys.each do |survey|
+        %td.editable-cell.lockable{ class: [("base" if survey == base_survey), ("locked" if survey.live?)]}
+          = text_field_tag :inline_target_selector, survey.inline_target_selector, href: localization_update_path(@survey_locale_group.id, survey_id: survey.id)
+          %span.cell-label= survey.inline_target_selector
+          = compare_and_print_tooltip(base_survey, survey, :inline_target_selector)
+  %tr.survey-row.widget-row.inline.fold-widget{ class: ("hidden" if widget_type != "inline")}
+    %td
+      Mobile Web Inline Selector
+      - surveys.each do |survey|
+        %td.editable-cell.lockable{ class: [("base" if survey == base_survey), ("locked" if survey.live?)]}
+          = text_field_tag :mobile_inline_target_selector, survey.mobile_inline_target_selector, href: localization_update_path(@survey_locale_group.id, survey_id: survey.id)
+          %span.cell-label= survey.mobile_inline_target_selector
+          = compare_and_print_tooltip(base_survey, survey, :mobile_inline_target_selector)
+  %tr.survey-row.widget-row.inline.fold-widget{ class: ("hidden" if widget_type != "inline")}
+    %td
+      Location Above/Below
+      - surveys.each do |survey|
+        %td.editable-cell.lockable{ class: [("base" if survey == base_survey), ("locked" if survey.live?)]}
+          = select_tag :inline_target_position, options_for_select(Survey.inline_target_positions.keys.map { |position| [position.titleize, position] }, selected: survey.inline_target_position), href: localization_update_path(@survey_locale_group.id, survey_id: survey.id)
+          = compare_and_print_tooltip(base_survey, survey, :inline_target_position)
+  %tr.survey-row.widget-row.inline.fold-widget{ class: ("hidden" if widget_type != "inline")}
+    %td
+      SDK Target
+      - surveys.each do |survey|
+        %td.editable-cell.lockable{ class: [("base" if survey == base_survey), ("locked" if survey.live?)]}
+          = text_field_tag :sdk_inline_target_selector, survey.sdk_inline_target_selector, href: localization_update_path(@survey_locale_group.id, survey_id: survey.id)
+          %span.cell-label= survey.sdk_inline_target_selector
+          = compare_and_print_tooltip(base_survey, survey, :sdk_inline_target_selector)
+  -# "top_bar"
+  %tr.survey-row.widget-row.top_bar.fold-widget{ class: ("hidden" if widget_type != "top_bar")}
+    %td
+      Top Bar Pusher
+    - surveys.each do |survey|
+      %td.lockable{ class: ("locked" if survey.live?) }
+        = check_box_tag :pusher_enabled, survey.pusher_enabled, survey.pusher_enabled, href: localization_update_path(@survey_locale_group.id, survey_id: survey.id)
+        = compare_and_print_tooltip(base_survey, survey, :pusher_enabled)
+
+  %tr.survey-row.sub-divider-row
+    %td
+      = link_to "", "javascript:void(0)", class: "toggle-rows-button glyphicon glyphicon-minus-sign", data: { row_selector: '.survey-row.fold-survey-image' }
+      Survey image
+    %td
+      -# intentionally blank
+    - if surveys.many?
+      %td{ colspan: surveys.count - 1 }
+
+  %tr.survey-row.fold-survey-image
+    %td
+      Survey Image
+    - surveys.each do |survey|
+      %td.lockable{ class: ("locked" if survey.live?) }
+        = survey.background&.identifier || survey.background_url
+        - modal_id = survey_modal_ids[:survey_image][survey.id]
+        - modal_url = localization_editor_survey_modal_path(survey_id: survey.id, modal_id: modal_id, modal_partial: Control::SurveysController::SURVEY_IMAGE)
+        = link_to "", modal_url, class: "glyphicon glyphicon-picture survey-image-modal-button", data: { modal_id: modal_id }
+
+  %tr.survey-row.sub-divider-row
+    %td
+      = link_to "", "javascript:void(0)", class: "toggle-rows-button glyphicon glyphicon-minus-sign", data: { row_selector: '.survey-row.fold-display-logic' }
+      Display Logic
+    %td
+      -# intentionally blank
+    - if surveys.many?
+      %td{ colspan: surveys.count - 1 }
+
+  %tr.survey-row.fold-display-logic{ data: { has_diff_tooltip: "true", base_value: base_survey.display_all_questions.to_s }}
+    %td
+      All At Once
+    - surveys.each do |survey|
+      %td.lockable{ class: [("base" if survey == base_survey), ("locked" if survey.live?)] }
+        = check_box_tag :display_all_questions, survey.display_all_questions, survey.display_all_questions, href: localization_cell_endpoint(@survey_locale_group.id, base_survey.id, survey.id), class: "all-at-once-selector"
+        = compare_and_print_tooltip(base_survey, survey, :display_all_questions)
+
+  %tr.survey-row.all-at-once-row.fold-display-logic{ class: ("hidden" unless base_survey.display_all_questions)}
+    %td
+      Enable empty error
+    - surveys.each do |survey|
+      %td.lockable{ class: [("base" if survey == base_survey), ("locked" if survey.live?)] }
+        = check_box_tag :all_at_once_empty_error_enabled, survey.all_at_once_empty_error_enabled, survey.all_at_once_empty_error_enabled, href: localization_update_path(@survey_locale_group.id, survey_id: survey.id)
+        = compare_and_print_tooltip(base_survey, survey, :all_at_once_empty_error_enabled)
+
+  %tr.survey-row.all-at-once-row.fold-display-logic{ class: ("hidden" unless base_survey.display_all_questions)}
+    %td
+      Submit button label
+    - surveys.each do |survey|
+      %td.editable-cell.localized-content-cell.lockable{ class: [("base" if survey == base_survey), ("locked" if survey.live?)], data: { language_code: survey.language_code }}
+        = text_field_tag :all_at_once_submit_label, survey.all_at_once_submit_label, href: localization_update_path(@survey_locale_group.id, survey_id: survey.id)
+        %span.cell-label= survey.all_at_once_submit_label
+        = compare_and_print_tooltip(base_survey, survey, :all_at_once_submit_label)
+        = print_translation_tooltip(survey, "all_at_once_submit_label")
+
+  %tr.survey-row.all-at-once-row.fold-display-logic{ class: ("hidden" unless base_survey.display_all_questions)}
+    %td
+      Error message
+    - surveys.each do |survey|
+      %td.editable-cell.localized-content-cell.lockable{ class: [("base" if survey == base_survey), ("locked" if survey.live?)], data: { language_code: survey.language_code }}
+        = text_field_tag :all_at_once_error_text, survey.all_at_once_error_text, href: localization_update_path(@survey_locale_group.id, survey_id: survey.id)
+        %span.cell-label= survey.all_at_once_error_text
+        = compare_and_print_tooltip(base_survey, survey, :all_at_once_error_text)
+        = print_translation_tooltip(survey, "all_at_once_error_text")
+
+  %tr.survey-row.fold-display-logic{ data: { has_diff_tooltip: "true", base_value: base_survey.randomize_question_order.to_s}}
+    %td
+      Randomize Questions
+    - surveys.each do |survey|
+      %td.lockable{ class: [("base" if survey == base_survey), ("locked" if survey.live?)] }
+        = check_box_tag :randomize_question_order, survey.randomize_question_order, survey.randomize_question_order, href: localization_cell_endpoint(@survey_locale_group.id, base_survey.id, survey.id)
+        = compare_and_print_tooltip(base_survey, survey, :randomize_question_order)
+
+  %tr.survey-row.sub-divider-row
+    %td
+      = link_to "", "javascript:void(0)", class: "toggle-rows-button glyphicon glyphicon-minus-sign", data: { row_selector: '.survey-row.fold-survey-css' }
+      Survey-level CSS
+    %td
+      -# intentionally blank
+    - if surveys.many?
+      %td{ colspan: surveys.count - 1 }
+
+  %tr.survey-row.fold-survey-css
+    %td
+      Survey-level CSS
+    - surveys.each do |survey|
+      %td.lockable{ class: ("locked" if survey.live?) }
+        - if survey.custom_css.present?
+          #{ survey.custom_css.first(10) }...
+          %br
+        - modal_id = survey_modal_ids[:survey_css][survey.id]
+        - modal_url = localization_editor_survey_modal_path(survey_id: survey.id, modal_id: modal_id, modal_partial: Control::SurveysController::SURVEY_CSS)
+        = link_to "edit css", modal_url, class: "survey-css-modal-button", data: { modal_id: modal_id }
+
+  %tr.survey-row.divider-row
+    %td
+      Targeting Conditions
+    %td
+      -# intentionally blank
+    - if surveys.many?
+      %td{ colspan: surveys.count - 1 }
+
+  %tr.survey-row.sub-divider-row
+    %td
+      = link_to "", "javascript:void(0)", class: "toggle-rows-button glyphicon glyphicon-minus-sign", data: { row_selector: '.survey-row.fold-devices' }
+      Devices
+    %td
+      -# intentionally blank
+    - if surveys.many?
+      %td{ colspan: surveys.count - 1 }
+
+  %tr.survey-row.fold-devices{ data: { has_diff_tooltip: "true", base_value: base_survey.desktop_enabled.to_s }}
+    %td
+      Desktop
+    - surveys.each do |survey|
+      %td.lockable{ class: [("base" if survey == base_survey), ("locked" if survey.live?)] }
+        = check_box_tag :desktop_enabled, survey.desktop_enabled, survey.desktop_enabled, href: localization_cell_endpoint(@survey_locale_group.id, base_survey.id, survey.id)
+        = compare_and_print_tooltip(base_survey, survey, :desktop_enabled)
+
+  %tr.survey-row.fold-devices{ data: { has_diff_tooltip: "true", base_value: base_survey.tablet_enabled.to_s }}
+    %td
+      Tablet
+    - surveys.each do |survey|
+      %td.lockable{ class: [("base" if survey == base_survey), ("locked" if survey.live?)] }
+        = check_box_tag :tablet_enabled, survey.tablet_enabled, survey.tablet_enabled, href: localization_cell_endpoint(@survey_locale_group.id, base_survey.id, survey.id)
+        = compare_and_print_tooltip(base_survey, survey, :tablet_enabled)
+
+  %tr.survey-row.fold-devices{ data: { has_diff_tooltip: "true", base_value: base_survey.mobile_enabled.to_s }}
+    %td
+      Phone
+    - surveys.each do |survey|
+      %td.lockable{ class: [("base" if survey == base_survey), ("locked" if survey.live?)] }
+        = check_box_tag :mobile_enabled, survey.mobile_enabled, survey.mobile_enabled, href: localization_update_path(@survey_locale_group.id, survey_id: survey.id)
+        = compare_and_print_tooltip(base_survey, survey, :mobile_enabled)
+
+  %tr.survey-row.fold-devices{ data: { has_diff_tooltip: "true", base_value: base_survey.email_enabled.to_s }}
+    %td
+      Email
+    - surveys.each do |survey|
+      %td.lockable{ class: [("base" if survey == base_survey), ("locked" if survey.live?)] }
+        = check_box_tag :email_enabled, survey.email_enabled, survey.email_enabled, href: localization_cell_endpoint(@survey_locale_group.id, base_survey.id, survey.id)
+        = compare_and_print_tooltip(base_survey, survey, :email_enabled)
+
+  %tr.survey-row.fold-devices{ data: { has_diff_tooltip: "true", base_value: base_survey.starts_at.try(:strftime, '%F %R') }}
+    %td
+      Starts At
+    - surveys.each do |survey|
+      %td.lockable{ class: [("base" if survey == base_survey), ("locked" if survey.live?)] }
+        = text_field_tag :starts_at, survey.starts_at.try(:strftime, '%F %R'), href: localization_cell_endpoint(@survey_locale_group.id, base_survey.id, survey.id), placeholder: 'Start Immediately', class: "survey_starts_at"
+        = compare_and_print_tooltip(base_survey, survey, :starts_at)
+
+  %tr.survey-row.fold-devices{ data: { has_diff_tooltip: "true", base_value: base_survey.ends_at.try(:strftime, '%F %R') }}
+    %td
+      Ends At
+    - surveys.each do |survey|
+      %td.lockable{ class: [("base" if survey == base_survey), ("locked" if survey.live?)] }
+        = text_field_tag :ends_at, survey.ends_at.try(:strftime, '%F %R'), href: localization_cell_endpoint(@survey_locale_group.id, base_survey.id, survey.id), placeholder: 'No End Date', class: "survey_ends_at"
+        = compare_and_print_tooltip(base_survey, survey, :ends_at)
+
+  %tr.survey-row.sub-divider-row
+    %td
+      = link_to "", "javascript:void(0)", class: "toggle-rows-button glyphicon glyphicon-minus-sign", data: { row_selector: '.survey-row.fold-urls' }
+      URLs
+    %td
+      -# intentionally blank
+    - if surveys.many?
+      %td{ colspan: surveys.count - 1 }
+
+  %tr.survey-row.fold-urls
+    %td
+      URLs
+    - surveys.includes(:triggers).each do |survey|
+      %td.lockable{ class: ("locked" if survey.live?) }
+        - trigger_urls = survey.triggers.map(&:trigger_content)
+        - num_urls = trigger_urls.count
+        - num_urls_to_show = 5
+
+        - modal_id = survey_modal_ids[:url_trigger][survey.id]
+        - modal_url = localization_editor_survey_modal_path(survey_id: survey.id, modal_id: modal_id, modal_partial: Control::SurveysController::URL_TRIGGER)
+        = link_to "edit URLs", modal_url, class: "edit-url-triggers-modal-button", data: { modal_id: modal_id }
+
+        - if trigger_urls.present?
+          %ul
+            - trigger_urls.each_with_index do |url, i|
+              %li{ class: ("overflow hidden" if i >= num_urls_to_show) }= url
+
+          - if num_urls > num_urls_to_show
+            = link_to "show #{ num_urls - num_urls_to_show } more", "javascript:void(0)", class: "toggle-overflow-button"
+            = link_to "hide #{ num_urls - num_urls_to_show }", "javascript:void(0)", class: "toggle-overflow-button hidden"
+
+  %tr.survey-row.fold-urls
+    %td
+      Suppress URLs
+    - surveys.includes(:suppressers).each do |survey|
+      %td.lockable{ class: ("locked" if survey.live?) }
+        - suppress_urls = survey.suppressers.map(&:trigger_content)
+        - num_urls = suppress_urls.count
+        - num_urls_to_show = 5
+
+        - modal_id = survey_modal_ids[:url_suppresser][survey.id]
+        - modal_url = localization_editor_survey_modal_path(survey_id: survey.id, modal_id: modal_id, modal_partial: Control::SurveysController::URL_SUPPRESSER)
+        = link_to "edit Suppress URLs", modal_url, class: "edit-suppressers-modal-button", data: { modal_id: modal_id }
+
+        - if suppress_urls.present?
+          %ul
+            - suppress_urls.each_with_index do |url, i|
+              %li{ class: ("overflow hidden" if i >= num_urls_to_show) }= url
+
+          - if num_urls > num_urls_to_show
+            = link_to "show #{ num_urls - num_urls_to_show } more", "javascript:void(0)", class: "toggle-overflow-button"
+            = link_to "hide #{ num_urls - num_urls_to_show }", "javascript:void(0)", class: "toggle-overflow-button hidden"
+
+  %tr.survey-row.sub-divider-row
+    %td
+      = link_to "", "javascript:void(0)", class: "toggle-rows-button glyphicon glyphicon-minus-sign", data: { row_selector: '.survey-row.fold-user-behaviour' }
+      User Behaviour
+    %td
+      -# intentionally blank
+    - if surveys.many?
+      %td{ colspan: surveys.count - 1 }
+
+  - base_value = base_survey.pageview_trigger&.pageviews_count
+  %tr.survey-row.fold-user-behaviour{ data: { has_diff_tooltip: "true", base_value: base_value }}
+    %td
+      Session Depth
+    - surveys.includes(:pageview_trigger).each do |survey|
+      - initial_value = survey.pageview_trigger&.pageviews_count
+      %td.editable-cell.lockable{ class: [("base" if survey == base_survey), ("locked" if survey.live?)]}
+        = text_field_tag 'pageview_trigger_attributes[pageviews_count]', initial_value, href: localization_cell_endpoint(@survey_locale_group.id, base_survey.id, survey.id), type: :number, min: 0
+        %span.cell-label= initial_value.presence
+        = print_tooltip(base_survey.name, base_value, initial_value)
+
+  %tr.survey-row.fold-user-behaviour
+    %td
+      Visits
+    - surveys.includes(:visit_trigger).each do |survey|
+      - initial_value = survey.visit_trigger&.visitor_type
+      %td.lockable{ class: [("base" if survey == base_survey), ("locked" if survey.live?)]}
+        - options = options_for_select(VisitTrigger.visitor_types.map { |label, _value| [label.titleize, label] }, initial_value)
+        = select_tag 'visit_trigger_attributes[visitor_type]', options, href: localization_cell_endpoint(@survey_locale_group.id, base_survey.id, survey.id)
+
+  %tr.survey-row.sub-divider-row
+    %td
+      = link_to "", "javascript:void(0)", class: "toggle-rows-button glyphicon glyphicon-minus-sign", data: { row_selector: '.survey-row.fold-page-behaviour' }
+      Page Behaviour
+    %td
+      -# intentionally blank
+    - if surveys.many?
+      %td{ colspan: surveys.count - 1 }
+
+  - base_value = base_survey.page_after_seconds_trigger&.render_after_x_seconds_enabled ? base_survey.page_after_seconds_trigger.render_after_x_seconds : nil
+  %tr.survey-row.fold-page-behaviour{ data: { has_diff_tooltip: "true", base_value: base_value }}
+    %td
+      Time on Page (seconds)
+    - surveys.includes(:page_after_seconds_trigger).each do |survey|
+      - initial_value = survey.page_after_seconds_trigger&.render_after_x_seconds_enabled ? survey.page_after_seconds_trigger.render_after_x_seconds : nil
+      %td.editable-cell.lockable{ class: [("base" if survey == base_survey), ("locked" if survey.live?)]}
+        = text_field_tag 'page_after_seconds_trigger_attributes[render_after_x_seconds]', initial_value, href: localization_update_path(@survey_locale_group.id, survey_id: survey.id), type: :number, min: 0
+        %span.cell-label= initial_value.presence
+        = print_tooltip(base_survey.name, base_value, initial_value)
+
+  - base_value = base_survey.page_scroll_trigger&.render_after_x_percent_scroll_enabled ? base_survey.page_scroll_trigger.render_after_x_percent_scroll : nil
+  %tr.survey-row.fold-page-behaviour{ data: { has_diff_tooltip: "true", base_value: base_value }}
+    %td
+      Scroll %
+    - surveys.includes(:page_scroll_trigger).each do |survey|
+      - initial_value = survey.page_scroll_trigger&.render_after_x_percent_scroll_enabled ? survey.page_scroll_trigger.render_after_x_percent_scroll : nil
+      %td.editable-cell.lockable{ class: [("base" if survey == base_survey), ("locked" if survey.live?)]}
+        = text_field_tag 'page_scroll_trigger_attributes[render_after_x_percent_scroll]', initial_value, href: localization_update_path(@survey_locale_group.id, survey_id: survey.id), type: :number, min: 0, max: 100
+        %span.cell-label= initial_value ? "#{initial_value}%" : nil
+        = print_tooltip(base_survey.name, base_value, initial_value)
+
+  %tr.survey-row.fold-page-behaviour
+    %td
+      Behavioral Triggers
+    - surveys.includes(:page_element_clicked_trigger, :page_element_visible_trigger, :text_on_page_trigger).each do |survey|
+      %td.lockable{ class: ("locked" if survey.live?) }
+        - any_defined = survey.page_element_clicked_trigger.present? || survey.page_element_visible_trigger.present? || survey.text_on_page_trigger.present?
+        - modal_id = survey_modal_ids[:css_selector_trigger][survey.id]
+        - modal_url = localization_editor_survey_modal_path(survey_id: survey.id, modal_id: modal_id, modal_partial: Control::SurveysController::CSS_SELECTOR_TRIGGERS)
+        = link_to "#{ any_defined ? 'edit' : 'create' } triggers", modal_url, class: "css-selector-trigger-modal-button", data: { modal_id: modal_id }
+
+  %tr.survey-row.sub-divider-row
+    %td
+      = link_to "", "javascript:void(0)", class: "toggle-rows-button glyphicon glyphicon-minus-sign", data: { row_selector: '.survey-row.fold-custom-data' }
+      Custom Data Attributes
+    %td
+      -# intentionally blank
+    - if surveys.many?
+      %td{ colspan: surveys.count - 1 }
+
+  %tr.survey-row.fold-custom-data
+    %td
+      Custom Data Triggers
+    - surveys.includes(:device_triggers).each do |survey|
+      %td.lockable{ class: ("locked" if survey.live?) }
+        - any_defined = survey.device_triggers.present?
+        - modal_id = survey_modal_ids[:custom_data_trigger][survey.id]
+        - modal_url = localization_editor_survey_modal_path(survey_id: survey.id, modal_id: modal_id, modal_partial: Control::SurveysController::CUSTOM_DATA_TRIGGER)
+        = link_to "#{ any_defined ? 'edit' : 'create' } triggers", modal_url, class: "custom-data-trigger-modal-button", data: { modal_id: modal_id }
+
+  %tr.survey-row.sub-divider-row
+    %td
+      = link_to "", "javascript:void(0)", class: "toggle-rows-button glyphicon glyphicon-minus-sign", data: { row_selector: '.survey-row.fold-advanced' }
+      Advanced
+    %td
+      -# intentionally blank
+    - if surveys.many?
+      %td{ colspan: surveys.count - 1 }
+
+  %tr.survey-row.fold-advanced{ data: { has_diff_tooltip: "true", base_value: base_survey.sample_rate }}
+    %td
+      Sample Rate (percentage)
+    - surveys.each do |survey|
+      - initial_value = survey.sample_rate
+      %td.editable-cell.lockable{ class: [("base" if survey == base_survey), ("locked" if survey.live?)]}
+        = text_field_tag :sample_rate, initial_value, href: localization_cell_endpoint(@survey_locale_group.id, base_survey.id, survey.id), pattern: "[0-9%]*"
+        %span.cell-label= initial_value ? "#{initial_value}%" : nil
+        = compare_and_print_tooltip(base_survey, survey, :sample_rate)
+
+  %tr.survey-row.fold-advanced{ data: { has_diff_tooltip: "true", base_value: base_survey.stop_showing_without_answer.to_s }}
+    %td
+      Don't Show On Close
+    - surveys.each do |survey|
+      %td.lockable{ class: [("base" if survey == base_survey), ("locked" if survey.live?)] }
+        = check_box_tag :stop_showing_without_answer, survey.stop_showing_without_answer, survey.stop_showing_without_answer, href: localization_cell_endpoint(@survey_locale_group.id, base_survey.id, survey.id)
+        = compare_and_print_tooltip(base_survey, survey, :stop_showing_without_answer)
+
+  %tr.survey-row.last.fold-advanced{ data: { has_diff_tooltip: "true", base_value: base_survey.ignore_frequency_cap }}
+    %td
+      Ignore Frequency Cap
+    - surveys.each do |survey|
+      %td.lockable{ class: [("base" if survey == base_survey), ("locked" if survey.live?)] }
+        = check_box_tag :ignore_frequency_cap, survey.ignore_frequency_cap, survey.ignore_frequency_cap, href: localization_cell_endpoint(@survey_locale_group.id, base_survey.id, survey.id)
+        = print_tooltip(base_survey.name, base_survey.ignore_frequency_cap, survey.ignore_frequency_cap)
+
+  %tr.survey-row.fold-advanced
+    %td
+      Refire Behaviour
+    - surveys.each do |survey|
+      %td.lockable{ class: ("locked" if survey.live?) }
+        - if survey.refire_enabled
+          Enable refiring #{ survey.refire_time } #{ survey.refire_time_period } after user submits
+          %br
+        - modal_id = survey_modal_ids[:survey_refire][survey.id]
+        - modal_url = localization_editor_survey_modal_path(survey_id: survey.id, modal_id: modal_id, modal_partial: Control::SurveysController::SURVEY_REFIRE)
+        = link_to "#{ survey.refire_enabled ? 'edit refire' : 'define refire rules'}", modal_url, class: "survey-refire-modal-button", data: { modal_id: modal_id }
+
+  %tr.survey-row.sub-divider-row
+    %td
+      = link_to "", "javascript:void(0)", class: "toggle-rows-button glyphicon glyphicon-minus-sign", data: { row_selector: '.survey-row.fold-invitation' }
+      Invitation
+    %td
+      -# intentionally blank
+    - if surveys.many?
+      %td{ colspan: surveys.count - 1 }
+
+  %tr.survey-row.fold-invitation
+    %td
+      Invite Text
+    - surveys.each do |survey|
+      %td.editable-cell.localized-content-cell.lockable{ class: ("locked" if survey.live?), data: { language_code: survey.language_code }}
+        = text_field_tag :invitation, survey.invitation, href: localization_update_path(@survey_locale_group.id, survey_id: survey.id)
+        %span.cell-label= survey.invitation
+        = print_translation_tooltip(survey, "invitation")
+
+  %tr.survey-row.fold-invitation
+    %td
+      Invite Button
+    - surveys.each do |survey|
+      %td.editable-cell.localized-content-cell.lockable{ class: ("locked" if survey.live?), data: { language_code: survey.language_code }}
+        = text_field_tag :invitation_button, survey.invitation_button, href: localization_update_path(@survey_locale_group.id, survey_id: survey.id)
+        %span.cell-label= survey.invitation_button
+        = print_translation_tooltip(survey, "invitation_button")
+
+  - question_locale_groups.each do |question_locale_group|
+    - questions = question_locale_group.questions.order(:created_at).to_a
+    - base_question = questions.first
+
+    %tr.question-row.sub-divider-row
+      %td
+        Question
+      %td
+        -# intentionally blank
+      - if surveys.many?
+        %td{ colspan: surveys.count - 1 }
+
+    %tr.question-header-row{ data: { question_locale_group_id: question_locale_group.id }}
+      - modal_id = base_question_modal_ids[question_locale_group.id]
+      - modal_url = localization_editor_edit_base_question_modal_path(question_locale_group_id: question_locale_group.id, modal_id: modal_id)
+      %td.edit-base-question-modal-cell.lockable{ class: ("locked" if surveys.live.present?), data: { modal_id: modal_id }, href: modal_url }
+        = link_to "", "javascript:void(0)", class: "collapse-question-button glyphicon glyphicon-minus-sign", data: { question_locale_group_id: question_locale_group.id }
+        = question_locale_group.name
+
+      - surveys.each do |survey|
+        - question = questions.detect {|question| question.survey_id == survey.id}
+        - if question
+          %td.editable-cell.localized-content-cell.lockable{ class: ("locked" if survey.live?), data: { language_code: survey.language_code }}
+            %span.glyphicon.glyphicon-triangle-right.hidden
+            = text_field_tag 'questions_attributes[content]', question.content, href: localization_update_path(@survey_locale_group.id, survey_id: question.survey_id), data: { extra_survey_attributes: { questions_attributes: { id: question.id }}}
+            %span.cell-label= question.content
+            = print_translation_tooltip(question, "content")
+        - else
+          %td.editable-cell.lockable{ class: ("locked" if survey.live?) }
+            = text_field_tag 'question[][content]', nil, href: questions_path(for_localized_survey: true), data: { extra_survey_attributes: { survey_locale_group_id: @survey_locale_group.id, question: [{ survey_id: survey.id, question_locale_group_id: question_locale_group.id, question_type: question_locale_group.questions.first.question_type }]}}
+            %span.cell-label
+            = print_tooltip("Question does not exist in this survey", '', false)
+
+    %tr.question-row{class: "question_row_#{ question_locale_group.id }"}
+      %td
+        Type
+      - surveys.each do |survey|
+        - question = questions.detect {|question| question.survey_id == survey.id}
+        - if question
+          %td{ class: ("base" if survey == base_survey)}
+            = print_question_type(question)
+        - else
+          %td= print_question_type(base_question)
+
+    %tr.question-row{class: "question_row_#{ question_locale_group.id }"}
+      %td
+        Show Additional Content
+        - surveys.each do |survey|
+          - question = questions.detect {|question| question.survey_id == survey.id}
+          - if question
+            %td.lockable{ class: [("base" if survey == base_survey), ("locked" if survey.live?)] }
+              = check_box_tag 'questions_attributes[show_additional_content]', question.show_additional_content, question.show_additional_content, href: localization_update_path(@survey_locale_group.id, survey_id: question.survey.id), data: { extra_survey_attributes: { questions_attributes: { id: question.id }}}
+              = print_tooltip(base_survey.name, base_question.show_additional_content, question.show_additional_content)
+          - else
+            %td= base_question.show_additional_content
+
+    %tr.question-row{class: "question_row_#{ question_locale_group.id }"}
+      %td
+        Additional Content Position
+        - surveys.each do |survey|
+          - question = questions.detect {|question| question.survey_id == survey.id}
+          - if question
+            %td.lockable{ class: [("base" if survey == base_survey), ("locked" if survey.live?)]}
+              = select_tag 'questions_attributes[additional_content_position]', options_for_select(Question.additional_content_positions.keys.map {|k| [k.humanize.capitalize, k]}), include_blank: false, href: localization_update_path(@survey_locale_group.id, survey_id: question.survey.id), data: { extra_survey_attributes: { questions_attributes: { id: question.id }}}
+              = print_tooltip(base_survey.name, base_question.additional_content_position, question.additional_content_position)
+          - else
+            %td= base_question.additional_content_position
+
+    %tr.question-row{class: "question_row_#{ question_locale_group.id }"}
+      %td
+        Additional Content
+        - surveys.each do |survey|
+          - question = questions.detect {|question| question.survey_id == survey.id}
+          %td= link_to (question&.additional_content || "(none yet)"), edit_survey_path(id: survey.id), target: "_blank"
+
+    - if base_question.question_type == "single_choice_question"
+      %tr.question-row{class: "question_row_#{ question_locale_group.id }", data: { has_diff_tooltip: "true", base_value: base_question.randomize.to_s }}
+        %td
+          Randomize
+        - surveys.each do |survey|
+          - question = questions.detect {|question| question.survey_id == survey.id}
+          - if question
+            %td.lockable{ class: [("base" if survey == base_survey), ("locked" if survey.live?)]}
+              = select_tag 'questions_attributes[randomize]', options_for_select(question_randomization_options, question.randomize), include_blank: false, href: localization_update_path(@survey_locale_group.id, survey_id: question.survey.id), data: { extra_survey_attributes: { questions_attributes: { id: question.id }}}
+              = print_tooltip(base_survey.name, base_question.randomize, question.randomize)
+          - else
+            %td= base_question.randomize
+
+    - if ["single_choice_question", "free_text_question", "multiple_choices_question", "slider_question"].include?(base_question.question_type)
+      %tr.question-row{class: "question_row_#{ question_locale_group.id }"}
+        %td
+          Nothing Selected (or typed) Error Text
+        - surveys.each do |survey|
+          - question = questions.detect {|question| question.survey_id == survey.id}
+          - if question
+            %td.editable-cell.localized-content-cell.lockable{ class: [("base" if survey == base_survey), ("locked" if survey.live?)], data: { language_code: survey.language_code }}
+              = text_field_tag 'questions_attributes[empty_error_text]', question.empty_error_text, href: localization_update_path(@survey_locale_group.id, survey_id: question.survey_id), data: { extra_survey_attributes: { questions_attributes: { id: question.id }}}
+              %span.cell-label= question.empty_error_text
+              = print_tooltip(base_survey.name, base_question.empty_error_text, question.empty_error_text)
+              = print_translation_tooltip(question, "empty_error_text")
+          - else
+            %td= base_question.empty_error_text
+
+    - if base_question.question_type == "multiple_choices_question"
+      %tr.question-row{class: "question_row_#{ question_locale_group.id }"}
+        %td
+          Max On/Off
+        - surveys.each do |survey|
+          - question = questions.detect {|question| question.survey_id == survey.id}
+          - if question
+            %td.lockable{ class: [("base" if survey == base_survey), ("locked" if survey.live?)] }
+              = check_box_tag 'questions_attributes[enable_maximum_selection]', question.enable_maximum_selection, question.enable_maximum_selection, href: localization_update_path(@survey_locale_group.id, survey_id: question.survey.id), data: { extra_survey_attributes: { questions_attributes: { id: question.id }}}
+              = print_tooltip(base_survey.name, base_question.enable_maximum_selection, question.enable_maximum_selection)
+          - else
+            %td= base_question.enable_maximum_selection
+
+      %tr.question-row{class: "question_row_#{ question_locale_group.id }"}
+        %td
+          Max Number
+        - surveys.each do |survey|
+          - question = questions.detect {|question| question.survey_id == survey.id}
+          - if question
+            %td.editable-cell.lockable{ class: [("base" if survey == base_survey), ("locked" if survey.live?)]}
+              = text_field_tag 'questions_attributes[maximum_selection]', question.maximum_selection, href: localization_update_path(@survey_locale_group.id, survey_id: question.survey_id), data: { extra_survey_attributes: { questions_attributes: { id: question.id }}}, type: :number, min: 0
+              %span.cell-label= question.maximum_selection
+              = print_tooltip(base_survey.name, base_question.maximum_selection, question.maximum_selection)
+          - else
+            %td= base_question.maximum_selection
+
+      %tr.question-row{class: "question_row_#{ question_locale_group.id }"}
+        %td
+          Too Many Selected Error Text
+        - surveys.each do |survey|
+          - question = questions.detect {|question| question.survey_id == survey.id}
+          - if question
+            %td.editable-cell.localized-content-cell.lockable{ class: [("base" if survey == base_survey), ("locked" if survey.live?)], data: { language_code: survey.language_code }}
+              = text_field_tag 'questions_attributes[maximum_selections_exceeded_error_text]', question.maximum_selections_exceeded_error_text, href: localization_update_path(@survey_locale_group.id, survey_id: question.survey_id), data: { extra_survey_attributes: { questions_attributes: { id: question.id }}}
+              %span.cell-label= question.maximum_selections_exceeded_error_text
+              = print_tooltip(base_survey.name, base_question.maximum_selections_exceeded_error_text, question.maximum_selections_exceeded_error_text)
+              = print_translation_tooltip(question, "maximum_selections_exceeded_error_text")
+          - else
+            %td= base_question.maximum_selections_exceeded_error_text
+
+    - if base_question.question_type == "free_text_question"
+      %tr.question-row{class: "question_row_#{ question_locale_group.id }"}
+        %td
+          Hint
+        - surveys.each do |survey|
+          - question = questions.detect {|question| question.survey_id == survey.id}
+          - if question
+            %td.editable-cell.localized-content-cell.lockable{ class: [("base" if survey == base_survey), ("locked" if survey.live?)], data: { language_code: survey.language_code }}
+              = text_field_tag 'questions_attributes[hint_text]', question.hint_text, href: localization_update_path(@survey_locale_group.id, survey_id: question.survey_id), data: { extra_survey_attributes: { questions_attributes: { id: question.id }}}
+              %span.cell-label= question.hint_text
+              = print_tooltip(base_survey.name, base_question.hint_text, question.hint_text)
+              = print_translation_tooltip(question, "hint_text")
+          - else
+            %td= base_question.hint_text
+
+      %tr.question-row{class: "question_row_#{ question_locale_group.id }"}
+        %td
+          Error Text
+        - surveys.each do |survey|
+          - question = questions.detect {|question| question.survey_id == survey.id}
+          - if question
+            %td.editable-cell.localized-content-cell.lockable{ class: [("base" if survey == base_survey), ("locked" if survey.live?)], data: { language_code: survey.language_code }}
+              = text_field_tag 'questions_attributes[error_text]', question.error_text, href: localization_update_path(@survey_locale_group.id, survey_id: question.survey_id), data: { extra_survey_attributes: { questions_attributes: { id: question.id }}}
+              %span.cell-label= question.error_text
+              = print_tooltip(base_survey.name, base_question.error_text, question.error_text)
+              = print_translation_tooltip(question, "error_text")
+          - else
+            %td= base_question.error_text
+
+    - if ["free_text_question", "multiple_choices_question", "slider_question"].include?(base_question.question_type)
+      %tr.question-row.submit_label{class: "question_row_#{ question_locale_group.id }", data: { next_question_locale_group_id: Question.find_by(id: base_question.free_text_next_question_id)&.question_locale_group_id }}
+        %td
+          Submit Label
+        - surveys.each do |survey|
+          - question = questions.detect {|question| question.survey_id == survey.id}
+          - if question
+            %td.editable-cell.localized-content-cell.lockable{ class: [("base" if survey == base_survey), ("locked" if survey.live?)], data: { language_code: survey.language_code }}
+              %span.glyphicon.glyphicon-triangle-bottom.hidden
+              = text_field_tag 'questions_attributes[submit_label]', question.submit_label, href: localization_update_path(@survey_locale_group.id, survey_id: question.survey_id), data: { extra_survey_attributes: { questions_attributes: { id: question.id }}}
+              %span.cell-label= question.submit_label
+              = print_tooltip(base_survey.name, base_question.submit_label, question.submit_label)
+              = print_translation_tooltip(question, "submit_label")
+          - else
+            %td= base_question.submit_label
+
+    - if base_question.question_type == "custom_content_question"
+      %tr.question-row{class: "question_row_#{ question_locale_group.id }"}
+        %td
+          Custom Content
+        - surveys.each do |survey|
+          - question = questions.detect {|question| question.survey_id == survey.id}
+          - if question
+            %td= link_to question.custom_content, legacy_custom_card_survey_path(id: survey.id, question_id: question.id), target: "_blank"
+          - else
+            %td
+
+    - question_locale_group.possible_answer_locale_groups.order(:created_at).each do |possible_answer_locale_group|
+      - possible_answers = possible_answer_locale_group.possible_answers.to_a
+      - base_possible_answer = base_survey.possible_answers.find_by(possible_answer_locale_group_id: possible_answer_locale_group.id)
+
+      %tr.possible-answer-row{ data: { next_question_locale_group_id: Question.find_by(id: base_possible_answer&.next_question_id)&.question_locale_group_id }}
+        - modal_id = possible_answer_modal_ids[possible_answer_locale_group.id]
+        - modal_url = localization_editor_edit_possible_answer_locale_group_modal_path(id: possible_answer_locale_group.id, modal_id: modal_id)
+        %td.edit-possible-answer-locale-group-modal-cell.lockable{ class: ("locked" if surveys.live.present?), data: { modal_id: modal_id }, href: modal_url }
+          = possible_answer_locale_group.name
+
+          - surveys.each do |survey|
+            - question = questions.detect { |question| question.survey_id == survey.id }
+            - possible_answer = possible_answers.detect { |possible_answer| possible_answer.question_id == question&.id }
+
+            - if possible_answer
+              %td.editable-cell.localized-content-cell.lockable{ class: [("base" if survey == base_survey), ("locked" if survey.live?)], data: { language_code: survey.language_code }}
+                %span.glyphicon.glyphicon-triangle-bottom.hidden
+                = text_field_tag 'questions_attributes[possible_answers_attributes][content]', possible_answer.content, href: localization_update_path(@survey_locale_group.id, survey_id: survey.id), data: { extra_survey_attributes: { questions_attributes: { id: question.id, possible_answers_attributes: { id: possible_answer.id }}}}
+                %span.cell-label= possible_answer.content
+                - unless base_possible_answer
+                  = print_tooltip(base_survey.name, "", possible_answer.content)
+
+                - image_modal_id = possible_answer_image_modal_ids[possible_answer.id]
+                - modal_url = localization_editor_possible_answer_image_modal_path(possible_answer_id: possible_answer.id, modal_id: image_modal_id)
+                - if possible_answer.answer_image&.image&.url
+                  = image_tag possible_answer.answer_image.image.url, width: '20%', class: "image-modal-button", data: { modal_id: image_modal_id }, href: modal_url
+                - else
+                  = link_to "", modal_url, class: "glyphicon glyphicon-picture image-modal-button", data: { modal_id: image_modal_id }
+
+                = print_translation_tooltip(possible_answer, "content")
+
+            - elsif locale_question = possible_answer_locale_group.question_locale_group.questions.find_by(survey_id: survey.id)
+              %td.editable-cell.lockable{ class: [("base" if survey == base_survey), ("locked" if survey.live?)]}
+                = text_field_tag 'questions_attributes[possible_answers_attributes][][content]', nil, href: localization_update_path(@survey_locale_group.id, survey_id: survey.id), data: { extra_survey_attributes: { questions_attributes: { id: locale_question.id, possible_answers_attributes: [{ possible_answer_locale_group_id: possible_answer_locale_group.id}]}}}
+                %span.cell-label
+                  = print_tooltip("Possible Answer does not exist in this survey", '', false)
+            - else
+              %td
+                = print_tooltip("Question does not exist in this survey", '', false)
+
+    - if ["single_choice_question", "multiple_choices_question", "slider_question"].include?(base_question.question_type) && !base_question.nps
+      %tr.possible-answer-row.last
+        %td
+          - modal_id = new_possible_answer_modal_ids[question_locale_group.id]
+          - modal_url = localization_editor_new_possible_answer_modal_path(question_locale_group_id: question_locale_group.id, modal_id: modal_id)
+          = link_to "+add answer", modal_url, class: "new-possible-answer-modal-button", data: { modal_id: modal_id }
+        - surveys.count.times do |_i|
+          %td
+
+  %tr.survey-row.sub-divider-row
+    %td
+      Thank You
+    %td
+      -# intentionally blank
+    - if surveys.many?
+      %td{ colspan: surveys.count - 1 }
+
+  %tr.survey-row
+    %td
+      Thank You
+    - surveys.each do |survey|
+      %td.editable-cell.localized-content-cell.lockable{ class: [("base" if survey == base_survey), ("locked" if survey.live?)], data: { language_code: survey.language_code }}
+        = text_field_tag :thank_you, survey.thank_you, href: localization_update_path(@survey_locale_group.id, survey_id: survey.id)
+        %span.cell-label= survey.thank_you
+        = print_translation_tooltip(survey, "thank_you")
+
+  %tr.survey-row{ data: { has_diff_tooltip: "true", base_value: base_survey.poll_enabled.to_s }}
+    %td
+      Poll (Show Results)
+    - surveys.each do |survey|
+      %td.lockable{ class: [("base" if survey == base_survey), ("locked" if survey.live?)] }
+        = check_box_tag :poll_enabled, survey.poll_enabled, survey.poll_enabled, href: localization_cell_endpoint(@survey_locale_group.id, base_survey.id, survey.id)
+        = compare_and_print_tooltip(base_survey, survey, :poll_enabled)
+
+- modal_id = "new_base_question"
+- modal_url = localization_editor_new_base_question_modal_path(survey_locale_group_id: @survey_locale_group.id, modal_id: modal_id)
+.placeholder{id: "#{modal_id}_placeholder"}
+= link_to "Add Question", modal_url, class: "btn btn-default new-base-question-modal-button", data: { modal_id: modal_id }
+
+#widget_preview_configs{ style: 'display: none;', data: { host: h(Rails.configuration.survey_host), identifier: h(current_user.account.identifier) } }
+= javascript_include_tag 'control/widget_preview'
+
+= javascript_include_tag 'surveys'

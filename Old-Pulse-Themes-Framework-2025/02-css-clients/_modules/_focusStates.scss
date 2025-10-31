@@ -1,0 +1,136 @@
+@mixin focusStyles($color: #5e9ed6, $style : solid, $offset : 2px, $width : 2px){
+    overflow: visible !important;
+    &:focus {
+        outline: $width $style $color;
+        outline-offset: $offset;
+    }
+
+    /* Remove :focus styling for browsers that do support :focus-visible */
+    &:focus:not(:focus-visible) {
+        outline: none !important;
+    }
+
+    /* Add focus styling back in browsers that do support :focus-visible */
+    &:focus-visible {
+        outline: $width $style $color;
+        outline-offset: $offset;
+    }
+}
+
+@mixin setupFocusStyles($color: #5e9ed6, $style : solid, $offset : 2px, $width : 2px, $pAnswerRadius: $btn-border-radius, $submitRadius : $btn-border-radius){
+    div#_pi_surveyWidgetContainer{
+        div#_pi_surveyWidget{
+            div._pi_widgetContentContainer{
+                ul._pi_answers_container,
+                div._pi_answers_container{
+                    overflow: visible !important;
+                    select._pi_select{
+                        @include focusStyles($color, $style, $offset, $width);
+                    }
+                    li{
+                        overflow: visible !important;
+                        label{
+                            @include focusStyles($color, $style, $offset, $width);
+                            border-radius: $pAnswerRadius !important;
+                            input[type="checkbox"] {
+                                border-radius: $pAnswerRadius;
+                                position: absolute !important;
+                                margin: 0px !important;
+                                width: 100%;
+                                height: 100%;
+                                top: 0;
+                                left: 0;
+                                transition: none !important;
+                                @include focusStyles($color, $style, $offset, $width);
+                                opacity: 1 !important;
+                            }
+                        }
+                    }
+                    ._pi_hidden_slider {
+                        &:focus {
+                            ~._pi_slider .noUi-handle {
+                                outline: $width $style $color;
+                                outline-offset: $offset;
+                            }
+                        }
+    
+                        /* Remove :focus styling for browsers that do support :focus-visible */
+                        &:focus:not(:focus-visible) {
+                            ~._pi_slider .noUi-handle {
+                                outline: none !important;
+                            }
+                        }
+    
+                        /* Add focus styling back in browsers that do support :focus-visible */
+                        &:focus-visible {
+                            ~._pi_slider .noUi-handle {
+                                outline: $width $style $color;
+                                outline-offset: $offset;
+                            }
+                        }
+                    }
+                    &[data-radio-button="on"][data-question-type="single_choice_question"]{
+                        li {
+                            position: relative;
+                            ._pi_radio_button_outer {
+                                position: absolute !important;
+                                top: 50% !important;
+                                transform: translateY(-50%);
+                                min-width: 18px !important;
+                                min-height: 18px !important;
+                                width: 18px !important;
+                                height: 18px !important;
+                                z-index: 1;
+
+                                ._pi_radio_button_inner {
+                                    min-width: 12px !important;
+                                    min-height: 12px !important;
+                                    width: 12px !important;
+                                    height: 12px !important;
+                                    top: 2px !important;
+                                    left: 2px !important;
+                                }
+                            }
+
+                            label {
+                                width: 100% !important;
+                                position: relative;
+                                padding-left: 42px !important;
+                            }
+                        }
+                    }
+                    ._pi_free_text_question_field{
+                        @include focusStyles($color, $style, $offset, $width);
+                    }
+                    
+                }
+                ._pi_multiple_choices_question_submit_button_container {
+            
+                    input._pi_multiple_choices_question_submit_button {
+                        @include focusStyles($color, $style, $offset, $width);
+                    }
+                }
+            
+                ._pi_free_text_question_submit_button_container {
+            
+                    input._pi_free_text_question_submit_button {
+                        @include focusStyles($color, $style, $offset, $width);
+                    }
+                }
+            
+                ._pi_all_questions_submit_button_container {
+            
+                    input._pi_all_questions_submit_button {
+                        @include focusStyles($color, $style, $offset, $width);
+                    }
+                }
+                ._pi_slider_question_submit_button_container{
+                    input._pi_slider_question_submit_button{
+                        @include focusStyles($color, $style, $offset, $width);
+                    }
+                }
+            }
+        }
+    }
+    
+}

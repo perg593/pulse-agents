@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="48px" height="12px" viewBox="0 0 48 12" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 64 (93537) - https://sketch.com -->
+    <title>mobi</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="bubbles" transform="translate(-29.000000, -34.000000)" stroke="#BDD8F2" stroke-width="2">
+            <g id="mobi" transform="translate(29.000000, 34.000000)">
+                <circle id="p1" fill="#005EB9" cx="6" cy="6" r="5"></circle>
+                <circle id="p2" fill="#BDD8F2" cx="24" cy="6" r="5"></circle>
+                <circle id="p3" fill="#BDD8F2" cx="42" cy="6" r="5"></circle>
+            </g>
+        </g>
+    </g>
+</svg>

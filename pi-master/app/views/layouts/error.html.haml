@@ -1,0 +1,12 @@
+!!!
+%html(html_attrs)
+  %head
+    %meta(charset="utf-8")
+    %meta(http-equiv="X-UA-Compatible" content="IE=edge")
+    %meta(name="viewport" content="width=device-width, initial-scale=1")
+    %title The page you were looking for doesn't exist.
+    = stylesheet_link_tag 'error', media: 'all'
+    = favicon_link_tag '/favicon.ico'
+    = csrf_meta_tags
+  %body
+    = yield

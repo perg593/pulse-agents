@@ -1,0 +1,14 @@
+.tooltip-inner {
+  white-space:pre-wrap;
+  min-width: 100px;
+  text-align: left;
+  padding: 8px 12px 8px 12px;
+}
+
+.tooltip.bottom .tooltip-arrow {
+  left: 16%;
+}
+
+.tooltip.bottom {
+  left: 6% !important;
+}

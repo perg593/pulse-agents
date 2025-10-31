@@ -1,0 +1,4 @@
+= render 'form'
+
+- if current_user.admin? && @audits.present?
+  = render "application/audits", audits: @audits, filter_fields: { "SurveyTag" => [ "name" ] }

@@ -1,0 +1,36 @@
+	/* ================== B3. BRANDING ================== */
+	a._pi_branding,
+	#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget a._pi_branding {
+		display: 		block;
+		
+		position: 		relative;
+		bottom:			0;
+		left: 			0;
+		width:		  	170px;
+		max-width:  	170px;
+		
+ 		padding-top:	7px;
+ 		padding-bottom:5px;
+ 		padding-left:	5px;
+ 		padding-right:	5px;
+		
+		margin-top: 	0;
+		margin-right:	auto;
+		margin-bottom: 0;
+		margin-left: 	0;
+	    // background-color: lightgreen;
+	}
+
+
+	// Custom Content Fullscreen
+	div#_pi_surveyWidgetCustom ._pi_branding {
+		// background-color: green;
+	}
+
+
+	// Hide Branding by Viewport Width
+	@media (min-width:1100px) {
+		#_pi_surveyWidget[survey-widget-type="bottombarsurvey"] a._pi_branding {
+			// margin-top: -5px !important;
+		}
+	}

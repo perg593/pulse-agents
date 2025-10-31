@@ -1,0 +1,5 @@
+.answers_count
+  = pluralize(@answers_count, 'answer')
+%ul#free_text_answers
+  - @answers.each do |answer|
+    %li= highlight(answer.text_answer, @text)

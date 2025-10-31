@@ -1,0 +1,56 @@
+/* ----------- INITIALIZATION, BACKGROUNDS, BORDERS, COLORS, AND SIZING ----------- */
+#_pi_surveyWidgetContainer,
+#_pi_surveyWidgetContainer.mobile-enabled,
+
+#_pi_surveyWidget,
+#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget,
+
+._pi_widgetContentContainer,
+#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget ._pi_widgetContentContainer,
+
+._pi_question,
+#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget ._pi_question,
+
+._pi_answers_container,
+#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget ._pi_widgetContentContainer ._pi_answers_container,
+
+ul._pi_answers_container li,
+#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget ._pi_widgetContentContainer ul._pi_answers_container li,
+
+ul._pi_answers_container li a,
+#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget ._pi_widgetContentContainer ul._pi_answers_container li a,	
+
+ul._pi_answers_container li a label,
+#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget ._pi_widgetContentContainer ul._pi_answers_container li a label,	
+
+._pi_free_text_question_field_container,
+#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget ._pi_widgetContentContainer ul._pi_answers_container ._pi_free_text_question_field_container,
+
+._pi_thankYouSurvey,
+#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget ._pi_widgetContentContainer ._pi_thankYouSurvey,
+
+._pi_startButton,
+#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget ._pi_widgetContentContainer ul._pi_answers_container ._pi_startButton
+
+a._pi_branding,
+#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget a._pi_branding,
+
+._pi_closeButton,
+#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget ._pi_closeButton {
+	display: block;
+	position: initial;
+	width: auto;
+	height: auto;
+	line-height: initial;
+	max-width: initial;
+	overflow: initial;
+	float: initial;
+	right: initial;
+	left: initial;
+	top: initial;
+	bottom: initial;
+	background-color: initial;
+
+	margin: 0;
+	padding: 0;
+}

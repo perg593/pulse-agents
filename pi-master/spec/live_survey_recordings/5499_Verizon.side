@@ -1,0 +1,83 @@
+{
+  "id": "e5fc6407-7bb2-4ddc-bed6-e0ab1095076e",
+  "version": "2.0",
+  "name": "5499",
+  "url": "https://www.verizon.com",
+  "tests": [{
+    "id": "77fbdfd6-6070-4eaa-bb8c-71a047631512",
+    "name": "5499",
+    "commands": [{
+      "id": "9a946842-c417-4462-b3a7-4185c0fb22f2",
+      "comment": "",
+      "command": "open",
+      "target": "/about/parenting/parenting-in-a-digital-world?pi_live_preview=true&pi_present=5499",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "d7993579-17b2-45f2-9643-c62a250f5c76",
+      "comment": "Screenshot of bottom bar single choice question",
+      "command": "setWindowSize",
+      "target": "1706x1033",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "627bfe35-8569-401d-96c6-71c5659c5dbf",
+      "comment": "",
+      "command": "click",
+      "target": "css=li:nth-child(3) label",
+      "targets": [
+        ["css=li:nth-child(3) label", "css:finder"],
+        ["xpath=//div[@id='_pi_surveyWidget']/div[2]/ul/li[3]/a/label", "xpath:idRelative"],
+        ["xpath=//li[3]/a/label", "xpath:position"],
+        ["xpath=//label[contains(.,'Difficult')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "0d047237-9220-4fb7-b303-7f0a6c0a893c",
+      "comment": "",
+      "command": "click",
+      "target": "css=.\\_pi_free_text_question_field",
+      "targets": [
+        ["css=.\\_pi_free_text_question_field", "css:finder"],
+        ["xpath=(//input[@type='text'])[2]", "xpath:attributes"],
+        ["xpath=//div[@id='_pi_surveyWidget']/div[2]/ul/div/input", "xpath:idRelative"],
+        ["xpath=//ul/div/input", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "f62b22af-ea51-4514-99a9-9c5bb6791ef6",
+      "comment": "Screenshot of bottom bar free text question",
+      "command": "type",
+      "target": "css=.\\_pi_free_text_question_field",
+      "targets": [
+        ["css=.\\_pi_free_text_question_field", "css:finder"],
+        ["xpath=(//input[@type='text'])[2]", "xpath:attributes"],
+        ["xpath=//div[@id='_pi_surveyWidget']/div[2]/ul/div/input", "xpath:idRelative"],
+        ["xpath=//ul/div/input", "xpath:position"]
+      ],
+      "value": "test"
+    }, {
+      "id": "d11e0adf-9a80-48d3-bca5-5df826c54060",
+      "comment": "",
+      "command": "click",
+      "target": "css=.\\_pi_free_text_question_submit_button",
+      "targets": [
+        ["css=.\\_pi_free_text_question_submit_button", "css:finder"],
+        ["xpath=//input[@value='Submit']", "xpath:attributes"],
+        ["xpath=//div[@id='_pi_surveyWidget']/div[2]/ul/div[2]/input", "xpath:idRelative"],
+        ["xpath=//ul/div[2]/input", "xpath:position"]
+      ],
+      "value": ""
+    }]
+  }],
+  "suites": [{
+    "id": "c81dddb9-dae8-4501-a735-2286ab14d8d3",
+    "name": "Production",
+    "persistSession": false,
+    "parallel": false,
+    "timeout": 300,
+    "tests": ["77fbdfd6-6070-4eaa-bb8c-71a047631512"]
+  }],
+  "urls": ["https://www.verizon.com/"],
+  "plugins": []
+}

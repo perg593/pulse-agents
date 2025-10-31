@@ -1,0 +1,49 @@
+// THE _selectors FILE:
+@import '../../01-css-pulse/_selectors';
+
+// DEFAULT VARIABLES
+@import '../_default/_default-1-variables';
+
+// CLIENT-SPECIFIC DESIGN VARIABLES
+@import './_sanofi_discover_fabry_variablesV2';
+
+// GLOBAL MAPS:
+@import '../../01-css-pulse/_maps';
+
+// GLOBAL MIXINS
+@import '../../01-css-pulse/_mixins';
+
+// THE GLOBAL STRUCTURE FOR FRAMEWORK V2:
+@import '../../01-css-pulse/_theme-structure';
+
+#_pi_surveyWidgetContainer{
+  #_pi_surveyWidget{
+    ._pi_widgetContentContainer{
+      ul._pi_answers_container[data-question-type="multiple_choices_question"]{
+        li{
+          align-content: center;
+          display: flex;
+          label{
+            ._pi-control-indicator{
+              min-width: 16px !important;
+              min-height: 16px !important;
+            }
+          }
+        }
+      }
+      ._pi_multiple_choices_question_submit_button{
+        color: #49a7b8 !important;
+        background-color: #ffffff !important;
+        &:hover{
+          color: #ffffff !important;
+          background-color: #49a7b8 !important;
+        }
+      }
+      ._pi_thankYouSurvey{
+        *{
+          font-size: $font-lg-size;
+        }
+      }
+    }
+  }
+}

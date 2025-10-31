@@ -1,0 +1,221 @@
+image: ruby:3.3.4
+
+services:
+  - postgres:17
+  - redis:6.2.0
+  - influxdb:latest
+
+variables:
+  POSTGRES_DB: pi_test
+  POSTGRES_USER: pi
+  POSTGRES_PASSWORD: "mysecretpassword"
+  INFLUXDB_HOSTNAME: 'influxdb'
+  INFLUXDB_DB: 'pi_test'
+  INFLUXDB_USER: 'root'
+  INFLUXDB_USER_PASSWORD: 'admin'
+  RAILS_ENV: 'test'
+  COFFEESCRIPT_SOURCE_PATH: vendor/assets/javascripts/coffeescript.js
+  NODE_MAJOR_VERSION: 20
+
+stages:
+  - test
+  - deploy
+
+.install-chrome: &install-chrome
+  # install Chrome
+  - curl -sS -L https://dl.google.com/linux/linux_signing_key.pub | apt-key add -
+  - echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google.list
+  - apt-get update -qy
+  - apt-get install -y google-chrome-stable
+  - rm -rf /var/lib/apt/lists/*
+
+.install-test-gems: &install-test-gems
+  - gem update --system
+  - gem install bundler:2.3.21
+  - bundle install --path vendor
+
+.install-deployment-gems: &install-deployment-gems
+  - gem update --system
+  - gem install bundler:2.3.21
+  - bundle install --with=deployment --path vendor
+
+.run-deploy-script: &run-deploy-script
+  - eval $(ssh-agent)
+  - ssh-add <(echo "$STAGING_SSH_KEY") # TODO: Change the name of the variable because it's used across environments
+  - CAPISTRANO_USER=gitlab_ci bundle exec cap "$CI_COMMIT_REF_NAME" deploy --trace
+
+.install-nodejs: &install-nodejs
+  # Download and import the Nodesource GPG key
+  - apt-get update
+  - apt-get install -y ca-certificates curl gnupg
+  - mkdir -p /etc/apt/keyrings
+  - curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+  # Create deb repository
+  - echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_${NODE_MAJOR_VERSION}.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
+  #  Run Update and Install
+  - apt-get update
+  - apt-get install nodejs -y
+
+.install-yarn: &install-yarn
+  - curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor | tee /usr/share/keyrings/yarnkey.gpg >/dev/null
+  - echo "deb [signed-by=/usr/share/keyrings/yarnkey.gpg] https://dl.yarnpkg.com/debian stable main" | tee /etc/apt/sources.list.d/yarn.list
+  - apt-get update && apt-get install yarn
+  - yarn set version 3.6.0
+
+.install-redis-server: &install-redis-server
+  - apt install -y lsb-release
+  - curl -fsSL https://packages.redis.io/gpg | gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg
+  - echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/redis.list
+  - apt-get update
+  - apt-get install -y redis-server
+
+.install-postgresql-client: &install-postgresql-client
+  - apt-get update -q
+  - apt-get install -y ca-certificates lsb-release gnupg
+  # Add PostgreSQL 17 repository
+  - curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /usr/share/keyrings/postgresql-keyring.gpg
+  - echo "deb [signed-by=/usr/share/keyrings/postgresql-keyring.gpg] http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list
+  - apt-get update -q
+  - apt-get install -y postgresql-client-17
+
+verify_styleguide_compliance:
+  before_script:
+    - *install-test-gems
+  script:
+    - bundle exec rubocop
+  cache:
+    - key:
+        files:
+          - Gemfile.lock
+      paths:
+        - vendor/ruby
+
+check_for_security_vulnerabilities:
+  before_script:
+    - *install-test-gems
+  script:
+    - bundle exec brakeman
+  cache:
+    - key:
+        files:
+          - Gemfile.lock
+      paths:
+        - vendor/ruby
+
+test_rack_app:
+  before_script:
+    - echo -e "\e[0Ksection_start:`date +%s`:env_setup_section\r\e[0KSetting up environment"
+    - cp config/database.example.yml config/database.yml
+    - cp config/scheduler.example.yml config/scheduler.yml
+    # MIT-licenced mimemagic dependency.
+    - apt-get install shared-mime-info
+    # other packages
+    - *install-nodejs
+    - apt-get update -qy
+    - *install-redis-server
+    - *install-postgresql-client
+    - redis-server &
+    - *install-test-gems
+    - bundle exec rake db:setup
+    - echo -e "\e[0Ksection_end:`date +%s`:env_setup_section\r\e[0K"
+  script:
+    - bundle exec rspec spec/rack/
+  cache:
+    - key:
+        files:
+          - Gemfile.lock
+      paths:
+        - vendor/ruby
+
+test:
+  before_script:
+    - echo -e "\e[0Ksection_start:`date +%s`:env_setup_section\r\e[0KSetting up environment"
+    - cp config/database.example.yml config/database.yml
+    - cp config/scheduler.example.yml config/scheduler.yml
+    # MIT-licenced mimemagic dependency.
+    - apt-get install shared-mime-info
+    # other packages
+    - *install-nodejs
+    - apt-get update -qy
+    - *install-redis-server
+    - *install-postgresql-client
+    - *install-yarn
+    - redis-server &
+    - *install-test-gems
+    - bundle exec rake db:setup
+    - yes 'no' | bundle exec rake webpacker:install || true
+    - yarn install
+    - bundle exec rake webpacker:compile
+    - echo -e "\e[0Ksection_end:`date +%s`:env_setup_section\r\e[0K"
+  script:
+    - bundle exec rspec --exclude-pattern 'spec/rack/**/*.rb, spec/surveys/**/*.rb, spec/live_survey_tests/**/*.rb, spec/widget_unit_tests/**/*.js'
+
+  cache:
+    - key:
+        files:
+          - Gemfile.lock
+      paths:
+        - vendor/ruby
+
+test_survey_js:
+  before_script:
+    - echo -e "\e[0Ksection_start:`date +%s`:env_setup_section\r\e[0KSetting up environment"
+    - cp config/database.example.yml config/database.yml
+    - cp config/scheduler.example.yml config/scheduler.yml
+    - *install-chrome
+    # MIT-licenced mimemagic dependency.
+    - apt-get install shared-mime-info
+    # other packages
+    - *install-nodejs
+    - apt-get update -qy
+    - apt-get install -y nodejs
+    - *install-redis-server
+    - *install-postgresql-client
+    - *install-yarn
+    - redis-server &
+    - *install-test-gems
+    - bundle exec rake db:setup
+    - yes 'no' | bundle exec rake webpacker:install || true
+    - yarn install
+    - bundle exec rake webpacker:compile
+    - echo -e "\e[0Ksection_end:`date +%s`:env_setup_section\r\e[0K"
+  script:
+    - bundle exec rspec spec/surveys/
+  cache:
+    - key:
+        files:
+          - Gemfile.lock
+      paths:
+        - vendor/ruby
+
+test_widget_units:
+  before_script:
+    - echo -e "\e[0Ksection_start:`date +%s`:env_setup_section\r\e[0KSetting up environment"
+    - *install-nodejs
+    - apt-get update -qy
+    - *install-yarn
+  script:
+    - yarn install
+    - yarn jest spec/widget_unit_tests
+
+deploy_develop:
+  stage: deploy
+  environment:
+    name: develop
+  before_script:
+    - *install-deployment-gems
+  script:
+    - *run-deploy-script
+  only:
+    - develop
+
+deploy_staging:
+  stage: deploy
+  environment:
+    name: staging
+  before_script:
+    - *install-deployment-gems
+  script:
+    - *run-deploy-script
+  only:
+    - staging

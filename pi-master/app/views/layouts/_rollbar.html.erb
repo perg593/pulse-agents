@@ -1,0 +1,9 @@
+<% unless Rails.env.development? || Rails.env.test? %>
+  <%= content_tag :div, '', id: 'rollbar', style: 'display: none;',
+                  data: {
+                    access_token: Rails.application.credentials.rollbar[:client_token],
+                    environment: Rails.env
+                  }
+  %>
+  <%= javascript_include_tag 'rollbar' %>
+<% end %>

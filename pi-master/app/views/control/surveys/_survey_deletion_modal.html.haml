@@ -1,0 +1,4 @@
+:ruby
+  survey ||= nil
+
+= react_component("SurveyDeletionModal", archiveSurveyUrl: change_status_survey_path(survey, status: "archived"), numAnswers: survey.answers.count, deleteSurveyUrl: survey_path(survey), authenticityToken: form_authenticity_token, surveyName: survey.name)

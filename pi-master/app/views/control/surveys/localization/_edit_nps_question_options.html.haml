@@ -1,0 +1,68 @@
+:ruby
+  questions_fields ||= nil
+
+.options
+  %a{:href => '#', :class => 'options-link'}
+    .arrow &#9658;
+    Options
+  .options-content
+    .options-group.answers-options
+      = questions_fields.hidden_field :button_type, id: 'button-type', class: 'button-type'
+
+      .desktop-answer-width-type
+        = questions_fields.input_field :desktop_width_type, as: :select, collection: Question::WIDTH_TYPE_OPTIONS, id: 'desktop-width-type-select',
+        prompt: 'Width Type'
+      .answer-per-row-desktop.nps-per-row
+        = questions_fields.input_field :answers_per_row_desktop, numeric: true, id: 'input_answers_per_row_desktop'
+        %label Per Rows on Desktop
+      .answer-alignment-type-desktop
+        = questions_fields.input_field :answers_alignment_desktop, as: :select, collection: Question.answers_alignment_for_select,
+        id: 'answers-alignment-desktop-select', include_blank: false
+
+      .mobile-answer-width-type
+        = questions_fields.input_field :mobile_width_type, as: :select, collection: Question::WIDTH_TYPE_OPTIONS, id: 'mobile-width-type-select',
+        prompt: 'Width Type'
+      .answer-per-row-mobile.nps-per-row
+        = questions_fields.input_field :answers_per_row_mobile, numeric: true, id: 'input_answers_per_row_mobile'
+        %label Per Rows on Mobile
+      .answer-alignment-type-mobile
+        = questions_fields.input_field :answers_alignment_mobile, as: :select, collection: Question.answers_alignment_for_select,
+        id: 'answers-alignment-mobile-select', include_blank: false
+
+      .additional-text
+        .subtitle Additional Text
+        .form-group
+          %label Before Question
+          .controls
+            = questions_fields.input_field :before_question_text
+        .form-group
+          %label After Question
+          .controls
+            = questions_fields.input_field :after_question_text
+
+        .form-group
+          %label Before Answers
+          .controls
+            = questions_fields.input_field :before_answers_count, as: :integer, numeric: true, id: 'before_answers_count_input', min: 0, max: 11,
+            value: (questions_fields.object.before_answers_count || 0)
+
+            = questions_fields.input_field :before_answers_items, multiple: true, value: '', id: 'before_answers_item', class: 'hidden', disabled: true
+
+            - (questions_fields.object.before_answers_items || []).each do |item|
+              = questions_fields.input_field :before_answers_items, multiple: true, value: item, id: 'before_answers_item',
+              style: "width: calc((100% / #{questions_fields.object.before_answers_items.count}) - (65px / #{questions_fields.object.before_answers_items.count}) - 10px"
+
+        .icon-answers
+          = image_tag 'questions/icon-answers.png'
+
+        .form-group
+          %label After Answers
+          .controls
+            = questions_fields.input_field :after_answers_count, as: :integer, numeric: true,  id: 'after_answers_count_input', min: 0, max: 11,
+            value: (questions_fields.object.after_answers_count || 0)
+
+            = questions_fields.input_field :after_answers_items, multiple: true, value: '', id: 'after_answers_item', class: 'hidden', disabled: true
+
+            - (questions_fields.object.after_answers_items || []).each do |item|
+              = questions_fields.input_field :after_answers_items, multiple: true, value: item, id: 'after_answers_item',
+              style: "width: calc((100% / #{questions_fields.object.after_answers_items.count}) - (65px / #{questions_fields.object.after_answers_items.count}) - 10px"

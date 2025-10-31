@@ -1,0 +1,13 @@
+= link_to 'Back', survey_tags_path
+
+%h2.new-tag Tag
+
+.panel.panel-default
+  .panel-heading
+    %h4.panel-title= @tag.persisted? ? 'Edit' : 'New'
+  .panel-body
+    = simple_form_for @tag, html: { role: 'form', class: 'form-horizontal' } do |f|
+      = f.input :name, required: false
+
+      .form-actions.tag-form-actions
+        = f.submit 'Save', class: 'btn btn-default'

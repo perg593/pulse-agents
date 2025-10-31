@@ -1,0 +1,56 @@
+# Cloudflare Pages upload exclusions
+# This file specifies which files and directories should be excluded from Cloudflare Pages deployment
+
+# OS / editor artefacts
+.DS_Store
+.cursorignore
+.cursorrules
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Dependencies and build outputs
+node_modules/
+output/
+package-lock.json
+yarn.lock
+
+# Development tooling and docs (not needed in production preview)
+chatgpt-suggestions/
+docs/
+legacy/
+pi-master/
+scripts/
+theme-generator/
+tools/
+_manual-testing/
+lipsum_local/
+
+# Configuration overrides (optional, leave out local secrets)
+.env
+.env.local
+.env.production
+
+# Log files
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.sublime-*
+
+# Git files
+.git/
+.gitignore
+
+# Backup files
+*.bak
+*.backup
+*.orig

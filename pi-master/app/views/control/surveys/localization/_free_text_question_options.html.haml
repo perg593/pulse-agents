@@ -1,0 +1,23 @@
+:ruby
+  survey ||= nil
+  follow_up_questions_fields ||= nil
+
+.options
+  %a{:href => '#', :class => 'options-link'}
+    .arrow &#9658;
+    Options
+  .options-content
+    .form-group.numeric
+      %label Height
+      .controls
+        = follow_up_questions_fields.text_field :height, numeric: true, disabled: true
+        %p.hint line(s)
+    .form-group.numeric
+      %label Max. length
+      .controls
+        = follow_up_questions_fields.text_field :max_length, numeric: true, disabled: true
+        %p.hint characters
+
+    - if survey.display_all_questions
+      .optional-question
+        = follow_up_questions_fields.input_field :optional, as: :boolean, inline_label: 'Optional', id: 'optional-checkbox', disabled: true

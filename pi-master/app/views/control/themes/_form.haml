@@ -1,0 +1,10 @@
+= simple_form_for @theme, html: { role: 'form', class: 'form-horizontal' } do |form|
+  = form.input :name
+  = form.input :theme_type, label: 'Type', collection: [%w(CSS css),%w(Native native)], selected: 'CSS'
+  = form.input :css, label: 'CSS'
+  = form.input :native_content, as: :text, label: 'JSON'
+  .form-action
+    = form.submit 'Update', class: 'btn btn-default'
+
+- if current_user.admin? && @audits.present?
+  = render "application/audits", audits: @audits

@@ -1,0 +1,42 @@
+= render 'header'
+
+%p{ style: "color: #5b5b5b" }
+  Hello,
+  %br
+  Please find your Pulse Insights scheduled reports below. Click on the Excel (XLSX) and/or CSV links to download the corresponding report.
+
+- @report_xlsx_urls[:locale_groups].each do |locale_group_id, xlsx_url|
+  - csv_url = @report_csv_urls[:locale_groups][locale_group_id]
+  - result_count = @report_result_counts[:locale_groups][locale_group_id]
+  - locale_group_name = SurveyLocaleGroup.find(locale_group_id).name
+  = render 'report_links', xlsx_url: xlsx_url, csv_url: csv_url, result_count: result_count, reportee_id: locale_group_id, reportee_name: locale_group_name
+
+- @report_xlsx_urls[:surveys].each do |survey_id, xlsx_url|
+  - csv_url = @report_csv_urls[:surveys][survey_id]
+  - result_count = @report_result_counts[:surveys][survey_id]
+  - survey_name = Survey.find(survey_id).name
+  = render 'report_links', xlsx_url: xlsx_url, csv_url: csv_url, result_count: result_count, reportee_id: survey_id, reportee_name: survey_name
+
+%h4
+  More about these reports:
+
+%p{ style: "color: #5b5b5b" }
+  %strong{ style: "text-decoration: underline;" }Excel
+  %br
+  The Excel Reports include a high level summary of your data. In here, you’ll find:
+  %ul{ style: "color: #5b5b5b" }
+    %li Survey Metadata: A summary of the name and important dates.
+    %li Aggregate Results By Day: A summary of how many people are engaging with your survey each day.
+    %li Questions: A list of your questions and a summary of response engagement.
+    %li Individual Rows: Presents raw data so that you can dive deeper into what your customers are saying. This format is often used to import responses into another system, as each response is recorded in a new row.
+    %li Devices: Presents raw data where each row is a complete submission for that user/device, and each answer within the submission has its own set of columns. This tab makes pivot tables easy!
+
+%p{ style: "color: #5b5b5b" }
+  %strong{ style: "text-decoration: underline;" }CSV
+  %br
+  If your report contains over 25,000 rows, an "Individual Rows" CSV file is attached separately.
+
+%p{ style: "color: #5b5b5b" }
+  Find a #{link_to 'Glossary of Terms', 'https://www.pulseinsights.com/documentation#Viewing-Survey-Results'} that you will see in these reports.
+
+= render 'footer'

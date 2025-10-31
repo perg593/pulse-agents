@@ -1,0 +1,200 @@
+// SURVEY WIDGET | FADE-IN ANIMATION
+// @keyframes pi-fadein {
+// 	0% 	{ opacity: 0; }
+// 	100% 	{ opacity: 1; }
+// }
+
+
+
+
+$fade-inline-active: 	yes;	// yes or no
+$fade-inline-delay: 		3s;	// time in seconds (3s)
+$fade-inline-duration: 	.5s;	// time in seconds
+
+$fade-bottom-active: 	no;
+$fade-bottom-delay: 		3s;
+$fade-bottom-duration: 	.5s;
+
+$fade-docked-active: 	no;
+$fade-docked-delay: 		3s;
+$fade-docked-duration: 	.5s;
+
+$fade-topbar-active: 	yes;
+$fade-topbar-delay: 		3s;
+$fade-topbar-duration: 	.5s;
+
+@function fade-function-inline($fade-inline-active) {
+	@if($fade-inline-active == yes) { @return 0; } 
+	@else { @return 1; }}
+
+@function fade-function-bottom($fade-bottom-active) {
+	@if($fade-bottom-active == yes) { @return 0; } 
+	@else { @return 1; }}
+
+@function fade-function-docked($fade-docked-active) {
+	@if($fade-docked-active == yes) { @return 0; } 
+	@else { @return 1; }}
+
+@function fade-function-topbar($fade-topbar-active) {
+	@if($fade-topbar-active == yes) { @return 0; } 
+	@else { @return 1; }}
+
+@function fade-function-topbar($fade-topbar-active) {
+	@if($fade-topbar-active == yes) { @return 0; } 
+	@else { @return 1; }}
+
+
+$crazy-var: red;
+
+
+.my-module {
+  opacity: fade-function-inline($fade-inline-active);
+  opacity: fade-function-bottom($fade-bottom-active);
+  opacity: fade-function-docked($fade-docked-active);
+  opacity: fade-function-topbar($fade-topbar-active);
+}
+
+@mixin fade-topbar($fade-topbar-active) {
+	@if($fade-topbar-active == yes) {
+		content: 'active';
+		border: $crazy-var;
+	} @else {
+		content: 'inactive';
+	}
+}
+
+.asdfasdf {
+	@include fade-topbar($fade-topbar-active);
+	color: black; 
+}
+
+
+
+
+
+
+
+// @function my-calculation-function($some-number, $another-number){
+//   @return $some-number + $another-number
+// }
+
+// .my-module {
+//   padding: my-calculation-function(1px, 5px);
+// }
+
+
+// @mixin font-fl($font){
+//     &:after {
+//         @if(type-of($font) == string) {
+//             content: 'My font is: #{$font}.';
+//         } @else {
+//             content: 'Sorry, the argument #{$font} is a #{type-of($font)}.';
+//         }
+//     }
+// }
+
+// h2{
+//     @include font-fl(sans-serif);
+// }
+
+
+// $fade-inline-active: 	yes;	// yes or no
+// $fade-inline-delay: 	;
+// $fade-inline-duration: 	;
+
+
+// @function fade-function($fade-inline-active){
+// 	@if($fade-inline-active == yes) {
+// 		@return 1;
+// 	} @else {
+// 		@return 0;
+// 	}
+// }
+
+// .my-module {
+//   opacity: fade-function($fade-inline-active);
+// }
+
+
+// $prefix: quote(fullscreen);
+
+// .button#{$prefix} {
+//   padding: 0.5rem;
+// }
+
+// #_pi_surveyWidget[data-question-id=#{$prefix}] {
+// 	color: $prefix;
+// }
+
+// $data-question-id: quote(fullscreen);
+// $quote: quote(asdf);
+// $var1: 123;
+// $var2: 234;
+// $var3: 345;
+// $var4: join($var1, $var2, $var3);
+
+// .asdf {
+// 	background-color: $quote + $data-question-id + $quote;
+// 	color: $data-question-id;
+// 	color: $quote;
+// 	color: $var4;
+// }
+
+// /*  SURVEY WIDGET */
+// #_pi_surveyWidget[data-question-id=""],
+// #_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget[data-question-id=""] {
+// 	background-color: red !important;
+// }
+
+
+
+
+
+// 	#_pi_surveyWidgetContainer.mobile-enabled {
+// 		div._pi_question, 
+// 		div._pi_thankYouSurvey,
+// 		div._pi_question_custom_content_question,
+// 		div._pi_question_custom_content_question p:first-child,
+// 		div._pi_invitationTextContainer	{
+// 				font-size: 16px;
+// 				font-weight: normal;
+// 			}
+// 		}
+
+
+// input, textarea {
+// 	._pi_free_text_question_field:-moz-placeholder,
+// 	._pi_free_text_question_field::-moz-placeholder { 
+// 		color: #999;
+// 	}
+// }
+
+
+
+// @mixin border-radius($radius) {
+//   -webkit-border-radius: $radius;
+//      -moz-border-radius: $radius;
+//       -ms-border-radius: $radius;
+//           border-radius: $radius;
+// }
+
+// .box { 
+// 	@include border-radius(10px); 
+// }
+
+
+// @mixin centerer {
+//   position: absolute;
+//   top: 50%;
+//   left: 50%;
+//   transform: translate(-50%, -50%);
+// }
+
+// .centery {
+// 	@include centerer
+// }
+
+
+
+
+

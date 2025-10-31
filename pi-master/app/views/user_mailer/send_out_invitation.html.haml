@@ -1,0 +1,10 @@
+%p Welcome to Pulse Insights.
+
+%p
+  You have been invited to join the Pulse Insights Account #{@invitation.account.name} (#{@invitation.account.identifier}).
+
+%p
+  You can finish setting up your account by clicking here:
+
+- url = sign_up_url(invite_token: @invitation.token, email: @invitation.email)
+%p= link_to url, url

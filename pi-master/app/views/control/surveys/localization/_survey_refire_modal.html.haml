@@ -1,0 +1,25 @@
+:ruby
+  modal_id ||= nil
+  survey ||= nil
+
+.modal.fade{id: modal_id, :role => "dialog", :tabindex => "-1"}
+  .modal-dialog.refire-settings{:role => "document"}
+    .modal-content
+      = form_for survey, url: localization_form_update_survey_path(survey) do |survey_form|
+        .modal-header
+          %button.close{"aria-label" => "Close", "data-dismiss" => "modal", :type => "button"}
+            %span{"aria-hidden" => "true"} ×
+          %h5.modal-title Multiple Submissions
+        .modal-body
+          .basic-fields-container
+            .basic-fields-row
+              %label Multiple Submissions:
+              .input-column
+                = survey_form.check_box :refire_enabled
+                Enable refiring survey
+                = survey_form.text_field :refire_time, class: "refire-time-input", type: :number, min: 1
+                = survey_form.select :refire_time_period, options_for_select(['minutes', 'hours', 'days'], selected: survey.refire_time_period)
+                after a user submits
+
+        .modal-footer
+          = survey_form.submit 'Save', class: 'btn btn-primary'

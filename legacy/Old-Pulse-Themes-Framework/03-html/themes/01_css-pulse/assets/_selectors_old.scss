@@ -1,0 +1,97 @@
+// .selectors-start { background-color: $test-value }
+
+
+
+// ======================= TOP CONTAINER ========================
+$top-container: 				'#_pi_surveyWidgetContainer';
+$top-container-mobi: 		'#_pi_surveyWidgetContainer.mobile-enabled';
+
+
+
+// ======================= SURVEY WIDGET ========================
+$wdg-type-default: 			'#_pi_surveyWidget';
+$wdg-type-custom: 			'#_pi_surveyWidgetCustom';
+$wdg-type-inline: 			'#_pi_surveyWidget[survey-widget-type="inlinesurvey"]';
+$wdg-type-bottom: 			'#_pi_surveyWidget[survey-widget-type="bottombarsurvey"]';
+$wdg-type-docked: 			'#_pi_surveyWidget[survey-widget-type="dockedwidgetsurvey"]';
+$wdg-type-topbar: 			'#_pi_surveyWidget[survey-widget-type="topbarsurvey"]';
+$wdg-type-fullsc: 			'#_pi_surveyWidget[survey-widget-type="fullscreensurvey"]';
+
+$wdg-type-default-mobi: 	#{$top-container-mobi} #{$wdg-type-default};
+$wdg-type-custom-mobi: 		#{$top-container-mobi} #{$wdg-type-custom};
+$wdg-type-inline-mobi: 		#{$top-container-mobi} #{$wdg-type-inline};
+$wdg-type-bottom-mobi: 		#{$top-container-mobi} #{$wdg-type-bottom};
+$wdg-type-docked-mobi: 		#{$top-container-mobi} #{$wdg-type-docked};
+$wdg-type-topbar-mobi: 		#{$top-container-mobi} #{$wdg-type-topbar};
+$wdg-type-fullsc-mobi: 		#{$top-container-mobi} #{$wdg-type-fullsc};
+
+
+
+// ======================= CONTENT CONTAINER ===================
+$content-container: 			'._pi_widgetContentContainer';
+
+
+
+// ======================= QUESTION TYPES ======================
+$q-type-single: 				'div[data-question-type="single_choice_question"]';
+$q-type-multi: 				'div[data-question-type="multiple_choices_question"]';
+$q-type-free: 					'div[data-question-type="free_text_question"]';
+$q-type-custom: 				'div[data-question-type="custom_content_question"]';
+
+$q-type-single-mobi: 		#{$top-container-mobi} #{$q-type-single};
+$q-type-multi-mobi: 			#{$top-container-mobi} #{$q-type-multi};
+$q-type-free-mobi: 			#{$top-container-mobi} #{$q-type-free};
+$q-type-custom-mobi: 		#{$top-container-mobi} #{$q-type-custom};
+
+
+
+// ======================= RADIO BUTTONS =======================
+$radio-on: 						'[data-radio-button="on"]';
+$radio-off: 					'[data-radio-button="off"]';
+
+
+
+
+
+
+
+// OLD SELECTORS
+// ================= TOP CONTAINER =================
+// $sel: 					'#_pi_surveyWidgetContainer';
+// $sel-mobi: 				'#_pi_surveyWidgetContainer.mobile-enabled';
+// $sel-custom: 			'#_pi_surveyWidgetCustom';
+// $sel-custom-mobi: 	'#_pi_surveyWidgetCustom.mobile-enabled';
+
+// ================= WIDGET TYPES =================
+// $sel-default: 			'#_pi_surveyWidget';
+// $sel-inline: 			'#_pi_surveyWidget[survey-widget-type="inlinesurvey"]';
+// $sel-bottom: 			'#_pi_surveyWidget[survey-widget-type="bottombarsurvey"]';
+// $sel-docked: 			'#_pi_surveyWidget[survey-widget-type="dockedwidgetsurvey"]';
+// $sel-topbar: 			'#_pi_surveyWidget[survey-widget-type="topbarsurvey"]';
+// $sel-fullsc: 			'#_pi_surveyWidget[survey-widget-type="fullscreensurvey"]';
+
+// $sel-default-mobi: 	#{$sel-mobi} #{$sel-default};
+// $sel-inline-mobi: 	#{$sel-mobi} #{$sel-inline};
+// $sel-bottom-mobi: 	#{$sel-mobi} #{$sel-bottom};
+// $sel-docked-mobi: 	#{$sel-mobi} #{$sel-docked};
+// $sel-topbar-mobi: 	#{$sel-mobi} #{$sel-topbar};
+// $sel-fullsc-mobi: 	#{$sel-mobi} #{$sel-fullsc};
+
+// ================= QUESTION TYPES =================
+// $sel-single: 			'div[data-question-type="single_choice_question"]';
+// $sel-multi: 			'div[data-question-type="multiple_choices_question"]';
+// $sel-free: 				'div[data-question-type="free_text_question"]';
+// $sel-custom: 			'div[data-question-type="custom_content_question"]';
+
+// $sel-single-mobi: 	#{$sel-mobi} #{$sel-single};
+// $sel-multi-mobi: 		#{$sel-mobi} #{$sel-multi};
+// $sel-free-mobi: 		#{$sel-mobi} #{$sel-free};
+// $sel-custom-mobi: 	#{$sel-mobi} #{$sel-custom};
+
+
+
+
+
+
+
+// .selectors-end { background-color: $test-value }

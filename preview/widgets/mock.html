@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link id="pi-theme-css" rel="stylesheet" href="/pulse" />
+<script>
+const existing = document.getElementById('pi-theme-css');
+console.log('existing initial', existing?.href);
+setTimeout(()=>{
+ existing.disabled = true;
+ console.log('disabled existing, inserted new');
+ const link = document.createElement('link');
+ link.rel='stylesheet';
+ link.href='foo.css';
+ link.id='preview-theme-css';
+ document.head.appendChild(link);
+ console.log('head after', [...document.head.querySelectorAll('link')].map(l=>({id:l.id, disabled:l.disabled, href:l.href})));
+}, 1000);
+</script>
+</head>
+<body></body>
+</html>

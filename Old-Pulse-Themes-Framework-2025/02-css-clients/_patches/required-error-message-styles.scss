@@ -1,0 +1,49 @@
+/* AAO empty error container fix */
+$alert-color: #927a85 !default;
+$alert-margin-top: 0px !default;
+
+#{$aao-top-container} ._pi_answers_container,
+#{$aao-top-container-mobi} #_pi_surveyWidget #{$aao-content-container} ._pi_answers_container {
+
+	&[data-question-type="multiple_choices_question"] ._pi_free_text_question_field_container,
+	._pi_single_choice_question_label_container,
+	._pi_all_at_once_slider_question_alert_container {
+		margin: 0 0.9%;
+		width: 100%;
+		text-align: left;
+
+		margin-top: $alert-margin-top;
+
+		._pi_multiple_choice_question_alert_label_container {
+			height: auto !important;
+			color: $alert-color;
+			margin-top: $alert-margin-top;
+		}
+
+		>* {
+			color: $alert-color;
+			font-family: $font-sm-family;
+		}
+	}
+
+	._pi_free_text_question_label_container {
+		margin-top: $alert-margin-top;
+
+		._pi_free_text_question_alert_label_container {
+			color: $alert-color;
+			font-family: $font-sm-family;
+		}
+	}
+	
+}
+#{$aao-top-container},
+#{$aao-top-container-mobi}{
+	._pi_all_questions_submit_button_container {
+		._pi_all_at_once_submit_error {
+			color: $alert-color;
+			font-family: $font-sm-family;
+		}
+	}
+}
+
+/* end aao empty error container fix */

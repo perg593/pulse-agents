@@ -1,0 +1,14 @@
+%h1 Daily report for impressions deleted on #{Time.zone.today.strftime('%Y-%m-%d')}
+- if @data.blank?
+  %p No data was deleted.
+- else
+  %table
+    %tr
+      %th UDID
+      %th Impression count
+      %th User Agent
+    - @data.each do |d|
+      %tr
+        %td #{d[:udid]}
+        %td #{d[:count]}
+        %td #{d[:user_agent]}

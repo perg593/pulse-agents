@@ -1,0 +1,22 @@
+div#_pi_surveyWidgetContainer,
+div#_pi_surveyWidgetContainer.all-at-once,
+div#_pi_surveyWidgetContainer.mobile-enabled,
+div#_pi_surveyWidgetContainer.mobile-enabled.all-at-once
+{
+    div#_pi_surveyWidget{
+        div._pi_widgetContentContainer{
+            ul._pi_answers_container{
+                li{
+                    a{
+                        border-style: none !important;
+                        border-width: 0px !important;
+                        label{
+                            border-style: none !important;
+                            border-width: 0px !important;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

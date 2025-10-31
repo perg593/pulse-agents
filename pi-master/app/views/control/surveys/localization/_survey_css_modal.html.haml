@@ -1,0 +1,27 @@
+:ruby
+  modal_id ||= nil
+  survey ||= nil
+
+.modal.fade{id: modal_id, :role => "dialog", :tabindex => "-1"}
+  .modal-dialog.css-selectors{:role => "document"}
+    .modal-content
+      = form_for survey, url: localization_form_update_survey_path(survey) do |survey_form|
+        .modal-header
+          %button.close{"aria-label" => "Close", "data-dismiss" => "modal", :type => "button"}
+            %span{"aria-hidden" => "true"} ×
+          %h5.modal-title Survey CSS
+        .modal-body
+          .basic-fields-container
+            .basic-fields-row
+              %label.css-selector-label CSS:
+              = survey_form.text_area :custom_css, placeholder: 'CSS here, please'
+
+          = link_to "show available css selectors", "javascript:void(0)", class: "css-selector-toggle-button"
+          = link_to "hide css selectors", "javascript:void(0)", class: "css-selector-toggle-button hidden"
+
+          .css-selector-container.hidden
+            %h4.css-selector-title Available CSS Selectors
+            = CUSTOMS[:tooltip][:widget][:css_selector_list].html_safe
+
+        .modal-footer
+          = survey_form.submit 'Save CSS', class: 'btn btn-primary'

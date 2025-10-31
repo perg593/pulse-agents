@@ -1,0 +1,44 @@
+!!!
+%html(html_attrs)
+  %head
+    %meta(charset="utf-8")
+    %meta(http-equiv="X-UA-Compatible" content="IE=edge")
+    %meta(name="viewport" content="width=device-width, initial-scale=1")
+    %title= @title.presence || yield(:title).to_s.presence || 'Pulse Insights'
+    = stylesheet_link_tag    'auth', media: 'all'
+    = favicon_link_tag '/favicon.ico'
+    = csrf_meta_tags
+    = render 'layouts/rollbar'
+    - if Rails.env.production?
+      = render 'layouts/data_layer'
+      = javascript_include_tag 'google_tag_manager'
+  %body{class: @css_scope.presence || yield(:css_scope).to_s.presence || "#{controller_name}-controller"}
+    = render 'layouts/body_gtm'
+    .container
+      - if flash.now[:notice]
+        .alert.alert-notice.alert-dismissable
+          = button_tag '×', class: 'close', data: { dismiss: 'alert' }, 'aria-hidden' => true
+          = flash.now[:notice]
+      - if flash.now[:alert]
+        .alert.alert-notice.alert-dismissable.clearfix
+          = button_tag '×', class: 'close', data: { dismiss: 'alert' }, 'aria-hidden' => true
+          = flash.now[:alert]
+      .logo
+        = image_tag 'pulse-insights-logo-128x128.svg', class: 'img-responsive center-block'
+        .links
+          = link_to 'Learn More', 'http://pulseinsights.com'
+          - unless sign_in_page?
+            = "&nbsp;or&nbsp;".html_safe
+            = link_to('Sign In', sign_in_path)
+      .form-wrapper= yield
+
+      - if sign_in_page?
+        .google_signin_button_container
+          = button_to "", "/auth/google_oauth2", class: "google_signin_button", title: "Sign in with Google"
+
+      .footer
+        - if sign_in_page?
+          = link_to 'Reset Password', new_user_password_path
+        = mail_to 'support@pulseinsights.com', 'Support', subject: 'Pulse Insights Support Request', body: "URL of issue (if applicable):\r\nURL of survey (if applicable):\r\nDescription:\r\n", role: 'menuitem', tabindex: '-1'
+    = javascript_include_tag 'auth'
+    = javascript_pack_tag 'control'

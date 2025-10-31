@@ -1,0 +1,21 @@
+{
+  "scripts": {
+    "start": "bash scripts/launch/preview.sh",
+    "start:lite": "bash scripts/launch/preview-lite.sh",
+    "build": "node scripts/build/preview-data.js && node scripts/build/demo-data.js",
+    "build:widgets": "node scripts/build/generate-widgets.js",
+    "dev:theme-v2": "cd pulse-theme-generator-v2 && npm run dev",
+    "test": "bash tests/run-all.sh",
+    "test:unit": "node tests/unit/config/config.test.js && node tests/unit/lib/errors.test.js && node tests/unit/lib/logger.test.js && node tests/unit/lib/validators.test.js",
+    "test:integration": "node tests/integration/preview/bridge.contract.test.mjs && node tests/integration/preview/surveyBridge.integration.test.mjs",
+    "test:preview": "node tests/integration/preview/*.test.mjs",
+    "test:generators": "cd theme-generator && npm run test:unit && cd ../pulse-theme-generator-v2 && npm test"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "jsdom": "^27.0.1",
+    "stripe": "^16.5.0",
+    "wrangler": "^4.45.1"
+  }
+}

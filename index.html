@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pulse Insights</title>
+  <!-- Preview build stamp: 2025-02-15T17:30:00Z -->
+  <link rel="stylesheet" href="./preview/styles/generator/basic.css" />
+  <script>
+    (function () {
+      if (window.__PI_PROXY_ORIGIN__) return;
+      const localHosts = ['localhost', '127.0.0.1'];
+      if (localHosts.includes(window.location.hostname)) {
+        window.__PI_PROXY_ORIGIN__ = 'http://localhost:3100';
+        return;
+      }
+      const origin = window.location.origin && window.location.origin !== 'null' ? window.location.origin : '/';
+      window.__PI_PROXY_ORIGIN__ = origin || '/';
+    })();
+  </script>
+</head>
+<body>
+  <aside id="control-rail" class="control-rail" aria-label="Preview controls">
+    <button id="rail-toggle" class="rail-toggle" aria-label="Toggle controls" aria-expanded="false">
+      <span class="rail-chevron"></span>
+    </button>
+    <div class="rail-content">
+      <header class="rail-header">
+        <span class="rail-logo">Pulse Insights</span>
+        <span class="rail-caption">Agent Demos</span>
+      </header>
+
+      <div class="accordion" id="rail-accordion">
+        <div class="accordion-item open">
+          <button class="accordion-header" type="button" data-accordion-toggle aria-expanded="true">
+            <span>Survey</span>
+          </button>
+          <div class="accordion-body">
+            <section class="rail-section">
+              <label for="survey-select">Survey</label>
+              <select id="survey-select">
+                <option value="7990" selected>Cyberhill Partners – Experience Agent Demo</option>
+              </select>
+              <span id="demo-subtitle" class="rail-subtitle"></span>
+            </section>
+            <button id="present-btn" class="rail-primary">Present Survey</button>
+            <section class="rail-section">
+              <label for="applied-css-list">Applied CSS Files</label>
+              <ol id="applied-css-list" class="css-manifest"></ol>
+            </section>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <button class="accordion-header" type="button" data-accordion-toggle aria-expanded="false">
+            <span>Theme Generator</span>
+          </button>
+          <div class="accordion-body">
+            <section class="rail-section">
+              <p class="rail-hint">Generate downloadable CSS themes from any website.</p>
+            </section>
+            <div class="rail-actions">
+              <a href="/preview/theme-generator/" target="_blank" class="rail-primary">Open Theme Generator →</a>
+            </div>
+            <p class="rail-hint">Analyze websites and download production-ready CSS files for all 4 theme variations.</p>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <button class="accordion-header" type="button" data-accordion-toggle aria-expanded="false">
+            <span>Examples</span>
+          </button>
+          <div class="accordion-body">
+            <section class="rail-section">
+              <label for="industry-select">Industry</label>
+              <select id="industry-select"></select>
+            </section>
+            <section class="rail-section">
+              <label for="theme-select">Theme Examples</label>
+              <select id="theme-select"></select>
+            </section>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <button class="accordion-header" type="button" data-accordion-toggle aria-expanded="false">
+            <span>Triggers</span>
+          </button>
+          <div class="accordion-body">
+            <div class="trigger-grid" id="trigger-buttons"></div>
+            <p class="rail-hint">Simulate behavioural events to validate the live tag.</p>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <button class="accordion-header" type="button" data-accordion-toggle aria-expanded="false">
+            <span>Tools</span>
+          </button>
+          <div class="accordion-body">
+            <div class="rail-tools">
+              <div class="badge-row">
+                <span id="tag-status" class="badge">Tag: booting…</span>
+                <span id="survey-status" class="badge">Survey: idle</span>
+              </div>
+              <button id="toggle-log-btn" class="button-secondary">Show Status Log</button>
+              <button id="demo-directory-button" class="demo-directory-trigger" type="button" hidden title="Open demo directory">Demo Directory</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="layout">
+    <section id="behavior-lab" class="behavior-lab" aria-label="Behavior tester" aria-hidden="true" tabindex="-1">
+      <header class="behavior-lab__header">
+        <div>
+          <h2>Behavior Lab</h2>
+          <p>Survey: <span id="behavior-survey-label">Loading…</span></p>
+        </div>
+        <div class="behavior-lab__header-actions">
+          <button id="behavior-present-btn" class="button-secondary" type="button">Present survey</button>
+          <button id="behavior-close-btn" class="behavior-close-btn" type="button" aria-label="Collapse behavior lab">×</button>
+        </div>
+      </header>
+      <div class="behavior-lab__body">
+        <div class="behavior-lab__list">
+          <h3>Behaviors</h3>
+          <div id="behavior-button-list" class="behavior-button-list"></div>
+          <div class="behavior-listener-panel">
+            <h4>Auto-detect</h4>
+            <div id="behavior-listener-list" class="behavior-listener-list"></div>
+            <p class="behavior-hint">Enable only the listeners you need while testing.</p>
+          </div>
+        </div>
+        <div class="behavior-lab__stage">
+          <div id="behavior-message" class="behavior-message" aria-live="polite">
+            Perform a behavior in the stage or click a button to simulate it.
+          </div>
+          <div id="behavior-stage" class="behavior-stage" tabindex="0">
+            <p><strong>Try it yourself:</strong></p>
+            <ul>
+              <li>Move the cursor quickly toward the top edge to simulate exit intent.</li>
+              <li>Scroll the content to roughly 60% depth.</li>
+              <li>Pause all interaction for ~10 seconds to fire idle.</li>
+              <li>Click the frustrated button repeatedly to trigger rage clicks.</li>
+            </ul>
+            <div class="behavior-stage-scroll">
+              <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse dignissim faucibus neque, eu luctus lectus fermentum sed.</p>
+              <p>Integer ornare nibh nec est imperdiet, sed pulvinar dolor luctus. Quisque condimentum sit amet ante sed tempus.</p>
+              <p>Donec viverra dui sed massa faucibus, non consectetur odio pulvinar. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae.</p>
+              <p>Maecenas sollicitudin dolor ante, at finibus lacus lobortis vitae. Nunc accumsan, turpis at varius tincidunt, felis arcu volutpat nisl, sed fermentum mauris lorem sed mauris.</p>
+              <p>Curabitur ut faucibus justo. In feugiat semper ligula nec fermentum. Praesent condimentum quam non mauris placerat.</p>
+              <p>Sed aliquet, nibh non tincidunt efficitur, lacus dolor viverra mauris, ut faucibus dui dolor quis nibh.</p>
+            </div>
+            <button id="behavior-rage-btn" class="behavior-rage-btn" type="button">Why isn’t this working?</button>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section id="site-root" class="site-root"></section>
+  </main>
+
+  <button id="behavior-toggle" class="behavior-toggle is-hidden" type="button" aria-label="Open behavior lab"></button>
+  <div id="behavior-banner" class="behavior-banner" aria-live="polite" aria-atomic="true"></div>
+
+  <aside id="log-panel" class="log-panel">
+    <div class="log-panel-header">
+      <h2>Status Log</h2>
+      <button id="close-log-btn" aria-label="Hide status log">×</button>
+    </div>
+    <ol id="log-list" class="log-list"></ol>
+  </aside>
+
+  <div id="demo-directory" class="demo-directory" aria-hidden="true">
+    <div id="demo-directory-backdrop" class="demo-directory__backdrop" role="presentation"></div>
+    <div class="demo-directory__dialog" role="dialog" aria-modal="true" aria-labelledby="demo-directory-title">
+      <header class="demo-directory__header">
+        <div>
+          <h2 id="demo-directory-title">Demo Library</h2>
+          <p class="demo-directory__subtitle">Choose a demo group to reload the preview with matching surveys.</p>
+        </div>
+        <button id="demo-directory-close" class="demo-directory__close" type="button" aria-label="Close demo library">×</button>
+      </header>
+      <section class="demo-directory__body">
+        <p class="demo-directory__hint">Shortcut: <kbd>Ctrl/⌘</kbd> + <kbd>.</kbd></p>
+        <ul id="demo-directory-list" class="demo-directory__list"></ul>
+      </section>
+    </div>
+  </div>
+
+  <script type="module" src="./preview/basic/preview.js"></script>
+</body>
+</html>

@@ -1,0 +1,210 @@
+// .ofi_map_6-2 { margin: 13px }
+
+
+// ------------------------ MAPS - BORDERS ------------------------
+$border-colors: (
+	widget-container: 						transparent,
+	
+	widget-default: 							transparent,
+	widget-custom:								transparent,
+	widget-inline: 								#bcbcbc,
+	widget-bottombar: 						#26b,
+	widget-docked: 								#26b,
+	widget-topbar: 								transparent,
+	widget-fullscreen: 						transparent,	
+	
+	single-choice-answer-each:				transparent,
+	single-choice-answer-each-hover:	transparent,
+	multi-choice-answer-each:					transparent,
+	multi-choice-answer-each-hover:		transparent,	
+	
+	radio-button-outer:								black,
+	radio-button-inner-hover:					black,
+	
+	multi-checkbox-outer:							black,
+	multi-checkbox-outer-hover:				black,	
+	multi-checkbox-checkmark:					black,
+	multi-checkbox-checkmark-hover:		black,
+	
+	submit-button: 										black,
+	submit-button-hover:							black,
+);
+
+$border-widths: (
+	widget-container: 						0px,
+	
+	widget-default: 							0px,
+	widget-custom:								0px,
+	widget-inline: 								1px,
+	widget-bottombar: 						2px 0 0 0,
+	widget-docked: 								2px 2px 0 2px,
+	widget-topbar: 								0px,
+	widget-fullscreen: 						0px,
+
+	single-choice-answer-all:				0, 	// Don't change
+	single-choice-answer-all-hover:	0,
+	multi-choice-answer-all:				0,
+	multi-choice-answer-all-hover:	0,
+	
+	single-choice-answer-each:				0px,
+	single-choice-answer-each-hover:	0px,
+	multi-choice-answer-each:					0px,
+	multi-choice-answer-each-hover:		0px,	
+	
+	radio-button-outer:					1px,
+	radio-button-inner-hover:		2px,
+
+	multi-checkbox-outer:				1px,
+	multi-checkbox-checkmark:		0 2px 2px 0,
+	
+	submit-button:							2px,
+);
+
+$border-styles: (
+	widget-container: 					solid,
+	
+	widget-default: 						solid,
+	widget-custom:							solid,
+	widget-inline: 							solid,
+	widget-bottombar: 					solid,
+	widget-docked: 							solid,
+	widget-topbar: 							solid,
+	widget-fullscreen: 					solid,
+
+	single-choice-answer-each:				solid,
+	single-choice-answer-each-hover:	solid,
+	multi-choice-answer-each:					solid,
+	multi-choice-answer-each-hover:		solid,		
+
+	radio-button-outer:						solid,
+	radio-button-inner-hover:			solid,
+
+	multi-checkbox-outer:					solid,
+	multi-checkbox-checkmark:			solid,
+	
+	submit-button: 								solid,
+);
+
+$border-radiuses: (
+	widget-container: 					0px,
+	
+	widget-default: 						0px,
+	widget-custom:							0px,
+	widget-inline: 							0px,
+	widget-bottombar: 					0px,
+	widget-docked: 							0,
+	widget-topbar: 							0px,
+	widget-fullscreen: 					0px,
+
+	close-default:							$close-default-radius,
+	close-custom:								$close-custom-radius,
+	close-inline:								$close-inline-radius,
+	close-bottombar:						$close-bottombar-radius,
+	close-docked:								$close-docked-radius,
+	close-topbar:								$close-topbar-radius,
+	close-fullscreen:						$close-fullscreen-radius,			
+	
+	single-choice-answer-each:				0px,
+	single-choice-answer-each-hover:	0px,
+	multi-choice-answer-each:					0px,
+	multi-choice-answer-each-hover:		0px,	
+
+	multi-checkbox-outer:							0px,
+	multi-checkbox-checkmark:					0px,
+	
+	submit-button:										0px,
+);
+
+
+
+
+
+// ------------------------ MAPS - PADDINGS, MARGINS, MIN/MAX WIDTHS ------------------------------------
+$paddings: (
+	close-default:							$close-default-padding,
+	close-custom:								$close-custom-padding,
+	close-inline:								$close-inline-padding,
+	close-bottombar:						$close-bottombar-padding,
+	close-docked:								$close-docked-padding,
+	close-topbar:								$close-topbar-padding,
+	close-fullscreen:						$close-fullscreen-padding,		
+	
+	submit-button:							$button-padding-lg,
+	submit-button-mobi:					$button-padding-sm,
+	
+	invitation-button:					$button-padding-lg,
+	invitation-button-mobi:			$button-padding-sm,
+
+	invitation:									10px 20px,
+	invitation-mobi:						8px 10px,	
+	
+	thank-you:									30px 10px,
+	
+	branding:										$branding-padding,
+);
+
+$margins: (
+	close-default:							$close-default-margin,
+	close-custom:								$close-custom-margin,
+	close-inline:								$close-inline-margin,
+	close-bottombar:						$close-bottombar-margin,
+	close-docked:								$close-docked-margin,
+	close-topbar:								$close-topbar-margin,
+	close-fullscreen:						$close-fullscreen-margin,	
+	
+	content-container:						$content-container-margin,
+	content-container-single:			$content-container-margin,
+	content-container-multi:			$content-container-margin,
+	content-container-free:				$content-container-margin,
+	content-container-custom:			$content-container-custom-margin,
+	content-container-custom-full:	$content-container-margin,
+	
+	widget-inline:							0,
+	
+	submit-button:							$button-margin-lg,
+	submit-button-mobi:					$button-margin-sm,
+
+	invitation-button:					$button-margin-lg,
+	invitation-button-mobi:				$button-margin-sm,
+	
+	invitation:								15px auto,
+	invitation-mobi:						10px auto,
+	
+	thank-you:								0,
+	
+	branding:								$branding-margin,
+);
+
+$widths: (
+	submit-button:					auto,
+	submit-button-mobi:			auto,
+	
+	invitation-button:			auto,	
+
+	invitation: 						100%,
+
+	thank-you:							100%,
+	thank-you-mobi:					95%,
+	
+	// AAO ADDITION
+	// widget-fullscreen: 			$widget-fullscreen-width,
+	// widget-bottombar: 			$widget-fullscreen-width,	
+);
+
+$min-widths: (
+	submit-button: 						$button-min-width,
+	submit-button-mobi: 					$button-min-width-mobi,
+	
+	invitation-button:					$button-min-width,
+	invitation-button-mobi:				$button-min-width-mobi,
+);
+
+$max-widths: (
+	widget-docked:							320px,
+	
+	submit-button: 						$button-max-width,
+	submit-button-mobi: 					$button-max-width-mobi,
+	
+	invitation-button:					$button-max-width,
+	invitation-button-mobi:				$button-max-width-mobi,
+);

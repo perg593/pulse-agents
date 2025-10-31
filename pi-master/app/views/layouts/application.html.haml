@@ -1,0 +1,21 @@
+!!!
+%html(lang="en")
+  %head
+    %meta(charset="utf-8")
+    %meta(http-equiv="X-UA-Compatible" content="IE=edge")
+    %meta(name="viewport" content="width=device-width, initial-scale=1")
+    %title= @title.presence || yield(:title).to_s.presence || 'Pulse Insights'
+    = favicon_link_tag '/favicon.ico'
+    = csrf_meta_tags
+    = render 'layouts/rollbar'
+    - if Rails.env.production?
+      = render 'layouts/data_layer'
+      = javascript_include_tag 'google_tag_manager'
+  %body{class: @css_scope.presence || yield(:css_scope).to_s.presence || "#{controller_name}-controller"}
+    = render 'layouts/body_gtm'
+    = render 'navbar'
+    .container#content
+      = yield
+
+    = javascript_include_tag 'application', 'data-turbolinks-track' => true
+    = content_for :js

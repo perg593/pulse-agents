@@ -1,0 +1,200 @@
+// THE _selectors FILE:
+@import '../../01-css-pulse/_selectors';
+
+// DEFAULT VARIABLES
+@import '../_default/_default-1-variables';
+
+// CLIENT-SPECIFIC DESIGN VARIABLES
+@import '_invesco_blue_variables';
+
+// GLOBAL MAPS:
+@import '../../01-css-pulse/_maps';
+
+// GLOBAL MIXINS
+@import '../../01-css-pulse/_mixins';
+
+// THE GLOBAL STRUCTURE FOR FRAMEWORK V2:
+@import '../../01-css-pulse/_theme-structure';
+
+#_pi_surveyWidgetContainer{
+  #_pi_surveyWidget{
+    ._pi_widgetContentContainer{
+      ._pi_header.pi_header_before{
+        margin-bottom: 5px;
+      }
+      ul._pi_answers_container{
+        li{
+          a, label{
+            outline: none !important;
+          }
+        }
+        &[data-question-type="multiple_choices_question"]{
+          li{
+            border-width: 1px !important;
+            border-color: transparent !important;
+            background-color: transparent !important;
+            *:not(._pi-control-indicator){
+              background-color: transparent !important;
+            }
+            label{
+              color: #fff !important;
+              input:checked ~ ._pi-control-indicator:after{
+                border-color: #001A7A;
+              }
+              ._pi-control-indicator{
+                border-radius: 2px;
+              }
+            }
+            &:hover{
+              label{
+                ._pi-control-indicator:after{
+                  border-color: #001A7A;
+                  display: block;
+                }
+              }
+            }
+          }
+        }
+        &[data-radio-button="on"][data-question-type="single_choice_question"]{
+          li{
+            border-color: transparent !important;
+            background-color: transparent !important;
+            *{
+              background-color: transparent !important;
+            }
+            a{
+              ._pi_radio_button_outer{
+                border-color: #fff !important;
+                min-width: 14px !important;
+                min-height: 14px !important;
+                ._pi_radio_button_inner{
+                  top: 2px !important;
+                  left: 2px !important;
+                  width: 8px !important;
+                  height: 8px !important;
+                  border-color: transparent !important;
+                }
+              }
+              label{
+                color: #fff !important;
+              }
+            }
+            &:hover, &.selected{
+              a{
+                ._pi_radio_button_outer{
+                  ._pi_radio_button_inner{
+                    border-color: #fff !important;
+                    background-color: #fff !important;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      input[type=text], textarea, select{
+        border: solid 1px #788BD9 !important;
+        background-color: transparent !important;
+        padding: 14px 15px !important;
+        color: #fff !important;
+        &::placeholder{
+          color: #788BD9 !important;
+        }
+      }
+      select{
+        background-image: url("data:image/svg+xml,%3C%3Fxml version='1.0' encoding='UTF-8'%3F%3E%3Csvg width='19px' height='11px' viewBox='0 0 19 11' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'%3E%3C!-- Generator: Sketch 64 (93537) - https://sketch.com --%3E%3Ctitle%3EPath%3C/title%3E%3Cdesc%3ECreated with Sketch.%3C/desc%3E%3Cg id='Page-1' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd'%3E%3Cpath d='M3.40202025,8 L15.4020203,8 L15.4020203,6.28571429 L5.11630597,6.28571429 L5.11630597,-4 C3.97344882,-4 3.40202025,-4 3.40202025,-4 C3.40202025,-4 3.40202025,0 3.40202025,8 Z' id='Path' stroke='%23788BD9' fill='%23788BD9' transform='translate(9.402020, 2.000000) rotate(-45.000000) translate(-9.402020, -2.000000) '%3E%3C/path%3E%3C/g%3E%3C/svg%3E");
+        background-position: calc(100% - 10px) center;
+      }
+      ._pi_free_text_question_field_container{
+        width: 100%;
+      }
+      ._pi_multiple_choices_question_submit_button_container{
+        margin-left: auto !important;
+      }
+      ._pi_free_text_question_submit_button_container{
+        margin-top: 20px !important;
+        margin-left: auto !important;
+      }
+      ._pi_question._pi_question_custom_content_question{
+        a{
+          color: #001A7A !important;
+        }
+      }
+    }
+  }
+  &.mobile-enabled{
+    #_pi_surveyWidget{
+      ._pi_widgetContentContainer{
+        ul._pi_answers_container{
+          ._pi_multiple_choices_question_submit_button_container{
+            margin-left: auto !important;
+            width: 100%;
+            ._pi_multiple_choices_question_submit_button{
+              width: 100%;
+            }
+          }
+          ._pi_free_text_question_submit_button_container{
+            margin-top: 20px !important;
+            margin-left: auto !important;
+          }
+        }
+      }
+    }
+  }
+  &.all-at-once{
+    #_pi_surveyWidget[data-survey-display="all-at-once"]{
+      max-width: 790px !important;
+      ._pi_widgetContentContainer{
+        width: 100% !important;
+        padding: 0 70px!important;
+        padding-bottom: 65px!important;
+        ._pi_all_questions_submit_button_container{
+          width: 100%;
+          text-align: left;
+          input{
+            text-transform: uppercase;
+          }
+        }
+        ul._pi_answers_container{
+          &[data-question-nps="t"]{
+            justify-content: space-between !important;
+            li{
+              margin-left: 0px !important;
+              margin-right: 0px !important;
+              max-width: calc(9% - 10px) !important;
+              label{
+                padding: 15px 10px !important;
+              }
+            }
+          }
+          &[data-answers-alignment="space-between"]{
+            justify-content: space-between !important;
+          }
+          &[data-question-type="multiple_choices_question"]{
+            justify-content: space-between !important;
+            li{
+              margin-left: 0px !important;
+              margin-right: 0px !important;
+              padding-left: 2px !important;
+              padding-right: 0px !important;
+            }
+          }
+          &[data-question-type="single_choice_question"][data-radio-button="on"]{
+            justify-content: space-between !important;
+            li{
+              margin: 0px !important;
+              a{
+                span._pi_radio_button_outer{
+                  margin: 0px !important;
+                }
+              }
+            }
+          }
+        }
+        ._pi_question._pi_question_custom_content_question{
+          width: 100% !important;
+        }
+      }
+    }
+  }
+}

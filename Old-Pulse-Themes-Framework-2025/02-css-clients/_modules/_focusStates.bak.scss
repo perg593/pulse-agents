@@ -1,0 +1,110 @@
+div#_pi_surveyWidgetContainer{
+    div#_pi_surveyWidget{
+        div._pi_widgetContentContainer{
+            ul._pi_answers_container{
+                &[data-question-type="single_choice_question"]{
+                    li{
+                        a:focus{
+                            outline: none !important;
+                            label{
+                                background-color: $bg-color-single-choice-answer-all-hover !important;
+                                outline: 1px dashed $bg-color-single-choice-answer-all-hover;
+                                // outline-offset: 3px;
+                            }
+                        }
+                        label{
+                            // font-size: 12px !important;
+                            // padding: 10px 14px !important;
+                            // color: #1434CB !important;
+                            &:focus {
+                                background-color: $bg-color-single-choice-answer-all-hover !important;
+                                outline: 1px dashed $bg-color-single-choice-answer-all-hover;
+                              }
+      
+                              /* Remove :focus styling for browsers that do support :focus-visible */
+                              &:focus:not(:focus-visible) {
+                                outline: none !important;
+                              }
+      
+                              /* Add focus styling back in browsers that do support :focus-visible */
+                              &:focus-visible {
+                                background-color: $bg-color-single-choice-answer-all-hover !important;
+                                outline: 1px dashed $bg-color-single-choice-answer-all-hover;
+                                outline-offset: 3px;
+                              }
+                        }
+                        &:hover{
+                            // background-color: #1434CB !important;
+                            label{
+                                // color: #ffffff !important;
+                            }
+                        }
+                    }
+                }
+                &[data-radio-button="on"]{
+                    li{
+                        &:focus-within{
+                            // border: solid 2px #173be8 !important;
+                            a{
+                                span._pi_radio_button_outer{
+                                    // left: 14px !important;
+                                    ._pi_radio_button_inner{
+                                        // background-color: #173be8 !important;
+                                        // border-color: #173be8 !important;
+                                        // border-width: 2px !important;
+                                        // border-style: solid !important;
+                                        // border-radius: 50% !important;
+                                    }
+                                }
+                                label{
+                                    // padding: 16px 17px 16px 39px !important;
+                                }
+                            }
+                        }
+                    }
+                }
+                &[data-question-type="multiple_choices_question"]{
+                    li{
+                        // border-color: rgba(0, 0, 0, 0.5) !important;
+                        // // background-color: #ffffff !important;
+                        // padding: 0px !important;
+                        label{
+                            // color: #000 !important;
+                            // padding: 17px 18px 17px 48px !important;
+                            // border-radius: 2px;
+                            ._pi-control-indicator{
+                                // left: 14px !important;
+                                // width: 18px;
+                                // min-width: 18px;
+                                // height: 18px;
+                                // min-height: 18px;
+                                // border-width: 2px;
+                                // border-radius: 2px;
+                            }
+                            input:checked ~ ._pi-control-indicator{
+                                // background-color: #1434CB;
+                            }
+                            &:focus-within{
+                                // outline-offset: 4px;
+                                // background-color: rgba(179, 215, 255, 0.35) !important;
+                                // outline: 1px dashed #1434CB;
+                            }
+                        }
+                        &:hover,&:focus-within{
+                            // border: solid 2px #173be8 !important;
+                            // background-color: rgba(179, 215, 255, 0.35) !important;
+                            label{
+                                // color: #000000 !important;
+                                // padding: 16px 17px 16px 47px !important;
+                                ._pi-control-indicator{
+                                    // left: 13px !important;
+                                }
+                            }
+                        }
+                       
+                    }
+                }
+            }
+        }
+    }
+}

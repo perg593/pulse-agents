@@ -1,0 +1,66 @@
+<%
+  # tag.js is a code snippet that users run on their website to invoke surveys.js
+  # surveys.js is set to time out in 5 seconds to give it the best chance to render surveys while minimizing the risk of wasting browser resources
+  # This version is compatible with ES5, making it embeddable inside GTM's Custom HTML/JS
+  #
+  # Bindings:
+  #   @survey_js_host        - the domain name that hosts surveys.js (Required)
+  #   @survey_host           - the domain name that returns surveys (Required)
+  #   @identifier            - account identifier (Required)
+  #   @debug_mode            - runs surveys.js in the debug mode (Optional)
+  #   @use_new_spa_behaviour - enables the new behaviour where the browser history is updated before displaying a survey (optional)
+  #   @present_results       - switches the presentation from a survey to results (Optional)
+  #   @submission_udid       - determines which results to show (Optional)
+%>
+(function() {
+    var w = window, d = document;
+    var s = d.createElement('script'); s.async = 1;
+    s.src = '<%= @survey_js_host %>/surveys.js';
+
+    var f = d.getElementsByTagName('script')[0];
+    f.parentNode.insertBefore(s, f);
+
+    function PulseInsightsCommands() {
+        Array.apply(this, arguments);
+    }
+
+    PulseInsightsCommands.prototype = Object.create(Array.prototype);
+    PulseInsightsCommands.prototype.push = function() {
+        var commands = Array.prototype.slice.call(arguments);
+        for (var i = 0; i < commands.length; i++) {
+            window.PulseInsightsObject.processCommand(commands[i]);
+        }
+    };
+
+    function waitPulseInsightsObject(callback, timeoutCallback) {
+        var timeoutId = setTimeout(function() {
+            timeoutCallback();
+        }, 5000);
+
+        function wait() {
+            if (typeof window.PulseInsightsObject === 'object') {
+                clearTimeout(timeoutId);
+                callback();
+            } else {
+                setTimeout(wait, 100);
+            }
+        }
+
+        wait();
+    }
+
+    waitPulseInsightsObject(function() {
+        w['pi'] = function() {
+            w['pi'].commands = w['pi'].commands || new PulseInsightsCommands();
+            w['pi'].commands.push(arguments);
+        };
+
+        <%= "pi('debug', true);" if @debug_mode %>
+        pi('host', '<%= @survey_host %>');
+        pi('identify', '<%= @identifier %>');
+        <%= "pi('pushBeforeGet', true);" if @use_new_spa_behaviour %>
+        <%= @present_results ? "pi('present_results', '#{@submission_udid}')" : "pi('get', 'surveys');" %>
+    }, function() {
+        console.error('Failed to initialize window.PulseInsightsObject');
+    });
+})();

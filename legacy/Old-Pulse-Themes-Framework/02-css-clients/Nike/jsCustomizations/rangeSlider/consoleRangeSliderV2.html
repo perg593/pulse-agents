@@ -1,0 +1,130 @@
+<script>
+var parentEl = document.querySelector("div[data-question-id='11632']");
+var topContainer = document.createElement("div");
+topContainer.setAttribute("id", "topContainer");
+var sliderContainer =  document.createElement("div");
+sliderContainer.setAttribute("id", "sliderContainer");
+topContainer.appendChild(sliderContainer);
+parentEl.appendChild(topContainer);
+
+
+
+var isInit = true;
+
+var labelEls;
+var updateActiveLabel = function(values, handle, unencoded, tap, positions, noUiSlider){
+  var index = parseInt(values[0]);
+  for (var i = 0; i < labelEls.length; i++) {
+    if(index === i){
+      labelEls[i].classList.add("active");
+    }
+    else{
+      labelEls[i].classList.remove("active");
+    }
+
+  }
+}
+
+var interacted = false;
+var setInteracted = function(){
+  var bar = document.querySelector(".noUi-base .noUi-connects");
+  if(!bar.classList.contains("interacted")){
+    bar.classList.add("interacted");
+  }
+  interacted = true;
+}
+
+var selectInput = parentEl.querySelector("select"),
+    options = selectInput.querySelectorAll("option");
+
+
+
+var changed;
+if(typeof Event === "function") {
+  changed =  new Event("change");
+}
+else{
+  changed = document.createEvent("Event");
+  changed.initEvent("change", true, true);
+}
+
+
+
+var updateSelect = function(values, handle, unencoded, tap, positions, noUiSlider){
+ var index = parseInt(values[0]);
+ selectInput.selectedIndex = index + 1;
+ selectInput.dispatchEvent(changed);
+}
+
+var html5Slider = document.getElementById('sliderContainer');
+
+var labels = {
+    0: 'Not at all Easy',
+    1: '',
+    2: '',
+    3: 'Somewhat Easy',
+    4: '',
+    5: '',
+    6: 'Extremely Easy'
+};
+
+function renameLabels (value) {
+    return labels[value];
+}
+
+var formatter = {
+    to: renameLabels
+}
+var range_all_sliders = {
+	'min': [0],
+	'max': [6]
+};
+function filterPips(value, type) {
+    if (type === 0) {
+        return -1;
+    }
+    return 1;
+}
+var slider = noUiSlider.create(html5Slider, {
+    start: [3],
+    connect: false,
+		step: 1,
+    connect: "upper",
+    range: range_all_sliders,
+		pips: {mode: 'steps', format: formatter, filter: filterPips},
+});
+
+html5Slider.noUiSlider.on("update", function(values, handle, unencoded, tap, positions, noUiSlider){
+  if(isInit){
+    labelEls = parentEl.querySelectorAll(".noUi-pips .noUi-value");
+    isInit = false;
+  }
+  else{
+    updateSelect(values, handle, unencoded, tap, positions, noUiSlider);
+    updateActiveLabel(values, handle, unencoded, tap, positions, noUiSlider);
+    setInteracted();
+  }
+});
+
+var ctrlPips = document.querySelectorAll(".noUi-marker.noUi-marker-horizontal.noUi-marker-large"),
+    ctrlPipsClone = document.createElement("div"),
+    pip;
+ctrlPipsClone.classList.add("ctr-pips-cloned");
+
+for (var i = 0; i < ctrlPips.length; i++) {
+  var pip = ctrlPips[i].cloneNode(true);
+  pip.setAttribute("data-goto", i);
+  pip.addEventListener("click", function(e){
+    html5Slider.noUiSlider.set(this.getAttribute("data-goto"));
+  });
+  ctrlPipsClone.appendChild(pip);
+}
+PulseInsightsObject.survey.widget.querySelector(".noUi-base").appendChild(ctrlPipsClone);
+
+document.querySelector(".noUi-handle.noUi-handle-lower").addEventListener("click", function(e){
+  if(!interacted){
+    html5Slider.noUiSlider.set(html5Slider.noUiSlider.get());
+  }
+});
+
+</script>

@@ -1,0 +1,68 @@
+// THE _selectors FILE:
+@import '../../01-css-pulse/_selectors';
+
+// DEFAULT VARIABLES
+@import '../_default/_default-1-variables';
+
+// CLIENT-SPECIFIC DESIGN VARIABLES
+@import '_njt_variables';
+
+// GLOBAL MAPS:
+@import '../../01-css-pulse/_maps';
+
+// GLOBAL MIXINS
+@import '../../01-css-pulse/_mixins';
+
+// THE GLOBAL STRUCTURE FOR FRAMEWORK V2:
+@import '../../01-css-pulse/_theme-structure';
+
+
+div#_pi_surveyWidget{
+  ._pi_header.pi_header_before{
+    margin-bottom: 5px;
+  }
+  li a span._pi_radio_button_inner{
+    height: 12px !important;
+    width: 12px !important;
+    top: -1px !important;
+    left: -1px !important;
+  }
+  select._pi_select{
+    width: 100%;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+  ._pi_answers_container{
+    li{
+      margin-bottom: 5px;
+    }
+  }
+}
+#_pi_surveyWidgetContainer.all-at-once{
+  ._pi_free_text_question_field_container, ._pi_free_text_question_field{
+    width: 100%;
+  }
+  ._pi_answers_container[data-question-type="single_choice_question"][data-radio-button="off"]{
+    li{
+      display: flex !important;
+      a{
+        flex-grow: 1 !important;
+        flex-basis: 0px !important;
+        display: block !important;
+        label{
+          display: flex !important;
+        }
+      }
+    }
+  }
+  ._pi_answers_container[data-question-type="multiple_choices_question"]{
+    li{
+      max-width: 48% !important;
+      margin: 5px 1% !important;
+      label{
+        align-items: center;
+      }
+    }
+  }
+}

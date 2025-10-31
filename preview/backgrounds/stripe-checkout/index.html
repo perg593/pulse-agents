@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pulse Checkout Demo</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="https://cdn.pulseinsights.com/s/PI-81598442/pulse.js" defer></script>
+    <script src="https://js.stripe.com/v3/" defer></script>
+    <script type="module" src="./checkout.js" defer></script>
+  </head>
+  <body>
+    <main class="checkout">
+      <header class="checkout__header">
+        <div class="checkout__badge">Pulse Demo</div>
+        <h1>Stripe Checkout + Pulse</h1>
+        <p>
+          Use the Stripe test card <code>4242&nbsp;4242&nbsp;4242&nbsp;4242</code> with any future
+          expiry and CVC. Pulse loads alongside the checkout experience.
+        </p>
+      </header>
+
+      <section class="checkout__card">
+        <form id="payment-form" class="checkout__form">
+          <div id="payment-element" class="checkout__element" aria-live="polite"></div>
+          <button id="submit" type="submit">
+            <span id="button-text">Pay</span>
+            <span id="spinner" aria-hidden="true"></span>
+          </button>
+          <div id="payment-message" class="checkout__message" role="status" hidden></div>
+        </form>
+      </section>
+
+      <footer class="checkout__footer">
+        <a
+          href="https://stripe.com/docs/testing"
+          target="_blank"
+          rel="noreferrer"
+          class="checkout__link"
+        >
+          Stripe testing guide ↗
+        </a>
+        <a
+          href="https://pulseinsights.com"
+          target="_blank"
+          rel="noreferrer"
+          class="checkout__link"
+        >
+          Pulse Insights ↗
+        </a>
+      </footer>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,702 @@
+[
+  {
+    "name": "body::color",
+    "normalizedName": "body.color",
+    "category": "color",
+    "value": "rgb(32, 33, 36)",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "body[0]",
+        "property": "color",
+        "value": "rgb(32, 33, 36)"
+      }
+    ]
+  },
+  {
+    "name": "body::background",
+    "normalizedName": "body.background",
+    "category": "radius",
+    "value": "rgb(255, 255, 255) none repeat scroll 0% 0% / auto padding-box border-box",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "body[0]",
+        "property": "background",
+        "value": "rgb(255, 255, 255) none repeat scroll 0% 0% / auto padding-box border-box"
+      }
+    ]
+  },
+  {
+    "name": "body::background-color",
+    "normalizedName": "body.backgroundColor",
+    "category": "color",
+    "value": "rgb(255, 255, 255)",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "body[0]",
+        "property": "background-color",
+        "value": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "name": "body::font-family",
+    "normalizedName": "body.fontFamily",
+    "category": "font",
+    "value": "\"Google Sans\", \"Noto Sans\", \"Noto Sans JP\", \"Noto Sans KR\", \"Noto Naskh Arabic\", \"Noto Sans Thai\", \"Noto Sans Hebrew\", \"Noto Sans Bengali\", sans-serif",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "body[0]",
+        "property": "font-family",
+        "value": "\"Google Sans\", \"Noto Sans\", \"Noto Sans JP\", \"Noto Sans KR\", \"Noto Naskh Arabic\", \"Noto Sans Thai\", \"Noto Sans Hebrew\", \"Noto Sans Bengali\", sans-serif"
+      }
+    ]
+  },
+  {
+    "name": "body::font-size",
+    "normalizedName": "body.fontSize",
+    "category": "font",
+    "value": "16px",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "body[0]",
+        "property": "font-size",
+        "value": "16px"
+      }
+    ]
+  },
+  {
+    "name": "body::line-height",
+    "normalizedName": "body.lineHeight",
+    "category": "font",
+    "value": "24px",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "body[0]",
+        "property": "line-height",
+        "value": "24px"
+      }
+    ]
+  },
+  {
+    "name": "body::border-radius",
+    "normalizedName": "body.borderRadius",
+    "category": "radius",
+    "value": "0px",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "body[0]",
+        "property": "border-radius",
+        "value": "0px"
+      }
+    ]
+  },
+  {
+    "name": "body::box-shadow",
+    "normalizedName": "body.boxShadow",
+    "category": "shadow",
+    "value": "none",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "body[0]",
+        "property": "box-shadow",
+        "value": "none"
+      }
+    ]
+  },
+  {
+    "name": "body::letter-spacing",
+    "normalizedName": "body.letterSpacing",
+    "category": "font",
+    "value": "normal",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "body[0]",
+        "property": "letter-spacing",
+        "value": "normal"
+      }
+    ]
+  },
+  {
+    "name": "body::padding",
+    "normalizedName": "body.padding",
+    "category": "spacing",
+    "value": "0px",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "body[0]",
+        "property": "padding",
+        "value": "0px"
+      }
+    ]
+  },
+  {
+    "name": "h2::color",
+    "normalizedName": "h2.color",
+    "category": "color",
+    "value": "rgb(32, 33, 36)",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "h2[0]",
+        "property": "color",
+        "value": "rgb(32, 33, 36)"
+      }
+    ]
+  },
+  {
+    "name": "h2::background",
+    "normalizedName": "h2.background",
+    "category": "radius",
+    "value": "rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "h2[0]",
+        "property": "background",
+        "value": "rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box"
+      }
+    ]
+  },
+  {
+    "name": "h2::background-color",
+    "normalizedName": "h2.backgroundColor",
+    "category": "color",
+    "value": "rgba(0, 0, 0, 0)",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "h2[0]",
+        "property": "background-color",
+        "value": "rgba(0, 0, 0, 0)"
+      }
+    ]
+  },
+  {
+    "name": "h2::font-family",
+    "normalizedName": "h2.fontFamily",
+    "category": "font",
+    "value": "\"Google Sans\", \"Noto Sans\", \"Noto Sans JP\", \"Noto Sans KR\", \"Noto Naskh Arabic\", \"Noto Sans Thai\", \"Noto Sans Hebrew\", \"Noto Sans Bengali\", sans-serif",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "h2[0]",
+        "property": "font-family",
+        "value": "\"Google Sans\", \"Noto Sans\", \"Noto Sans JP\", \"Noto Sans KR\", \"Noto Naskh Arabic\", \"Noto Sans Thai\", \"Noto Sans Hebrew\", \"Noto Sans Bengali\", sans-serif"
+      }
+    ]
+  },
+  {
+    "name": "h2::font-size",
+    "normalizedName": "h2.fontSize",
+    "category": "font",
+    "value": "32px",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "h2[0]",
+        "property": "font-size",
+        "value": "32px"
+      }
+    ]
+  },
+  {
+    "name": "h2::line-height",
+    "normalizedName": "h2.lineHeight",
+    "category": "font",
+    "value": "40px",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "h2[0]",
+        "property": "line-height",
+        "value": "40px"
+      }
+    ]
+  },
+  {
+    "name": "h2::border-radius",
+    "normalizedName": "h2.borderRadius",
+    "category": "radius",
+    "value": "0px",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "h2[0]",
+        "property": "border-radius",
+        "value": "0px"
+      }
+    ]
+  },
+  {
+    "name": "h2::box-shadow",
+    "normalizedName": "h2.boxShadow",
+    "category": "shadow",
+    "value": "none",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "h2[0]",
+        "property": "box-shadow",
+        "value": "none"
+      }
+    ]
+  },
+  {
+    "name": "h2::letter-spacing",
+    "normalizedName": "h2.letterSpacing",
+    "category": "font",
+    "value": "-0.32px",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "h2[0]",
+        "property": "letter-spacing",
+        "value": "-0.32px"
+      }
+    ]
+  },
+  {
+    "name": "h2::padding",
+    "normalizedName": "h2.padding",
+    "category": "spacing",
+    "value": "0px",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "h2[0]",
+        "property": "padding",
+        "value": "0px"
+      }
+    ]
+  },
+  {
+    "name": "h3::color",
+    "normalizedName": "h3.color",
+    "category": "color",
+    "value": "rgb(32, 33, 36)",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "h3[0]",
+        "property": "color",
+        "value": "rgb(32, 33, 36)"
+      }
+    ]
+  },
+  {
+    "name": "h3::background",
+    "normalizedName": "h3.background",
+    "category": "radius",
+    "value": "rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "h3[0]",
+        "property": "background",
+        "value": "rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box"
+      }
+    ]
+  },
+  {
+    "name": "h3::background-color",
+    "normalizedName": "h3.backgroundColor",
+    "category": "color",
+    "value": "rgba(0, 0, 0, 0)",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "h3[0]",
+        "property": "background-color",
+        "value": "rgba(0, 0, 0, 0)"
+      }
+    ]
+  },
+  {
+    "name": "h3::font-family",
+    "normalizedName": "h3.fontFamily",
+    "category": "font",
+    "value": "\"Google Sans\", \"Noto Sans\", \"Noto Sans JP\", \"Noto Sans KR\", \"Noto Naskh Arabic\", \"Noto Sans Thai\", \"Noto Sans Hebrew\", \"Noto Sans Bengali\", sans-serif",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "h3[0]",
+        "property": "font-family",
+        "value": "\"Google Sans\", \"Noto Sans\", \"Noto Sans JP\", \"Noto Sans KR\", \"Noto Naskh Arabic\", \"Noto Sans Thai\", \"Noto Sans Hebrew\", \"Noto Sans Bengali\", sans-serif"
+      }
+    ]
+  },
+  {
+    "name": "h3::font-size",
+    "normalizedName": "h3.fontSize",
+    "category": "font",
+    "value": "64px",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "h3[0]",
+        "property": "font-size",
+        "value": "64px"
+      }
+    ]
+  },
+  {
+    "name": "h3::line-height",
+    "normalizedName": "h3.lineHeight",
+    "category": "font",
+    "value": "72px",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "h3[0]",
+        "property": "line-height",
+        "value": "72px"
+      }
+    ]
+  },
+  {
+    "name": "h3::border-radius",
+    "normalizedName": "h3.borderRadius",
+    "category": "radius",
+    "value": "0px",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "h3[0]",
+        "property": "border-radius",
+        "value": "0px"
+      }
+    ]
+  },
+  {
+    "name": "h3::box-shadow",
+    "normalizedName": "h3.boxShadow",
+    "category": "shadow",
+    "value": "none",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "h3[0]",
+        "property": "box-shadow",
+        "value": "none"
+      }
+    ]
+  },
+  {
+    "name": "h3::letter-spacing",
+    "normalizedName": "h3.letterSpacing",
+    "category": "font",
+    "value": "normal",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "h3[0]",
+        "property": "letter-spacing",
+        "value": "normal"
+      }
+    ]
+  },
+  {
+    "name": "h3::padding",
+    "normalizedName": "h3.padding",
+    "category": "spacing",
+    "value": "0px",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "h3[0]",
+        "property": "padding",
+        "value": "0px"
+      }
+    ]
+  },
+  {
+    "name": "a::color",
+    "normalizedName": "a.color",
+    "category": "color",
+    "value": "rgba(0, 0, 0, 0)",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "a[0]",
+        "property": "color",
+        "value": "rgba(0, 0, 0, 0)"
+      }
+    ]
+  },
+  {
+    "name": "a::background",
+    "normalizedName": "a.background",
+    "category": "radius",
+    "value": "rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "a[0]",
+        "property": "background",
+        "value": "rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box"
+      }
+    ]
+  },
+  {
+    "name": "a::background-color",
+    "normalizedName": "a.backgroundColor",
+    "category": "color",
+    "value": "rgba(0, 0, 0, 0)",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "a[0]",
+        "property": "background-color",
+        "value": "rgba(0, 0, 0, 0)"
+      }
+    ]
+  },
+  {
+    "name": "a::font-family",
+    "normalizedName": "a.fontFamily",
+    "category": "font",
+    "value": "\"Google Sans\", \"Noto Sans\", \"Noto Sans JP\", \"Noto Sans KR\", \"Noto Naskh Arabic\", \"Noto Sans Thai\", \"Noto Sans Hebrew\", \"Noto Sans Bengali\", sans-serif",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "a[0]",
+        "property": "font-family",
+        "value": "\"Google Sans\", \"Noto Sans\", \"Noto Sans JP\", \"Noto Sans KR\", \"Noto Naskh Arabic\", \"Noto Sans Thai\", \"Noto Sans Hebrew\", \"Noto Sans Bengali\", sans-serif"
+      }
+    ]
+  },
+  {
+    "name": "a::font-size",
+    "normalizedName": "a.fontSize",
+    "category": "font",
+    "value": "16px",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "a[0]",
+        "property": "font-size",
+        "value": "16px"
+      }
+    ]
+  },
+  {
+    "name": "a::line-height",
+    "normalizedName": "a.lineHeight",
+    "category": "font",
+    "value": "20px",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "a[0]",
+        "property": "line-height",
+        "value": "20px"
+      }
+    ]
+  },
+  {
+    "name": "a::border-radius",
+    "normalizedName": "a.borderRadius",
+    "category": "radius",
+    "value": "25px",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "a[0]",
+        "property": "border-radius",
+        "value": "25px"
+      }
+    ]
+  },
+  {
+    "name": "a::box-shadow",
+    "normalizedName": "a.boxShadow",
+    "category": "shadow",
+    "value": "none",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "a[0]",
+        "property": "box-shadow",
+        "value": "none"
+      }
+    ]
+  },
+  {
+    "name": "a::letter-spacing",
+    "normalizedName": "a.letterSpacing",
+    "category": "font",
+    "value": "0.5px",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "a[0]",
+        "property": "letter-spacing",
+        "value": "0.5px"
+      }
+    ]
+  },
+  {
+    "name": "a::padding",
+    "normalizedName": "a.padding",
+    "category": "spacing",
+    "value": "12px 40px",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "a[0]",
+        "property": "padding",
+        "value": "12px 40px"
+      }
+    ]
+  },
+  {
+    "name": "button::color",
+    "normalizedName": "button.color",
+    "category": "color",
+    "value": "rgb(32, 33, 36)",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "button[0]",
+        "property": "color",
+        "value": "rgb(32, 33, 36)"
+      }
+    ]
+  },
+  {
+    "name": "button::background",
+    "normalizedName": "button.background",
+    "category": "radius",
+    "value": "rgba(0, 0, 0, 0) none repeat scroll 0px 50% / auto padding-box border-box",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "button[0]",
+        "property": "background",
+        "value": "rgba(0, 0, 0, 0) none repeat scroll 0px 50% / auto padding-box border-box"
+      }
+    ]
+  },
+  {
+    "name": "button::background-color",
+    "normalizedName": "button.backgroundColor",
+    "category": "color",
+    "value": "rgba(0, 0, 0, 0)",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "button[0]",
+        "property": "background-color",
+        "value": "rgba(0, 0, 0, 0)"
+      }
+    ]
+  },
+  {
+    "name": "button::font-family",
+    "normalizedName": "button.fontFamily",
+    "category": "font",
+    "value": "\"Material Icons\"",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "button[0]",
+        "property": "font-family",
+        "value": "\"Material Icons\""
+      }
+    ]
+  },
+  {
+    "name": "button::font-size",
+    "normalizedName": "button.fontSize",
+    "category": "font",
+    "value": "24px",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "button[0]",
+        "property": "font-size",
+        "value": "24px"
+      }
+    ]
+  },
+  {
+    "name": "button::line-height",
+    "normalizedName": "button.lineHeight",
+    "category": "font",
+    "value": "36px",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "button[0]",
+        "property": "line-height",
+        "value": "36px"
+      }
+    ]
+  },
+  {
+    "name": "button::border-radius",
+    "normalizedName": "button.borderRadius",
+    "category": "radius",
+    "value": "25px",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "button[0]",
+        "property": "border-radius",
+        "value": "25px"
+      }
+    ]
+  },
+  {
+    "name": "button::box-shadow",
+    "normalizedName": "button.boxShadow",
+    "category": "shadow",
+    "value": "none",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "button[0]",
+        "property": "box-shadow",
+        "value": "none"
+      }
+    ]
+  },
+  {
+    "name": "button::letter-spacing",
+    "normalizedName": "button.letterSpacing",
+    "category": "font",
+    "value": "normal",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "button[0]",
+        "property": "letter-spacing",
+        "value": "normal"
+      }
+    ]
+  },
+  {
+    "name": "button::padding",
+    "normalizedName": "button.padding",
+    "category": "spacing",
+    "value": "0px",
+    "sources": [
+      {
+        "type": "computed",
+        "selector": "button[0]",
+        "property": "padding",
+        "value": "0px"
+      }
+    ]
+  }
+]

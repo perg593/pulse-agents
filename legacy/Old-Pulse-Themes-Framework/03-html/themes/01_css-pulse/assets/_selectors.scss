@@ -1,0 +1,174 @@
+// .selectors-start { background-color: $test-value }
+
+// ======================= MISCELLANEOUS ========================
+$pseudo-hover:					':hover';
+$pseudo-focus:					':focus';
+$pseudo-after:					':after';
+
+$radio-button-on:				'[data-radio-button="on"]';
+$radio-button-off:			'[data-radio-button="off"]';
+
+$answer-widths-fixed:		'[data-answer-widths="fixed"]';
+$answer-widths-var-left:	'[data-answer-widths="variable-left"]';
+$answer-widths-var-center:	'[data-answer-widths="variable-center"]';
+
+
+
+// ======================= TOP CONTAINER ========================
+$top-container: 			'#_pi_surveyWidgetContainer';
+$top-container-mobi: 	'#_pi_surveyWidgetContainer.mobile-enabled';
+
+
+
+// ======================= SURVEY WIDGET ========================
+$widget-default: 			'#_pi_surveyWidget';
+$widget-custom: 			'#_pi_surveyWidgetCustom';
+$widget-inline: 			'#_pi_surveyWidget[survey-widget-type="inlinesurvey"]';
+$widget-bottom: 			'#_pi_surveyWidget[survey-widget-type="bottombarsurvey"]';
+$widget-docked: 			'#_pi_surveyWidget[survey-widget-type="dockedwidgetsurvey"]';
+$widget-topbar: 			'#_pi_surveyWidget[survey-widget-type="topbarsurvey"]';
+$widget-fullsc: 			'#_pi_surveyWidget[survey-widget-type="fullscreensurvey"]';
+
+$widget-default-mobi: #{$top-container-mobi} #{$widget-default};
+$widget-custom-mobi: 	#{$top-container-mobi} #{$widget-custom};
+$widget-inline-mobi: 	#{$top-container-mobi} #{$widget-inline};
+$widget-bottom-mobi: 	#{$top-container-mobi} #{$widget-bottom};
+$widget-docked-mobi: 	#{$top-container-mobi} #{$widget-docked};
+$widget-topbar-mobi: 	#{$top-container-mobi} #{$widget-topbar};
+$widget-fullsc-mobi: 	#{$top-container-mobi} #{$widget-fullsc};
+
+
+
+// ======================= CLOSE BUTTON ========================
+$close-default: 			'._pi_closeButton';
+$close-custom: 			'._pi_closeCustomButton';
+$close-inline: 			#{$widget-inline} #{$close-default};
+$close-bottom: 			#{$widget-bottom} #{$close-default};
+$close-docked: 			#{$widget-docked} #{$close-default};
+$close-topbar: 			#{$widget-topbar} #{$close-default};
+$close-fullsc: 			#{$widget-fullsc} #{$close-default};
+ 
+$close-default-hover: 	#{$close-default}#{$pseudo-hover};
+$close-custom-hover: 	#{$close-custom}#{$pseudo-hover};
+$close-inline-hover: 	#{$close-inline}#{$pseudo-hover};
+$close-bottom-hover: 	#{$close-bottom}#{$pseudo-hover};
+$close-docked-hover: 	#{$close-docked}#{$pseudo-hover};
+$close-topbar-hover: 	#{$close-topbar}#{$pseudo-hover};
+$close-fullsc-hover: 	#{$close-fullsc}#{$pseudo-hover};
+
+$close-default-mobi: 	#{$top-container-mobi} #{$close-default};
+$close-custom-mobi: 		#{$top-container-mobi} #{$close-custom};
+$close-inline-mobi: 		#{$top-container-mobi} #{$close-inline};
+$close-bottom-mobi: 		#{$top-container-mobi} #{$close-bottom};
+$close-docked-mobi: 		#{$top-container-mobi} #{$close-docked};
+$close-topbar-mobi: 		#{$top-container-mobi} #{$close-topbar};
+$close-fullsc-mobi: 		#{$top-container-mobi} #{$close-fullsc};
+
+
+
+
+// ======================= CARD TYPES ======================
+$card-type-single: 				'#_pi_surveyWidget[data-question-type="single_choice_question"]';
+$card-type-multi: 				'#_pi_surveyWidget[data-question-type="multiple_choices_question"]';
+$card-type-free: 					'#_pi_surveyWidget[data-question-type="free_text_question"]';
+$card-type-custom: 				'#_pi_surveyWidget[data-question-type="custom_content_question"]';
+$card-type-custom-full: 		'#_pi_surveyWidgetCustom[data-question-type="custom_content_question"]';
+
+$card-type-single-mobi: 		#{$top-container-mobi} #{$card-type-single};
+$card-type-multi-mobi: 			#{$top-container-mobi} #{$card-type-multi};
+$card-type-free-mobi: 			#{$top-container-mobi} #{$card-type-free};
+$card-type-custom-mobi: 		#{$top-container-mobi} #{$card-type-custom};
+$card-type-custom-full-mobi: 	#{$top-container-mobi} #{$card-type-custom-full};
+
+
+
+// ======================= CONTENT CONTAINERS ===================
+$content-container-default: 				'div._pi_widgetContentContainer';
+$content-container-single:					#{$card-type-single} 		'div._pi_widgetContentContainer';
+$content-container-multi:					#{$card-type-multi} 			'div._pi_widgetContentContainer';
+$content-container-free:					#{$card-type-free} 			'div._pi_widgetContentContainer';
+$content-container-custom:					#{$card-type-custom} 		'div._pi_widgetContentContainer';
+$content-container-custom-full:			#{$card-type-custom-full} 	'div._pi_widgetContentContainer';
+
+$content-container-default-mobi: 		#{$top-container-mobi} #{$content-container-default};
+$content-container-single-mobi: 			#{$top-container-mobi} #{$content-container-single};
+$content-container-multi-mobi: 			#{$top-container-mobi} #{$content-container-multi};
+$content-container-free-mobi: 			#{$top-container-mobi} #{$content-container-free};
+$content-container-custom-mobi: 			#{$top-container-mobi} #{$content-container-custom};
+$content-container-custom-full-mobi:	#{$top-container-mobi} #{$content-container-custom-full};
+
+
+
+// ======================= QUESTION TYPES ======================
+$question-single: 					#{$card-type-single} 			'._pi_question';
+$question-multi: 						#{$card-type-multi} 			'._pi_question';
+$question-free: 						#{$card-type-free} 				'._pi_question';
+$question-custom: 					#{$card-type-custom} 			'._pi_question_custom_content_question p:first-child';
+$question-custom-full: 			#{$card-type-custom-full} '._pi_question_custom_content_question_fullscreen p:first-child';
+
+$question-single-mobi: 			#{$top-container-mobi} #{$question-single};
+$question-multi-mobi: 			#{$top-container-mobi} #{$question-multi};
+$question-free-mobi: 				#{$top-container-mobi} #{$question-free};
+$question-custom-mobi: 			#{$top-container-mobi} #{$question-custom};
+$question-custom-full-mobi: #{$top-container-mobi} #{$question-custom-full};
+
+
+
+// ======================= TEXT LABEL TYPES ======================
+$single-choice-text:					'label';
+$multi-choice-text:						'label._pi-control._pi-control-checkbox';
+$free-text-one-line-text:			'input._pi_free_text_question_field';
+$free-text-multi-line-text:		'textarea._pi_free_text_question_field';
+$custom-text:									'._pi_question_custom_content_question';
+$custom-full-text:						'._pi_question_custom_content_question_fullscreen';
+
+
+
+// ======================= RADIO BUTTONS (SINGLE CHOICE ONLY ) ======================
+$card-type-single-radio-on:		#{$card-type-single}#{$radio-button-on};
+$card-type-single-radio-off:	#{$card-type-single}#{$radio-button-off};
+$radio-button-outer: 					#{$card-type-single} 'li a span._pi_radio_button_outer';
+$radio-button-outer-hover: 		#{$card-type-single} 'li:hover a span._pi_radio_button_outer';
+$radio-button-inner-hover: 		#{$card-type-single} 'li:hover a span._pi_radio_button_inner';
+
+$card-type-single-radio-on-mobi:	#{$top-container-mobi} #{$card-type-single}#{$radio-button-on};
+
+
+
+// ======================= RADIO BUTTONS (SINGLE CHOICE ONLY ) ======================
+$multi-checkbox-outer: 						#{$card-type-multi} 'li 		._pi-control-indicator';
+$multi-checkbox-outer-hover: 			#{$card-type-multi} 'li:hover ._pi-control-indicator';
+$multi-checkbox-checkmark: 				#{$card-type-multi} 'li 		._pi-control-indicator:after';
+$multi-checkbox-checkmark-hover: 	#{$card-type-multi} 'li:hover ._pi-control-indicator:after';
+
+
+
+// ======================= MISCELLANEOUS ========================
+$character-count:					'div._pi_free_text_question_characters_count';
+$multi-max-count:					'div._pi_multiple_choices_count';
+
+$character-count-mobi:		#{$top-container-mobi} #{$character-count};
+$multi-max-count-mobi:		#{$top-container-mobi} #{$multi-max-count};
+
+$branding:								'a._pi_branding';
+$branding-hover:					#{$branding}#{$pseudo-hover};
+$branding-mobi:						#{$top-container-mobi} #{$branding};
+
+$branding-custom:					#{$card-type-custom} #{$branding};
+$branding-custom-hover:		#{$branding-custom}#{$pseudo-hover};
+$branding-custom-mobi:		#{$top-container-mobi} #{$branding-custom};
+
+$invitation:							'div._pi_invitationTextContainer';
+$invitation-mobi:					#{$top-container-mobi} #{$invitation};
+
+$invitation-button:				'a._pi_startButton';
+$invitation-button-hover:	#{$invitation-button}#{$pseudo-hover};
+$invitation-button-mobi:	#{$top-container-mobi} #{$invitation-button};
+
+$thank-you:								'div._pi_thankYouSurvey';
+$thank-you-mobi:					#{$top-container-mobi} #{$thank-you};
+
+
+
+
+// .selectors-end { background-color: $test-value }

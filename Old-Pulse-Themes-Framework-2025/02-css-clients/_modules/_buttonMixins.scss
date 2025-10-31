@@ -1,0 +1,244 @@
+@mixin standardButton($standard-btn-default-fill: #ffffff,
+    $standard-btn-default-border: solid 2px #484848,
+    $standard-btn-default-shadow: none,
+    $standard-btn-default-color: #434343,
+
+    $standard-btn-hov-fill: #484848,
+    $standard-btn-hov-border: #{$standard-btn-default-border},
+    $standard-btn-hov-shadow: none,
+    $standard-btn-hov-color: #ffffff,
+
+    $standard-btn-sel-fill: #ffffff,
+    $standard-btn-sel-border: #{$standard-btn-default-border},
+    $standard-btn-sel-shadow: none,
+    $standard-btn-sel-color: #434343,
+
+    $standard-btn-active-fill: #ffffff,
+    $standard-btn-active-border: #{$standard-btn-default-border},
+    $standard-btn-active-shadow: none,
+    $standard-btn-active-color: #434343,
+
+    $standard-btn-focus-fill: #484848,
+    $standard-btn-focus-border: 2px solid #FFFFFF,
+    $standard-btn-focus-shadow: 0 0 8px 6px rgba(76, 145, 206, 0.6),
+    $standard-btn-focus-color: #{$standard-btn-hov-color},
+
+    $standard-btn-border-radius: 8px
+    ) {
+
+    /** STATES **/
+    div#_pi_surveyWidgetContainer div#_pi_surveyWidget div._pi_widgetContentContainer {
+        ul._pi_answers_container {
+
+            --standard-btn-fill: #{$standard-btn-default-fill};
+            --standard-btn-border: #{$standard-btn-default-border};
+            --standard-btn-shadow: #{$standard-btn-default-shadow};
+            --standard-btn-color: #{$standard-btn-default-color};
+
+            //single choice
+            &[data-question-type="single_choice_question"] {
+
+                //base
+                li {
+                    background-color: transparent !important;
+                    border-radius: $standard-btn-border-radius !important;
+                    border: none !important;
+                    overflow: visible !important;
+
+                    a {
+                        overflow: visible !important;
+                        position: relative;
+                        border-radius: $standard-btn-border-radius !important;
+                        height: 100% !important;
+
+                        label {
+                            height: 100% !important;
+                            border: var(--standard-btn-border) !important;
+                            box-shadow: var(--standard-btn-shadow) !important;
+                            background-color: var(--standard-btn-fill) !important;
+                            color: var(--standard-btn-color) !important;
+
+                            position: static;
+                            border-radius: $standard-btn-border-radius !important;
+                        }
+                    }
+
+                    //hover
+                    &:hover {
+                        a {
+                            label {
+                                --standard-btn-fill: #{$standard-btn-hov-fill};
+                                --standard-btn-border: #{$standard-btn-hov-border};
+                                --standard-btn-shadow: #{$standard-btn-hov-shadow};
+                                --standard-btn-color: #{$standard-btn-hov-color};
+                            }
+                        }
+                    }
+
+                    //selected
+                    &.selected {
+                        --standard-btn-fill: #{$standard-btn-sel-fill};
+
+                        a {
+                            label {
+                                --standard-btn-border: #{$standard-btn-sel-border};
+                                --standard-btn-fill: #{$standard-btn-sel-fill};
+                                --standard-btn-shadow: #{$standard-btn-sel-shadow};
+                                --standard-btn-color: #{$standard-btn-sel-color};
+
+                                &:focus:not(:focus-visible) {
+                                    outline: none !important;
+                                    --standard-btn-fill: #{$standard-btn-sel-fill};
+                                    --standard-btn-border: #{$standard-btn-sel-border};
+                                    --standard-btn-shadow: #{$standard-btn-sel-shadow};
+                                    --standard-btn-color: #{$standard-btn-sel-color};
+                                }
+                            }
+                        }
+
+                    }
+
+                    //focus states
+                    a {
+                        label {
+                            &:focus {
+                                outline: none !important;
+                                --standard-btn-fill: #{$standard-btn-focus-fill};
+                                --standard-btn-border: #{$standard-btn-focus-border};
+                                --standard-btn-shadow: #{$standard-btn-focus-shadow};
+                                --standard-btn-color: #{$standard-btn-focus-color};
+
+                            }
+
+                        }
+
+                        &:active {
+                            label {
+                                --standard-btn-fill: #{$standard-btn-active-fill};
+                                --standard-btn-border: #{$standard-btn-active-border};
+                                --standard-btn-shadow: #{$standard-btn-active-shadow};
+                                --standard-btn-color: #{$standard-btn-active-color};
+                            }
+                        }
+
+                    }
+                }
+            }
+
+            &[data-question-type="multiple_choices_question"] {
+                li {
+                    background-color: transparent !important;
+                    border-radius: $standard-btn-border-radius !important;
+                    border: none !important;
+                    overflow: visible !important;
+
+
+                    label {
+                        height: 100% !important;
+                        border: var(--standard-btn-border) !important;
+                        box-shadow: var(--standard-btn-shadow) !important;
+                        background-color: var(--standard-btn-fill) !important;
+                        color: var(--standard-btn-color) !important;
+
+                        position: relative;
+                        border-radius: $standard-btn-border-radius !important;
+                    }
+
+                    //hover
+                    &:hover {
+                        label {
+                            --standard-btn-fill: #{$standard-btn-hov-fill};
+                            --standard-btn-border: #{$standard-btn-hov-border};
+                            --standard-btn-shadow: #{$standard-btn-hov-shadow};
+                            --standard-btn-color: #{$standard-btn-hov-color};
+                        }
+                    }
+
+                    //selected
+                    &.selected {
+                        --standard-btn-fill: #{$standard-btn-sel-fill};
+
+                        label {
+                            --standard-btn-border: #{$standard-btn-sel-border};
+                            --standard-btn-fill: #{$standard-btn-sel-fill};
+                            --standard-btn-shadow: #{$standard-btn-sel-shadow};
+                            --standard-btn-color: #{$standard-btn-sel-color};
+
+                            &:focus:not(:focus-visible) {
+                                outline: none !important;
+                                --standard-btn-fill: #{$standard-btn-sel-fill};
+                                --standard-btn-border: #{$standard-btn-sel-border};
+                                --standard-btn-shadow: #{$standard-btn-sel-shadow};
+                                --standard-btn-color: #{$standard-btn-sel-color};
+                            }
+                        }
+
+                    }
+
+                    //focus states
+                    label {
+                        &:focus {
+                            outline: none !important;
+                            --standard-btn-fill: #{$standard-btn-focus-fill};
+                            --standard-btn-border: #{$standard-btn-focus-border};
+                            --standard-btn-shadow: #{$standard-btn-focus-shadow};
+                            --standard-btn-color: #{$standard-btn-focus-color};
+
+                        }
+
+                    }
+
+                    label:active {
+                        --standard-btn-fill: #{$standard-btn-active-fill};
+                        --standard-btn-border: #{$standard-btn-active-border};
+                        --standard-btn-shadow: #{$standard-btn-active-shadow};
+                        --standard-btn-color: #{$standard-btn-active-color};
+                    }
+
+                }
+            }
+        }
+    }
+
+    //remove hover on mobile
+    div#_pi_surveyWidgetContainer.mobile-enabled div#_pi_surveyWidget div._pi_widgetContentContainer,
+    div#_pi_surveyWidgetContainer[tablet-enabled="true"] div#_pi_surveyWidget div._pi_widgetContentContainer {
+        ul._pi_answers_container {
+            li {
+                &:hover {
+                    a:not(:active) {
+                        label:not(:focus) {
+                            --standard-btn-fill: #{$standard-btn-default-fill};
+                            --standard-btn-border: #{$standard-btn-default-border};
+                            --standard-btn-shadow: #{$standard-btn-default-shadow};
+                            --standard-btn-color: #{$standard-btn-default-color};
+                        }
+                    }
+                    label:not(:active):not(:focus){
+                        --standard-btn-fill: #{$standard-btn-default-fill};
+                        --standard-btn-border: #{$standard-btn-default-border};
+                        --standard-btn-shadow: #{$standard-btn-default-shadow};
+                        --standard-btn-color: #{$standard-btn-default-color};
+                    }
+                }
+            }
+
+            li {
+                a:active {
+                    label {
+                        --standard-btn-fill: #{$standard-btn-hov-fill};
+                        --standard-btn-border: #{$standard-btn-hov-border};
+                        --standard-btn-shadow: #{$standard-btn-hov-shadow};
+                        --standard-btn-color: #{$standard-btn-hov-color};
+                    }
+                }
+                label:active{
+                    --standard-btn-fill: #{$standard-btn-hov-fill};
+                    --standard-btn-border: #{$standard-btn-hov-border};
+                    --standard-btn-shadow: #{$standard-btn-hov-shadow};
+                    --standard-btn-color: #{$standard-btn-hov-color};
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,175 @@
+/* ===================== ANSWERS CONTAINER =============================== */
+
+/* LEGACY SCENARIOS */
+div[data-answer-widths="fixed"] ul._pi_answers_container,
+ul[data-answer-widths="fixed"] {
+   justify-content: flex-start;
+}
+
+div[data-answer-widths="variable-center"] ul._pi_answers_container,
+ul[data-answer-widths="variable-center"] {
+   justify-content: center;
+}
+
+div[data-answer-widths="variable-left"] ul._pi_answers_container,
+ul[data-answer-widths="variable-left"] {
+   justify-content: flex-start; 
+}
+
+
+/* LAYOUT SCENARIOS */
+div[data-answers-layout="fixed"] ul._pi_answers_container,
+ul[data-answers-layout="fixed"] {
+   justify-content: flex-start;
+}
+
+div[data-answers-layout="variable"] ul._pi_answers_container,
+ul[data-answers-layout="variable"] {
+   justify-content: center;
+}
+
+
+/* FLEX ALIGNMENT SCENARIOS */
+div[data-answers-alignment="center"] ul._pi_answers_container,
+ul[data-answers-alignment="center"] {
+   justify-content: center;
+}
+
+div[data-answers-alignment="left"] ul._pi_answers_container,
+ul[data-answers-alignment="left"] {
+   justify-content: flex-start;
+}
+
+div[data-answers-alignment="right"] ul._pi_answers_container,
+ul[data-answers-alignment="right"] {
+   justify-content: flex-end;
+}
+
+div[data-answers-alignment="space-between"] ul._pi_answers_container,
+ul[data-answers-alignment="space-between"] {
+   justify-content: space-between;
+}
+
+div[data-answers-alignment="space-around"] ul._pi_answers_container,
+ul[data-answers-alignment="space-around"] {
+   justify-content: space-around;
+}
+
+div[data-answers-alignment="space-evenly"] ul._pi_answers_container,
+ul[data-answers-alignment="space-evenly"] {
+   justify-content: space-evenly;
+}
+
+          
+          
+/* ===================== LI WIDTHS AND MARGINS ========================== */
+
+/* LI MARGINS */
+div[data-answers-alignment="center"] ul._pi_answers_container li,
+div[data-answers-alignment="left"] ul._pi_answers_container li,
+div[data-answers-alignment="right"] ul._pi_answers_container li,
+div[data-answers-alignment="space-around"] ul._pi_answers_container li,
+div[data-answers-alignment="space-between"] ul._pi_answers_container li,
+div[data-answers-alignment="space-evenly"] ul._pi_answers_container li,
+ul[data-answers-alignment="center"] li,
+ul[data-answers-alignment="left"] li,
+ul[data-answers-alignment="right"] li,
+ul[data-answers-alignment="space-around"] li,
+ul[data-answers-alignment="space-between"] li,
+ul[data-answers-alignment="space-evenly"] li {
+   box-sizing: border-box !important;
+   margin: 5px 1% !important; 
+}
+
+
+
+/* VARIABLE WIDTHS */
+div[data-answers-layout="variable"] ul._pi_answers_container li,
+ul[data-answers-layout="variable"] li {
+   flex-grow: 0;
+   flex-shrink: 0;
+   flex-basis: auto; 
+}
+
+
+/* FIXED: DEFAULT: 3 PER ROW */
+div[data-answers-layout="fixed"] ul._pi_answers_container li,
+ul[data-answers-layout="fixed"] li {
+	flex: 0 0      calc((100% / 3) - 2%) !important;
+	max-width:     calc((100% / 3) - 2%) !important;
+}
+
+
+/* FIXED: X ITEMS PER ROW */
+div[data-answers-layout="fixed"][data-answers-per-row="1"] ul._pi_answers_container li,
+ul[data-answers-layout="fixed"][data-answers-per-row="1"] li {
+   margin: 5px 7% !important;
+   flex: 0 0 86% !important;  /* SPECIAL CASE FOR ONE ITEM PER ROW */
+   max-width: 86% !important; 
+}
+
+div[data-answers-layout="fixed"][data-answers-per-row="2"] ul._pi_answers_container li,
+ul[data-answers-layout="fixed"][data-answers-per-row="2"] li {
+	flex: 0 0      calc((100% / 2) - 2%) !important;
+	max-width:     calc((100% / 2) - 2%) !important;
+}
+
+div[data-answers-layout="fixed"][data-answers-per-row="3"] ul._pi_answers_container li,
+ul[data-answers-layout="fixed"][data-answers-per-row="3"] li {
+	flex: 0 0      calc((100% / 3) - 2%) !important;
+	max-width:     calc((100% / 3) - 2%) !important;
+}
+
+div[data-answers-layout="fixed"][data-answers-per-row="4"] ul._pi_answers_container li,
+ul[data-answers-layout="fixed"][data-answers-per-row="4"] li {
+	flex: 0 0      calc((100% / 4) - 2%) !important;
+	max-width:     calc((100% / 4) - 2%) !important;
+}
+
+div[data-answers-layout="fixed"][data-answers-per-row="5"] ul._pi_answers_container li,
+ul[data-answers-layout="fixed"][data-answers-per-row="5"] li {
+	flex: 0 0      calc((100% / 5) - 2%) !important;
+	max-width:     calc((100% / 5) - 2%) !important;
+}
+
+div[data-answers-layout="fixed"][data-answers-per-row="6"] ul._pi_answers_container li,
+ul[data-answers-layout="fixed"][data-answers-per-row="6"] li {
+	flex: 0 0      calc((100% / 6) - 2%) !important;
+	max-width:     calc((100% / 6) - 2%) !important;
+}
+
+div[data-answers-layout="fixed"][data-answers-per-row="7"] ul._pi_answers_container li,
+ul[data-answers-layout="fixed"][data-answers-per-row="7"] li {
+	flex: 0 0      calc((100% / 7) - 2%) !important;
+	max-width:     calc((100% / 7) - 2%) !important;
+}
+
+div[data-answers-layout="fixed"][data-answers-per-row="8"] ul._pi_answers_container li,
+ul[data-answers-layout="fixed"][data-answers-per-row="8"] li {
+	flex: 0 0      calc((100% / 8) - 2%) !important;
+	max-width:     calc((100% / 8) - 2%) !important;
+}
+
+div[data-answers-layout="fixed"][data-answers-per-row="9"] ul._pi_answers_container li,
+ul[data-answers-layout="fixed"][data-answers-per-row="9"] li {
+	flex: 0 0      calc((100% / 9) - 2%) !important;
+	max-width:     calc((100% / 9) - 2%) !important;
+}
+
+div[data-answers-layout="fixed"][data-answers-per-row="10"] ul._pi_answers_container li,
+ul[data-answers-layout="fixed"][data-answers-per-row="10"] li {
+	flex: 0 0      calc((100% / 10) - 2%) !important;
+	max-width:     calc((100% / 10) - 2%) !important;
+}
+
+div[data-answers-layout="fixed"][data-answers-per-row="11"] ul._pi_answers_container li,
+ul[data-answers-layout="fixed"][data-answers-per-row="11"] li {
+	flex: 0 1      calc((100% / 11) - 2%) !important;
+	max-width:     calc((100% / 11) - 2%) !important;
+}
+
+div[data-answers-layout="fixed"][data-answers-per-row="12"] ul._pi_answers_container li,
+ul[data-answers-layout="fixed"][data-answers-per-row="12"] li {
+	flex: 0 0      calc((100% / 12) - 2%) !important;
+	max-width:     calc((100% / 12) - 2%) !important;
+}

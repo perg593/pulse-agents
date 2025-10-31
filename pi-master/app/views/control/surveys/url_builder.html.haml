@@ -1,0 +1,42 @@
+%h4.form-title
+  = @survey.name || "New Survey"
+  %span.label.label-default= @survey.status
+
+.survey-navbar
+  %ul.nav.nav-tabs
+    %li
+      = link_to 'Edit', edit_survey_path
+    %li
+      = link_to "Results", report_survey_path(@survey)
+    %li.active
+      = link_to 'URL Builder', url_builder_survey_path
+
+.questions
+  - @survey.questions.each do |question|
+    .question
+      %h2.question_content= question.content
+
+      - if question.question_type=="free_text_question"
+        .free_text_question
+          .content Free text question
+          .url
+            %pre= question.free_text_direct_submission_link
+      - else
+        %ul.possible_answers
+          - question.possible_answers.each do |possible_answer|
+            %li
+              .content= possible_answer.content
+              .url
+                %pre= possible_answer.direct_submission_link
+
+.notes
+  %h2 Notes
+  %ul
+    %li
+      Use the `redirect` parameter if you want to configure a custom redirect URL. By default, it will redirect to the referer if there's any, otherwise, it will just display a thank you message.
+    %li
+      Any other query string parameter will be saved as context data.
+    %li
+      You can use `preview_mode=true` if you want to test draft surveys.
+    %li
+      You can use `poll_or_ty=true` if you want to display thank you or poll card.

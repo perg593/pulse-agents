@@ -1,0 +1,211 @@
+// THE _selectors FILE:
+@import '../../01-css-pulse/_selectors';
+
+// DEFAULT VARIABLES
+@import '../_default/_default-1-variables';
+
+// CLIENT-SPECIFIC DESIGN VARIABLES
+@import './_pulse_black_purple_variables';
+
+// GLOBAL MAPS:
+@import '../../01-css-pulse/_maps';
+
+// GLOBAL MIXINS
+@import '../../01-css-pulse/_mixins';
+
+// THE GLOBAL STRUCTURE FOR FRAMEWORK V2:
+@import '../../01-css-pulse/_theme-structure';
+div#_pi_surveyWidgetContainer{
+  div#_pi_surveyWidget{
+    div._pi_widgetContentContainer{
+      ul._pi_answers_container{
+        overflow: visible !important;
+        justify-content: space-between !important;
+        li{
+          // padding-top: 2px !important;
+          // padding-bottom: 2px !important;
+          justify-content: center !important;
+          align-items: center !important;
+          align-content: center !important;
+          transition: all 0.3s;
+          position: relative;
+          overflow: visible !important;
+          background-color: transparent !important;
+          label{
+            height: 100% !important;
+            background-color: transparent !important;
+            transition: all 0.3s;
+            ._pi-control-indicator{
+              width: 15px !important;
+              height: 15px !important;
+              min-width: 15px !important;
+              min-height: 15px !important;
+            }
+          }
+          &::marker{
+            content: none;
+            display: none;
+          }
+          &:after{
+            transition: all 0.3s;
+            z-index: -1;
+            content: "";
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            top: -2px;
+            right: -2px;
+            bottom: -2px;
+            left: -2px;
+
+            // transform: scale(1) translate(-50%, -50%);
+            border-radius: 30px;
+            border: solid 1px #B7B7B7;
+          }
+        }
+        &[data-question-type="multiple_choices_question"]{
+          ._pi_free_text_question_field_container{
+            width: 100% !important;
+          }
+        }
+        ._pi_free_text_question_field_container{
+          max-width: 100% !important;
+          input._pi_free_text_question_field{
+            -webkit-box-direction: normal;
+            box-sizing: border-box;
+            // margin: 0;
+            display: block;
+            width: 100%;
+            height: 38px;
+            padding: 8px 12px;
+            font-size: 14px;
+            line-height: 1.42857143;
+            color: #333;
+            vertical-align: middle;
+            border: 1px solid #ccc;
+            margin-bottom: 16px;
+            border-style: none none solid;
+            border-width: 1px;
+            border-color: #000;
+            background-color: #f3f3f3;
+            font-family: Raleway,sans-serif;
+            &:focus{
+              border-color: #3898EC;
+              outline: 0;
+            }
+          }
+        }
+        ._pi_free_text_question_submit_button_container{
+          width: 100%;
+        }
+      }
+      input[type="submit"]{
+        padding: 10px 20px !important;
+        border-radius: 0;
+        border-width: 1px;
+        letter-spacing: .33em;
+        text-transform: uppercase;
+        padding-right: 25px;
+        padding-left: 25px;
+        border-style: solid;
+        border-color: #9576d6;
+        background-color: transparent;
+        font-family: Raleway,sans-serif;
+        color: #000;
+        // font-size: 10px;
+      }
+    }
+  }
+  &:not(.mobile-enabled){
+    div#_pi_surveyWidget{
+      div._pi_widgetContentContainer{
+        ul._pi_answers_container{
+          overflow: visible !important;
+          justify-content: space-between !important;
+          li{
+            margin-top: 20px !important;
+            margin-bottom: 20px !important;
+            &:hover{
+              padding-top: 0px !important;
+              padding-bottom: 0px !important;
+              &:after{
+                transition: all 0.3s;
+                z-index: -1;
+                background-color: #000000;
+                // transform: scale(1.2) translate(-50%, -50%);
+                border: solid 3px #4f2550;
+                transform: scale(1.2);
+              }
+            }
+          }
+          &[data-answers-per-row="1"]{
+            li{
+              flex: 0 0 auto !important;
+              max-width: 90% !important;
+            }
+          }
+          &[data-answers-per-row="2"]{
+            li{
+              flex: 0 0 auto !important;
+              max-width: 40% !important;
+            }
+          }
+          &[data-answers-per-row="3"]{
+            li{
+              flex: 0 0 auto !important;
+              max-width: 30% !important;
+            }
+          }
+          &[data-answers-per-row="4"]{
+            li{
+              flex: 0 0 auto !important;
+              max-width: 22% !important;
+            }
+          }
+          &[data-answers-per-row="5"]{
+            li{
+              flex: 0 0 auto !important;
+              max-width: 16% !important;
+            }
+          }
+          &[data-answers-per-row="6"]{
+            li{
+              flex: 0 0 auto !important;
+              max-width: 12% !important;
+            }
+          }
+          &[data-answers-per-row="7"]{
+            li{
+              flex: 0 0 auto !important;
+              max-width: 5% !important;
+            }
+          }
+          &[data-answers-per-row="8"]{
+            li{
+              flex: 0 0 auto !important;
+              max-width: 29.5% !important;
+            }
+          }
+          &[data-answers-per-row="9"]{
+            li{
+              flex: 0 0 auto !important;
+              max-width: 29.5% !important;
+            }
+          }
+          &[data-answers-per-row="10"]{
+            li{
+              flex: 0 0 auto !important;
+              max-width: 29.5% !important;
+            }
+          }
+          &[data-answers-per-row="11"]{
+            li{
+              flex: 0 0 auto !important;
+              max-width: 29.5% !important;
+            }
+          }
+        }
+      }
+    }
+  }
+}

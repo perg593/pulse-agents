@@ -1,0 +1,67 @@
+.list-header
+  %h1.list-title Scheduled Reports
+  .right-btns
+    = link_to 'New Report', new_scheduled_report_path, class: 'btn btn-default'
+
+%table.table.table-hover.table-responsive.list-table
+  %thead
+    %tr
+      %th.hidden-sm.hidden-xs(data-sort='string')
+        Name
+        .arrow.arrow-up.hide
+      %th.hidden-sm.hidden-xs(data-sort='string')
+        Dates
+        .arrow.arrow-up.hide
+      %th.hidden-sm.hidden-xs(data-sort='string')
+        Next Report
+        .arrow.arrow-up.hide
+      %th.hidden-sm.hidden-xs
+        Surveys
+        .arrow.arrow-up.hide
+      %th.hidden-sm.hidden-xs
+        Recipients
+        .arrow.arrow-up.hide
+  %tbody
+    - @reports.each do |report|
+      %tr.scheduled-survey-name
+        %td.hidden-sm.hidden-xs{:'data-sort-value' => report.name}
+          = report.name
+          .actions{style: 'display: none;'}
+            = link_to 'Edit', edit_scheduled_report_path(report)
+            |
+            - if report.paused?
+              = link_to 'Restart', restart_scheduled_report_path(report), method: :patch, data: { confirm: 'Are you sure?' }
+            - else
+              = link_to 'Pause', pause_scheduled_report_path(report), method: :patch, data: { confirm: 'Are you sure?' }
+            |
+            = link_to 'Delete', scheduled_report_path(report), method: :delete, data: { confirm: 'Are you sure?' }
+
+        %td.hidden-sm.hidden-xs{:'data-sort-value' => report.start_date.to_s}
+          = report.frequency.capitalize
+          %br
+          = pi_formatted_date(report.start_date)
+          - if report.end_date
+            %br
+            = pi_formatted_date(report.end_date)
+        %td.hidden-sm.hidden-xs{:'data-sort-value' => report.send_next_report_at.to_s}
+          - if report.paused?
+            Paused
+          - else
+            = pi_formatted_date(report.send_next_report_at) if report.send_next_report_at
+
+        %td.hidden-sm.hidden-xs
+          - if report.all_surveys
+            All
+          - else
+            - links = []
+            - links << report.survey_locale_groups.map { |survey_group| link_to(survey_group.name, localization_editor_path(survey_locale_group_id: survey_group.id)) }
+            - links << report.surveys.map { |survey| link_to(survey.name, edit_survey_path(survey.id)) }
+            = links.flatten.join(',<br>').html_safe
+        %td.hidden-sm.hidden-xs
+          = report.emails.join(',<br>').html_safe if report.emails
+
+- if current_user.admin? && @audits.present?
+  = render "application/audits", audits: @audits
+
+- content_for :js, javascript_include_tag('list_page_common')
+

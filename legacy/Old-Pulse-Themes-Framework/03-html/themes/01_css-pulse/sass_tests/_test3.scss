@@ -1,0 +1,159 @@
+// %message-shared,
+// %message-2 {
+//   border: 1px solid #ccc;
+//   padding: 10px;
+//   color: #333;
+// }
+
+// .message {
+//   @extend %message-shared;
+// }
+
+// .message2 {
+//   @extend %message-2;
+// }
+
+// MAPS -----------------
+$background-colors: (
+	widget-container: 	#000,
+	widget-default: 		blue,
+	widget-custom:			green,
+	widget-inline: 		yellow,
+	widget-bottombar: 	pink,
+	widget-docked: 		purple,
+	widget-topbar: 		fuchsia,
+	widget-fullscreen: 	red,
+);
+
+$border-colors: (
+	widget-container: 	#000,
+	widget-default: 		blue,
+	widget-custom:			green,
+	widget-inline: 		yellow,
+	widget-bottombar: 	pink,
+	widget-docked: 		purple,
+	widget-topbar: 		fuchsia,
+	widget-fullscreen: 	red,
+);
+
+$border-widths: (
+	widget-container: 	1000px,
+	widget-default: 		10px,
+	widget-custom:			20px,
+	widget-inline: 		0,
+	widget-bottombar: 	0,
+	widget-docked: 		0,
+	widget-topbar: 		0,
+	widget-fullscreen: 	0,
+);
+
+$border-styles: (
+	widget-container: 	dotted,
+	widget-default: 		solid,
+	widget-custom:			solid,
+	widget-inline: 		solid,
+	widget-bottombar: 	solid,
+	widget-docked: 		solid,
+	widget-topbar: 		solid,
+	widget-fullscreen: 	solid,
+);
+
+$border-radiuses: (
+	widget-container: 	0,
+	widget-default: 		0,
+	widget-custom:			0,
+	widget-inline: 		0,
+	widget-bottombar: 	0,
+	widget-docked: 		0,
+	widget-topbar: 		0,
+	widget-fullscreen: 	0,
+);
+
+@mixin hellothere() {
+   @extend %#{$container}-border;
+}
+
+@mixin hellothere() {
+	margin: 0;
+	@content;
+}
+
+
+
+
+// .hellow {
+//     @include hellothere($widget-container) {
+//         color: #F00;
+// 		 $widget-container: blue;
+//     }
+// }
+
+
+
+
+
+// .alert {
+//     @include button {
+//         color: #F00;
+// 		 $variable: blue;
+//     }
+// }
+// .cancel {
+//     @include button {
+//         border: solid 1px #999;
+//     }   
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// // BORDER (color, width, style, radius) -----------------
+// @mixin pi_border($container) {
+//    @extend %#{$container}-border;
+// }
+
+	// BORDER MAPS -----------------
+// 	%surveyWidgetContainer-border {
+// 		border-color: 	map-get($surveyWidgetContainer-border, color);
+// 		border-width: 	map-get($surveyWidgetContainer-border, width);
+// 		border-style: 	map-get($surveyWidgetContainer-border, style);
+// 		border-radius: map-get($surveyWidgetContainer-border, radius);
+// 	}
+
+// 	%surveyWidgetCustom-border {
+// 		border-color: 	map-get($surveyWidgetCustom-border, color);
+// 		border-width: 	map-get($surveyWidgetCustom-border, width);
+// 		border-style: 	map-get($surveyWidgetCustom-border, style);
+// 		border-radius: map-get($surveyWidgetCustom-border, radius);
+// 	}
+
+// 	%surveyWidget-border {
+// 		border-color: 	map-get($surveyWidget-border, color);
+// 		border-width: 	map-get($surveyWidget-border, width);
+// 		border-style: 	map-get($surveyWidget-border, style);
+// 		border-radius: map-get($surveyWidget-border, radius);
+// 	}
+
+// 	%surveyWidget_bottombar-border {
+// 		border-color: 	map-get($surveyWidget_bottombar-border, color);
+// 		border-width: 	map-get($surveyWidget_bottombar-border, width);
+// 		border-style: 	map-get($surveyWidget_bottombar-border, style);
+// 		border-radius: map-get($surveyWidget_bottombar-border, radius);
+// 	}
+
+// 	%surveyWidget-border {
+// 		border-color: 	map-get($surveyWidget-border, color);
+// 		border-width: 	map-get($surveyWidget-border, width);
+// 		border-style: 	map-get($surveyWidget-border, style);
+// 		border-radius: map-get($surveyWidget-border, radius);
+// 	}

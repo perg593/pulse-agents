@@ -1,0 +1,7 @@
+:ruby
+  survey = {
+    name: { value: '', name: 'survey[name]' },
+    goal: { value: @survey.goal, name: 'survey[goal]' }
+  }
+
+= react_component("NewSurveyWrapper", survey: survey, url: surveys_path, authenticityToken: form_authenticity_token)

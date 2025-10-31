@@ -1,0 +1,254 @@
+/* Custom and Additional Content Styles TO BE USED ONLY WITH THE THEME STRUCTURE SANS CUSTOM CONTENT VERSION*/
+/*begin fix custom content*/
+// GLOBAL MIXINS
+$link-color: $font-sm-color !default;
+$link-color-hover: $color-1 !default;
+$link-text-decoration: underline !default;
+$link-text-decoration-hover: underline !default;
+$aao-text-align: left !default;
+$oaat-text-align: center !default;
+
+@import '../../01-css-pulse/_mixins';
+//begin custom content + additional content patch
+div#_pi_surveyWidgetContainer{
+   div#_pi_surveyWidget{
+      ._pi_additional_content{
+         @include builder("small-font");
+         font-size: $font-md-size !important;
+         // font-family: $font-button-family !important;
+         text-align: $oaat-text-align !important;
+         *{
+            @include builder("small-font");
+            font-size: $font-md-size;
+            text-align: $oaat-text-align;
+         }
+         h1,h2,h3,h4,h5{
+            @include builder("question-header");
+            font-family: $font-header-family !important;
+            color: $font-lg-color !important;
+            margin: 0 auto .6rem auto !important;
+         }
+         ul,ol{
+            padding-left: 0px !important;
+            list-style-position: inside !important;
+         }
+         ul{
+            li{
+               list-style-type: disc;
+            }
+         }
+         ol{
+            li{
+               list-style-type: decimal;
+            }
+         }
+         li{
+            @include builder("small-font");
+            font-size: $font-md-size;
+            text-align: center;
+            border: none !important;
+            background: none !important;
+            display: list-item !important;
+            *{
+               width: auto !important;
+               border: none !important;
+               background: none !important;
+               display: inline-block;
+            }
+         }
+         a:hover{
+            color: $link-color-hover !important;
+            text-decoration: $link-text-decoration-hover !important;
+         }
+         a{
+            color: $link-color !important;
+            text-decoration: $link-text-decoration !important;
+            text-transform: none !important;
+         }
+         p{
+            margin: 0 auto .4rem auto !important;
+         }
+         *:not(a){
+            cursor: initial !important;
+         }
+      }
+      ._pi_question._pi_question_custom_content_question{
+         text-align: $oaat-text-align !important;
+         color: #000;
+         ol, ul{
+            list-style-position: inside !important;
+            padding-left: 0px !important;
+         }
+         ul{
+            li{
+               list-style-type: disc;
+            }
+         }
+         ol{
+            li{
+               list-style-type: decimal;
+            }
+         }
+         li{
+            @include builder("small-font");
+            font-size: $font-md-size;
+            text-align: center;
+         }
+         p:not(:first-child){
+            margin: 0 auto .4rem auto !important;
+         }
+         >*:first-child{
+            // @include builder('question-custom');
+            // font-family: $font-header-family !important;
+            // color: $font-lg-color !important;
+            margin-top: 0;
+            margin-bottom: 0.6rem;
+            margin-left: auto;
+            margin-right: auto;
+         }
+         h1,h2,h3,h4,h5{
+            @include builder("question-custom");
+            font-family: $font-lg-family !important;
+            color: $font-lg-color !important;
+            margin: 0 auto .6rem auto !important;
+         }
+         a:hover{
+            color: $link-color-hover !important;
+            text-decoration: $link-text-decoration-hover !important;
+         }
+         a{
+            text-decoration: $link-text-decoration !important;
+            text-transform: none !important;
+            
+         }
+         
+         @include builder("small-font");
+         font-size: $font-md-size !important;
+         // font-family: $font-button-family !important;
+         text-align: $oaat-text-align !important;
+         >*:not(:first-child), >*:not(:first-child) *{
+            @include builder("small-font");
+            font-size: $font-md-size;
+            font-family: $font-header-family;
+            color: $font-sm-color;
+            //  font-family: $font-button-family !important;
+            
+            
+            // text-align: center !important;
+         }
+         a,
+         >a:not(:first-child),
+         >*:not(:first-child) a{
+            color: $link-color !important;
+            &:hover{
+               color: $link-color-hover !important;
+               text-decoration: $link-text-decoration-hover !important;
+            }
+         }
+         *:not(a){
+            cursor: initial !important;
+         }
+      }
+   }
+   &.all-at-once{
+      div#_pi_surveyWidget{
+         ._pi_additional_content{
+            text-align: $aao-text-align !important;
+            *{
+               text-align: $aao-text-align !important;
+            }
+            li{
+               text-align: $aao-text-align;
+            }
+         }
+         ._pi_question._pi_question_custom_content_question{
+            text-align: $aao-text-align !important;
+            >*:first-child{
+               text-align: $aao-text-align;
+            }
+            h1,h2,h3,h4,h5{
+               text-align: $aao-text-align;
+            }
+            li{
+               text-align: $aao-text-align !important;
+            }
+            >*:not(:first-child), >*:not(:first-child) *{
+               text-align: $aao-text-align !important;
+            }
+         }
+      }
+   }
+   &.mobile-enabled{
+      div#_pi_surveyWidget{
+         ._pi_additional_content{
+            @include builder("small-font-mobi");
+            font-size: $font-md-size-mobi !important;
+            // font-family: $font-button-family !important;
+            text-align: $oaat-text-align !important;
+            *{
+               @include builder("small-font-mobi");
+               font-size: $font-md-size-mobi;
+               //  font-family: $font-button-family !important;
+               text-align: $oaat-text-align !important;
+            }
+            h1,h2,h3,h4,h5{
+               @include builder("question-header-mobi");
+               font-family: $font-header-family !important;
+               color: $font-lg-color !important;
+            }
+            li{
+               @include builder("small-font");
+               font-size: $font-md-size-mobi;
+               text-align: $oaat-text-align;
+            }
+         }
+         ._pi_question_custom_content_question{
+            @include builder("small-font-mobi");
+            font-size: $font-md-size-mobi !important;
+            // font-family: $font-button-family !important;
+            text-align: $oaat-text-align !important;
+            li{
+               @include builder("small-font");
+               font-size: $font-md-size;
+               text-align: $oaat-text-align;
+            }
+            >*:not(:first-child), >*:not(:first-child) *{
+               @include builder("small-font-mobi");
+               font-size: $font-md-size-mobi !important;
+               font-family: $font-header-family !important;
+               color: $font-sm-color !important;
+               //  font-family: $font-button-family !important;
+               text-align: $oaat-text-align !important;
+            }
+            
+         }
+      }
+      &.all-at-once{
+         ._pi_additional_content{
+            text-align: $aao-text-align !important;
+            *{
+               text-align: $aao-text-align !important;
+            }
+            li{
+               text-align: $aao-text-align;
+            }
+         }
+         ._pi_question._pi_question_custom_content_question{
+            text-align: $aao-text-align !important;
+            >*:first-child{
+               text-align: $aao-text-align;
+            }
+            h1,h2,h3,h4,h5{
+               text-align: $aao-text-align;
+            }
+            li{
+               text-align: $aao-text-align !important;
+            }
+            >*:not(:first-child), >*:not(:first-child) *{
+               text-align: $aao-text-align !important;
+            }
+         }
+      }
+   }
+}
+/* end fix custom content */

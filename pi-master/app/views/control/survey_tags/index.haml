@@ -1,0 +1,29 @@
+.list-header.new-tag
+  .right-btns
+    = link_to 'New Tag', new_survey_tag_path, class: 'btn btn-default'
+
+.title
+  %h2= 'Tags'
+
+%table.table.table-hover.table-responsive.list-table.tags-table
+  %thead
+    %tr
+      %th= 'Tag'
+      %th= 'Edit'
+      %th= 'Delete'
+
+  %tbody
+    - @tags.each do |tag|
+      %tr
+        %td
+          = tag.name
+        %td
+          = link_to edit_survey_tag_path(tag) do
+            %i.glyphicon.glyphicon-pencil
+        %td
+          = link_to survey_tag_path(tag), method: :delete,
+            data: { confirm: "This tag is in use by #{tag.applied_survey_tags.count} survey(s), are you sure you want to delete it?" } do
+            %i.glyphicon.glyphicon-trash
+
+- if current_user.admin? && @audits.present?
+  = render "application/audits", audits: @audits, filter_fields: { "SurveyTag" => [ "name" ] }

@@ -1,0 +1,10 @@
+- content_for :content_container_class, "survey-edit"
+- css_scope('survey-editor')
+
+= react_component("SurveyEditorWrapper", @presenter.editor_props.merge(authenticityToken: form_authenticity_token, subnavLinks: subnav_links(is_admin: current_user.admin?)), {class: "react-component-wrapper"})
+
+#widget_preview_configs{ style: 'display: none;', data: { host: h(Rails.configuration.survey_host), identifier: h(current_user.account.identifier) } }
+
+= javascript_include_tag 'control/widget_preview'
+
+= javascript_include_tag 'surveys'

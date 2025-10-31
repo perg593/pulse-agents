@@ -1,0 +1,35 @@
+- content_for :page_title, @prompt_template.name
+
+.container
+  .row
+    .col-md-12
+      .panel.panel-default
+        .panel-heading
+          %h3.panel-title
+            = @prompt_template.name
+            = link_to "Edit", edit_admin_prompt_template_path(@prompt_template), class: "btn btn-primary btn-sm pull-right"
+            = link_to "Back to List", admin_prompt_templates_path, class: "btn btn-default btn-sm pull-right", style: "margin-right: 10px;"
+
+        .panel-body
+          .row
+            .col-md-6
+              %h4 Template Details
+              %dl.dl-horizontal
+                %dt Name:
+                %dd= @prompt_template.name
+                %dt Default:
+                %dd
+                  - if @prompt_template.is_default?
+                    %span.label.label-success Yes
+                  - else
+                    %span.label.label-default No
+                %dt Created:
+                %dd= @prompt_template.created_at.strftime("%m/%d/%Y %H:%M")
+                %dt Updated:
+                %dd= @prompt_template.updated_at.strftime("%m/%d/%Y %H:%M")
+
+            .col-md-6
+              %h4 Content
+              .well
+                %pre= @prompt_template.content
+

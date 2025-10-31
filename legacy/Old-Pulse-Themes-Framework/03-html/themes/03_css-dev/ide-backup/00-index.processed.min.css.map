@@ -1,0 +1,1 @@
+{"version":3,"sources":["styles/ide/00-index.processed.css","00-index.css"],"names":[],"mappings":"AAKA,KCCC,WAAA","file":"00-index.processed.min.css","sourcesContent":["/**\n * index.scss\n * - Add any styles you want here!\n */\n\nbody {\n  background: #DEDEDE;\n}","/**\n * index.scss\n * - Add any styles you want here!\n */\nbody {\n  background: #DEDEDE;\n}\n"]}

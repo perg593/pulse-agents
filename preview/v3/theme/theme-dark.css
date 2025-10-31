@@ -1,0 +1,9 @@
+.pi-v3 {
+  --pi-color-bg: #0f1115;
+  --pi-color-surface: #161a22;
+  --pi-color-surface-2: #1c2230;
+  --pi-color-border: #2a2f3a;
+  --pi-color-text: #e7eaf0;
+  --pi-color-muted: #a7adbb;
+  color-scheme: dark;
+}

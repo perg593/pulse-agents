@@ -1,0 +1,15 @@
+production:
+  adapter: postgresql
+  database: pi
+  username: pi
+  password: HmXB}hFBx6Mjz6]#@dpY
+  host: 127.0.0.1
+  port: 5432
+  influxdb:
+    database: "pi_production"
+    username: "pi"
+    password: 'pi+2018!'
+    hosts: [ "10.142.0.13" ]
+    port: 8086
+    use_ssl: false
+    retry: 5

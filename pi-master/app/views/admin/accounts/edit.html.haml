@@ -1,0 +1,139 @@
+%h1 Edit Account "#{@account.company_name}"
+
+.edit-account-form
+  / Contact Info
+  .panel.panel-default
+    .panel-body
+      = simple_form_for [:admin, @account], html: { role: 'form', class: 'form-horizontal' } do |form|
+        = form.input :name, label: 'Account'
+        = form.input :identifier do
+          .value= @account.identifier
+        = form.input :cancelled_at do
+          .value= @account.status
+        = form.input :region, label: 'Region'
+        .form-action
+          = form.submit 'Update', class: 'btn btn-default'
+
+  / Qrvey test button
+  .panel.panel-default
+    .panel-heading
+      %h4.panel-title Qrvey
+    .panel-body
+      - if @account.registered_with_qrvey?
+        = link_to "Registered ✅", admin_account_qrvey_user_path(@account)
+      - else
+        = link_to "Register with Qrvey", register_with_qrvey_admin_account_path(@account), method: :patch, class: 'btn btn-default'
+
+  / IP storage policy
+  .panel.panel-default
+    .panel-heading
+      %h4.panel-title IP Storage policy
+    .panel-body
+      = simple_form_for [:admin, @account], html: { role: 'form', class: 'form-horizontal' } do |form|
+        = form.input :ip_storage_policy, label: 'IP Address Storage Policy', collection: Account.ip_storage_policies.map {|enum| [enum[0].titleize, enum[1]]}, include_blank: false, selected: @account.ip_storage_policy_before_type_cast
+
+        .form-action
+          = form.submit 'Update', class: 'btn btn-default'
+
+  / SPA Behaviour
+  .panel.panel-default
+    .panel-heading
+      %h4.panel-title SPA Behaviour
+    .panel-body
+      = simple_form_for [:admin, @account], html: { role: 'form', class: 'form-horizontal' } do |form|
+        = form.input :use_new_spa_behaviour, label: 'Use new SPA behaviour'
+
+        .form-action
+          = form.submit 'Update', class: 'btn btn-default'
+
+  / Tag Automation
+  .panel.panel-default
+    .panel-heading
+      %h4.panel-title Tag Automation
+    .panel-body
+      = simple_form_for [:admin, @account], html: { role: 'form', class: 'form-horizontal' } do |form|
+        = form.input :tag_automation_enabled, label: 'Use Tag Automation'
+
+        .form-action
+          = form.submit 'Update', class: 'btn btn-default'
+
+  / Custom Content Link Tracker
+  .panel.panel-default
+    .panel-heading
+      %h4.panel-title Custom Content Link Tracker
+    .panel-body
+      = simple_form_for [:admin, @account], html: { role: 'form', class: 'form-horizontal' } do |form|
+        = form.input :custom_content_link_click_enabled, label: 'Use Custom Content Link Tracker'
+
+        .form-action
+          = form.submit 'Update', class: 'btn btn-default'
+
+  :ruby
+    tag_js_settings_panel_props = {
+      authenticityToken: form_authenticity_token,
+      accountId: @account.id,
+      tagJsVersion: @account.tag_js_version,
+      tagJsVersionOptions: TagJsFileHelpers.tag_js_versions.sort.reverse.map {|tag_js_version| { option: tag_js_version, label: tag_js_version }}
+    }
+  = react_component("accounts/TagJSSettingsPanel", tag_js_settings_panel_props)
+
+  / status
+  .panel.panel-default
+    .panel-heading
+      %h4.panel-title Stats since beginning of calendar month
+    .panel-body.statuses
+      .status Server Calls : #{@account.calls_count.to_i}
+      .status.impression_count Impressions : #{@impression_count}
+      .status.submission_count Submissions : #{@submission_count}
+      .status Surveys : #{@account.surveys.size}
+
+  / Plan
+  .panel.panel-default
+    .panel-heading
+      %h4.panel-title Plan
+    .panel-body
+      = simple_form_for [:admin, @account], html: { role: 'form', class: 'form-horizontal' } do |form|
+        = form.input :pulse_insights_branding, label: 'Pulse Branding'
+        = form.input :max_submissions, label: 'Max Submissions' do
+          = form.input_field :max_submissions
+          .or_flag -or-
+        = form.input :max_submissions_per_month, label: 'Max Sub / Month'
+        = form.input :cancelled, label: 'Cancelled?' do
+          = form.input_field :cancelled, collection: [['Cancelled', true] ,['Available', false]], include_blank: false
+
+        .form-action
+          = form.submit 'Update', class: 'btn btn-default'
+  / User Management
+  .panel.panel-default
+    .panel-heading
+      %h4.panel-title User Management
+    .panel-body
+      = simple_form_for Invitation.new, url: admin_invite_path, html: { role: 'form', class: 'form-horizontal' } do |invitation_form|
+        = render 'control/my_accounts/invite_user_form', invitation_form: invitation_form, account_id: @account.id
+      .users
+        %table.table
+          %thead
+            %tr
+              %th Name
+              %th Email
+              %th Account Access
+              %th= t('user.level')
+              %th Join Date
+          %tbody
+            - @account.users.each do |user|
+              %tr
+                %td= user.name
+                %td= user.email
+                %td
+                  - selector_id = "account_list_#{ user.id }"
+                  - user.accounts.each do |account|
+                    .account-user-row
+                      %span.account-name= account.autocomplete_name
+                      = link_to 'X', remove_account_link_admin_user_url(id: user.id, account_id: account.id), class: 'delete-account-user-button', data: { selector_id: selector_id }
+
+                  = text_field_tag selector_id, nil, placeholder: 'Start typing account name or PI ID', class: 'autocomplete-field', data: { available_tags: user.autocomplete_tags }
+
+                  = link_to 'Add', add_account_link_admin_user_url(id: user.id), class: 'add-account-user-button btn btn-default', data: { selector_id: selector_id }, tabIndex: 0
+
+                %td= select_tag "user[level]", options_for_select(User.levels.map {|choice| [t('user.levels.'+choice[0]), choice[1]]}, user.level_before_type_cast), include_blank: false, disabled: (user==current_user ? 'disabled' : nil), class: 'user_level', data: {url: admin_user_path(user)}
+                %td= user.created_at.to_date

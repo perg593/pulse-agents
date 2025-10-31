@@ -1,0 +1,24 @@
+div#_pi_surveyWidgetContainer {
+    div#_pi_surveyWidget {
+        div._pi_widgetContentContainer {
+            ul._pi_answers_container {
+                div._pi_free_text_question_label_container {
+                    flex-wrap: wrap;
+                    ._pi_free_text_question_personal_data_alert {
+                        width: 100%;
+                        display: none;
+                        text-wrap: auto;
+                        margin-top: 5px;
+                        color: #c41414 !important;
+                    }
+                }
+
+                ._pi_free_text_question_field[aria-invalid="true"]~._pi_free_text_question_label_container {
+                    ._pi_free_text_question_personal_data_alert {
+                        display: block;
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,26 @@
+%h1.mfa-settings-title Multi-Factor Authentication
+
+.mfa-settings-container
+  .panel.panel-default
+    .panel-heading
+      %h2.panel-title Backup Codes
+
+    .mfa-settings-panel-content
+      %p.mfa-instructions Keep these somewhere safe in case you lose access to your authenticator application. They will not be shown again.
+
+      %hr
+
+      .backup-code-lists-container
+        - @unencrypted_backup_codes.in_groups_of((@unencrypted_backup_codes.length / 2.0).round, false).each do |backup_code_list|
+          %ul
+            - backup_code_list.each do |unencrypted_backup_code|
+              %li #{unencrypted_backup_code}
+
+  .panel.panel-default
+    .panel-heading
+      %h2.panel-title Multi-factor Setup Complete
+
+    .mfa-settings-panel-content
+      %p.mfa-instructions You have successfully enabled multi-factor authentication.
+
+      = link_to "Return to account settings", edit_my_account_path, class: "pi-primary-button"

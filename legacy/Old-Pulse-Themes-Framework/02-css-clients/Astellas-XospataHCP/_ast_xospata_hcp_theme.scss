@@ -1,0 +1,129 @@
+// THE _selectors FILE:
+@import '../../01-css-pulse/_selectors';
+
+// DEFAULT VARIABLES
+@import '../_default/_default-1-variables';
+
+// CLIENT-SPECIFIC DESIGN VARIABLES
+@import '_ast_xospata_hcp_variables';
+
+// GLOBAL MAPS:
+@import '../../01-css-pulse/_maps';
+
+// GLOBAL MIXINS
+@import '../../01-css-pulse/_mixins';
+
+// THE GLOBAL STRUCTURE FOR FRAMEWORK V2:
+@import '../../01-css-pulse/_theme-structure';
+
+div#_pi_surveyWidgetContainer{
+  div#_pi_surveyWidget{
+    box-shadow: 0 0 10px 0 rgba(0,0,0,0.15);
+    div._pi_widgetContentContainer{
+      width: 100% !important;
+      ul._pi_answers_container, div._pi_answers_container{
+        padding-left: 30px !important;
+        padding-right: 30px !important;
+        li{
+          box-shadow: 0 0 10px 0 rgba(0,0,0,0.15);
+          transform: skewX(30deg);
+          &:before{
+            content: "";
+            display: block;
+            background-color: #ab93c3;
+            width: 0px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            -webkit-transition: all .5s;
+            transition: all .5s;
+            left: 50%;
+            height: 100%;
+          }
+          label{
+            color: #582887 !important;
+            &:focus{
+              outline: none !important;
+            }
+          }
+          &:hover{
+            @media only screen and (min-width: 1024px){
+              &::before {
+                width: 100%;
+                left: 0%;
+              }
+            }
+          }
+          ._pi_radio_button_outer{
+            min-height: 14px !important;
+            ._pi_radio_button_inner{
+              top: 1px !important;
+              left: 1px !important;
+            }
+          }
+          >*{
+            transform: skewX(-30deg);
+          }
+        }
+        ._pi_free_text_question_field_container{
+          max-width: 100% !important;
+        }
+      }
+      ._pi_question._pi_question_custom_content_question{
+        text-align: center !important;
+        *{
+          text-align: center !important;
+        }
+        *{
+          // margin: 5px 0px;
+          font-family: 'SlatePro-Bk', Helvetica, Arial, sans-serif !important;
+          color: #58595b;
+          font-size: 14px
+        }
+        h1,h2,h3,h4,h5,&:first-child{
+          color: #a60f75 !important;
+          font-size: 16px !important;
+          font-weight: 700 !important;
+          font-family: inherit !important;
+          margin: 3px 0px 7px 0px !important;
+        }
+        a{
+          color: #a60f75 !important;
+          &:hover{
+            text-decoration: underline !important;
+          }
+        }
+      }
+      input[type="submit"]{
+        padding: 13px 30px !important;
+        color: #ffffff !important;
+        &:hover{
+          color: #a6a60f75 !important;
+        }
+      }
+    }
+  }
+  &.mobile-enabled{
+    div#_pi_surveyWidget{
+      div._pi_widgetContentContainer{
+        width: 100% !important;
+        ul._pi_answers_container{
+          padding-left: 30px !important;
+          padding-right: 30px !important;
+          li{
+            &:hover{
+              label{
+                color: #ffffff !important;
+              }
+            }
+          }
+        }
+        ._pi_question._pi_question_custom_content_question{
+          h1,h2,h3,h4,h5{
+            font-size: 18px !important;
+          }
+        }
+      }
+    }
+  }
+}

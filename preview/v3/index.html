@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pulse Insights Demo Studio — v3 Scaffold</title>
+  <link rel="stylesheet" href="./v3.css" />
+  <link rel="stylesheet" href="./theme/tokens.css" />
+  <link rel="stylesheet" href="./theme/theme-dark.css" />
+  <link rel="stylesheet" href="./theme/theme-light.css" />
+  <script>
+    (function () {
+      if (window.__PI_PROXY_ORIGIN__) return;
+      const localHosts = ['localhost', '127.0.0.1'];
+      if (localHosts.includes(window.location.hostname)) {
+        window.__PI_PROXY_ORIGIN__ = 'http://localhost:3100';
+        return;
+      }
+      const origin = window.location.origin && window.location.origin !== 'null' ? window.location.origin : '/';
+      window.__PI_PROXY_ORIGIN__ = origin || '/';
+    })();
+  </script>
+</head>
+<body class="pi-v3">
+  <div class="pi-v3__app">
+    <aside class="pi-v3__rail" aria-label="Demo controls">
+      <header class="pi-v3__rail-header">
+        <span class="pi-v3__rail-brand">Pulse Insights</span>
+        <span class="pi-v3__rail-subtitle">Demo Studio</span>
+      </header>
+      <div class="pi-v3__accordion" role="tablist">
+        <section class="pi-v3__accordion-item pi-v3__accordion-item--open" data-section="agent">
+          <header class="pi-v3__accordion-header" role="tab">
+            <button type="button" data-accordion-toggle aria-expanded="true">Agent</button>
+          </header>
+          <div class="pi-v3__accordion-body" role="tabpanel">
+            <div class="pi-v3__field">
+              <label for="pi-v3-agent-select">Select agent</label>
+              <div class="pi-v3__combobox">
+                <input id="pi-v3-agent-select" type="text" role="combobox" placeholder="Search agents" aria-expanded="false" aria-autocomplete="list" />
+              </div>
+              <p class="pi-v3__hint">Pick an Agent to begin. Load a demo from <em>Examples</em> if you’re exploring.</p>
+            </div>
+            <div class="pi-v3__field">
+              <label>Placement</label>
+              <div class="pi-v3__segment" role="group" aria-label="Placement">
+                <button type="button" data-placement="BR">Bottom right</button>
+                <button type="button" data-placement="BL">Bottom left</button>
+                <button type="button" data-placement="TR">Top right</button>
+                <button type="button" data-placement="TL">Top left</button>
+              </div>
+            </div>
+            <div class="pi-v3__field">
+              <label for="pi-v3-variant">Variant</label>
+              <select id="pi-v3-variant">
+                <option>Card</option>
+                <option>Banner</option>
+                <option>Modal</option>
+              </select>
+            </div>
+            <button id="pi-v3-launch-agent" class="pi-v3__button pi-v3__button--primary" type="button" title="Show the selected agent on the page.">
+              Launch Agent
+            </button>
+            <a id="pi-v3-embed-link" class="pi-v3__link" href="#" role="button">Show embed snippet</a>
+          </div>
+        </section>
+
+        <section class="pi-v3__accordion-item" data-section="appearance">
+          <header class="pi-v3__accordion-header" role="tab">
+            <button type="button" data-accordion-toggle aria-expanded="false">Appearance</button>
+          </header>
+          <div class="pi-v3__accordion-body" role="tabpanel" hidden>
+            <div class="pi-v3__tabs" role="tablist">
+              <button type="button" data-tab="auto" aria-selected="true">Auto (from URL)</button>
+              <button type="button" data-tab="manual" aria-selected="false">Manual</button>
+            </div>
+            <div class="pi-v3__tab-panel" data-panel="auto">
+              <div class="pi-v3__field">
+                <label for="pi-v3-theme-url">Enter a site URL</label>
+                <input id="pi-v3-theme-url" type="url" placeholder="https://example.com" />
+              </div>
+              <button id="pi-v3-generate-theme" class="pi-v3__button pi-v3__button--primary" type="button" title="Scan the URL for colors and typography; we’ll propose four variants.">
+                Generate theme
+              </button>
+              <div id="pi-v3-theme-suggestions" class="pi-v3__suggestions" aria-label="Suggestions"></div>
+              <p class="pi-v3__hint">Enter a URL and generate suggestions. You can still tweak Quick knobs.</p>
+            </div>
+            <div class="pi-v3__tab-panel" data-panel="manual" hidden>
+              <div class="pi-v3__field">
+                <label for="pi-v3-saved-themes">Saved themes</label>
+                <select id="pi-v3-saved-themes">
+                  <option>Default theme</option>
+                </select>
+              </div>
+              <button id="pi-v3-apply-theme" class="pi-v3__button pi-v3__button--secondary" type="button">Apply</button>
+              <div class="pi-v3__applied-list" id="pi-v3-applied-styles"></div>
+            </div>
+            <details class="pi-v3__quick-knobs">
+              <summary>Quick knobs</summary>
+              <div class="pi-v3__field">
+                <label for="pi-v3-brand-color">Brand color</label>
+                <input id="pi-v3-brand-color" type="color" value="#7c5cff" />
+              </div>
+              <div class="pi-v3__field">
+                <label for="pi-v3-corner-radius">Corner radius</label>
+                <input id="pi-v3-corner-radius" type="range" min="0" max="16" value="8" />
+              </div>
+              <div class="pi-v3__field">
+                <label for="pi-v3-density">Density</label>
+                <select id="pi-v3-density">
+                  <option value="1">Cozy</option>
+                  <option value="0" selected>Comfortable</option>
+                  <option value="-1">Compact</option>
+                </select>
+              </div>
+            </details>
+          </div>
+        </section>
+
+        <section class="pi-v3__accordion-item" data-section="triggers">
+          <header class="pi-v3__accordion-header" role="tab">
+            <button type="button" data-accordion-toggle aria-expanded="false">Manual trigger</button>
+          </header>
+          <div class="pi-v3__accordion-body" role="tabpanel" hidden>
+            <button id="pi-v3-trigger-present" class="pi-v3__button pi-v3__button--primary" type="button" title="Force the agent to appear. Ignores behavioral rules.">
+              Present now
+            </button>
+            <p class="pi-v3__manual-trigger-note">Need the behaviour demos? Use the Behavior Lab overlay in the preview panel.</p>
+          </div>
+        </section>
+
+        <section class="pi-v3__accordion-item" data-section="examples">
+          <header class="pi-v3__accordion-header" role="tab">
+            <button type="button" data-accordion-toggle aria-expanded="false">Examples</button>
+          </header>
+          <div class="pi-v3__accordion-body" role="tabpanel" hidden>
+            <div class="pi-v3__field">
+              <label for="pi-v3-industry">Industry</label>
+              <select id="pi-v3-industry">
+                <option>All industries</option>
+                <option>SaaS</option>
+                <option>Retail</option>
+                <option>Financial Services</option>
+                <option>Healthcare</option>
+              </select>
+            </div>
+            <div class="pi-v3__field">
+              <label for="pi-v3-usecase">Use-case</label>
+              <select id="pi-v3-usecase">
+                <option>—</option>
+                <option>Churn predictor prompt</option>
+                <option>Pricing objection</option>
+                <option>Implementation partner eval</option>
+              </select>
+            </div>
+            <p class="pi-v3__hint">Examples swap in prewritten copy and logic on top of your selected agent. You can revert any time.</p>
+            <div id="pi-v3-example-chip" class="pi-v3__chip" hidden></div>
+          </div>
+        </section>
+
+        <section class="pi-v3__accordion-item" data-section="tools">
+          <header class="pi-v3__accordion-header" role="tab">
+            <button type="button" data-accordion-toggle aria-expanded="false">Tools</button>
+          </header>
+          <div class="pi-v3__accordion-body" role="tabpanel" hidden>
+            <div class="pi-v3__badge-row">
+              <span id="pi-v3-tag-status" class="pi-v3__badge">Tag: Ready</span>
+              <span id="pi-v3-agent-status" class="pi-v3__badge">Agent: Idle</span>
+            </div>
+            <div class="pi-v3__field">
+              <label for="pi-v3-theme-mode">Appearance</label>
+              <div class="pi-v3__pill-group" id="pi-v3-theme-mode" role="group" aria-label="Appearance mode">
+                <button type="button" data-theme-mode="dark">Dark</button>
+                <button type="button" data-theme-mode="light">Light</button>
+                <button type="button" data-theme-mode="auto">Auto</button>
+              </div>
+            </div>
+            <div class="pi-v3__tool-buttons">
+              <button id="pi-v3-show-log" class="pi-v3__button pi-v3__button--ghost" type="button" title="Open a live stream of tag events, trigger checks, and presentation state.">
+                Show event log
+              </button>
+              <button id="pi-v3-reset-demo" class="pi-v3__button pi-v3__button--danger" type="button">
+                Reset demo
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </aside>
+
+    <main class="pi-v3__preview">
+      <div class="pi-v3__toolbar" role="region" aria-label="Preview toolbar">
+        <div class="pi-v3__toolbar-group pi-v3__toolbar-group--grow">
+          <label for="pi-v3-preview-url" class="pi-v3__toolbar-label">URL</label>
+          <input id="pi-v3-preview-url" type="url" placeholder="https://target-site.com" />
+        </div>
+        <div class="pi-v3__toolbar-group">
+          <span class="pi-v3__toolbar-label">Device</span>
+          <div class="pi-v3__pill-group" role="group">
+            <button type="button" data-device="Desktop">Desktop</button>
+            <button type="button" data-device="Tablet">Tablet</button>
+            <button type="button" data-device="Mobile">Mobile</button>
+          </div>
+        </div>
+        <div class="pi-v3__toolbar-group">
+          <span class="pi-v3__toolbar-label">Placement</span>
+          <div class="pi-v3__pill-group" role="group">
+            <button type="button" data-toolbar-placement="BR">BR</button>
+            <button type="button" data-toolbar-placement="BL">BL</button>
+            <button type="button" data-toolbar-placement="TR">TR</button>
+            <button type="button" data-toolbar-placement="TL">TL</button>
+          </div>
+        </div>
+        <div class="pi-v3__toolbar-group pi-v3__toolbar-group--safe">
+          <label class="pi-v3__toggle">
+            <input id="pi-v3-safe-area" type="checkbox" checked />
+            <span>Safe area</span>
+          </label>
+        </div>
+        <div class="pi-v3__toolbar-group">
+          <button id="pi-v3-reload" class="pi-v3__icon-button" type="button" aria-label="Reload preview">
+            ↻
+          </button>
+        </div>
+      </div>
+
+      <section class="pi-v3__behavior-card" id="pi-v3-behavior-overlay" role="complementary" aria-label="Behavior lab">
+        <header class="pi-v3__behavior-head">
+          <h2>Behavior Lab</h2>
+          <p>We preselected the first survey so you can trigger it with real behaviors or guided simulations.</p>
+        </header>
+        <div class="pi-v3__behavior-grid">
+          <section class="pi-v3__behavior-summary">
+            <h3>Selected survey</h3>
+            <p id="pi-v3-behavior-survey">Loading…</p>
+            <button id="pi-v3-behavior-present" class="pi-v3__button pi-v3__button--secondary" type="button">
+              Present now
+            </button>
+          </section>
+          <section class="pi-v3__behavior-actions">
+            <h3>Behaviors</h3>
+            <div id="pi-v3-behavior-list" class="pi-v3__behavior-list"></div>
+          </section>
+          <section class="pi-v3__behavior-stage-shell">
+            <h3>Try the behavior</h3>
+            <p class="pi-v3__hint">Scroll, pause, hover toward the top edge, or mash the button to trigger automatically.</p>
+            <div id="pi-v3-behavior-message" class="pi-v3__behavior-message" aria-live="polite">
+              Waiting for a behavior…
+            </div>
+            <div id="pi-v3-behavior-stage" class="pi-v3__behavior-stage" tabindex="0">
+              <div class="pi-v3__behavior-stage-content">
+                <div class="pi-v3__behavior-stage-intro">
+                  <p><strong>Play in this surface:</strong> it mimics a product page so you can practise the detectors.</p>
+                  <ul>
+                    <li><strong>Exit intent:</strong> move your cursor upward until it leaves the surface.</li>
+                    <li><strong>Scroll depth:</strong> skim the content to roughly 60%.</li>
+                    <li><strong>Idle:</strong> stop interacting for ~10 seconds.</li>
+                    <li><strong>Rage click:</strong> mash the frustrated button.</li>
+                  </ul>
+                </div>
+                <div class="pi-v3__behavior-stage-scroll">
+                  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse dignissim faucibus neque, eu luctus lectus fermentum sed. Integer ornare nibh nec est imperdiet, sed pulvinar dolor luctus.</p>
+                  <p>Quisque condimentum sit amet ante sed tempus. Donec viverra dui sed massa faucibus, non consectetur odio pulvinar. Aenean at dapibus dui. Donec ultricies eros lorem, sit amet interdum velit feugiat ac.</p>
+                  <p>Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Maecenas sollicitudin dolor ante, at finibus lacus lobortis vitae.</p>
+                  <p>Nunc accumsan, turpis at varius tincidunt, felis arcu volutpat nisl, sed fermentum mauris lorem sed mauris. Maecenas et turpis nec metus lacinia finibus.</p>
+                  <p>Curabitur ut faucibus justo. In feugiat semper ligula nec fermentum. Praesent condimentum quam non mauris placerat, eu pulvinar dui viverra.</p>
+                  <p>Sed aliquet, nibh non tincidunt efficitur, lacus dolor viverra mauris, ut faucibus dui dolor quis nibh. Nullam convallis libero non turpis tincidunt, vitae interdum velit tincidunt.</p>
+                </div>
+                <button type="button" class="pi-v3__behavior-rage" data-rage-target>Why isn’t this working?</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <div class="pi-v3__stage">
+        <div class="pi-v3__frame-wrapper">
+          <iframe id="pi-v3-frame" title="Preview frame" sandbox="allow-scripts allow-same-origin" referrerpolicy="no-referrer"></iframe>
+          <div class="pi-v3__safe-outline" hidden></div>
+          <div id="pi-v3-agent-overlay" class="pi-v3__agent-overlay"></div>
+          <div class="pi-v3__ghost-agent" aria-hidden="true">
+            <span>Agent (ghost)</span>
+          </div>
+        </div>
+      </div>
+
+      <aside class="pi-v3__log-panel" aria-live="polite">
+        <header class="pi-v3__log-header">
+          <h2>Event Log</h2>
+          <button id="pi-v3-close-log" class="pi-v3__icon-button" type="button" aria-label="Close log">×</button>
+        </header>
+        <ol id="pi-v3-log-list"></ol>
+      </aside>
+    </main>
+  </div>
+
+  <div id="pi-v3-toasts" aria-live="polite" aria-atomic="true"></div>
+
+  <script type="module" src="./v3.js"></script>
+</body>
+</html>

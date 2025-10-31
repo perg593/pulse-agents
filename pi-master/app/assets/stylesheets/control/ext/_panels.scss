@@ -1,0 +1,8 @@
+.panel {
+  @include box-shadow(none);
+  .panel-heading {
+    .panel-title {
+      font-size: 18px;
+    }
+  }
+}

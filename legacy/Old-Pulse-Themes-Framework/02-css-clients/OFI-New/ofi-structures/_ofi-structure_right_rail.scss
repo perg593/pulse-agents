@@ -1,0 +1,113 @@
+/* CUSTOM WORK RIGHT RAIL THEME */
+
+div#_pi_surveyWidget {
+  height: 394px !important;
+  width: 305px !important;
+}
+
+div#_pi_surveyWidget div._pi_question {
+  line-height: 120% !important;
+}
+
+div._pi_closeButton {
+  position: absolute !important;
+  top: 3px !important;
+  right: 5px !important;
+}
+
+a._pi_branding {
+  position: absolute !important;
+}
+
+div#_pi_surveyWidget ul._pi_answers_container {
+  flex-direction: column !important;
+}
+
+div[data-answer-widths="fixed"] ul._pi_answers_container li {
+  max-width: 98% !important;
+}
+
+div[data-answer-widths="variable-left"] ul._pi_answers_container li,
+div[data-answer-widths="variable-center"] ul._pi_answers_container li {
+  min-width: 120px !important;
+}
+
+div#_pi_surveyWidget[data-question-type="multiple_choices_question"] li label._pi-control._pi-control-checkbox {
+  padding: 10px 0px !important;
+  align-items: center !important;
+  width: 100%;
+}
+
+div#_pi_surveyWidget[data-question-type="multiple_choices_question"] input._pi_multiple_choices_question_submit_button,
+div#_pi_surveyWidget[data-question-type="multiple_choices_question"].mobile-enabled input._pi_multiple_choices_question_submit_button {
+  margin: 0px !important;
+  width: 98%;
+  padding: 10px 0px !important;
+}
+
+#_pi_surveyWidget > div._pi_widgetContentContainer > ul > div._pi_free_text_question_field_container {
+  width: 100%;
+}
+
+div#_pi_surveyWidget[data-question-type="free_text_question"] ._pi_question {
+  width: 80% !important;
+  margin: 0px 0px 15px 0px !important;
+  font-weight: normal !important;
+  text-align: left !important;
+}
+
+// #_pi_surveyWidget > div._pi_widgetContentContainer > ul > div._pi_free_text_question_field_container > div {
+//   display: none !important;
+// }
+
+#_pi_surveyWidget > div._pi_widgetContentContainer > ul > div._pi_free_text_question_submit_button_container {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px !important;
+}
+
+#_pi_surveyWidget > div._pi_widgetContentContainer > ul > div._pi_free_text_question_submit_button_container > input {
+  padding: 14px 30px !important;
+}
+
+#_pi_surveyWidget > img {
+  max-width: 40% !important;
+  position: absolute;
+  top: 10px;
+  left: 15px;
+}
+
+// PABLO
+
+div#_pi_surveyWidget {
+  justify-content: flex-start !important;
+  height: auto !important;
+  min-height: 394px !important;
+  padding-bottom: 30px !important;
+}
+
+div._pi_widgetContentContainer {
+  margin-top: 45px !important;
+}
+
+div#_pi_surveyWidget[data-question-type="free_text_question"] ._pi_question {
+  width: 90% !important;
+  margin-top: 15px !important;
+}
+
+div[data-question-type="free_text_question"] ul._pi_answers_container {
+  width: 90% !important;
+}
+
+textarea._pi_free_text_question_field {
+  min-height: 190px;
+}
+
+div._pi_thankYouSurvey {
+  display: block;
+  margin-top: 40%;
+}
+
+
+/* END CUSTOM WORK RIGHT RAIL THEME */

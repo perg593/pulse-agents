@@ -1,0 +1,59 @@
+/* Pulse Demo v3 — token source of truth */
+.pi-v3 {
+  color-scheme: dark;
+
+  /* Brand and semantic */
+  --pi-brand: #7c5cff;
+  --pi-success: #22c55e;
+  --pi-warning: #f59e0b;
+  --pi-danger: #ef4444;
+  --pi-info: #3b82f6;
+
+  /* Neutral palette (overridden per theme) */
+  --pi-color-bg: #0f1115;
+  --pi-color-surface: #161a22;
+  --pi-color-surface-2: #1c2230;
+  --pi-color-border: #2a2f3a;
+  --pi-color-text: #e7eaf0;
+  --pi-color-muted: #a7adbb;
+
+  /* Typography */
+  --pi-font: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
+    "Apple Color Emoji", "Segoe UI Emoji";
+  --pi-font-size: 16px;
+  --pi-line: 1.5;
+
+  /* Spacing */
+  --pi-space-1: 4px;
+  --pi-space-2: 8px;
+  --pi-space-3: 12px;
+  --pi-space-4: 16px;
+  --pi-space-5: 24px;
+  --pi-space-6: 32px;
+  --pi-space-7: 48px;
+
+  /* Shape + density (quick knobs) */
+  --pi-radius: 8px;
+  --pi-density: 0;
+
+  /* Effects */
+  --pi-ring: color-mix(in srgb, var(--pi-brand), white 22%);
+  --pi-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --pi-shadow-2: 0 18px 40px rgba(8, 10, 22, 0.4);
+  --pi-trans-fast: 0.12s ease;
+  --pi-trans: 0.18s ease;
+
+  /* Z layers */
+  --pi-z-toast: 9999;
+  --pi-z-overlay: 999;
+}
+
+.pi-v3[data-density='1'] {
+  --pi-space-2: 10px;
+  --pi-space-3: 14px;
+}
+
+.pi-v3[data-density='-1'] {
+  --pi-space-2: 6px;
+  --pi-space-3: 10px;
+}

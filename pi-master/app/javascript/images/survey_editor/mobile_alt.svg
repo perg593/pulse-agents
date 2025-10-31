@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="15px" height="22px" viewBox="0 0 15 22" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>device / mobile_alt</title>
+    <defs>
+        <filter id="filter-1">
+            <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 1.000000 0 0 0 0 1.000000 0 0 0 0 1.000000 0 0 0 1.000000 0"></feColorMatrix>
+        </filter>
+        <rect id="path-2" x="0" y="0" width="24" height="24"></rect>
+    </defs>
+    <g id="New-Editor" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="editor-NoInvite" transform="translate(-573.000000, -1064.000000)">
+            <g id="Group-2" transform="translate(320.000000, 1050.000000)">
+                <g id="device-/-mobile_alt" transform="translate(249.000000, 13.000000)" filter="url(#filter-1)">
+                    <g>
+                        <mask id="mask-3" fill="white">
+                            <use xlink:href="#path-2"></use>
+                        </mask>
+                        <g id="device-/-mobile_alt-(Background/Mask)"></g>
+                        <path d="M6.75,1 C5.64699996,1 4.75,1.89699996 4.75,3 L4.75,21 C4.75,22.1030006 5.64699996,23 6.75,23 L16.75,23 C17.8529997,23 18.75,22.1030006 18.75,21 L18.75,3 C18.75,1.89699996 17.8529997,1 16.75,1 L6.75,1 Z M6.75,3 L16.75,3 L16.7520008,21 L6.75,21 L6.75,3 Z M12.75,19 C12.75,18.4477152 12.3022847,18 11.75,18 C11.1977152,18 10.75,18.4477152 10.75,19 C10.75,19.5522847 11.1977152,20 11.75,20 C12.3022847,20 12.75,19.5522847 12.75,19 Z" fill="#2E3A59" mask="url(#mask-3)"></path>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

@@ -1,0 +1,9 @@
+# .cursorrules
+ask_output_dir: docs/ask
+plan_output_dir: docs/plan
+default_templates:
+  ask: docs/templates/ask_template.md
+  plan: docs/templates/plan_template.md
+default_commit_prefixes:
+  ask: "ask:"
+  plan: "plan:"

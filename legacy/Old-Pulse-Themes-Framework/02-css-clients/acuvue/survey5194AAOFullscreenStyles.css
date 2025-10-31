@@ -1,0 +1,90 @@
+div#_pi_surveyWidgetContainer.all-at-once div#_pi_surveyWidget ul._pi_answers_container li label._pi-control-checkbox{
+    color: #003087 !important;
+}
+div#_pi_surveyWidgetContainer.all-at-once:not(.mobile-enabled) div#_pi_surveyWidget ul._pi_answers_container li:hover label._pi-control-checkbox{
+    color: #ffffff !important;
+}
+div#_pi_surveyWidgetContainer.all-at-once div#_pi_surveyWidget div._pi_widgetContentContainer{
+    width: 90% !important;
+}
+div#_pi_surveyWidgetContainer.all-at-once div#_pi_surveyWidget div._pi_widgetContentContainer ._pi_question{
+    text-align: left !important;
+    width: 100% !important;
+    padding-right: 10% !important;
+}
+div#_pi_surveyWidgetContainer.all-at-once div#_pi_surveyWidget div._pi_widgetContentContainer ul._pi_answers_container li{
+    margin-left: 8px !important;
+    margin-right: 8px !important;
+}
+div#_pi_surveyWidgetContainer.all-at-once div#_pi_surveyWidget div._pi_widgetContentContainer ul._pi_answers_container li.selected{
+    border: 2px solid #00abe4 !important;
+    background-color: #00abe4 !important;
+    color: #fff !important;
+}
+div#_pi_surveyWidgetContainer.all-at-once div#_pi_surveyWidget div._pi_widgetContentContainer ul._pi_answers_container li a:focus{
+    outline: none !important;
+}
+div#_pi_surveyWidgetContainer.all-at-once div#_pi_surveyWidget div._pi_widgetContentContainer ul._pi_answers_container li.selected a{
+    background-color: #00abe4 !important;
+    color: #fff;
+}
+div#_pi_surveyWidgetContainer.all-at-once div#_pi_surveyWidget div._pi_widgetContentContainer ul._pi_answers_container li.selected a label{
+    background-color: #00abe4 !important;
+    color: #fff;
+}
+div#_pi_surveyWidgetContainer.all-at-once div#_pi_surveyWidget div._pi_widgetContentContainer ul._pi_answers_container li.selected a ._pi_radio_button_outer{
+    background-color: #00abe4 !important;
+    border: 1px solid #fff !important;
+}
+div#_pi_surveyWidgetContainer.all-at-once div#_pi_surveyWidget div._pi_widgetContentContainer ul._pi_answers_container li.selected a ._pi_radio_button_outer ._pi_radio_button_inner{
+    border: 1px solid transparent;
+    background-color: #fff !important;
+}
+div#_pi_surveyWidgetContainer.all-at-once:not(.mobile-enabled) div#_pi_surveyWidget div._pi_widgetContentContainer ul._pi_answers_container li:first-child{
+    /* margin-left: 0px !important; */
+}
+div#_pi_surveyWidgetContainer.all-at-once div#_pi_surveyWidget div._pi_widgetContentContainer ul._pi_answers_container li label{
+    min-width: 0px !important;
+    /* padding: 8px 15px 8px 8px !important; */
+    text-align: left !important;
+    display: flex;
+    align-items: center;
+    align-content: center;
+    justify-content: flex-start;
+}
+div#_pi_surveyWidgetContainer.all-at-once div#_pi_surveyWidget div._pi_widgetContentContainer ul._pi_answers_container[data-answers-per-row="1"] li{
+    max-width: calc(100% - 16px) !important;
+}
+div#_pi_surveyWidgetContainer.all-at-once.mobile-enabled div#_pi_surveyWidget div._pi_widgetContentContainer ul._pi_answers_container[data-answers-per-row="1"] li{
+    width: calc(100% - 16px) !important;
+}
+div#_pi_surveyWidgetContainer.all-at-once div#_pi_surveyWidget div._pi_widgetContentContainer ul._pi_answers_container[data-answers-per-row="2"] li{
+    max-width: calc(50% - 16px) !important;
+}
+div#_pi_surveyWidgetContainer.all-at-once.mobile-enabled div#_pi_surveyWidget div._pi_widgetContentContainer ul._pi_answers_container[data-answers-per-row="2"] li{
+    width: calc(50% - 16px) !important;
+}
+div#_pi_surveyWidgetContainer.all-at-once div#_pi_surveyWidget div._pi_widgetContentContainer ul._pi_answers_container[data-answers-per-row="3"] li{
+    max-width: calc(32% - 16px) !important;
+}
+div#_pi_surveyWidgetContainer.all-at-once.mobile-enabled div#_pi_surveyWidget div._pi_widgetContentContainer ul._pi_answers_container[data-answers-per-row="3"] li{
+    width: calc(32% - 16px) !important;
+}
+div#_pi_surveyWidgetContainer.all-at-once div#_pi_surveyWidget div._pi_widgetContentContainer ul._pi_answers_container[data-answers-per-row="4"] li{
+    max-width: calc(25% - 16px) !important;
+}
+div#_pi_surveyWidgetContainer.all-at-once.mobile-enabled div#_pi_surveyWidget div._pi_widgetContentContainer ul._pi_answers_container[data-answers-per-row="4"] li{
+    width: calc(25% - 16px) !important;
+}
+div#_pi_surveyWidgetContainer.all-at-once div#_pi_surveyWidget div._pi_widgetContentContainer ul._pi_answers_container[data-answers-per-row="5"] li{
+    max-width: calc(20% - 16px) !important;
+}
+div#_pi_surveyWidgetContainer.all-at-once.mobile-enabled div#_pi_surveyWidget div._pi_widgetContentContainer ul._pi_answers_container[data-answers-per-row="5"] li{
+    width: calc(20% - 16px) !important;
+}
+div#_pi_surveyWidgetContainer.all-at-once div#_pi_surveyWidget div._pi_widgetContentContainer ul._pi_answers_container[data-answers-per-row="6"] li{
+    max-width: calc(16.66666% - 16px) !important;
+}
+div#_pi_surveyWidgetContainer.all-at-once.mobile-enabled div#_pi_surveyWidget div._pi_widgetContentContainer ul._pi_answers_container[data-answers-per-row="6"] li{
+    width: calc(16.66666% - 16px) !important;
+}

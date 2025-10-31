@@ -1,0 +1,31 @@
+		// ================== E1. <a> TAG FOR SINGLE CHOICE ====================================
+
+
+
+
+
+
+
+
+// FLEX
+		ul._pi_answers_container li a {
+			// flex parent
+			display: 			flex;			
+			flex-direction: 	row;
+			flex-wrap: 			nowrap;
+			justify-content: 	flex-start;
+			align-items: 		center;
+			align-content: 	center;
+
+			// flex child
+			flex-grow: 			0;
+			flex-shrink: 		0;
+			flex-basis: 		100%;			
+			
+			// other sizing and positioning
+			position: 			static;
+			margin: 				0;
+			padding: 			0 !important;
+			height: 				auto;
+			min-width: 			100% !important;
+		}

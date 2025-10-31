@@ -1,0 +1,2 @@
+- if @survey.present? && @survey.metadatum.present?
+  = react_component("admin/pdf_templates/PDFTemplatePage", @presenter.props.merge(authenticityToken: form_authenticity_token))

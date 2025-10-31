@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="66px" height="16px" viewBox="0 0 66 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 64 (93537) - https://sketch.com -->
+    <title>bubbles</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="bubbles" transform="translate(-20.000000, -20.000000)" stroke="#BDD8F2" stroke-width="4">
+            <g transform="translate(20.000000, 20.000000)">
+                <circle id="o1" fill="#005EB9" cx="8" cy="8" r="6"></circle>
+                <circle id="o2" fill="#BDD8F2" cx="33" cy="8" r="6"></circle>
+                <circle id="o3" fill="#BDD8F2" cx="58" cy="8" r="6"></circle>
+            </g>
+        </g>
+    </g>
+</svg>

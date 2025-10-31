@@ -1,0 +1,11 @@
+= stylesheet_link_tag 'text_responses', media: 'all'
+
+- content_for :content_container_class, "text-response-content"
+
+- if @presenter.props['tableData'].blank?
+  .no-data-container
+    %h1 No data
+    %span Try
+    = link_to "adjusting your filters", report_survey_path(@question.survey_id)
+- else
+  = react_component("survey_report/TextResponsesWrapper", @presenter.props, {class: "text-response-content-wrapper"})

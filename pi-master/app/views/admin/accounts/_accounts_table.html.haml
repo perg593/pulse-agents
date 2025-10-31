@@ -1,0 +1,42 @@
+%td{title: object.company_name.presence || object.name}
+  = infos_for_account(object)
+  .actions{ style: 'display: none;' }
+    - account = object
+    = link_to 'Edit', edit_admin_account_path(account)
+    - if account.primary_user_id
+      |
+      = link_to 'Login As', login_as_admin_user_path(account.primary_user_id)
+    - if current_user.admin?
+      |
+      - if account.enabled
+        = link_to 'Deactivate', deactivate_admin_account_path(account), method: :patch, data: { confirm: 'Are you sure?' }
+      - else
+        = link_to 'Activate', activate_admin_account_path(account), method: :patch, data: { confirm: 'Are you sure?' }
+      |
+      - if account.qrvey_enabled?
+        = link_to "Block from Qrvey", block_qrvey_access_admin_account_path(account), method: :patch, data: { confirm: "This will prevent them from seeing anything Qrvey related. Are you sure?" }
+      - else
+        = link_to "Allow access to Qrvey", restore_qrvey_access_admin_account_path(account), method: :patch, data: { confirm: "This will allow them to see Qrvey pages and data. Are you sure?" }
+      |
+      = link_to 'Audit', audit_admin_account_path(account)
+    |
+    = link_to 'Delete', admin_account_path(account), method: :delete, data: { confirm: 'Are you sure?' }
+
+%td{:'data-sort-value' => object.surveys_size}
+  = number_with_delimiter(object.surveys_size)
+  %span.info (#{number_with_delimiter(object.live_surveys_size)} Live)
+%td{:'data-sort-value' => object.calls_count}= number_with_delimiter(object.calls_count)
+%td{:'data-column' => 'impressions', :'data-sort-value' => '0'}= '0'
+%td{:'data-column' => 'submissions', :'data-sort-value' => '0'}= '0'
+%td{:'data-sort-value' => object.users_last_sign_in_at.to_i}= object.users_last_sign_in_at.try(:strftime, '%m/%d/%Y')
+%td{:'data-sort-value' => object.users_join_date.to_i}= object.users_join_date.try(:strftime, '%m/%d/%Y')
+%td= object.users_sign_in_count
+%td= object.users_size
+%td
+  = form_tag observe_admin_account_path(object.id), method: :patch do |f|
+    - if object.is_observed
+      = hidden_field_tag :is_observed, 'false'
+      = submit_tag 'Observed'
+    - else
+      = hidden_field_tag :is_observed, 'true'
+      = submit_tag 'Observe'

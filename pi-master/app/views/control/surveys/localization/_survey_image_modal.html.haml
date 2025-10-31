@@ -1,0 +1,36 @@
+:ruby
+  modal_id ||= nil
+  survey ||= nil
+
+.modal.fade{id: modal_id, :role => "dialog", :tabindex => "-1"}
+  .modal-dialog{:role => "document"}
+    .modal-content
+      = form_for survey, url: localization_form_update_survey_path(survey) do |survey_form|
+        .modal-header
+          %button.close{"aria-label" => "Close", "data-dismiss" => "modal", :type => "button"}
+            %span{"aria-hidden" => "true"} ×
+          %h5.modal-title Image Settings
+        .modal-body
+          .basic-fields-container
+            .basic-fields-row
+              %label.image-label Survey Image:
+              = survey_form.file_field :background
+
+            - if survey.background_url
+              .delete-img
+                = link_to 'remove image', remove_background_survey_path(survey), method: :delete
+              = image_tag survey.background_url, width: '80%'
+
+            .basic-fields-row
+              %label.image-label Survey Image URL:
+              = survey_form.text_field :remote_background
+              - if survey.remote_background
+                = image_tag survey.remote_background, width: '80%'
+
+            .basic-fields-row
+              %label.image-label Widget background colour:
+              = survey_form.text_field :background_color, data: { toggle: 'tooltip', placement: 'bottom' }, title: I18n.t('simple_form.titles.survey.background_color'), id: "background_color_#{ survey.id }", pattern: "^#([0-9A-Ga-g]{3}|[0-9A-Ga-g]{6})$"
+              .color-box{ data: {color: survey.background_color, target: "#background_color_#{ survey.id }"} }
+
+        .modal-footer
+          = survey_form.submit 'Save Image Settings', class: 'btn btn-primary'

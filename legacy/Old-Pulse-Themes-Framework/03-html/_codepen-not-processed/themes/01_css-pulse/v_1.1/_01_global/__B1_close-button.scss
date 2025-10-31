@@ -1,0 +1,119 @@
+	/* ================== B1. CLOSE BUTTON ================== */
+	// CLOSE 1 | Standard
+	div._pi_closeButton {
+		// font-family: 	sans-serif;
+		// font-weight: 	lighter;
+		font-family: 	'XfinityStandard', Helvetica, Arial, sans-serif;
+		font-weight: 	200;
+
+		color: 		 	#888;
+		font-size: 	 	34px;
+		text-align:  	center;
+		line-height: 	15px !important;
+
+		width: 			20px;
+		height: 			20px;
+		padding: 		0;
+		margin: 			0;
+		margin-left: 	auto;
+
+		background-color: transparent !important;
+	}
+
+	div._pi_closeButton:hover {
+		color: 				#888;
+		background-color: transparent !important;
+	}
+
+	#_pi_surveyWidgetContainer.mobile-enabled div._pi_closeButton,
+	#_pi_surveyWidgetContainer.mobile-enabled div._pi_closeButton:hover {
+		color: 			#888;
+		font-size: 	 	34px;
+		text-align:  	center;
+		line-height: 	15px !important;
+
+		width: 			20px !important;
+		height: 			20px !important;
+		padding: 		0 !important;
+		margin: 			0 !important;
+		margin-left: 	auto !important;
+
+		background-color: transparent !important;
+	}
+
+
+	// CLOSE 2 | Custom Content Fullscreen
+	div._pi_closeCustomButton,
+	#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidgetCustom div._pi_closeCustomButton {
+		font-family: 	sans-serif;
+		font-weight: 	lighter;
+
+		color: 		 	#888;
+		font-size: 	 	34px;
+		text-align:  	center;
+		line-height: 	100% !important;
+
+		width: 			40px;
+		height: 			30px;
+		padding: 		0;
+		margin: 			0;
+		margin-left: 	calc(100% - 70px);
+		margin-top: 	20px;
+
+		border-radius: 	0 !important;
+		background-color: #fff !important;
+	}
+
+	div._pi_closeCustomButton:hover {
+		color: 				#888 !important;
+		background-color: #fff !important;
+	}
+
+
+	// CLOSE 3 | Bottom Bar
+	#_pi_surveyWidget[survey-widget-type="bottombarsurvey"] div._pi_closeButton, 
+	#_pi_surveyWidget[survey-widget-type="bottombarsurvey"] div._pi_closeButton:hover {
+		color: 				#888;
+		background-color: transparent !important;
+	}
+
+	#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget[survey-widget-type="bottombarsurvey"] div._pi_closeButton,
+	#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget[survey-widget-type="bottombarsurvey"] div._pi_closeButton:hover {
+		color: 				#888;
+		background-color: transparent !important;
+	} 
+
+
+	// CLOSE 4 | Docked Widget
+	#_pi_surveyWidget[survey-widget-type="dockedwidgetsurvey"] div._pi_closeButton, 
+	#_pi_surveyWidget[survey-widget-type="dockedwidgetsurvey"] div._pi_closeButton:hover {
+		font-weight: 		lighter;
+
+		color: 		 		#888;
+		font-size: 	 		24px;
+		text-align:  		center;
+		line-height: 		80% !important;
+	
+		width: 				20px;		
+		height: 				20px;
+		background-color: transparent !important;
+	}
+
+	#_pi_surveyWidget[survey-widget-type="dockedwidgetsurvey"] div._pi_closeButton:hover {
+		color: 		 		#000 !important;
+	}
+
+	#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget[survey-widget-type="dockedwidgetsurvey"] div._pi_closeButton,
+	#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget[survey-widget-type="dockedwidgetsurvey"] div._pi_closeButton:hover {
+		color: 				#888;
+		background-color: transparent !important;
+	} 
+
+
+	// Legacy | ----  VERIFICATION NEEDED ----
+	div._pi_closeButton,
+	div._pi_closeCustomButton { 
+		position: static !important;
+	}
+
+

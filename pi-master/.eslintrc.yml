@@ -1,0 +1,23 @@
+env:
+  browser: true
+  es2021: true
+extends:
+  - 'plugin:react/recommended'
+  - 'plugin:import/recommended'
+  - google
+  # Comment this out to use ES6 linting (for js and jsx files)
+  # Uncomment to use Typescript linting (for ts and tsx files)
+parser: "@typescript-eslint/parser"
+settings:
+  import/resolver:
+    node:
+      extensions: ['.js', '.ts', '.jsx', '.tsx']
+parserOptions:
+  ecmaFeatures:
+    jsx: true
+  ecmaVersion: 12
+  sourceType: module
+plugins:
+  - react
+  - import
+rules: {}

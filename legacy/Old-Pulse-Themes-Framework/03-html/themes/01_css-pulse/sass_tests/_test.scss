@@ -1,0 +1,238 @@
+// VARIABLES -----------------
+$widget-container-border: (
+	color: purple,
+	width: 1000px 0 0 100px,
+	style: solid,
+	radius: 2000px 0 0 200px
+);
+
+$widget-border: (
+	color: yellow,
+	width: 0,
+	style: dotted,
+	radius: 0,
+);
+
+
+// MAPS -----------------
+%widget-container-border {
+	border-color: map-get($widget-container-border, color);
+	border-width: map-get($widget-container-border, width);
+	border-style: map-get($widget-container-border, style);
+	border-radius: map-get($widget-container-border, radius);
+}
+
+%widget-border {
+	border-color: map-get($widget-border, color);
+	border-width: map-get($widget-border, width);
+	border-style: map-get($widget-border, style);
+	border-radius: map-get($widget-border, radius);
+}
+
+
+// MIXINS -----------------
+@mixin pi_border($container) {
+   @extend %#{$container}-border;
+}
+
+
+// STYLES -----------------
+.widget-container {
+   @include pi_border("widget-container");
+}
+
+.widget {
+   @include pi_border("widget");
+}
+
+
+
+
+
+
+
+
+
+
+
+
+// .asdf {margin: 10px}
+
+// $widget-container-border: (
+// 	color: black,
+// 	width: 89px 5px,
+// 	style: dotted,
+// 	radius: 20px
+// );
+
+// $widget-border: (
+// 	color: green,
+// 	width: 0,
+// 	style: solid,
+// 	radius: 0,
+// );
+
+// $widget-border-map: widget-border;
+
+// @mixin pi-border($number) {
+// 	border-color: map-get($widget-container-border, color);
+// 	border-width: map-get($widget-container-border, width);
+// 	border-style: map-get($widget-container-border, style);
+// 	border-radius: map-get($widget-container-border, radius);
+// }
+
+// .surveycontainer1 {
+// 	@include pi-border(1);
+// }
+
+// @mixin pi-border2($container-type) {
+// 	border-color: map-get($container-type, color);
+// 	border-width: map-get($container-type, width);
+// 	border-style: map-get($container-type, style);
+// 	border-radius: map-get($container-type, radius);
+// }
+
+// .surveycontainer2 {
+// 	@include pi-border2("$widget-border");
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// @mixin goo($hey) {
+//   goo: $hey
+// }
+
+// $hey: 1000px, 12px;
+
+// div.one {
+//     @include goo(unquote("#{$hey}")); 
+// }
+
+// div.two {
+//     @include goo(($hey)); 
+// }
+
+
+
+
+
+
+
+// @mixin pi-border($color, $width, $style, $radius) {
+// 	border-color: $color;
+// 	border-width: $width;
+// 	border-style: $style;
+// 	border-radius: $radius;
+// }
+
+// $border-color-01: yellow;
+// $border-color-02: green;
+
+// %background-widget-1a {
+// 	 @include pi-border($border-color-01,2px 3px 4px 5px,dotted,10px 12px 14px 16px);
+// }
+
+// %background-widget-1b {
+// 	 @include pi-border($border-color-02,1px,solid,1px);
+// }
+
+// .box-1a { 
+// 	@extend %background-widget-1a;
+// }
+
+// .box-1b { 
+// 	@extend %background-widget-1b;
+// }
+
+// .box2 { 
+// 	@extend %background-widget-1a;
+// }
+
+
+
+
+
+
+
+
+// This CSS won't print because %equal-heights is never extended.
+// %equal-heights {
+//   display: flex;
+//   flex-wrap: wrap;
+// }
+
+// This CSS will print because %message-shared is extended.
+// %message-shared {
+//   border: 1px solid #ccc;
+//   padding: 10px;
+//   color: #333;
+// }
+
+// .message {
+//   @extend %message-shared;
+// }
+
+// .success {
+//   @extend %message-shared;
+//   border-color: green;
+// }
+
+// .error {
+//   @extend %message-shared;
+//   border-color: red;
+// }
+
+// .warning {
+//   @extend %message-shared;
+//   border-color: yellow;
+// }
+
+
+
+
+
+
+
+
+
+
+
+// @mixin box-emboss($outerOpacity, $innerOpacity) {
+//   box-shadow:
+//     rgba(white, $outerOpacity) 0 1px 0, 
+//     rgba(black, $innerOpacity) 0 1px 0 inset;
+// }
+  
+// %box-emboss {
+//   @include box-emboss(0.7, 0.4);
+// }
+
+// header[role="banner"] {
+//   @extend %box-emboss;
+// }
+
+// .module {
+//   @extend %box-emboss;
+  
+//   border-radius: 10px;
+//   background: #ccc;
+//   padding: 10px 20px;
+// }

@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# Build outputs
+output/
+dist/
+*.log
+
+# Environment files
+.env
+.env.local
+.env.production
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Development
+_manual-testing/
+lipsum_local/
+
+# Large legacy directories (keep for reference but don't commit)
+# Uncomment if you want to exclude these:
+# legacy/Old-Pulse-Themes-Framework/
+# pi-master/
+
+# Temporary
+tmp/
+temp/
+.tmp/
+

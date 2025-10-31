@@ -1,0 +1,103 @@
+@import 'common/variables';
+@import 'control/ext/mixins';
+
+// Shamelessly borrowed from Bootstrap
+@mixin bootstrap_button() {
+  display: inline-block;
+  margin-bottom: 0;
+  font-weight: normal;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  touch-action: manipulation;
+  cursor: pointer;
+  background-image: none;
+  border: 1px solid transparent;
+  padding: 6px 12px;
+  font-size: 12px;
+  line-height: 1.428571429; // wtf?
+  border-radius: 4px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+// TODO: Review accessibility
+@mixin accessible_button($text-colour, $background-colour, $border-colour, $hover-background-colour, $hover-border-colour, $focus-background-colour, $focus-border-colour, $active-background-colour) {
+  &:hover,
+  &:focus {
+    color: $text-colour;
+    text-decoration: none;
+  }
+
+  &:hover {
+    color: $text-colour;
+    background-color: $hover-background-colour;
+    border-color: $hover-border-colour;
+
+    &:focus {
+      background-color: $focus-background-colour;
+      border-color: $focus-border-colour;
+    }
+  }
+
+  &:focus {
+    &:active {
+      background-color: $active-background-colour;
+    }
+  }
+}
+
+// A nice colourful button that invites action
+// OK, Save, Update, etc.
+// WIP -- Feel free to make it more robust
+.pi-primary-button {
+  @include bootstrap_button();
+
+  $text-colour: #fff;
+  $background-colour: $pi-highlight-color;
+  $border-colour: $pi-highlight-color-border;
+
+  $hover-background-colour: $pi-darkened-highlight-color;
+  $hover-border-colour: #86b0cc;
+
+  $focus-background-colour: #883879;
+  $focus-border-colour: #86b0cc;
+
+  $active-background-colour: #663457;
+
+  @include accessible_button($text-colour, $background-colour, $border-colour, $hover-background-colour, $hover-border-colour, $focus-background-colour, $focus-border-colour, $active-background-colour);
+
+  // Our customizations
+  color: $text-colour;
+  background-color: $background-colour;
+  border-color: $border-colour;
+}
+
+// A less colourful button for secondary actions
+// For example, a "Cancel" button in a modal dialogue
+// Or a sidebar that has many buttons that aren't too eye-catching
+// WIP -- Feel free to make it more robust
+.pi-secondary-button {
+  @include bootstrap_button();
+
+  $text-colour: #333;
+  $background-colour: #fff;
+  $border-colour: $pi-highlight-color-border;
+
+  $hover-background-colour: $pi-neutral-color;
+  $hover-border-colour: $pi-highlight-color-border;
+
+  $focus-background-colour: #222;
+  $focus-border-colour: $pi-highlight-color-border;
+
+  $active-background-colour: #808080;
+
+  @include accessible_button($text-colour, $background-colour, $border-colour, $hover-background-colour, $hover-border-colour, $focus-background-colour, $focus-border-colour, $active-background-colour);
+
+  border: 1px solid $pi-highlight-color-border;
+  background-color: $background-colour;
+  font-size: 12px;
+  font-weight: 600;
+}

@@ -1,0 +1,17 @@
+{
+  "name": "codekit-project",
+  "version": "1.0.0",
+  "description": "CodeKit created this starter package.json file. You should customize it appropriately.",
+  "scripts": {},
+  "author": "",
+  "license": "UNLICENSED",
+  "repository": {},
+  "dependencies": {
+    "autoprefixer": "^9.7.6",
+    "browserslist": "^4.12.0",
+    "caniuse-db": "^1.0.30001043",
+    "caniuse-lite": "^1.0.30001039",
+    "caniuse-support": "^1.0.4",
+    "caniuse-web-component": "^2.1.1"
+  }
+}

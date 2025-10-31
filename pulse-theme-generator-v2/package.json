@@ -1,0 +1,26 @@
+{
+  "name": "pulse-theme-generator-v2",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Pulse Theme Generator v2 - automated theme extraction and mapping pipeline.",
+  "scripts": {
+    "build": "tsc",
+    "extract": "tsx scripts/extract-theme.ts",
+    "map": "tsx scripts/map-to-pulse.ts",
+    "dev": "tsx scripts/dev-server.ts",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "colorjs.io": "^0.5.2",
+    "express": "^4.19.2",
+    "playwright": "^1.45.0",
+    "postcss": "^8.4.38"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.12.7",
+    "tsx": "^4.7.1",
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0"
+  }
+}

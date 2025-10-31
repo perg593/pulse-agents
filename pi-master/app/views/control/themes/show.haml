@@ -1,0 +1,46 @@
+%h2 Theme
+
+.panel.panel-default
+  .panel-heading
+    %h4.panel-title Details
+  .panel-body
+    .theme-name
+      .row
+        .col-md-2
+          %label= 'Name'
+        .col-md-10
+          =@theme.name
+    .theme-last-edited
+      .row
+        .col-md-2
+          %label= 'Last Edited'
+        .col-md-10
+          =I18n.l @theme.updated_at, format: :long
+    .theme-surveys
+      .row
+        .col-md-2
+          %label= 'In Use By'
+        .col-md-10
+          .theme-surveys-link
+            - @theme.surveys.each do |survey|
+              = link_to(survey.name, edit_survey_path(survey))
+              %br
+    - if @theme.css?
+      .theme-css
+        .row
+          .col-md-2
+            %label= 'CSS'
+          .col-md-10
+            %br
+            %textarea#theme-css-text=@theme.css
+    - else
+      .theme-native
+        .row
+          .col-md-2
+            %label= 'Native'
+          .col-md-10
+            %br
+            %textarea#theme-native-text= JSON.pretty_generate(@theme.native_content)
+
+- if current_user.admin? && @audits.present?
+  = render "application/audits", audits: @audits

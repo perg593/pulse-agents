@@ -1,0 +1,12 @@
+.impressions{ style: 'margin-left: 20px;'}
+  .title{ style: 'color: #5B5B5B; font-size: 13px; font-weight: bold; margin-top: 25px;'}= 'Impressions'
+  .count{ style: 'color: #6086C1; font-size: 32px;'}= number_with_delimiter(@impressions_count, delimiter: ',')
+
+.submissions{ style: 'margin-left: 20px;'}
+  .title{ style: 'color: #5B5B5B; font-size: 13px; font-weight: bold; margin-top: 25px;'}= 'Submissions'
+  .count{ style: 'color: #6086C1; font-size: 32px;'}= number_with_delimiter(@submissions_count, delimiter: ',')
+
+.submission_rate{ style: 'margin-left: 20px;'}
+  .title{ style: 'color: #5B5B5B; font-size: 13px; font-weight: bold; margin-top: 25px;'}
+    Submission Rate
+  .count{ style: 'color: #6086C1; font-size: 32px;'}= @submission_rate

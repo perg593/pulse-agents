@@ -1,0 +1,41 @@
+- content_for :page_title, "Prompt Templates"
+
+.container
+  .row
+    .col-md-12
+      .panel.panel-default
+        .panel-heading
+          %h3.panel-title
+            Prompt Templates
+            = link_to "New Prompt Template", new_admin_prompt_template_path, class: "btn btn-primary btn-sm pull-right"
+
+        .panel-body
+          - if @prompt_templates.any?
+            %table.table.table-striped
+              %thead
+                %tr
+                  %th Name
+                  %th Content Preview
+                  %th Default
+                  %th Created
+                  %th Actions
+              %tbody
+                - @prompt_templates.each do |template|
+                  %tr
+                    %td
+                      = link_to template.name, admin_prompt_template_path(template)
+                    %td
+                      = truncate(template.content, length: 100)
+                    %td
+                      - if template.is_default?
+                        %span.label.label-success Default
+                      - else
+                        %span.label.label-default Not Default
+                    %td
+                      = template.created_at.strftime("%m/%d/%Y")
+                    %td
+                      = link_to "Edit", edit_admin_prompt_template_path(template), class: "btn btn-xs btn-default"
+                      = link_to "Delete", admin_prompt_template_path(template), method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-xs btn-danger"
+          - else
+            %p.text-muted No prompt templates found.
+

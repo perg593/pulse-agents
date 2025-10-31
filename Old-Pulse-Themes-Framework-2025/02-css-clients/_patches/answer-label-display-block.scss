@@ -1,0 +1,74 @@
+/* ======================= Answer Label Display Block Patch ======================= */
+$control-indicator-transform: translateY(calc(-50% - 2px)) !default;
+$control-indicator-left-offset: 0px !default;
+$control-indicator-checkmark-left-offset: 5px !default;
+$multi-choice-padding-left: 26px !default;
+div#_pi_surveyWidgetContainer{
+   div#_pi_surveyWidget{
+      div._pi_widgetContentContainer{
+         ul._pi_answers_container{
+            li{
+               label{
+                  background-color: transparent !important;
+                  display: block !important;
+               }
+               a{
+                  background-color: transparent !important;
+                  label{
+                     display: block !important;
+                  }
+               }
+            }
+            &[data-radio-button="on"]{
+               li{
+                  a{
+                     width: 100% !important;  
+                     max-width: 100% !important;
+                     label{
+                        width: auto !important;
+                     }
+                  }
+               }
+            }
+         }
+         ul._pi_answers_container[data-question-type="multiple_choices_question"]{
+            li{
+               padding: 0px !important;
+               label{
+                  @if variable-exists(single-choice-noradio-text-padding-desk) {
+                     padding: $single-choice-noradio-text-padding-desk;
+                  }
+                  @media (min-width:415px) and (max-width:768px) {
+                        @if variable-exists(single-choice-noradio-text-padding-ipad) {
+                           padding: $single-choice-noradio-text-padding-ipad;
+                        }
+                  }
+                  @media (max-width:414px) {
+                     @if variable-exists(single-choice-noradio-text-padding-mobi) {
+                        padding: $single-choice-noradio-text-padding-mobi;
+                     }
+                  }
+                  margin-left: 0px !important;
+                  padding-left: $multi-choice-padding-left !important;
+                  padding-right: 10px;
+                  width: 100% !important;
+                  ._pi_checkbox{
+                    position: absolute !important;
+                  }
+                  ._pi-control-indicator{
+                     position: absolute !important;
+                     top: 15px !important;
+                     position: absolute !important;
+                     top: 50% !important;
+                     left: $control-indicator-left-offset !important;
+                     transform: $control-indicator-transform;
+                     &::after{
+                        left: $control-indicator-checkmark-left-offset !important
+                     }
+                  }
+               }
+            }
+         }
+      }
+   }
+}
