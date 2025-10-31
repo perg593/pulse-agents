@@ -29,6 +29,10 @@ Thumbs.db
 _manual-testing/
 lipsum_local/
 
+# Legacy directories with secrets (exclude from git)
+pi-master/config/deploy/extras/notifier.rb
+preview/scripts/stripe-demo-server.js
+
 # Large legacy directories (keep for reference but don't commit)
 # Uncomment if you want to exclude these:
 # legacy/Old-Pulse-Themes-Framework/
