@@ -102,6 +102,7 @@ function run() {
   if (!fs.existsSync(DEFAULT_THEME_JSON)) {
     throw new Error('preview/themes/default.json missing.');
   }
+  if (!fs.existsSync(CLIENT_THEMES_PATH)) { console.warn("⚠️  CLIENT_THEMES_PATH not found, skipping build. This is OK for Cloudflare Pages deployment."); process.exit(0); }
   const clientIndex = JSON.parse(fs.readFileSync(CLIENT_THEMES_PATH, 'utf8'));
   const manifest = buildManifest(clientIndex);
   fs.writeFileSync(MANIFEST_OUT, JSON.stringify(manifest, null, 2));
