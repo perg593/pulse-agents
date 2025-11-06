@@ -2,7 +2,7 @@
 
 **Date:** 2025-01-23  
 **Scope:** `/preview` directory implementation vs. documented plans  
-**Reference Plans:** `docs/plan/2025-10-22_1547 preview v3/`
+**Reference Plans:** `docs/planning/2025-10/preview-v3/`
 
 ---
 
@@ -125,7 +125,7 @@ The `/preview` implementation demonstrates **strong alignment** with the Protoco
 
 **Implementation Status:**
 
-**File:** `preview/v3/_headers`
+**File:** `preview/v3-prototype/_headers`
 
 - ✅ Default CSP includes `frame-ancestors 'none'`
 - ✅ Player override (`/player.html`) sets `frame-ancestors 'self'`

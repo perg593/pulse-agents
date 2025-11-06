@@ -83,7 +83,7 @@ Before deploying, verify:
 - [ ] `functions/proxy.js` exists (✅ confirmed)
 - [ ] `wrangler.toml` has correct config (✅ confirmed)
 - [ ] `.cfignore` excludes dev files (✅ confirmed)
-- [ ] `preview/v3/_headers` exists (✅ confirmed)
+- [ ] `preview/v3-prototype/_headers` exists (✅ confirmed)
 
 ## Deployment Test Plan
 
@@ -109,7 +109,7 @@ After deploying via Git:
 
 4. **Test V3 Preview:**
    ```
-   https://your-project.pages.dev/preview/v3/index.html
+   https://your-project.pages.dev/preview/v3-prototype/index.html
    ```
    Should load v3 prototype
 

@@ -20,7 +20,7 @@ This report verifies that the codebase implementation matches the plans and spec
 
 ### ✅ Status: COMPLETE
 
-**Specification:** `/docs/planning/2025-10-28_2255-dedicated-theme-generator-interface.md`
+**Specification:** `/docs/planning/2025-10/theme-generator-interface.md`
 
 **Verification Results:**
 
@@ -56,7 +56,7 @@ This report verifies that the codebase implementation matches the plans and spec
 
 ### ✅ Status: COMPLETE
 
-**Specification:** `/docs/planning/2025-10-28_2255-dedicated-theme-generator-interface.md` - Migration Strategy section
+**Specification:** `/docs/planning/2025-10/theme-generator-interface.md` - Migration Strategy section
 
 **Verification Results:**
 
@@ -83,7 +83,7 @@ This report verifies that the codebase implementation matches the plans and spec
 
 ### ✅ Status: COMPLETE
 
-**Specification:** `/docs/planning/2025-10-28_2255-dedicated-theme-generator-interface.md` - Download Implementation section
+**Specification:** `/docs/planning/2025-10/theme-generator-interface.md` - Download Implementation section
 
 **Verification Results:**
 
@@ -121,7 +121,7 @@ This report verifies that the codebase implementation matches the plans and spec
 ### ⚠️ Status: INCOMPLETE
 
 **Specification:** 
-- `/docs/planning/2025-10-28_2336 theme-generator-upgrades.md`
+- `/docs/planning/2025-10/theme-generator-upgrades.md`
 - `/docs/ask/2025-10-28_2327-css-structure.md`
 
 **Verification Results:**
@@ -269,5 +269,5 @@ The missing answer layout CSS system has now been implemented:
 
 3. **Integrated into `compileTheme()` function** - answer layout CSS is now included in all generated themes
 
-The implementation follows the specifications from `docs/planning/2025-10-28_2336 theme-generator-upgrades.md` and matches patterns from curated CSS files.
+The implementation follows the specifications from `docs/planning/2025-10/theme-generator-upgrades.md` and matches patterns from curated CSS files.
 

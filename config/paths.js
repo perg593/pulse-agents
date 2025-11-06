@@ -26,7 +26,7 @@ const BASE_PATHS = {
   PREVIEW_BASIC_DIR: 'preview/basic',
   
   /** Preview v3 directory */
-  PREVIEW_V3_DIR: 'preview/v3',
+  PREVIEW_V3_DIR: 'preview/v3-prototype',
   
   /** Preview dist directory */
   PREVIEW_DIST_DIR: 'preview/dist',

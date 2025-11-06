@@ -45,7 +45,7 @@ Click **"Environment variables"** and add:
 ### Step 6: Verify Deployment
 Test these URLs:
 - `https://pulse-agents.pages.dev/` - Main preview
-- `https://pulse-agents.pages.dev/preview/v3/index.html` - V3 prototype
+- `https://pulse-agents.pages.dev/preview/v3-prototype/index.html` - V3 prototype
 - `https://pulse-agents.pages.dev/proxy?url=https://example.com` - Proxy function
 
 ---

@@ -32,7 +32,7 @@ The `.cfignore` file excludes development files from deployment:
 - `.env` files, logs, temporary files
 - IDE and editor files
 
-### Security Headers (`preview/v3/_headers`)
+### Security Headers (`preview/v3-prototype/_headers`)
 
 The application includes Cloudflare Pages headers for:
 - Content Security Policy (CSP)
@@ -128,9 +128,9 @@ After deployment, your site structure will be:
 ### Required Files
 
 - `preview/index.html` - Main entry point
-- `preview/v3/_headers` - Security headers
+- `preview/v3-prototype/_headers` - Security headers
 - `preview/app/` - Application code
-- `preview/v3/` - V3 preview assets
+- `preview/v3-prototype/` - V3 preview assets
 - `preview/styles/` - CSS files
 - `preview/fonts/` - Font assets
 - `wrangler.toml` - Cloudflare configuration
@@ -157,7 +157,7 @@ After deployment, verify:
    - Should redirect to basic preview or show v3 prototype
 
 2. **V3 Preview**
-   - Navigate to `https://your-project.pages.dev/preview/v3/index.html`
+   - Navigate to `https://your-project.pages.dev/preview/v3-prototype/index.html`
    - Should load the v3 prototype interface
 
 3. **Player iframe**
@@ -184,7 +184,7 @@ After deployment, verify:
 
 ### Runtime Errors
 
-- **CSP violations**: Check `preview/v3/_headers` and adjust if needed
+- **CSP violations**: Check `preview/v3-prototype/_headers` and adjust if needed
 - **Module not found**: Ensure all ES modules use relative imports
 - **Player not loading**: Verify iframe sandbox attributes and CSP `frame-ancestors`
 
@@ -192,7 +192,7 @@ After deployment, verify:
 
 - **Fonts**: Ensure `preview/fonts/` is included (not in `.cfignore`)
 - **Styles**: Check `preview/styles/` is deployed
-- **Themes**: Verify `preview/v3/data/example-themes.json` exists
+- **Themes**: Verify `preview/v3-prototype/data/example-themes.json` exists
 
 ## Custom Domain Setup
 
@@ -244,5 +244,5 @@ If deployment issues occur:
 
 - [Cloudflare Pages Documentation](https://developers.cloudflare.com/pages/)
 - [Wrangler CLI Documentation](https://developers.cloudflare.com/workers/wrangler/)
-- Security checklist: `docs/planning/2025-10-22_1547 preview v3/06-SECURITY-CHECKLIST.md`
+- Security checklist: `docs/planning/2025-10/preview-v3/06-SECURITY-CHECKLIST.md`
 

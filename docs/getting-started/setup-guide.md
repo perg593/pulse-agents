@@ -75,7 +75,7 @@ git push -u origin main
    - Once deployed, you'll get a URL like: `https://pulse-agents.pages.dev`
    - Test the following URLs:
      - `https://pulse-agents.pages.dev/` - Main preview
-     - `https://pulse-agents.pages.dev/preview/v3/index.html` - V3 prototype
+     - `https://pulse-agents.pages.dev/preview/v3-prototype/index.html` - V3 prototype
      - `https://pulse-agents.pages.dev/proxy?url=https://example.com` - Proxy function
 
 ## Quick Commands Reference

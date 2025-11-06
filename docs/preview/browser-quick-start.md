@@ -106,7 +106,7 @@ AI: [Resizes browser, takes screenshots at each size]
 
 ## 📚 Learn More
 
-- See `docs/browser-features-guide.md` for detailed documentation
+- See `docs/preview/browser-features.md` for detailed documentation
 - See `examples/browser_examples.py` for code examples
 
 ## ⚠️ Important Notes
