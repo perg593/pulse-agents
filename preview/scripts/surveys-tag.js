@@ -71,6 +71,38 @@
       } catch (_error) {
         /* ignore */
       }
+      
+      // Add error handler wrapper for PulseInsightsObject.survey.render if it exists
+      if (w.PulseInsightsObject && w.PulseInsightsObject.survey) {
+        const originalSurvey = w.PulseInsightsObject.survey;
+        if (originalSurvey && typeof originalSurvey.render === 'function') {
+          const originalRender = originalSurvey.render;
+          originalSurvey.render = function() {
+            try {
+              if (this && typeof originalRender === 'function') {
+                return originalRender.apply(this, arguments);
+              }
+            } catch (error) {
+              try {
+                console.error('[surveys-tag] survey.render() error caught', error);
+                // Dispatch error event for preview application to handle
+                if (typeof w.dispatchEvent === 'function') {
+                  w.dispatchEvent(new CustomEvent('pulseinsights:error', {
+                    detail: {
+                      type: 'render-error',
+                      error: error.message || String(error),
+                      stack: error.stack
+                    }
+                  }));
+                }
+              } catch (_consoleError) {
+                /* ignore */
+              }
+            }
+          };
+        }
+      }
+      
       const priorPi = w.pi;
       const priorQueue = Array.isArray(priorPi && priorPi.q) ? priorPi.q.slice() : [];
       const priorTimestamp = (priorPi && priorPi.l) || Date.now();

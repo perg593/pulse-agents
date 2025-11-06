@@ -279,6 +279,114 @@ init().catch((error) => {
   addLog(`Fatal: ${error.message}`, 'error');
 });
 
+// Global error handler for PulseInsightsObject/surveys.js errors
+function setupGlobalErrorHandling() {
+  // Handle unhandled errors that might come from surveys.js
+  window.addEventListener('error', (event) => {
+    const { message, filename, lineno, colno, error } = event;
+    // Check if error is related to PulseInsightsObject or surveys.js
+    if (
+      filename &&
+      (filename.includes('surveys.js') ||
+        filename.includes('proxy') ||
+        message.includes('render') ||
+        message.includes('PulseInsightsObject') ||
+        message.includes('survey'))
+    ) {
+      try {
+        console.error('[preview] Caught PulseInsights error', {
+          message,
+          filename,
+          lineno,
+          colno,
+          error: error?.message || String(error)
+        });
+        addLog(
+          `Survey error: ${message || 'Unknown error'}${filename ? ` (${filename.split('/').pop()})` : ''}`,
+          'error'
+        );
+        
+        // Dispatch event for bridge to handle
+        if (typeof window.dispatchEvent === 'function') {
+          window.dispatchEvent(
+            new CustomEvent('pulseinsights:error', {
+              detail: {
+                type: 'unhandled-error',
+                message: message || 'Unknown error',
+                filename,
+                lineno,
+                colno,
+                error: error?.message || String(error)
+              }
+            })
+          );
+        }
+      } catch (_catchError) {
+        // Ignore errors in error handler
+      }
+    }
+  });
+
+  // Handle unhandled promise rejections
+  window.addEventListener('unhandledrejection', (event) => {
+    const { reason } = event;
+    const errorMessage = reason?.message || String(reason || 'Unknown promise rejection');
+    if (
+      errorMessage.includes('render') ||
+      errorMessage.includes('PulseInsightsObject') ||
+      errorMessage.includes('survey')
+    ) {
+      try {
+        console.error('[preview] Caught PulseInsights promise rejection', reason);
+        addLog(`Survey promise error: ${errorMessage}`, 'error');
+        
+        // Dispatch event for bridge to handle
+        if (typeof window.dispatchEvent === 'function') {
+          window.dispatchEvent(
+            new CustomEvent('pulseinsights:error', {
+              detail: {
+                type: 'unhandled-rejection',
+                message: errorMessage,
+                reason
+              }
+            })
+          );
+        }
+      } catch (_catchError) {
+        // Ignore errors in error handler
+      }
+    }
+  });
+}
+
+setupGlobalErrorHandling();
+
+// Listen for PulseInsights error events
+window.addEventListener('pulseinsights:error', (event) => {
+  try {
+    const { detail } = event;
+    const errorMsg = detail?.message || detail?.error || 'Unknown error';
+    const errorType = detail?.type || 'unknown';
+    console.error('[preview] PulseInsights error event', detail);
+    
+    addLog(`Survey error (${errorType}): ${errorMsg}`, 'error');
+    
+    // Also report to bridge as present-error if we have a survey context
+    if (lastSurveyRecord) {
+      const surveyId = lastSurveyRecord.surveyId || lastSurveyRecord.surveyName || 'unknown';
+      handlePlayerStatus({
+        type: 'player-status',
+        status: 'present-error',
+        surveyId,
+        source: 'error-handler',
+        message: errorMsg
+      });
+    }
+  } catch (_catchError) {
+    // Ignore errors in error handler
+  }
+});
+
 async function init() {
   addLog('Initializing basic preview…');
   addLog(`Preview build stamp ${PREVIEW_BUILD_STAMP}`);
