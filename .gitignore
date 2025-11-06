@@ -17,6 +17,7 @@ dist/
 # IDE
 .vscode/
 .idea/
+.cursor/
 *.swp
 *.swo
 *~
@@ -24,6 +25,10 @@ dist/
 # OS
 .DS_Store
 Thumbs.db
+
+# Media files
+*.heic
+*.HEIC
 
 # Development
 _manual-testing/
@@ -42,4 +47,8 @@ preview/scripts/stripe-demo-server.js
 tmp/
 temp/
 .tmp/
+
+# Legacy archive files
+legacy/*.zip
+legacy/**/*.zip
 
