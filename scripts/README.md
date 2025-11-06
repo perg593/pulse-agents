@@ -85,7 +85,7 @@ Runs `preview-data.js` and `demo-data.js` together.
 npm run dev:theme-v2
 ```
 
-Starts the development server for pulse-theme-generator-v2.
+Starts the development server for theme-generator/v2 (TypeScript web UI version).
 
 ## Usage
 

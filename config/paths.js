@@ -16,8 +16,20 @@ const BASE_PATHS = {
   /** Lipsum index file path */
   LIPSUM_INDEX: '/lipsum_local/www.lipsum.com/index.html',
   
-  /** Theme generator output directory */
-  THEME_OUTPUT_DIR: 'theme-generator/output',
+  /** Theme generator v1 output directory */
+  THEME_OUTPUT_DIR: 'theme-generator/v1/output',
+  
+  /** Theme generator v2 output directory */
+  THEME_V2_OUTPUT_DIR: 'theme-generator/v2/output',
+  
+  /** Theme generator base directory */
+  THEME_GENERATOR_DIR: 'theme-generator',
+  
+  /** Theme generator v1 directory */
+  THEME_GENERATOR_V1_DIR: 'theme-generator/v1',
+  
+  /** Theme generator v2 directory */
+  THEME_GENERATOR_V2_DIR: 'theme-generator/v2',
   
   /** Preview directory */
   PREVIEW_DIR: 'preview',

@@ -2,17 +2,17 @@ import { expect, describe, it, beforeAll } from "vitest";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { buildTokenSchema } from "../../../pulse-theme-generator-v2/src/parser/tokenSchema.js";
-import { mapFindingsToSchema } from "../../../pulse-theme-generator-v2/src/mapper/mapToSchema.js";
-import { buildLegacyTokens } from "../../../pulse-theme-generator-v2/src/mapper/legacyTokenBuilder.js";
-import { compileTheme } from "../../../pulse-theme-generator-v2/src/legacy/themeCompiler.js";
-import { RawFinding } from "../../../pulse-theme-generator-v2/src/types.js";
+import { buildTokenSchema } from "../../../theme-generator/v2/src/parser/tokenSchema.js";
+import { mapFindingsToSchema } from "../../../theme-generator/v2/src/mapper/mapToSchema.js";
+import { buildLegacyTokens } from "../../../theme-generator/v2/src/mapper/legacyTokenBuilder.js";
+import { compileTheme } from "../../../theme-generator/v2/src/legacy/themeCompiler.js";
+import { RawFinding } from "../../../theme-generator/v2/src/types.js";
 
 const SKIP = process.env.SKIP_PUBLIC_SITE_TESTS === "1";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const projectRoot = path.resolve(__dirname, "../../../pulse-theme-generator-v2");
-const sassRoot = path.resolve(projectRoot, "../sass-framework/01-css-pulse");
+const projectRoot = path.resolve(__dirname, "../../../theme-generator/v2");
+const sassRoot = path.resolve(projectRoot, "../../sass-framework/01-css-pulse");
 
 const fixtures = [
   {

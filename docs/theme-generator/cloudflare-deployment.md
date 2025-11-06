@@ -31,7 +31,7 @@ You can deploy the **UI frontend** to Cloudflare Pages:
 Create a build script that exports the UI without the Express server:
 
 ```bash
-# In pulse-theme-generator-v2/
+# In theme-generator/v2/
 npm run build
 ```
 
@@ -41,8 +41,8 @@ Add to your `wrangler.toml` or Cloudflare Pages settings:
 
 ```toml
 [build]
-command = "cd pulse-theme-generator-v2 && npm install && npm run build"
-output = "pulse-theme-generator-v2/public"
+command = "cd theme-generator/v2 && npm install && npm run build"
+output = "theme-generator/v2/public"
 ```
 
 ### Step 3: Configure API Proxy
@@ -68,7 +68,7 @@ export async function onRequest(context) {
 For now, testing locally is the best option:
 
 ```bash
-cd pulse-theme-generator-v2
+cd theme-generator/v2
 npm install
 npm run dev
 # Open http://localhost:5173

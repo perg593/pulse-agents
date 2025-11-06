@@ -29,8 +29,8 @@ echo "Testing lib/validators..."
 node tests/unit/lib/validators.test.js
 
 echo ""
-echo "Testing theme-generator..."
-cd theme-generator && npm run test:unit && cd ..
+echo "Testing theme-generator/v1..."
+cd theme-generator/v1 && npm run test:unit && cd ../..
 
 # Integration tests
 echo ""
@@ -44,8 +44,8 @@ echo "Testing preview survey bridge integration..."
 node tests/integration/preview/surveyBridge.integration.test.mjs
 
 echo ""
-echo "Testing pulse-theme-generator-v2..."
-cd pulse-theme-generator-v2 && npm test && cd ..
+echo "Testing theme-generator/v2..."
+cd theme-generator/v2 && npm test && cd ../..
 
 echo ""
 echo "✅ All tests completed"

@@ -4,13 +4,13 @@ This document describes the output directory patterns used across different gene
 
 ## Theme Generator Outputs
 
-### Active Generator (`theme-generator/`)
+### Active Generator (`theme-generator/v1/`)
 
-**Output Location:** `theme-generator/output/`
+**Output Location:** `theme-generator/v1/output/`
 
 **Structure:**
 ```
-theme-generator/output/
+theme-generator/v1/output/
 └── client-themes/
     ├── index.json          # Client/theme index
     └── [client-name]/
@@ -21,34 +21,13 @@ theme-generator/output/
         └── themes.json
 ```
 
-### Legacy Generators (`legacy/theme-generators/`)
+### TypeScript Web UI Generator (`theme-generator/v2/`)
 
-**Legacy Output Locations:**
-- `legacy/output/client-themes/` - Output from legacy theme-mvp generator
-- `legacy/pulse-theme-generator-v2-output/` - Output from pulse-theme-generator-v2 (if archived)
-
-**Note:** Legacy generators are kept for historical reference. Use the active `theme-generator/` for new development.
-
-## Preview Build Outputs
-
-### Preview Dist (`preview/dist/`)
-
-**Location:** `preview/dist/`
-
-**Contents:**
-- Generated CSS files
-- Compiled theme outputs
-- Manifest files
-
-**Build Command:** `npm run preview:build` (from `theme-generator/`)
-
-## Pulse Theme Generator v2 Outputs
-
-**Active Generator:** `pulse-theme-generator-v2/output/`
+**Output Location:** `theme-generator/v2/output/`
 
 **Structure:**
 ```
-pulse-theme-generator-v2/output/
+theme-generator/v2/output/
 ├── ui-run-[timestamp]/
 │   ├── theme.json
 │   ├── theme.report.json
@@ -58,6 +37,14 @@ pulse-theme-generator-v2/output/
 ```
 
 **Note:** This generator runs a web UI and produces timestamped output directories.
+
+### Legacy Generators (`theme-generator/legacy/`)
+
+**Legacy Output Locations:**
+- `legacy/output/client-themes/` - Output from legacy theme-mvp generator
+- `legacy/pulse-theme-generator-v2-output/` - Output from pulse-theme-generator-v2 (if archived)
+
+**Note:** Legacy generators are kept for historical reference. Use the active `theme-generator/v1/` or `theme-generator/v2/` for new development.
 
 ## Output Directory Best Practices
 
