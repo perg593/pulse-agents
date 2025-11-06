@@ -118,7 +118,7 @@ diff --git a/preview/app/survey/bridge.js b/preview/app/survey/bridge.js
 
 **New test (integration, fast)**
 
-`preview/tests/handshakeFailure.integration.test.mjs`
+`tests/integration/preview/handshakeFailure.integration.test.mjs`
 ```js
 import { strict as assert } from 'node:assert';
 import { withDom, withWatch } from './support/testUtils.mjs';
@@ -183,7 +183,7 @@ export function normalizeUrl(input, { base = window.location.origin, preferProxy
 }
 ```
 
-**Unit tests (add new file `preview/tests/services/normalizeUrl.test.mjs`)**
+**Unit tests (add new file `tests/integration/preview/services/normalizeUrl.test.mjs`)**
 ```js
 import { strict as assert } from 'node:assert';
 import { normalizeUrl } from '../../app/services/background.js';
@@ -238,7 +238,7 @@ function ensureInlineTarget(selector, root = document) {
 
 **Integration test (extend existing suite)**
 ```js
-// pseudo: preview/tests/player.inline.integration.test.mjs
+// pseudo: tests/integration/preview/player.inline.integration.test.mjs
 test('inline: complex selector falls back to synthesized host', async () => {
   // configure inlineSelector: '[data-slot="survey"]' with no DOM match
   // load player, call present, expect ack

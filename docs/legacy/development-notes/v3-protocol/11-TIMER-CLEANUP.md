@@ -113,7 +113,7 @@ Reference files: wrapper factory and protocol/legacy branches (bridge.js), and t
 
 ## Patch B — Tests: tear down bridges and force a clean exit
 
-**File:** `preview/tests/surveyBridge.integration.test.mjs`
+**File:** `tests/integration/preview/surveyBridge.integration.test.mjs`
 
 ### B.1 Call `destroy()` at the end of each suite
 ```diff
@@ -162,7 +162,7 @@ Reference files: wrapper factory and protocol/legacy branches (bridge.js), and t
 
 1) Run the suites directly:
 ```bash
-node preview/tests/bridge.contract.test.mjs && node preview/tests/surveyBridge.integration.test.mjs
+node tests/integration/preview/bridge.contract.test.mjs && node tests/integration/preview/surveyBridge.integration.test.mjs
 ```
 Expected:
 - `bridge.contract tests passed`

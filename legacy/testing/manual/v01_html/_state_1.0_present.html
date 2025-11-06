@@ -1,0 +1,813 @@
+<html lang="en">
+
+   <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>Pulse Insights</title>
+      <link rel="stylesheet" href="../styles/generator/basic.css" data-source="generator"
+         data-applied-label="/preview/styles/generator/basic.css"
+         data-non-removable="true">
+      <script async=""
+         src="http://localhost:3100/proxy?url=https%3A%2F%2Fjs.pulseinsights.com%2Fsurveys.js"></script>
+      <script>
+         (function () {
+            if (window.__PI_PROXY_ORIGIN__) return;
+            const localHosts = ['localhost', '127.0.0.1'];
+            if (localHosts.includes(window.location.hostname)) {
+               window.__PI_PROXY_ORIGIN__ = 'http://localhost:3100';
+            }
+         })();
+      </script>
+      <script src="../scripts/pulse-insights-official-tag.js" async=""></script>
+   </head>
+
+   <body class="rail-open">
+
+      <!-- 1.0.1 -->
+      <!-- <aside id="control-rail" class="control-rail open" aria-label="Preview controls">
+         <button id="rail-toggle" class="rail-toggle" aria-label="Toggle controls"
+            aria-expanded="true">
+            <span class="rail-chevron"></span>
+         </button>
+         <div class="rail-content">
+            <header class="rail-header">
+               <span class="rail-logo">Pulse Insights</span>
+               <span class="rail-caption">Demo Studio</span>
+            </header>
+
+            <div class="accordion" id="rail-accordion">
+               <div class="accordion-item open">
+                  <button class="accordion-header" type="button" data-accordion-toggle=""
+                     aria-expanded="true">
+                     <span>Survey</span>
+                  </button>
+                  <div class="accordion-body" style="max-height: 247px;">
+                     <section class="rail-section">
+                        <label for="survey-select">Survey</label>
+                        <select id="survey-select">
+                           <option value="" disabled="">Select a demo survey…</option>
+                           <option value="survey-7990-0-cyberhill">What Would Help Decide
+                              · PI-81598442</option>
+                           <option value="survey-8008-1-cyberhill">Segmentation ·
+                              PI-81598442</option>
+                           <option value="survey-8008-2-ecomm">Indecision Loop ·
+                              PI-81598442</option>
+                           <option value="survey-8008-3-ecomm">Search Confusion ·
+                              PI-81598442</option>
+                           <option value="survey-8008-4-ecomm">Checkout Freeze ·
+                              PI-81598442</option>
+                           <option value="survey-8008-5-ecomm">Variant Confusion ·
+                              PI-81598442</option>
+                           <option value="survey-8008-6-ecomm">Lingering on FAQs ·
+                              PI-81598442</option>
+                           <option value="survey-8008-7-pharma">Wayfinder · PI-81598442
+                           </option>
+                           <option value="survey-8008-8-pharma">Form Roadblock ·
+                              PI-81598442</option>
+                        </select>
+                        <span id="demo-subtitle" class="rail-subtitle"
+                           style="display: block;">Cyberhill Partners</span>
+                     </section>
+                     <button id="present-btn" class="rail-primary">Present Survey</button>
+                     <section class="rail-section">
+                        <label for="applied-css-list">Applied CSS Files</label>
+                        <ol id="applied-css-list" class="css-manifest">
+                           <li data-source="generator"><input type="checkbox" disabled=""
+                                 title="Required stylesheet" id="css-toggle-0"><label
+                                 for="css-toggle-0">/preview/styles/generator/basic.css</label>
+                           </li>
+                        </ol>
+                     </section>
+                  </div>
+               </div>
+
+               <div class="accordion-item">
+                  <button class="accordion-header" type="button" data-accordion-toggle=""
+                     aria-expanded="false">
+                     <span>Theme Generator</span>
+                  </button>
+                  <div class="accordion-body" style="max-height: 0px;">
+                     <section class="rail-section">
+                        <label for="theme-url-input">Enter a URL</label>
+                        <input id="theme-url-input" type="url" inputmode="url"
+                           value="https://" placeholder="https://example.com">
+                     </section>
+                     <div class="rail-actions">
+                        <button id="generate-theme-btn" class="rail-primary">Generate
+                           Theme</button>
+                     </div>
+                     <section class="rail-section" id="generated-theme-section" hidden="">
+                        <label for="generated-theme-select">Generated Themes</label>
+                        <select id="generated-theme-select" disabled="">
+                           <option value="">Generated themes will appear here</option>
+                        </select>
+                     </section>
+                     <p class="rail-hint">We’ll analyze the site, then deliver four
+                        ready-to-use theme variations.</p>
+                  </div>
+               </div>
+
+               <div class="accordion-item">
+                  <button class="accordion-header" type="button" data-accordion-toggle=""
+                     aria-expanded="false">
+                     <span>Examples</span>
+                  </button>
+                  <div class="accordion-body" style="max-height: 0px;">
+                     <section class="rail-section">
+                        <label for="industry-select">Industry</label>
+                        <select id="industry-select">
+                           <option value="__all">All industries</option>
+                           <option value="B2B">B2B</option>
+                           <option value="Ecommerce">Ecommerce</option>
+                           <option value="Financial Services">Financial Services</option>
+                           <option value="Healthcare &amp; Pharma">Healthcare &amp; Pharma
+                           </option>
+                           <option value="Other">Other</option>
+                           <option value="Telecom">Telecom</option>
+                        </select>
+                     </section>
+                     <section class="rail-section">
+                        <label for="theme-select">Theme Examples</label>
+                        <select id="theme-select">
+                           <option value="" disabled="">-- Select theme --</option>
+                           <option value="none">No theme override (widget default)
+                           </option>
+                           <optgroup label="American Century">
+                              <option value="latest-pi-83713016-theme-1-1">American
+                                 Century — Theme 1.1</option>
+                              <option value="latest-pi-83713016-theme-1-1-2">American
+                                 Century — Theme 1.1</option>
+                           </optgroup>
+                           <optgroup label="Astellas">
+                              <option value="latest-pi-98053767-theme-1-docked">Cresemba —
+                                 Theme 1 - Docked</option>
+                              <option
+                                 value="latest-pi-98053767-theme-1-adapted-for-staging-2">
+                                 Cresemba — Theme 1 adapted for staging</option>
+                              <option
+                                 value="latest-pi-98053767-theme-1-adapted-for-staging-inline-docked-2">
+                                 Cresemba — Theme 1 adapted for staging - Inline &gt;
+                                 docked</option>
+                              <option value="latest-pi-35724701-above-isi-docked-modal">
+                                 DTC — Above ISI Docked / Modal</option>
+                              <option
+                                 value="latest-pi-20276852-bottom-bar-desktop-modal-mobile">
+                                 HCP — Bottom Bar Desktop Modal Mobile</option>
+                              <option
+                                 value="latest-pi-20276852-bottom-bar-desktop-modal-mobile-revised-for-2024">
+                                 HCP — Bottom Bar Desktop Modal Mobile - Revised for 2024
+                              </option>
+                              <option
+                                 value="latest-pi-20276852-docked-desktop-modal-mobile">
+                                 HCP — Docked Desktop Modal Mobile</option>
+                              <option
+                                 value="latest-pi-20276852-docked-desktop-modal-mobile-revised-for-2024">
+                                 HCP — Docked Desktop Modal Mobile - Revised for 2024
+                              </option>
+                              <option value="latest-pi-62512928-theme-1-2">Vyloy — Theme 1
+                              </option>
+                           </optgroup>
+                           <optgroup label="Astellas | Cresemba">
+                              <option
+                                 value="latest-pi-98053767-theme-1-adapted-for-staging">
+                                 Astellas | Cresemba — Theme 1 adapted for staging
+                              </option>
+                              <option
+                                 value="latest-pi-98053767-theme-1-adapted-for-staging-inline-docked">
+                                 Astellas | Cresemba — Theme 1 adapted for staging -
+                                 Inline &gt; docked</option>
+                           </optgroup>
+                           <optgroup label="Astellas | Vyloy">
+                              <option value="latest-pi-62512928-theme-1">Astellas | Vyloy
+                                 — Theme 1</option>
+                           </optgroup>
+                           <optgroup label="AstraZeneca">
+                              <option value="latest-pi-46887353-theme-1">Consumer — Theme
+                                 1</option>
+                              <option value="latest-pi-56074549-tezspire-theme-1">HCP —
+                                 Tezspire Theme 1</option>
+                              <option
+                                 value="latest-pi-56074549-tezspire-theme-2-2024-revamp">
+                                 HCP — Tezspire Theme 2 | 2024 revamp</option>
+                              <option
+                                 value="latest-pi-56074549-tezspire-theme-2-2024-revamp-inline-2">
+                                 HCP — Tezspire Theme 2 | 2024 revamp | Inline</option>
+                              <option value="latest-pi-05402076-theme-1">HCP — Theme 1
+                              </option>
+                              <option value="latest-pi-05402076-theme-1-refreshed">HCP —
+                                 Theme 1 refreshed</option>
+                              <option
+                                 value="latest-pi-26436716-theme-1-docked-inline-hybrid">
+                                 Med — Theme 1 - Docked Inline Hybrid</option>
+                              <option value="latest-pi-26436716-theme-1-standard">Med —
+                                 Theme 1 - Standard</option>
+                              <option
+                                 value="latest-pi-26436716-theme-1-overlay-only-use-with-fullscreen-widgets">
+                                 Med — Theme 1 Overlay (only use with fullscreen widgets)
+                              </option>
+                              <option value="latest-pi-26436716-theme-2-2024-basic">Med —
+                                 Theme 2 2024 Basic</option>
+                              <option value="latest-pi-26436716-theme-2-for-site-revamp">
+                                 Med — Theme 2 for site revamp</option>
+                              <option
+                                 value="latest-pi-26436716-theme-2-for-site-revamp-overlay-only">
+                                 Med — Theme 2 for site revamp - overlay only</option>
+                           </optgroup>
+                           <optgroup label="AstraZeneca Tezspire HCP">
+                              <option
+                                 value="latest-pi-56074549-tezspire-theme-2-2024-revamp-inline">
+                                 AstraZeneca Tezspire HCP — Tezspire Theme 2 | 2024 revamp
+                                 | Inline</option>
+                           </optgroup>
+                           <optgroup label="Azurity">
+                              <option value="latest-pi-67585473-theme-1-2">Azmiro — Theme
+                                 1</option>
+                              <option
+                                 value="latest-pi-35722843-docked-desktop-modal-mobile">
+                                 Edarbi — Docked Desktop Modal Mobile</option>
+                              <option value="latest-pi-35722843-theme-1-2025-revamp-2">
+                                 Edarbi — Theme 1 2025 Revamp</option>
+                              <option value="latest-pi-08602150-theme-1-docked">Eprontia —
+                                 Theme 1 - Docked</option>
+                              <option value="latest-pi-62731489-theme-1">Horizant — Theme
+                                 1</option>
+                              <option
+                                 value="latest-pi-62731489-theme-1-for-dr-discussion-guide">
+                                 Horizant — Theme 1 - For dr discussion guide</option>
+                              <option
+                                 value="latest-pi-62731489-theme-1-salesforce-site-2025-2">
+                                 Horizant — Theme 1 - salesforce site 2025</option>
+                              <option value="latest-pi-57350493-custom-docked-modal">
+                                 Katerzia — Custom Docked Modal</option>
+                              <option value="latest-pi-57350493-katerzia-theme">Katerzia —
+                                 Katerzia Theme</option>
+                              <option value="latest-pi-98758744-theme-1-docked">Konvomep —
+                                 Theme 1 - Docked</option>
+                              <option value="latest-pi-31452599-theme-1-2024">Myhibbin —
+                                 Theme 1 2024</option>
+                              <option value="latest-pi-56813408-theme-1-docked-modal">
+                                 Nymalize — Theme 1 - docked / modal</option>
+                              <option
+                                 value="latest-pi-56813408-theme-2-site-revamp-docked-modal">
+                                 Nymalize — Theme 2 - Site Revamp - Docked &gt; modal
+                              </option>
+                              <option value="latest-pi-56813408-theme-2-2025-revamp-2">
+                                 Nymalize — Theme 2 2025 revamp</option>
+                              <option
+                                 value="latest-pi-84827672-docked-desktop-modal-mobile">
+                                 Qbrelis — Docked Desktop Modal Mobile</option>
+                              <option
+                                 value="latest-pi-84827672-theme-1-salesforce-site-2025-2">
+                                 Qbrelis — Theme 1 - salesforce site 2025</option>
+                              <option value="latest-pi-05764704-custom-overlay">Triptodur
+                                 — Custom Overlay</option>
+                              <option
+                                 value="latest-pi-05764704-docked-desktop-modal-mobile">
+                                 Triptodur — Docked Desktop Modal Mobile</option>
+                              <option
+                                 value="latest-pi-05764704-overlay-theme-2-2024-revamp">
+                                 Triptodur — Overlay Theme 2 2024 revamp</option>
+                              <option value="latest-pi-05764704-theme-2-2024-revamp">
+                                 Triptodur — Theme 2 2024 revamp</option>
+                              <option
+                                 value="latest-pi-05764704-theme-2-salesforce-site-2025-2">
+                                 Triptodur — Theme 2 Salesforce Site 2025</option>
+                              <option
+                                 value="latest-pi-05764704-theme-2-salesforce-site-2025-overlay-2">
+                                 Triptodur — Theme 2 Salesforce Site 2025 - Overlay
+                              </option>
+                              <option value="latest-pi-95963047-theme-1">Vivimusta — Theme
+                                 1</option>
+                              <option value="latest-pi-79981559-theme-1-no-tricks">Xatmep
+                                 — Theme 1 - no tricks</option>
+                              <option value="latest-pi-79981559-theme-2-hcp-2">Xatmep —
+                                 Theme 2 - HCP</option>
+                              <option value="latest-pi-79981559-theme-2-patient-2">Xatmep
+                                 — Theme 2 - Patient</option>
+                              <option value="latest-pi-03913254-theme-1-docked">Zonisade —
+                                 Theme 1 - Docked</option>
+                           </optgroup>
+                           <optgroup label="Azurity Azmiro">
+                              <option value="latest-pi-67585473-theme-1">Azurity Azmiro —
+                                 Theme 1</option>
+                           </optgroup>
+                           <optgroup label="Azurity Edarbi">
+                              <option value="latest-pi-35722843-theme-1-2025-revamp">
+                                 Azurity Edarbi — Theme 1 2025 Revamp</option>
+                           </optgroup>
+                           <optgroup label="Azurity Horizant">
+                              <option
+                                 value="latest-pi-62731489-theme-1-salesforce-site-2025">
+                                 Azurity Horizant — Theme 1 - salesforce site 2025
+                              </option>
+                           </optgroup>
+                           <optgroup label="Azurity Nymalize">
+                              <option value="latest-pi-56813408-theme-2-2025-revamp">
+                                 Azurity Nymalize — Theme 2 2025 revamp</option>
+                           </optgroup>
+                           <optgroup label="Azurity Qbrelis">
+                              <option
+                                 value="latest-pi-84827672-theme-1-salesforce-site-2025">
+                                 Azurity Qbrelis — Theme 1 - salesforce site 2025</option>
+                           </optgroup>
+                           <optgroup label="Azurity Triptodur">
+                              <option
+                                 value="latest-pi-05764704-theme-2-salesforce-site-2025">
+                                 Azurity Triptodur — Theme 2 Salesforce Site 2025</option>
+                              <option
+                                 value="latest-pi-05764704-theme-2-salesforce-site-2025-overlay">
+                                 Azurity Triptodur — Theme 2 Salesforce Site 2025 -
+                                 Overlay</option>
+                           </optgroup>
+                           <optgroup label="Azurity Xatmep">
+                              <option value="latest-pi-79981559-theme-2-hcp">Azurity
+                                 Xatmep — Theme 2 - HCP</option>
+                              <option value="latest-pi-79981559-theme-2-patient">Azurity
+                                 Xatmep — Theme 2 - Patient</option>
+                           </optgroup>
+                           <optgroup label="Bayer">
+                              <option value="latest-pi-49404061-theme-1-2025-2">Mirena —
+                                 Theme 1 2025</option>
+                              <option value="latest-pi-49404061-theme-1-2025-inline-2">
+                                 Mirena — Theme 1 2025 - Inline</option>
+                              <option value="latest-pi-02517611-nubeqa">Nubeqa — nubeqa
+                              </option>
+                              <option
+                                 value="latest-pi-02517611-nubeqa-content-delivery-2">
+                                 Nubeqa — nubeqa content delivery</option>
+                              <option value="latest-pi-02517611-nubeqa-inline">Nubeqa —
+                                 nubeqa inline</option>
+                           </optgroup>
+                           <optgroup label="Bayer | Nubeqa HCP">
+                              <option value="latest-pi-54193566-2025-default-theme">Bayer
+                                 | Nubeqa HCP — 2025 Default Theme</option>
+                              <option value="latest-pi-54193566-2025-pseudo-docked">Bayer
+                                 | Nubeqa HCP — 2025 Pseudo Docked</option>
+                           </optgroup>
+                           <optgroup label="Bayer Mirena">
+                              <option value="latest-pi-49404061-theme-1-2025">Bayer Mirena
+                                 — Theme 1 2025</option>
+                              <option value="latest-pi-49404061-theme-1-2025-inline">Bayer
+                                 Mirena — Theme 1 2025 - Inline</option>
+                           </optgroup>
+                           <optgroup label="Bayer Nubeqa">
+                              <option value="latest-pi-02517611-nubeqa-content-delivery">
+                                 Bayer Nubeqa — nubeqa content delivery</option>
+                           </optgroup>
+                           <optgroup label="Benjamin Moore">
+                              <option value="latest-pi-53817864-2024-theme">Benjamin Moore
+                                 — 2024 Theme</option>
+                              <option value="latest-pi-53817864-chatbot-theme">Benjamin
+                                 Moore — Chatbot Theme</option>
+                              <option value="latest-pi-53817864-theme-1">Benjamin Moore —
+                                 Theme 1</option>
+                              <option value="latest-pi-53817864-theme-2">Benjamin Moore —
+                                 Theme 2</option>
+                           </optgroup>
+                           <optgroup label="Comcast | Research Enterprise">
+                              <option
+                                 value="latest-pi-43371140-cgm-e-theme-for-follow-ups-2025-10-full-screen-only">
+                                 Comcast | Research Enterprise — CGM&amp;E Theme For
+                                 Follow-Ups 2025-10 (FULL SCREEN ONLY)</option>
+                           </optgroup>
+                           <optgroup label="Comcast CMGE">
+                              <option
+                                 value="latest-pi-65383858-theme-1-overlay-email-followup">
+                                 Comcast CMGE — Theme 1 overlay - email followup</option>
+                           </optgroup>
+                           <optgroup label="Comcast Enterprise">
+                              <option
+                                 value="latest-pi-43371140-01-old-center-inline-normal">
+                                 Comcast | Research Enterprise — 01-old. CENTER (Inline
+                                 &gt; Normal)</option>
+                              <option
+                                 value="latest-pi-43371140-02-old-center-inline-bottom">
+                                 Comcast | Research Enterprise — 02-old. CENTER (Inline
+                                 &gt; Bottom)</option>
+                              <option
+                                 value="latest-pi-43371140-03-left-inline-bottom-note-select-inline-survey">
+                                 Comcast | Research Enterprise — 03. LEFT (Inline &gt;
+                                 Bottom) [NOTE: Select INLINE survey]</option>
+                              <option
+                                 value="latest-pi-43371140-04-center-inline-bottom-note-select-inline-survey">
+                                 Comcast | Research Enterprise — 04. CENTER (Inline &gt;
+                                 Bottom) [NOTE: Select INLINE survey]</option>
+                              <option value="latest-pi-43371140-05-left-inline-normal">
+                                 Comcast | Research Enterprise — 05. LEFT (Inline &gt;
+                                 Normal)</option>
+                              <option value="latest-pi-43371140-06-center-inline-normal">
+                                 Comcast | Research Enterprise — 06. CENTER (Inline &gt;
+                                 Normal)</option>
+                              <option value="latest-pi-43371140-06-center-08-2020">Comcast
+                                 | Research Enterprise — 06. CENTER 08-2020</option>
+                              <option value="latest-pi-43371140-buyflow">Comcast |
+                                 Research Enterprise — BuyFlow</option>
+                              <option
+                                 value="latest-pi-43371140-cgm-e-theme-for-follow-ups-2025-10-full-screen-only-2">
+                                 Comcast | Research Enterprise — CGM&amp;E Theme For
+                                 Follow-Ups 2025-10 (FULL SCREEN ONLY)</option>
+                              <option
+                                 value="latest-pi-43371140-comcast-basic-theme-v1-08-07-2020">
+                                 Comcast | Research Enterprise — Comcast Basic Theme | V1
+                                 | 08-07-2020</option>
+                              <option value="latest-pi-43371140-comcast-basic-theme-v2">
+                                 Comcast | Research Enterprise — Comcast Basic Theme | V2
+                                 |</option>
+                              <option value="latest-pi-43371140-learn-theme-1">Comcast |
+                                 Research Enterprise — Learn Theme 1</option>
+                              <option value="latest-pi-65383858-early-life-theme">Comcast
+                                 CMGE — Early Life Theme</option>
+                              <option
+                                 value="latest-pi-65383858-theme-1-overlay-email-followup-2">
+                                 Comcast CMGE — Theme 1 overlay - email followup</option>
+                              <option
+                                 value="latest-pi-65383858-theme-1-overlay-only-use-with-fullscreen-widgets">
+                                 Comcast CMGE — Theme 1 Overlay (only use with fullscreen
+                                 widgets)</option>
+                           </optgroup>
+                           <optgroup label="Crocs">
+                              <option value="latest-pi-42005165-theme-1-general">Crocs —
+                                 Theme 1 - General</option>
+                              <option value="latest-pi-42005165-theme-1-overlay">Crocs —
+                                 Theme 1 - Overlay</option>
+                           </optgroup>
+                           <optgroup label="Crocs Enterprise">
+                              <option value="latest-pi-42005165-theme-1-general-2">Crocs —
+                                 Theme 1 - General</option>
+                              <option value="latest-pi-42005165-theme-1-overlay-2">Crocs —
+                                 Theme 1 - Overlay</option>
+                              <option
+                                 value="latest-pi-58045353-hey-dude-theme-1-post-purchase-2">
+                                 Heydude — Hey Dude Theme 1 - Post Purchase</option>
+                              <option
+                                 value="latest-pi-58045353-hey-dude-theme-1-basic-2025-2">
+                                 Heydude — Hey Dude Theme 1 Basic - 2025</option>
+                              <option
+                                 value="latest-pi-58045353-hey-dude-theme-1-overlay-2025-2">
+                                 Heydude — Hey Dude Theme 1 Overlay - 2025</option>
+                           </optgroup>
+                           <optgroup label="Doosan | Bobcat">
+                              <option value="latest-pi-08917801-fault-code-theme">Doosan |
+                                 Bobcat — Fault Code Theme</option>
+                           </optgroup>
+                           <optgroup label="Doosan Enterprise">
+                              <option value="latest-pi-08917801-fault-code-theme-2">Doosan
+                                 | Bobcat — Fault Code Theme</option>
+                              <option value="latest-pi-08917801-theme-1">Doosan | Bobcat —
+                                 Theme 1</option>
+                              <option value="latest-pi-49257285-portable-power-theme-1">
+                                 Doosan | Portable Power — Portable Power Theme 1</option>
+                           </optgroup>
+                           <optgroup label="Heydude">
+                              <option
+                                 value="latest-pi-58045353-hey-dude-theme-1-post-purchase">
+                                 Heydude — Hey Dude Theme 1 - Post Purchase</option>
+                              <option
+                                 value="latest-pi-58045353-hey-dude-theme-1-basic-2025">
+                                 Heydude — Hey Dude Theme 1 Basic - 2025</option>
+                              <option
+                                 value="latest-pi-58045353-hey-dude-theme-1-overlay-2025">
+                                 Heydude — Hey Dude Theme 1 Overlay - 2025</option>
+                           </optgroup>
+                           <optgroup label="J&amp;J Janssen">
+                              <option value="latest-pi-21942829-theme-1-2024-refresh">
+                                 J&amp;J Janssen — Theme 1 2024 Refresh</option>
+                           </optgroup>
+                           <optgroup label="Johnson &amp; Johnson">
+                              <option value="latest-pi-21942829-2019-09-janssenmd">Janssen
+                                 — 2019-09 JanssenMD</option>
+                              <option
+                                 value="latest-pi-21942829-2021-04-theme-without-fade">
+                                 Janssen — 2021-04 - Theme Without Fade</option>
+                              <option value="latest-pi-21942829-theme-1-2024-refresh-2">
+                                 Janssen — Theme 1 2024 Refresh</option>
+                              <option value="latest-pi-21942829-theme-1-refresh">Janssen —
+                                 Theme 1 Refresh</option>
+                           </optgroup>
+                           <optgroup label="Neurent Medical">
+                              <option value="latest-pi-27678328-ddg-survey-theme-2">
+                                 Neuromark — DDG survey theme</option>
+                              <option value="latest-pi-27678328-ddg-survey-theme-v2-2">
+                                 Neuromark — DDG survey theme V2</option>
+                              <option value="latest-pi-27678328-theme-1-2024">Neuromark —
+                                 Theme 1 - 2024</option>
+                           </optgroup>
+                           <optgroup label="Neurent Medical | Neuromark">
+                              <option value="latest-pi-27678328-ddg-survey-theme">Neurent
+                                 Medical | Neuromark — DDG survey theme</option>
+                              <option value="latest-pi-27678328-ddg-survey-theme-v2">
+                                 Neurent Medical | Neuromark — DDG survey theme V2
+                              </option>
+                           </optgroup>
+                           <optgroup label="New Jersey Transit">
+                              <option value="latest-pi-29434435-theme-v1">New Jersey
+                                 Transit — Theme v1</option>
+                              <option value="latest-pi-29434435-theme-v2">New Jersey
+                                 Transit — Theme v2</option>
+                              <option value="latest-pi-29434435-theme-v3">New Jersey
+                                 Transit — Theme v3</option>
+                           </optgroup>
+                           <optgroup label="NYU">
+                              <option value="latest-pi-84624412-theme-1-2">Dashboard —
+                                 Theme 1</option>
+                              <option value="latest-pi-19699623-nyu-health-free-text">
+                                 Langone — NYU health free text</option>
+                              <option value="latest-pi-19699623-purple-theme">Langone —
+                                 Purple Theme</option>
+                              <option
+                                 value="latest-pi-32241780-global-theme-as-of-11-08-2017">
+                                 Medicine — Global Theme as of 11/08/2017</option>
+                              <option value="latest-pi-32241780-purple-theme-2025-2">
+                                 Medicine — Purple Theme 2025</option>
+                              <option
+                                 value="latest-pi-32241780-purple-theme-2025-overlay-2">
+                                 Medicine — Purple Theme 2025 - Overlay</option>
+                              <option value="latest-pi-18417675-theme-1">Patient — Theme 1
+                              </option>
+                              <option value="latest-pi-18417675-theme-1-inline-hybrid">
+                                 Patient — Theme 1 Inline Hybrid</option>
+                              <option
+                                 value="latest-pi-18417675-theme-v2-docked-desktop-bb-mobile">
+                                 Patient — Theme V2 Docked Desktop / BB Mobile</option>
+                           </optgroup>
+                           <optgroup label="NYU | City Health Dashboard">
+                              <option value="latest-pi-84624412-theme-1">NYU | City Health
+                                 Dashboard — Theme 1</option>
+                           </optgroup>
+                           <optgroup label="NYU School of Medicine">
+                              <option value="latest-pi-32241780-purple-theme-2025">NYU
+                                 School of Medicine — Purple Theme 2025</option>
+                              <option
+                                 value="latest-pi-32241780-purple-theme-2025-overlay">NYU
+                                 School of Medicine — Purple Theme 2025 - Overlay</option>
+                           </optgroup>
+                           <optgroup label="OpenStax">
+                              <option
+                                 value="latest-pi-16384954-openstax-v3-1-smaller-text-inline-close-button-visible">
+                                 OpenStax — OpenStax v3.1 - smaller text - inline close
+                                 button visible</option>
+                           </optgroup>
+                           <optgroup label="Pulse Marketing Site">
+                              <option
+                                 value="latest-pi-70746639-bayer-nubeqa-modded-custom-content">
+                                 Pulse Marketing Site — Bayer - NUBEQA - modded custom
+                                 content</option>
+                              <option value="latest-pi-70746639-dark-theme-2025">Pulse
+                                 Marketing Site — Dark theme 2025</option>
+                           </optgroup>
+                           <optgroup label="Skechers">
+                              <option
+                                 value="latest-pi-89866762-sketchers-theme-1-general-use-search">
+                                 Skechers — Sketchers Theme 1 | General Use | Search
+                              </option>
+                              <option
+                                 value="latest-pi-89866762-sketchers-theme-1-global-feedback">
+                                 Skechers — Sketchers Theme 1 | Global Feedback</option>
+                           </optgroup>
+                           <optgroup label="Sumitomo Gemtesa">
+                              <option value="latest-pi-47214746-theme-3-dark">Sumitomo
+                                 Gemtesa — Theme 3 - dark</option>
+                           </optgroup>
+                           <optgroup label="Summer Discovery">
+                              <option value="latest-pi-44739906-theme-1">Summer Discovery
+                                 — Theme 1</option>
+                              <option
+                                 value="latest-pi-44739906-theme-1-overlay-only-use-with-fullscreen">
+                                 Summer Discovery — Theme 1 overlay (only use with
+                                 fullscreen!!)</option>
+                           </optgroup>
+                           <optgroup label="Verizon Corporate">
+                              <option value="latest-pi-29512454-sticky-notes-theme">
+                                 Verizon Corporate — Sticky Notes Theme</option>
+                              <option value="latest-pi-29512454-verizon-2025-theme">
+                                 Verizon Corporate — Verizon 2025 Theme</option>
+                              <option
+                                 value="latest-pi-29512454-verizon-2025-theme-variants-stone-bg-skele-btns">
+                                 Verizon Corporate — Verizon 2025 Theme | Variants | Stone
+                                 BG Skele BTNs</option>
+                              <option
+                                 value="latest-pi-29512454-verizon-2025-theme-variants-white-bg-black-btns">
+                                 Verizon Corporate — Verizon 2025 Theme | Variants | White
+                                 BG Black BTNs</option>
+                              <option
+                                 value="latest-pi-29512454-verizon-2025-theme-variants-white-bg-skele-btns">
+                                 Verizon Corporate — Verizon 2025 Theme | Variants | White
+                                 BG Skele BTNs</option>
+                           </optgroup>
+                           <optgroup label="Visa">
+                              <option
+                                 value="latest-pi-10908318-visa-custom-quiz-theme-2025">
+                                 Visa — Visa Custom Quiz Theme 2025</option>
+                           </optgroup>
+                           <optgroup label="WMG Artist Packs">
+                              <option value="latest-pi-28809249-theme-1">WMG Artist Packs
+                                 — Theme 1</option>
+                           </optgroup>
+                           <optgroup label="WMG Co-op">
+                              <option value="latest-pi-42899008-theme-1">WMG Co-op — Theme
+                                 1</option>
+                           </optgroup>
+                           <optgroup label="WMG One">
+                              <option value="latest-pi-34212792-theme-1">WMG One — Theme 1
+                              </option>
+                           </optgroup>
+                        </select>
+                     </section>
+                  </div>
+               </div>
+
+               <div class="accordion-item">
+                  <button class="accordion-header" type="button" data-accordion-toggle=""
+                     aria-expanded="false">
+                     <span>Triggers</span>
+                  </button>
+                  <div class="accordion-body" style="max-height: 0px;">
+                     <div class="trigger-grid" id="trigger-buttons"><button type="button"
+                           class="button-secondary"
+                           data-trigger-id="present-selected">Present Selected
+                           Survey</button><button type="button" class="button-secondary"
+                           data-trigger-id="exit-intent">Simulate Exit
+                           Intent</button><button type="button" class="button-secondary"
+                           data-trigger-id="rage-click">Simulate Rage
+                           Click</button><button type="button" class="button-secondary"
+                           data-trigger-id="scroll-depth">Simulate Scroll
+                           Depth</button><button type="button" class="button-secondary"
+                           data-trigger-id="time-delay">Simulate Timer</button><button
+                           type="button" class="button-secondary"
+                           data-trigger-id="pageview">Increment Pageview</button></div>
+                     <p class="rail-hint">Simulate behavioural events to validate the live
+                        tag.</p>
+                  </div>
+               </div>
+
+               <div class="accordion-item open">
+                  <button class="accordion-header" type="button" data-accordion-toggle=""
+                     aria-expanded="true">
+                     <span>Tools</span>
+                  </button>
+                  <div class="accordion-body" style="max-height: 140px;">
+                     <div class="rail-tools">
+                        <div class="badge-row">
+                           <span id="tag-status" class="badge">Tag: ready</span>
+                           <span id="survey-status" class="badge">Survey: presenting
+                              7990</span>
+                        </div>
+                        <button id="toggle-log-btn" class="button-secondary">Show Status
+                           Log</button>
+                        <button id="demo-directory-button" class="demo-directory-trigger"
+                           type="button" title="Open demo directory">Demo
+                           Directory</button>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </aside> -->
+
+
+      <!-- 1.0.2 -->
+      <main class="layout">
+
+         <!-- 1.0.2.1 -->
+         <section id="site-root" class="site-root">
+
+            <!-- 1.0.2.1.frame1 -->
+             <!-- original frame -->
+            <!-- <iframe class="background-frame"
+               src="http://localhost:3100/proxy?url=https%3A%2F%2Fcyberhillpartners.com%2Fservices"
+               title="Preview background" loading="lazy"
+               data-preview-original-url="https://cyberhillpartners.com/services"> -->
+            <!-- modified frame -->
+            <iframe class="background-frame"
+            src="_state_1.0.2.1.frame1.cyberhill.html"
+            title="Preview background" loading="lazy"
+            data-preview-original-url="https://cyberhillpartners.com/services">               
+               <!-- 1.0.2.1.frame1.content | CYBERHILL FRAME -->
+
+            </iframe>
+
+            <!-- 1.0.2.1.frame2 -->
+            <div class="survey-overlay-container"
+               style="display: none; pointer-events: none;">
+               <!-- original iframe -->
+               <!-- <iframe
+                  src="http://localhost:8000/preview/app/survey/player.html?ver=2025-10-09-01&amp;account=PI-81598442&amp;host=survey.pulseinsights.com&amp;present=7990&amp;tagSrc=http%3A%2F%2Flocalhost%3A3100%2Fproxy%3Furl%3Dhttps%253A%252F%252Fjs.pulseinsights.com%252Fsurveys.js&amp;proxyOrigin=http%3A%2F%2Flocalhost%3A3100&amp;mode=overlay"
+                  title="Pulse Survey Player" sandbox="allow-scripts allow-same-origin"
+                  referrerpolicy="no-referrer"
+                  style="position: absolute; top: 0px; left: 0px; width: 100%; height: 100%; pointer-events: none;"> -->
+               <!-- modified iframe -->
+               <iframe
+               src="_state_1.0.2.1.frame2.pulseplayer.html"
+               title="Pulse Survey Player" sandbox="allow-scripts allow-same-origin"
+               referrerpolicy="no-referrer"
+               style="position: absolute; top: 0px; left: 0px; width: 100%; height: 100%; pointer-events: none;">
+                  <!-- 1.0.2.1.frame2.content | PULSE SURVEY PLAYER -->
+
+               </iframe>
+            </div>
+
+         </section>
+
+      </main>
+
+
+      <!-- 1.0.3 -->
+      <!-- <aside id="log-panel" class="log-panel">
+         <div class="log-panel-header">
+            <h2>Status Log</h2>
+            <button id="close-log-btn" aria-label="Hide status log">×</button>
+         </div>
+         <ol id="log-list" class="log-list">
+            <li data-level="info">3:18:39 PM — Initializing basic preview…</li>
+            <li data-level="info">3:18:39 PM — Loading survey list from Google Sheet…</li>
+            <li data-level="info">3:18:39 PM — No demo parameter detected; defaulting host
+               to https://www.pulseinsights.com/agents.</li>
+            <li data-level="info">3:18:39 PM — Bridge UNMOUNTED → BOOTING (init-start)
+            </li>
+            <li data-level="info">3:18:39 PM — Loading host page
+               https://www.pulseinsights.com/agents</li>
+            <li data-level="info">3:18:39 PM — Proxying background via
+               http://localhost:3100/proxy?url=https%3A%2F%2Fwww.pulseinsights.com%2Fagents
+            </li>
+            <li data-level="info">3:18:39 PM — Bridge BOOTING → IDLE (ready)</li>
+            <li data-level="info">3:18:39 PM — Survey player ready</li>
+            <li data-level="info">3:18:40 PM — Loaded 150 latest example themes.</li>
+            <li data-level="info">3:18:40 PM — Loading official Pulse tag…</li>
+            <li data-level="info">3:18:40 PM — Pulse tag script loaded; waiting for
+               initialization…</li>
+            <li data-level="info">3:18:40 PM — PulseInsightsObject and pi() are ready.
+            </li>
+            <li data-level="info">3:18:40 PM — Applying tag identifier PI-81598442</li>
+            <li data-level="info">3:19:06 PM — Bridge IDLE → UNMOUNTED (destroy)</li>
+            <li data-level="info">3:19:06 PM — Bridge UNMOUNTED → BOOTING (init-start)
+            </li>
+            <li data-level="info">3:19:06 PM — Loading host page
+               https://cyberhillpartners.com/services</li>
+            <li data-level="info">3:19:06 PM — Proxying background via
+               http://localhost:3100/proxy?url=https%3A%2F%2Fcyberhillpartners.com%2Fservices
+            </li>
+            <li data-level="info">3:19:06 PM — Bridge BOOTING → IDLE (ready)</li>
+            <li data-level="info">3:19:06 PM — Survey player ready</li>
+            <li data-level="info">3:19:07 PM — Background ready:
+               https://cyberhillpartners.com/services</li>
+            <li data-level="info">3:19:07 PM — Bridge IDLE → UNMOUNTED (destroy)</li>
+            <li data-level="info">3:19:07 PM — Bridge UNMOUNTED → BOOTING (init-start)
+            </li>
+            <li data-level="info">3:19:07 PM — Survey player configured for PI-81598442
+               (present 7990).</li>
+            <li data-level="info">3:19:07 PM — pi queue snapshot: empty</li>
+            <li data-level="info">3:19:07 PM — Calling pi('present', 7990)</li>
+            <li data-level="info">3:19:07 PM — Bridge BOOTING → IDLE (ready)</li>
+            <li data-level="info">3:19:07 PM — Survey player ready</li>
+            <li data-level="info">3:19:07 PM — Survey 7990 present command sent (source:
+               message).</li>
+         </ol>
+      </aside> -->
+
+
+      <!-- 1.0.4 -->
+      <!-- <div id="demo-directory" class="demo-directory" aria-hidden="true">
+         <div id="demo-directory-backdrop" class="demo-directory__backdrop"
+            role="presentation"></div>
+         <div class="demo-directory__dialog" role="dialog" aria-modal="true"
+            aria-labelledby="demo-directory-title">
+            <header class="demo-directory__header">
+               <div>
+                  <h2 id="demo-directory-title">Demo Library</h2>
+                  <p class="demo-directory__subtitle">Choose a demo group to reload the
+                     preview with matching surveys.</p>
+               </div>
+               <button id="demo-directory-close" class="demo-directory__close"
+                  type="button" aria-label="Close demo library">×</button>
+            </header>
+            <section class="demo-directory__body">
+               <p class="demo-directory__hint">Shortcut: <kbd>Ctrl/⌘</kbd> + <kbd>.</kbd>
+               </p>
+               <ul id="demo-directory-list" class="demo-directory__list">
+                  <li><button type="button" class="demo-directory__option" data-value=""
+                        data-active="false"><span>All demos</span><span
+                           class="demo-directory__count">9 surveys</span></button></li>
+                  <li><button type="button" class="demo-directory__option"
+                        data-value="Cyberhill Partners" data-active="true"><span>Cyberhill
+                           Partners</span><span class="demo-directory__count">2
+                           surveys</span></button></li>
+                  <li><button type="button" class="demo-directory__option"
+                        data-value="Ecommerce"
+                        data-active="false"><span>Ecommerce</span><span
+                           class="demo-directory__count">5 surveys</span></button></li>
+                  <li><button type="button" class="demo-directory__option"
+                        data-value="Pharma" data-active="false"><span>Pharma</span><span
+                           class="demo-directory__count">2 surveys</span></button></li>
+               </ul>
+            </section>
+         </div>
+      </div> -->
+
+
+      <!-- 1.0.5 -->
+      <!-- <script type="module" src="./preview.js"></script> -->
+
+
+   </body>
+
+</html>

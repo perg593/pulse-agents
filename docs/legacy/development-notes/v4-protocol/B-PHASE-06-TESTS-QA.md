@@ -1,7 +1,7 @@
 # Phase‑B Step‑5 — Tests & QA
 
 ## A) Unit — Controller behavior
-`preview/tests/presentationController.test.mjs`
+`tests/integration/preview/presentationController.test.mjs`
 ```js
 import { strict as assert } from 'node:assert';
 import { PresentationController } from '../../basic/js/presentationController.js';

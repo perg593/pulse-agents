@@ -183,7 +183,7 @@ The `/preview` implementation demonstrates **strong alignment** with the Protoco
 
 **Implementation Status:**
 
-**File:** `preview/tests/bridge.contract.test.mjs`
+**File:** `tests/integration/preview/bridge.contract.test.mjs`
 
 - ✅ `testHandshakeCompletesQuickly()` - Handshake timing
 - ✅ `testPresentAckResolvesAndEmitsStatus()` - Ack handling
@@ -208,7 +208,7 @@ The `/preview` implementation demonstrates **strong alignment** with the Protoco
 
 **Implementation Status:**
 
-**File:** `preview/tests/surveyBridge.integration.test.mjs`
+**File:** `tests/integration/preview/surveyBridge.integration.test.mjs`
 
 - ✅ `runLegacySuite()` - Legacy bridge compatibility
 - ✅ `runProtocolSuite()` - Protocol v1 integration
@@ -218,7 +218,7 @@ The `/preview` implementation demonstrates **strong alignment** with the Protoco
   - Trigger commands
   - Concurrency cancellation
 
-**File:** `preview/tests/handshakeFailure.integration.test.mjs`
+**File:** `tests/integration/preview/handshakeFailure.integration.test.mjs`
 
 - ✅ Handshake timeout handling
 
@@ -449,7 +449,7 @@ Created `docs/PROTOCOL-V1.md` with the canonical protocol specification.
 
 ### ✅ Issue 3: Incomplete Test Coverage (MEDIUM) - FIXED
 
-**Location:** `preview/tests/bridge.contract.test.mjs`, `preview/tests/surveyBridge.integration.test.mjs`
+**Location:** `tests/integration/preview/bridge.contract.test.mjs`, `tests/integration/preview/surveyBridge.integration.test.mjs`
 
 **Missing Tests:**
 
