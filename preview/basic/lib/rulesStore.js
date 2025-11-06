@@ -1,5 +1,3 @@
-// I'm adding a comment to the file to test the commit
-
 export class RulesStore {
   static #instance;
 

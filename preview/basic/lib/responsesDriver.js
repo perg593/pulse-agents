@@ -1,5 +1,3 @@
-// I'm adding a comment to the file to test the commit
-
 function parseWhen(when) {
   const match = /^scroll\s*(>=)\s*(\d{1,3})$/.exec(when || '');
   if (!match) return null;

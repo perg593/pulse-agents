@@ -1,5 +1,3 @@
-// I'm adding a comment to the file to test the commit
-
 import { createSurveyBridge } from '../app/survey/bridge.js';
 import { resolveProxyUrl, getProxyOrigin } from '../app/services/proxy.js';
 import { bus, installBehaviorLogProxy } from './lib/behaviorBus.js';

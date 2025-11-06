@@ -1,5 +1,3 @@
-// I'm adding a comment to the file to test the commit
-
 import {
   TOKEN_SCHEMA,
   CORE_TOKEN_PATHS,

@@ -1,5 +1,3 @@
-// I'm adding a comment to the file to test the commit
-
 export const bus = new EventTarget();
 
 export const emit = (type, detail) => bus.dispatchEvent(new CustomEvent(type, { detail }));

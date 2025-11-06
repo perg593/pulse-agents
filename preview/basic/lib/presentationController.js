@@ -1,5 +1,3 @@
-// I'm adding a comment to the file to test the commit
-
 export class PresentationController {
   constructor(delegate, { manualLockMs = 4000, autoCooldownMs = 10000, now = () => Date.now(), log = console } = {}) {
     this.delegate = delegate;
