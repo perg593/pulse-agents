@@ -371,7 +371,7 @@ The `/preview` implementation demonstrates **strong alignment** with the Protoco
 
 ## 8. Security Checklist Verification
 
-**Reference:** `docs/plan/2025-10-22_1547 preview v3/06-SECURITY-CHECKLIST.md`
+**Reference:** `docs/planning/2025-10/preview-v3/06-SECURITY-CHECKLIST.md`
 
 | Check | Status | Evidence |
 |-------|--------|----------|

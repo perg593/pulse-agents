@@ -23,7 +23,7 @@ Command: Ask → Save output using docs/templates/ask_template.md in docs/ask
 
 Cmd+Alt+P
 New Plan note
-Command: Plan → Save output using docs/templates/plan_template.md in docs/plan
+Command: Plan → Save output using docs/templates/plan_template.md in docs/planning
 
 Cmd+Alt+D
 Open Don’t-Do-This
@@ -31,11 +31,11 @@ Command: docs/decisions/dont-do-this.md
 
 Cmd+Alt+W
 Weekly Summary
-Command: Ask: Summarize all /docs/ask and /docs/plan entries from the last 7 days into docs/weekly/YYYY-MM-DD_summary.md
+Command: Ask: Summarize all /docs/ask and /docs/planning entries from the last 7 days into docs/weekly/YYYY-MM-DD_summary.md
 
 You can also add:
 	•	Cmd+Alt+T → Create template copy (duplicate whichever Ask/Plan template is open)
-	•	Cmd+Alt+L → List recent Ask/Plan docs (use the “Open File” action with filter docs/ask OR docs/plan)
+	•	Cmd+Alt+L → List recent Ask/Plan docs (use the "Open File" action with filter docs/ask OR docs/planning)
 
 That gives you one-keystroke access to each piece of your documentation loop.
 
@@ -68,10 +68,10 @@ Prompt: Plan – Refactor
 Generate a plan for safely refactoring <module>. 
 List steps, risks, and test coverage. 
 Do not change code yet. 
-Save to docs/plan/<date>_refactor_<module>.plan.md.
+Save to docs/planning/<date>_refactor_<module>.plan.md.
 
 Prompt: Ask – Weekly Summary
-Summarize all Ask and Plan notes in docs/ask and docs/plan from the last 7 days. Identify themes, blockers, and next actions. Save to docs/weekly/YYYY-MM-DD_summary.md.
+Summarize all Ask and Plan notes in docs/ask and docs/planning from the last 7 days. Identify themes, blockers, and next actions. Save to docs/weekly/YYYY-MM-DD_summary.md.
 
 
 

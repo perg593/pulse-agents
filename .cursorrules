@@ -1,6 +1,6 @@
 # .cursorrules
 ask_output_dir: docs/ask
-plan_output_dir: docs/plan
+plan_output_dir: docs/planning
 default_templates:
   ask: docs/templates/ask_template.md
   plan: docs/templates/plan_template.md

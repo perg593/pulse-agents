@@ -8,7 +8,7 @@
 
 ## Inputs
 
-- Reference analysis: `docs/plan/2025-10-29_1110 theme-framework-token-reference.md`
+- Reference analysis: `docs/planning/2025-10/theme-framework-token-reference.md`
 - Legacy SCSS sources (`sass-framework/01-css-pulse/*.scss`, `/02-css-clients/**`)
 - Existing generator code (`theme-generator/src`, `preview/basic/theme-css.js`)
 
