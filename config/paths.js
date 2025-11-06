@@ -82,12 +82,6 @@ const BASE_PATHS = {
   /** Scripts build directory */
   SCRIPTS_BUILD_DIR: 'scripts/build',
   
-  /** Scripts dev directory */
-  SCRIPTS_DEV_DIR: 'scripts/dev',
-  
-  /** Scripts utils directory */
-  SCRIPTS_UTILS_DIR: 'scripts/utils',
-  
   /** Config directory */
   CONFIG_DIR: 'config',
   
