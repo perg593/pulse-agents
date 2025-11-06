@@ -6,7 +6,7 @@
 
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 # Load port configuration from centralized config
 if [[ -f "${ROOT_DIR}/config/ports.js" ]]; then
@@ -170,14 +170,14 @@ fi
 ensure_node_modules() {
   local directory="$1"
   local description="$2"
-  if [ ! -d "${directory}/node_modules" ]; then
+  if [ -d "${directory}" ] && [ ! -d "${directory}/node_modules" ]; then
     echo "➡️  Installing ${description} dependencies…"
     (cd "${directory}" && npm install)
   fi
 }
 
 ensure_node_modules "${ROOT_DIR}" "root"
-ensure_node_modules "${ROOT_DIR}/theme-generator" "theme-generator"
+ensure_node_modules "${ROOT_DIR}/theme-generator/v1" "theme-generator"
 ensure_node_modules "${ROOT_DIR}/pi-master" "pi-master"
 
 run_step() {
@@ -190,7 +190,11 @@ run_step() {
 cd "${ROOT_DIR}"
 
 if [[ "${RUN_WIDGETS}" == "1" ]]; then
-  run_step "Generating widget snapshots from pi-master..." node scripts/build/generate-widgets.js
+  if [ -d "${ROOT_DIR}/pi-master" ]; then
+    run_step "Generating widget snapshots from pi-master..." node scripts/build/generate-widgets.js
+  else
+    echo "⚠️  Skipping widget generation - pi-master directory not found (optional)"
+  fi
 fi
 
 if [[ "${RUN_DEMO_DATA}" == "1" ]]; then
@@ -198,15 +202,15 @@ if [[ "${RUN_DEMO_DATA}" == "1" ]]; then
 fi
 
 if [[ "${RUN_EXAMPLES}" == "1" ]]; then
-  run_step "Exporting latest example themes..." bash -lc 'cd theme-generator && npm run examples:export'
+  run_step "Exporting latest example themes..." bash -lc 'cd theme-generator/v1 && npm run examples:export'
 fi
 
 if [[ "${RUN_PREVIEW_BUILD}" == "1" ]]; then
-  run_step "Rebuilding preview manifest and default CSS..." bash -lc 'cd theme-generator && npm run preview:build'
+  run_step "Rebuilding preview manifest and default CSS..." bash -lc 'cd theme-generator/v1 && npm run preview:build'
 fi
 
 if [[ "${RUN_TESTS}" == "1" ]]; then
-  run_step "Running theme-generator unit tests..." bash -lc 'cd theme-generator && npm run test:unit'
+  run_step "Running theme-generator unit tests..." bash -lc 'cd theme-generator/v1 && npm run test:unit'
 fi
 
 # Function to wait for service readiness with exponential backoff
@@ -280,11 +284,17 @@ if [[ "${RUN_BACKGROUND_PROXY}" == "1" ]]; then
 fi
 
 if [[ "${RUN_STRIPE_DEMO_SERVER}" == "1" ]]; then
-  start_service "Stripe Demo Server" "${STRIPE_DEMO_PORT}" \
-    "nohup env STRIPE_DEMO_PORT=\"${STRIPE_DEMO_PORT}\" node preview/scripts/stripe-demo-server.js >\"${STRIPE_DEMO_LOG}\" 2>&1 &" \
-    "http://localhost:${STRIPE_DEMO_PORT}/stripe-demo/health" \
-    "${STRIPE_DEMO_LOG}" \
-    "STRIPE_SERVER_PID"
+  if [[ -z "${STRIPE_SECRET_KEY:-}" ]]; then
+    echo "⚠️  Skipping Stripe Demo Server - STRIPE_SECRET_KEY not set (optional)"
+    echo "   To enable: export STRIPE_SECRET_KEY='sk_test_...'"
+    RUN_STRIPE_DEMO_SERVER=0
+  else
+    start_service "Stripe Demo Server" "${STRIPE_DEMO_PORT}" \
+      "nohup env STRIPE_DEMO_PORT=\"${STRIPE_DEMO_PORT}\" STRIPE_SECRET_KEY=\"${STRIPE_SECRET_KEY}\" node preview/scripts/stripe-demo-server.js >\"${STRIPE_DEMO_LOG}\" 2>&1 &" \
+      "http://localhost:${STRIPE_DEMO_PORT}/stripe-demo/health" \
+      "${STRIPE_DEMO_LOG}" \
+      "STRIPE_SERVER_PID"
+  fi
 fi
 
 # Start main server last to ensure all dependencies are ready

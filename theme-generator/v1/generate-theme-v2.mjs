@@ -5,9 +5,10 @@ import { createRequire } from 'module';
 
 const require = createRequire(import.meta.url);
 const { compileTheme, deepMerge } = require('./src/theme-css.js');
-const { log, createLogger } = require('../lib/logger.js');
-const { ErrorFactory, ErrorHandler } = require('../lib/errors.js');
-const { FileValidator, ThemeValidator, ParameterValidator } = require('../lib/validators.js');
+// Script is in theme-generator/v1/, lib is at root level, so go up 2 levels
+const { log, createLogger } = require('../../lib/logger.js');
+const { ErrorFactory, ErrorHandler } = require('../../lib/errors.js');
+const { FileValidator, ThemeValidator, ParameterValidator } = require('../../lib/validators.js');
 
 // Create logger for theme generator v2
 const logger = createLogger('ThemeGeneratorV2');

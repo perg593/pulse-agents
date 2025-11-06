@@ -29,6 +29,21 @@ const DEMO_LIBRARY_SEQUENCE = UI_CONSTANTS.DEMO_LIBRARY_SEQUENCE;
 const SEQUENCE_MAX_LENGTH = UI_CONSTANTS.SEQUENCE_MAX_LENGTH;
 const RAIL_SHORTCUT_RESET_MS = UI_CONSTANTS.RAIL_SHORTCUT_RESET_MS;
 const PREVIEW_BUILD_STAMP = '2025-02-15T17:30:00Z';
+
+// Tag lifecycle states
+const TAG_STATES = {
+  NOT_STARTED: 'not-started',
+  LOADING: 'loading',
+  READY: 'ready',
+  FAILED: 'failed',
+  RETRYING: 'retrying'
+};
+
+// Tag configuration
+const MAX_TAG_RETRIES = 3;
+const TAG_TIMEOUT = 15000; // Increased from 10s
+const TAG_RETRY_DELAYS = [1000, 2000, 5000]; // Progressive delays
+
 const FALLBACK_SURVEYS = [
   {
     surveyId: '7990',
@@ -168,7 +183,16 @@ const demoForFilter = demoDismissed ? '' : demoForFilterParam;
 
 const loadedAssets = new Set();
 let tagReady = false;
+// Tag state management
+let tagState = TAG_STATES.NOT_STARTED;
+let tagReadyPromise = null;
+let tagRetryCount = 0;
+let tagHealthCheckInterval = null;
 let pendingPresent = null;
+// Operation tracking
+let activePresentOperation = null;
+let presentOperationId = 0;
+let surveyBridgeReady = false;
 let lastPresentedOptionId = null;
 let logVisible = false;
 let railOpen = false;
@@ -201,6 +225,12 @@ let overlayLayoutRaf = null;
 let overlayLayoutTimeout = null;
 let widgetFallbackTimer = null;
 let widgetFallbackApplied = false;
+let iframePositioned = false;
+let pendingGeometryUpdates = [];
+let geometryRetryCount = 0;
+let geometryRetryTimeout = null;
+const MAX_GEOMETRY_RETRIES = 3;
+const GEOMETRY_RETRY_DELAYS = [500, 1000, 2000];
 let corsErrorLogged = false;
 const behaviorButtons = new Map();
 let behaviorMessageTimeout = null;
@@ -367,19 +397,35 @@ window.addEventListener('pulseinsights:error', (event) => {
     const { detail } = event;
     const errorMsg = detail?.message || detail?.error || 'Unknown error';
     const errorType = detail?.type || 'unknown';
+    const surveyId = detail?.surveyId;
+    const isSurveyNullError = errorType === 'survey-null-error' || detail?.surveyNull;
+    
     console.error('[preview] PulseInsights error event', detail);
     
-    addLog(`Survey error (${errorType}): ${errorMsg}`, 'error');
+    // Provide more specific error messages for survey-null errors
+    if (isSurveyNullError) {
+      const surveyLabel = surveyId ? `survey ${surveyId}` : 'survey';
+      const waitInfo = detail?.waited ? ` (waited ${detail.waited}ms)` : '';
+      addLog(
+        `Survey error: Cannot present ${surveyLabel} - PulseInsightsObject.survey is null${waitInfo}. This typically happens when switching surveys and the new iframe hasn't finished loading survey data yet, or there's a configuration issue.`,
+        'error'
+      );
+    } else {
+      addLog(`Survey error (${errorType}): ${errorMsg}`, 'error');
+    }
     
     // Also report to bridge as present-error if we have a survey context
-    if (lastSurveyRecord) {
-      const surveyId = lastSurveyRecord.surveyId || lastSurveyRecord.surveyName || 'unknown';
+    if (lastSurveyRecord || surveyId) {
+      const surveyIdToReport = surveyId || lastSurveyRecord?.surveyId || lastSurveyRecord?.surveyName || 'unknown';
       handlePlayerStatus({
         type: 'player-status',
         status: 'present-error',
-        surveyId,
+        surveyId: String(surveyIdToReport),
         source: 'error-handler',
-        message: errorMsg
+        message: isSurveyNullError 
+          ? `Survey null error: ${errorMsg}` 
+          : errorMsg,
+        errorType
       });
     }
   } catch (_catchError) {
@@ -454,7 +500,56 @@ function wireUi() {
     if (railOpen) {
       setRailOpen(false);
     }
-    await presentSurvey(surveySelect.value, { force: true });
+    
+    const newOptionId = surveySelect.value;
+    const record = findRecordByOptionId(newOptionId);
+    
+    if (!record) {
+      addLog('Invalid survey selection', 'warn', { optionId: newOptionId });
+      return;
+    }
+    
+    // Clear previous survey state
+    addLog(
+      `Switching to survey ${record.surveyId}...`,
+      'info',
+      {
+        operationId: 'survey-switch',
+        surveyId: record.surveyId,
+        previousSurveyId: lastSurveyRecord?.surveyId
+      }
+    );
+    
+    // Cancel any in-flight operations
+    if (activePresentOperation) {
+      addLog(
+        'Cancelling previous survey operation...',
+        'info',
+        {
+          operationId: 'survey-switch',
+          cancelledOperationId: activePresentOperation.id,
+          cancelledSurveyId: activePresentOperation.surveyId
+        }
+      );
+      if (activePresentOperation.cancelToken) {
+        activePresentOperation.cancelToken.cancel();
+      }
+    }
+    
+    // Reset widget state
+    playerWidgetRect = null;
+    overlayFallbackActive = false;
+    overlayFallbackLogged = false;
+    resetPlayerOverlayLayout(playerFrameEl);
+    
+    // Clear any pending presents
+    pendingPresent = null;
+    
+    // Wait a brief moment for cleanup
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // Present new survey
+    await presentSurvey(newOptionId, { force: true, forceReload: true });
     updateBehaviorSurveyLabel();
     showBehaviorMessage('Survey updated. Perform a behavior to trigger it.');
   });
@@ -700,30 +795,58 @@ function rewriteUrl(value) {
   return `${LIPSUM_BASE}${normalized}`;
 }
 
-async function bootPulseTag() {
-  if (window.__pulsePreviewBooted) {
-    addLog('Pulse tag already booted.');
-    return;
+async function bootPulseTag({ force = false } = {}) {
+  // Allow re-initialization if forced or failed
+  if (tagState === TAG_STATES.READY && !force) {
+    addLog('Pulse tag already ready.', 'info', { operationId: 'tag-boot' });
+    return Promise.resolve();
   }
-  window.__pulsePreviewBooted = true;
+  
+  // If already loading, return existing promise
+  if (tagState === TAG_STATES.LOADING && tagReadyPromise) {
+    addLog('Tag loading already in progress; waiting...', 'info', { operationId: 'tag-boot' });
+    return tagReadyPromise;
+  }
 
+  tagState = TAG_STATES.LOADING;
+  setTagStatus('Tag: loading...');
+  
   if (!window.PULSE_TAG_SRC) {
     window.PULSE_TAG_SRC = resolveProxyUrl(DEFAULT_TAG_SRC);
   } else {
     window.PULSE_TAG_SRC = resolveProxyUrl(window.PULSE_TAG_SRC);
   }
 
-  addLog('Loading official Pulse tag…');
-  await injectScript('/preview/scripts/pulse-insights-official-tag.js');
-  addLog('Pulse tag script loaded; waiting for initialization…');
-
-  waitForOfficialTag()
-    .then(() => {
+  const attemptNumber = tagRetryCount + 1;
+  addLog(
+    `Loading Pulse tag (attempt ${attemptNumber}/${MAX_TAG_RETRIES + 1})...`,
+    'info',
+    { operationId: 'tag-boot', attempt: attemptNumber }
+  );
+  
+  tagReadyPromise = (async () => {
+    try {
+      await injectScript('/preview/scripts/pulse-insights-official-tag.js');
+      addLog('Tag script injected; verifying readiness...', 'info', { operationId: 'tag-boot' });
+      
+      await waitForOfficialTag(TAG_TIMEOUT);
+      
+      // Verify tag is actually functional
+      await verifyTagFunctionality();
+      
+      tagState = TAG_STATES.READY;
       tagReady = true;
+      tagRetryCount = 0;
       setTagStatus('Tag: ready');
-      addLog('PulseInsightsObject and pi() are ready.');
+      addLog('Pulse tag ready and verified.', 'info', { operationId: 'tag-boot' });
+      
+      // Start health monitoring
+      startTagHealthMonitoring();
+      
       clearPresentCommands({ log: true });
       applyPendingIdentifier({ reason: 'ready' });
+      
+      // Process pending presents
       if (pendingPresent && pendingPresent.optionId) {
         const record = findRecordByOptionId(pendingPresent.optionId);
         if (record) {
@@ -731,11 +854,49 @@ async function bootPulseTag() {
         }
         pendingPresent = null;
       }
-    })
-    .catch((error) => {
-      setTagStatus('Tag: failed');
-      addLog(`Pulse tag failed to initialize: ${error.message}`, 'error');
-    });
+      
+      return true;
+    } catch (error) {
+      tagRetryCount++;
+      
+      if (tagRetryCount <= MAX_TAG_RETRIES) {
+        tagState = TAG_STATES.RETRYING;
+        const retryDelay = TAG_RETRY_DELAYS[tagRetryCount - 1] || 2000;
+        addLog(
+          `Tag initialization failed: ${error.message}. Retrying in ${retryDelay}ms...`,
+          'warn',
+          {
+            operationId: 'tag-boot',
+            error: error.message,
+            retryCount: tagRetryCount,
+            retryDelay
+          }
+        );
+        setTagStatus(`Tag: retrying (${tagRetryCount}/${MAX_TAG_RETRIES})...`);
+        
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+        return bootPulseTag({ force: true });
+      } else {
+        tagState = TAG_STATES.FAILED;
+        tagReady = false;
+        setTagStatus('Tag: failed');
+        addLog(
+          `Tag failed after ${MAX_TAG_RETRIES + 1} attempts: ${error.message}`,
+          'error',
+          {
+            operationId: 'tag-boot',
+            error: error.message,
+            totalAttempts: MAX_TAG_RETRIES + 1
+          }
+        );
+        throw error;
+      }
+    } finally {
+      tagReadyPromise = null;
+    }
+  })();
+  
+  return tagReadyPromise;
 }
 
 async function populateSurveySelect() {
@@ -778,7 +939,7 @@ async function populateSurveySelect() {
 
   const placeholderOption = document.createElement('option');
   placeholderOption.value = '';
-  placeholderOption.textContent = 'Select a demo survey…';
+  placeholderOption.textContent = 'Select a demo';
   placeholderOption.disabled = true;
   placeholderOption.selected = true;
   placeholderOption.hidden = false;
@@ -796,7 +957,7 @@ async function populateSurveySelect() {
 
   const firstRecord = surveyRecords[0];
   return {
-    initialOptionId: firstRecord?.__optionId || null,
+    initialOptionId: null, // Default to placeholder "Select a demo"
     initialSurveyId: firstRecord?.surveyId || null,
     backgroundUrl: firstRecord?.backgroundUrl || '',
     identifier: resolveIdentifier(firstRecord)
@@ -883,39 +1044,152 @@ function injectScript(src) {
   });
 }
 
-function waitForOfficialTag(timeoutMs = 10000) {
+function waitForOfficialTag(timeoutMs = TAG_TIMEOUT) {
   const start = Date.now();
+  let lastProgressLog = 0;
+  
   return new Promise((resolve, reject) => {
     (function poll() {
       const hasPi = typeof window.pi === 'function';
       const hasPulse = typeof window.PulseInsightsObject === 'object' && window.PulseInsightsObject;
+      
       if (hasPi && hasPulse) {
         resolve();
         return;
       }
-      if (Date.now() - start >= timeoutMs) {
-        reject(new Error('PulseInsightsObject / pi() not available'));
+      
+      const elapsed = Date.now() - start;
+      if (elapsed >= timeoutMs) {
+        reject(new Error(
+          `Timeout: PulseInsightsObject/pi() not available after ${timeoutMs}ms`
+        ));
         return;
       }
+      
+      // Log progress every 2 seconds
+      if (elapsed - lastProgressLog >= 2000) {
+        lastProgressLog = elapsed;
+        const seconds = Math.round(elapsed / 1000);
+        addLog(
+          `Waiting for tag... (${seconds}s/${Math.round(timeoutMs / 1000)}s)`,
+          'info',
+          { operationId: 'tag-wait', elapsed, timeout: timeoutMs }
+        );
+      }
+      
       setTimeout(poll, 100);
     })();
   });
 }
 
+async function verifyTagFunctionality() {
+  // Verify pi() function works
+  if (typeof window.pi !== 'function') {
+    throw new Error('pi() function not available');
+  }
+  
+  // Verify PulseInsightsObject exists and has expected structure
+  if (!window.PulseInsightsObject || typeof window.PulseInsightsObject !== 'object') {
+    throw new Error('PulseInsightsObject not available');
+  }
+  
+  // Try a test command to ensure it's functional
+  try {
+    const testId = 'test-' + Date.now();
+    window.pi('identify', testId);
+    // If no error thrown, assume it's working
+  } catch (error) {
+    throw new Error(`Tag functionality test failed: ${error.message}`);
+  }
+}
+
+function startTagHealthMonitoring() {
+  if (tagHealthCheckInterval) return;
+  
+  tagHealthCheckInterval = setInterval(() => {
+    if (tagState !== TAG_STATES.READY) return;
+    
+    const isHealthy = 
+      typeof window.pi === 'function' &&
+      window.PulseInsightsObject &&
+      typeof window.PulseInsightsObject === 'object';
+    
+    if (!isHealthy) {
+      addLog(
+        'Tag health check failed; tag may have been removed or corrupted.',
+        'warn',
+        { operationId: 'tag-health' }
+      );
+      tagState = TAG_STATES.FAILED;
+      tagReady = false;
+      setTagStatus('Tag: unhealthy');
+      
+      // Attempt recovery
+      bootPulseTag({ force: true }).catch(() => {
+        addLog('Tag recovery failed.', 'error', { operationId: 'tag-health' });
+      });
+    }
+  }, 5000);
+}
+
+function stopTagHealthMonitoring() {
+  if (tagHealthCheckInterval) {
+    clearInterval(tagHealthCheckInterval);
+    tagHealthCheckInterval = null;
+  }
+}
+
 async function presentSurvey(optionId, options = {}) {
+  const operationId = ++presentOperationId;
+  const operationKey = `present-${operationId}`;
+  
   try {
     const key = String(optionId || '').trim();
     if (!key) {
-      addLog('No survey id selected.', 'warn');
+      addLog('No survey id selected.', 'warn', { operationId: operationKey });
       return;
     }
 
     const record = findRecordByOptionId(key);
     if (!record) {
-      addLog(`No survey record found for option ${key}`, 'warn');
+      addLog(
+        `No survey record found for option ${key}`,
+        'warn',
+        { operationId: operationKey, optionId: key }
+      );
       setSurveyStatus('Survey: idle');
       return;
     }
+
+    // Cancel previous operation if still in progress
+    if (activePresentOperation && activePresentOperation.cancelToken) {
+      addLog(
+        `Cancelling previous present operation (${activePresentOperation.surveyId})`,
+        'info',
+        {
+          operationId: operationKey,
+          cancelledOperationId: activePresentOperation.id,
+          cancelledSurveyId: activePresentOperation.surveyId
+        }
+      );
+      activePresentOperation.cancelToken.cancel();
+    }
+
+    // Create cancellation token
+    let cancelled = false;
+    const cancelToken = {
+      cancel: () => { cancelled = true; },
+      get cancelled() { return cancelled; }
+    };
+
+    activePresentOperation = {
+      id: operationId,
+      key: operationKey,
+      optionId: key,
+      surveyId: record.surveyId,
+      cancelToken,
+      startTime: Date.now()
+    };
 
     if (surveySelect && surveySelect.value !== key) {
       surveySelect.value = key;
@@ -931,37 +1205,131 @@ async function presentSurvey(optionId, options = {}) {
 
     const { force = false, forceReload = false, allowDuplicate = false } = options;
 
+    addLog(
+      `Starting present operation for survey ${record.surveyId}`,
+      'info',
+      {
+        operationId: operationKey,
+        surveyId: record.surveyId,
+        account: resolveIdentifier(record),
+        force,
+        forceReload,
+        allowDuplicate
+      }
+    );
+
+    // Step 1: Ensure background
+    if (cancelled) {
+      addLog(`Operation cancelled`, 'warn', { operationId: operationKey });
+      return;
+    }
+    addLog(
+      `Step 1/4: Ensuring background page...`,
+      'info',
+      { operationId: operationKey, step: 1, total: 4, surveyId: record.surveyId }
+    );
     await ensureBackgroundForRecord(record, { force: Boolean(force) });
+
+    // Step 2: Ensure player loaded and ready
+    if (cancelled) return;
+    addLog(
+      `Step 2/4: Ensuring player iframe...`,
+      'info',
+      { operationId: operationKey, step: 2, total: 4, surveyId: record.surveyId }
+    );
     const ensureResult = ensurePlayerLoadedForRecord(record, {
       forceReload: Boolean(forceReload || force)
     });
-    const trimmedQueue = (window.pi && Array.isArray(window.pi.commands)) ? window.pi.commands.map((args) => args[0]) : [];
-    addLog(`pi queue snapshot: ${trimmedQueue.join(', ') || 'empty'}`);
+    
+    // Wait for player bridge to be ready
+    if (ensureResult.reloaded || !surveyBridgeReady) {
+      addLog(
+        `Waiting for player bridge ready...`,
+        'info',
+        { operationId: operationKey, surveyId: record.surveyId }
+      );
+      await waitForPlayerBridgeReady(10000);
+    }
+
+    // Step 3: Ensure tag ready
+    if (cancelled) return;
+    addLog(
+      `Step 3/4: Ensuring tag ready...`,
+      'info',
+      { operationId: operationKey, step: 3, total: 4, surveyId: record.surveyId }
+    );
+    if (!tagReady || tagState !== TAG_STATES.READY) {
+      addLog(
+        `Tag not ready; booting...`,
+        'info',
+        { operationId: operationKey, surveyId: record.surveyId }
+      );
+      await bootPulseTag();
+    }
+
+    // Step 4: Apply identifier
+    if (cancelled) return;
+    addLog(
+      `Step 4/4: Applying identifier...`,
+      'info',
+      { operationId: operationKey, step: 4, total: 4, surveyId: record.surveyId }
+    );
+    const trimmedQueue = (window.pi && Array.isArray(window.pi.commands)) 
+      ? window.pi.commands.map((args) => args[0]) 
+      : [];
+    addLog(
+      `pi() queue: ${trimmedQueue.join(', ') || 'empty'}`,
+      'info',
+      { operationId: operationKey, queue: trimmedQueue }
+    );
     applyIdentifier(resolveIdentifier(record));
 
-    if (!tagReady || typeof window.pi !== 'function') {
-      pendingPresent = {
-        optionId: key,
-        options: { force, forceReload, allowDuplicate }
-      };
-      const queuedLabel = record.surveyId || record.surveyName || key;
-      addLog(`Tag not ready yet; waiting to present ${queuedLabel}.`, 'warn');
-      setSurveyStatus(`Survey: queued ${queuedLabel}`);
+    if (cancelled) {
+      addLog(`Operation cancelled before present`, 'warn', { operationId: operationKey });
       return;
     }
 
-    sendPresentForRecord(record, { force, forceReload, allowDuplicate }, ensureResult);
+    // Step 5: Send present
+    addLog(
+      `Sending present command...`,
+      'info',
+      { operationId: operationKey, surveyId: record.surveyId }
+    );
+    sendPresentForRecord(record, { force, forceReload, allowDuplicate }, ensureResult, operationKey);
+    
+    const duration = Date.now() - activePresentOperation.startTime;
+    addLog(
+      `Present operation completed in ${duration}ms`,
+      'info',
+      {
+        operationId: operationKey,
+        surveyId: record.surveyId,
+        duration
+      }
+    );
+    activePresentOperation = null;
+    
   } catch (error) {
-    addLog(`Present failed: ${error.message}`, 'error');
+    addLog(
+      `Present failed: ${error.message}`,
+      'error',
+      {
+        operationId: operationKey,
+        error: error.message,
+        stack: error.stack
+      }
+    );
+    activePresentOperation = null;
   }
 }
 
-function sendPresentForRecord(record, { force = false, forceReload = false, allowDuplicate = false } = {}, ensured = null) {
+function sendPresentForRecord(record, { force = false, forceReload = false, allowDuplicate = false } = {}, ensured = null, operationKey = null) {
   if (!record) return;
   pendingPresent = null;
   const optionId = record.__optionId || String(record.surveyId || '');
   const surveyId = record.surveyId;
   const label = String(surveyId || record.surveyName || optionId);
+  const opKey = operationKey || activePresentOperation?.key || 'present';
 
   lastSurveyRecord = record;
   const placementHint = derivePlacementHintFromRecord(record);
@@ -970,7 +1338,11 @@ function sendPresentForRecord(record, { force = false, forceReload = false, allo
   }
 
   if (!surveyId) {
-    addLog(`Survey record ${label} is missing a surveyId; skipping present.`, 'warn');
+    addLog(
+      `Survey record ${label} is missing a surveyId; skipping present.`,
+      'warn',
+      { operationId: opKey, surveyId: label }
+    );
     return;
   }
 
@@ -981,7 +1353,11 @@ function sendPresentForRecord(record, { force = false, forceReload = false, allo
   const reloaded = Boolean(ensureResult && ensureResult.reloaded);
 
   if (!force && !forceReload && !allowDuplicate && !reloaded && lastPresentedOptionId === optionId) {
-    addLog(`pi('present', ${label}) already sent; skipping duplicate.`);
+    addLog(
+      `pi('present', ${label}) already sent; skipping duplicate.`,
+      'info',
+      { operationId: opKey, surveyId: label }
+    );
     setSurveyStatus(`Survey: already presenting ${label}`);
     return;
   }
@@ -990,7 +1366,17 @@ function sendPresentForRecord(record, { force = false, forceReload = false, allo
   blockAutoPresent = false;
   stopPresentGuard();
   const modeNote = forceReload || force ? ' (reload)' : allowDuplicate ? ' (duplicate)' : '';
-  addLog(`Calling pi('present', ${label})${modeNote}`);
+  addLog(
+    `Calling pi('present', ${label})${modeNote}`,
+    'info',
+    {
+      operationId: opKey,
+      surveyId: label,
+      force,
+      forceReload,
+      allowDuplicate
+    }
+  );
   setSurveyStatus(`Survey: presenting ${label}`);
   if (surveyBridge && typeof surveyBridge.present === 'function') {
     surveyBridge.present(surveyId);
@@ -1138,6 +1524,48 @@ function normalizePresentList(value) {
   return value.map((item) => String(item)).join('|');
 }
 
+function waitForPlayerBridgeReady(timeoutMs = 10000) {
+  return new Promise((resolve, reject) => {
+    if (surveyBridgeReady) {
+      resolve();
+      return;
+    }
+    
+    const start = Date.now();
+    let lastProgressLog = 0;
+    
+    const checkInterval = setInterval(() => {
+      if (surveyBridgeReady) {
+        clearInterval(checkInterval);
+        resolve();
+        return;
+      }
+      
+      const elapsed = Date.now() - start;
+      if (elapsed >= timeoutMs) {
+        clearInterval(checkInterval);
+        reject(new Error(`Player bridge ready timeout after ${timeoutMs}ms`));
+        return;
+      }
+      
+      // Log progress every 2 seconds
+      if (elapsed - lastProgressLog >= 2000) {
+        lastProgressLog = elapsed;
+        const seconds = Math.round(elapsed / 1000);
+        addLog(
+          `Waiting for player bridge... (${seconds}s/${Math.round(timeoutMs / 1000)}s)`,
+          'info',
+          {
+            operationId: activePresentOperation?.key || 'bridge-wait',
+            elapsed,
+            timeout: timeoutMs
+          }
+        );
+      }
+    }, 100);
+  });
+}
+
 function ensurePlayerLoadedForRecord(record, { forceReload = false } = {}) {
   if (!record || !surveyBridge || typeof surveyBridge.load !== 'function') {
     return { reloaded: false, config: null };
@@ -1153,6 +1581,7 @@ function ensurePlayerLoadedForRecord(record, { forceReload = false } = {}) {
   const shouldReload = forceReload || !playerConfigsEqual(currentConfig, config);
 
   if (shouldReload) {
+    surveyBridgeReady = false; // Reset ready state when reloading
     const frame = surveyBridge.load(config);
     registerPlayerFrame(frame || null);
     playerMode = config.mode === 'inline' ? 'inline' : 'overlay';
@@ -1161,7 +1590,16 @@ function ensurePlayerLoadedForRecord(record, { forceReload = false } = {}) {
     const presentLabel =
       config.present && config.present[0] ? ` (present ${config.present[0]})` : '';
     const modeLabel = config.mode === 'inline' ? ' in inline mode' : '';
-    addLog(`Survey player configured for ${config.account}${presentLabel}${modeLabel}.`);
+    addLog(
+      `Survey player reloading for ${config.account}${presentLabel}${modeLabel}...`,
+      'info',
+      {
+        operationId: activePresentOperation?.key || 'player-load',
+        account: config.account,
+        mode: config.mode,
+        surveyId: config.present?.[0]
+      }
+    );
   }
 
   return { reloaded: shouldReload, config };
@@ -1235,6 +1673,9 @@ function monitorWidgetVisibility({ surveyId, url }) {
   if (monitorWidgetVisibility.timeout) {
     clearTimeout(monitorWidgetVisibility.timeout);
   }
+  // Align timeout with geometry detection timeout (4000ms base, adaptive up to 6000ms)
+  // Use 4200ms to check slightly after geometry timeout to avoid false negatives
+  const timeoutMs = 4200;
   monitorWidgetVisibility.timeout = window.setTimeout(() => {
     const visible = playerWidgetRect && playerWidgetRect.width > 0 && playerWidgetRect.height > 0;
     if (!visible) {
@@ -1247,7 +1688,10 @@ function monitorWidgetVisibility({ surveyId, url }) {
       console.debug('[preview] widget geometry detected', playerWidgetRect);
     }
     monitorWidgetVisibility.timeout = null;
-  }, 2600);
+  }, timeoutMs);
+  
+  // Also check immediately when geometry is detected (via callback from geometry update)
+  // This is handled by checking in updatePlayerWidgetGeometry when rect becomes available
 }
 
 function startPresentGuard() {
@@ -1676,19 +2120,79 @@ function parseCsv(text) {
 }
 
 
-function addLog(message, level = 'info') {
+function addLog(message, level = 'info', context = {}) {
+  const timestamp = new Date().toISOString();
+  const operationId = context.operationId || activePresentOperation?.key || 'none';
+  const surveyId = context.surveyId || activePresentOperation?.surveyId || lastSurveyRecord?.surveyId || 'none';
+  const account = context.account || currentIdentifier || 'none';
+  
+  // Build structured log entry
+  const logEntry = {
+    timestamp,
+    level,
+    message,
+    operationId,
+    surveyId,
+    account,
+    ...context
+  };
+  
+  // Format for display
+  const timeOnly = timestamp.split('T')[1].split('.')[0];
+  const parts = [
+    timeOnly,
+    operationId !== 'none' ? `[${operationId}]` : '',
+    surveyId !== 'none' ? `survey:${surveyId}` : '',
+    account !== 'none' && account !== DEFAULT_IDENTIFIER ? `account:${account}` : '',
+    message
+  ].filter(Boolean);
+  
+  const displayMessage = parts.join(' — ');
+  
   const li = document.createElement('li');
-  li.textContent = `${timestamp()} — ${message}`;
+  li.textContent = displayMessage;
   li.dataset.level = level;
+  li.dataset.operationId = operationId;
+  li.dataset.surveyId = surveyId;
+  li.dataset.account = account;
+  li.title = JSON.stringify(logEntry, null, 2); // Full context on hover
+  
   logList.appendChild(li);
   logList.scrollTop = logList.scrollHeight;
-  if (level === 'error') {
-    console.error('[preview]', message);
-  } else if (level === 'warn') {
-    console.warn('[preview]', message);
-  } else {
-    console.info('[preview]', message);
+  
+  // Console logging with structured data
+  const consoleMethod = level === 'error' ? 'error' : level === 'warn' ? 'warn' : 'log';
+  console[consoleMethod]('[preview]', logEntry);
+  
+  // Store in log history for debugging
+  if (!window.__previewLogHistory) {
+    window.__previewLogHistory = [];
   }
+  window.__previewLogHistory.push(logEntry);
+  
+  // Keep last 1000 entries
+  if (window.__previewLogHistory.length > 1000) {
+    window.__previewLogHistory.shift();
+  }
+}
+
+// Helper for operation-scoped logging
+function addOperationLog(operationKey, message, level = 'info', context = {}) {
+  addLog(message, level, {
+    ...context,
+    operationId: operationKey
+  });
+}
+
+// Helper for progress logging
+function addProgressLog(step, total, message, context = {}) {
+  const progress = `[${step}/${total}]`;
+  addLog(`${progress} ${message}`, 'info', {
+    ...context,
+    step,
+    total,
+    progress: `${step}/${total}`
+  });
 }
 
 function setTagStatus(text) {
@@ -2639,11 +3143,28 @@ function unregisterStylesheet(node) {
   }
 }
 function handlePlayerReady(event) {
-  addLog('Survey player ready');
+  surveyBridgeReady = true;
+  addLog(
+    'Survey player ready',
+    'info',
+    {
+      operationId: activePresentOperation?.key || 'bridge-ready',
+      account: event?.account,
+      host: event?.host,
+      mode: event?.mode
+    }
+  );
   playerMode = event?.mode === 'inline' ? 'inline' : 'overlay';
   if (playerMode === 'inline') {
     playerWidgetRect = null;
     playerViewportSize = { width: 0, height: 0 };
+  }
+  // Ensure iframe is marked as positioned and process any queued geometry updates
+  if (playerFrameEl) {
+    requestAnimationFrame(() => {
+      iframePositioned = true;
+      processPendingGeometryUpdates();
+    });
   }
   updatePlayerOverlayLayout();
   const resolvedTheme = resolveThemeHref(currentThemeHref);
@@ -2712,6 +3233,7 @@ function registerPlayerFrame(frame) {
     resetPlayerOverlayLayout(playerFrameEl);
   }
   playerFrameEl = frame || null;
+  iframePositioned = false;
   if (playerFrameEl) {
     playerWidgetRect = null;
     playerViewportSize = { width: 0, height: 0 };
@@ -2722,6 +3244,11 @@ function registerPlayerFrame(frame) {
     playerFrameEl.style.height = '100%';
     playerFrameEl.style.pointerEvents = 'none';
     playerFrameEl.style.visibility = 'hidden';
+    // Mark iframe as positioned after initial layout
+    requestAnimationFrame(() => {
+      iframePositioned = true;
+      processPendingGeometryUpdates();
+    });
   }
   updatePlayerOverlayLayout();
 }
@@ -2730,6 +3257,12 @@ function resetPlayerOverlayLayout(frame) {
   overlayFallbackActive = false;
   overlayFallbackLogged = false;
   resetWidgetFallbackStyles();
+  iframePositioned = false;
+  geometryRetryCount = 0;
+  if (geometryRetryTimeout) {
+    clearTimeout(geometryRetryTimeout);
+    geometryRetryTimeout = null;
+  }
   if (overlayContainer) {
     overlayContainer.style.pointerEvents = 'none';
     overlayContainer.style.visibility = 'hidden';
@@ -2766,6 +3299,18 @@ function applyOverlayFallbackRect() {
     viewportHeight: viewport.height,
     placement
   });
+  
+  // Adjust left position to account for rail width when centering
+  if (viewport.railWidth > 0 && (placement === 'CENTER' || !metrics.left && !metrics.right)) {
+    // When rail is open and we're centering, add rail width to left position
+    // since overlay is position:fixed relative to viewport
+    if (metrics.left != null) {
+      metrics.left = metrics.left + viewport.railWidth;
+    } else if (metrics.right != null) {
+      // If using right, subtract rail width from right
+      metrics.right = metrics.right + viewport.railWidth;
+    }
+  }
 
   if (!overlayFallbackActive && !overlayFallbackLogged) {
     addLog(
@@ -2809,9 +3354,27 @@ function applyOverlayFallbackRect() {
 }
 
 function resolveFallbackViewportSize() {
+  // Get the effective viewport size, accounting for the left rail if open
+  const getRailWidth = () => {
+    if (typeof window === 'undefined' || typeof document === 'undefined') return 0;
+    const railOpen = document.body.classList.contains('rail-open');
+    if (!railOpen) return 0;
+    // Get rail width from CSS variable
+    const rootStyles = getComputedStyle(document.documentElement);
+    const railWidth = rootStyles.getPropertyValue('--rail-width-open').trim();
+    const parsed = parseInt(railWidth, 10);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : 380; // fallback to 380px
+  };
+  
+  const railWidth = getRailWidth();
+  const fullViewportWidth = typeof window !== 'undefined' ? window.innerWidth : null;
+  const effectiveViewportWidth = fullViewportWidth && railWidth > 0 
+    ? fullViewportWidth - railWidth 
+    : fullViewportWidth;
+  
   const widthCandidates = [
     playerViewportSize?.width,
-    typeof window !== 'undefined' ? window.innerWidth : null,
+    effectiveViewportWidth,
     typeof document !== 'undefined' ? document.documentElement?.clientWidth : null,
     overlayContainer?.offsetWidth,
     1024
@@ -2836,7 +3399,8 @@ function resolveFallbackViewportSize() {
 
   return {
     width: Math.max(1, Math.round(resolve(widthCandidates, 1024))),
-    height: Math.max(1, Math.round(resolve(heightCandidates, 768)))
+    height: Math.max(1, Math.round(resolve(heightCandidates, 768))),
+    railWidth: railWidth
   };
 }
 
@@ -2852,7 +3416,31 @@ function resolveFallbackPlacement() {
   return 'CENTER';
 }
 
+function processPendingGeometryUpdates() {
+  if (!iframePositioned || !playerFrameEl || pendingGeometryUpdates.length === 0) {
+    return;
+  }
+  const updates = pendingGeometryUpdates.splice(0);
+  updates.forEach((message) => {
+    updatePlayerWidgetGeometry(message);
+  });
+}
+
 function updatePlayerWidgetGeometry(message) {
+  // If iframe is not ready, queue the update
+  if (!iframePositioned || !playerFrameEl) {
+    if (pendingGeometryUpdates.length < 5) {
+      pendingGeometryUpdates.push(message);
+      console.debug('[preview] geometry update queued (iframe not ready)', {
+        queued: pendingGeometryUpdates.length,
+        message
+      });
+    } else {
+      console.warn('[preview] geometry update queue full, dropping update', message);
+    }
+    return;
+  }
+
   const incomingMode = message?.mode === 'inline' ? 'inline' : 'overlay';
   if (incomingMode !== playerMode) {
     playerMode = incomingMode;
@@ -2865,6 +3453,48 @@ function updatePlayerWidgetGeometry(message) {
   const rect = normalizeWidgetRect(message?.rect);
   const hadRect = !!playerWidgetRect;
   const wasInFallback = overlayFallbackActive;
+  
+  // Validate geometry: if rect is invalid or missing, schedule retry
+  if (!rect && playerMode === 'overlay' && !hadRect) {
+    // No geometry received, schedule retry if we haven't exceeded max retries
+    if (geometryRetryCount < MAX_GEOMETRY_RETRIES) {
+      const retryDelay = GEOMETRY_RETRY_DELAYS[geometryRetryCount] || 2000;
+      geometryRetryCount++;
+      console.debug('[preview] geometry update missing rect, scheduling retry', {
+        attempt: geometryRetryCount,
+        delay: retryDelay,
+        message
+      });
+      
+      if (geometryRetryTimeout) {
+        clearTimeout(geometryRetryTimeout);
+      }
+      geometryRetryTimeout = window.setTimeout(() => {
+        geometryRetryTimeout = null;
+        // Request geometry refresh from player
+        if (surveyBridge && typeof surveyBridge.sendTrigger === 'function') {
+          surveyBridge.sendTrigger('ping');
+        }
+        // Also retry processing this message
+        updatePlayerWidgetGeometry(message);
+      }, retryDelay);
+      return;
+    } else {
+      console.warn('[preview] geometry update failed after max retries', {
+        retries: geometryRetryCount,
+        message
+      });
+      geometryRetryCount = 0;
+    }
+  } else if (rect) {
+    // Valid geometry received, reset retry counter
+    geometryRetryCount = 0;
+    if (geometryRetryTimeout) {
+      clearTimeout(geometryRetryTimeout);
+      geometryRetryTimeout = null;
+    }
+  }
+  
   playerWidgetRect = rect;
   if (rect) {
     overlayFallbackActive = false;
@@ -2872,6 +3502,12 @@ function updatePlayerWidgetGeometry(message) {
     resetWidgetFallbackStyles();
     if (overlayContainer) {
       delete overlayContainer.dataset.fallbackPlacement;
+    }
+    // If visibility check is pending and we just got geometry, trigger immediate check
+    if (monitorWidgetVisibility.timeout && rect.width > 0 && rect.height > 0) {
+      clearTimeout(monitorWidgetVisibility.timeout);
+      monitorWidgetVisibility.timeout = null;
+      console.debug('[preview] widget geometry detected immediately', rect);
     }
   }
   // If we just got geometry after fallback was active, ensure fallback styles are applied
@@ -2885,7 +3521,7 @@ function updatePlayerWidgetGeometry(message) {
     });
     applyWidgetFallbackStyles({ placement: fallbackPlacement, metrics }, 0);
   }
-  updatePlayerOverlayLayout();
+  scheduleOverlayLayoutUpdate({ immediate: true, trailing: true, geometryUpdate: true });
 }
 
 function normalizeWidgetRect(rect) {
@@ -3298,7 +3934,12 @@ function clearImportantStyle(element, property) {
   }
 }
 
-function scheduleOverlayLayoutUpdate({ immediate = false, trailing = false, delay = 280 } = {}) {
+function scheduleOverlayLayoutUpdate({ immediate = false, trailing = false, delay = 280, geometryUpdate = false } = {}) {
+  // For geometry updates, skip debouncing and update immediately
+  if (geometryUpdate) {
+    updatePlayerOverlayLayout();
+    return;
+  }
   if (immediate) {
     updatePlayerOverlayLayout();
   }
@@ -3381,8 +4022,53 @@ function updatePlayerOverlayLayout() {
     Math.max(0, viewportWidth - (playerWidgetRect.left + playerWidgetRect.width))
   );
 
-  const clippedTop = playerWidgetRect.top - marginTop;
-  const clippedLeft = playerWidgetRect.left - marginLeft;
+  // Get iframe position relative to viewport to convert widget coordinates
+  // Note: This gets the iframe's current position in the main viewport
+  // Since the iframe is initially positioned at (0,0) relative to overlayContainer,
+  // and overlayContainer is position:fixed, iframeRect.top/left gives us overlayContainer's current position
+  // Guard: Ensure iframe is positioned before using its coordinates
+  if (!iframePositioned) {
+    // Iframe not positioned yet, schedule retry on next frame
+    console.debug('[preview] iframe not positioned yet, deferring layout update', {
+      hasWidgetRect: !!playerWidgetRect,
+      hasFrame: !!playerFrameEl
+    });
+    requestAnimationFrame(() => {
+      if (playerWidgetRect && playerFrameEl) {
+        updatePlayerOverlayLayout();
+      }
+    });
+    return;
+  }
+  const iframeRect = playerFrameEl.getBoundingClientRect();
+  
+  // Validate iframe rect is valid
+  if (!iframeRect || iframeRect.width === 0 || iframeRect.height === 0) {
+    console.warn('[preview] invalid iframe rect, deferring layout update', {
+      iframeRect,
+      hasWidgetRect: !!playerWidgetRect
+    });
+    requestAnimationFrame(() => {
+      if (playerWidgetRect && playerFrameEl) {
+        updatePlayerOverlayLayout();
+      }
+    });
+    return;
+  }
+  
+  // playerWidgetRect contains coordinates relative to the iframe's content viewport (0,0 at top-left of iframe content)
+  // These coordinates come from getBoundingClientRect() called inside the iframe, which returns
+  // coordinates relative to the iframe's viewport (the content area)
+  // 
+  // To get widget position in main viewport:
+  // widget position in viewport = iframe position in viewport + widget position within iframe
+  // getBoundingClientRect() always returns coordinates relative to the viewport, accounting for
+  // all transforms and positioning contexts, so this calculation is correct.
+  const widgetTopViewport = iframeRect.top + playerWidgetRect.top;
+  const widgetLeftViewport = iframeRect.left + playerWidgetRect.left;
+  
+  const clippedTop = widgetTopViewport - marginTop;
+  const clippedLeft = widgetLeftViewport - marginLeft;
   const clippedWidth = playerWidgetRect.width + marginLeft + marginRight;
   const clippedHeight = playerWidgetRect.height + marginTop + marginBottom;
 
@@ -3394,8 +4080,9 @@ function updatePlayerOverlayLayout() {
   overlayContainer.style.webkitClipPath = '';
   const containerWidth = Math.max(1, Math.round(clippedWidth));
   const containerHeight = Math.max(1, Math.round(clippedHeight));
-  const containerTop = Math.round(clippedTop - rootRect.top);
-  const containerLeft = Math.round(clippedLeft - rootRect.left);
+  // overlayContainer is position:fixed, so positions are relative to viewport
+  const containerTop = Math.round(clippedTop);
+  const containerLeft = Math.round(clippedLeft);
 
   overlayContainer.style.width = `${containerWidth}px`;
   overlayContainer.style.height = `${containerHeight}px`;
@@ -3409,21 +4096,56 @@ function updatePlayerOverlayLayout() {
   playerFrameEl.style.webkitClipPath = '';
   playerFrameEl.style.position = 'absolute';
   playerFrameEl.style.visibility = 'visible';
-  playerFrameEl.style.top = `${-Math.round(clippedTop)}px`;
-  playerFrameEl.style.left = `${-Math.round(clippedLeft)}px`;
+  // For the iframe, we need positions relative to overlayContainer
+  // The widget is at (playerWidgetRect.left, playerWidgetRect.top) within the iframe's content
+  // overlayContainer is positioned at (containerTop, containerLeft) to cover the widget area including margins
+  // 
+  // To align the widget correctly:
+  // - overlayContainer's visible area starts at (marginTop, marginLeft) relative to its top-left
+  // - Widget should appear at this visible area's top-left
+  // - Widget is at (playerWidgetRect.top, playerWidgetRect.left) within iframe
+  // - So iframe offset = -(playerWidgetRect.top - marginTop, playerWidgetRect.left - marginLeft)
+  // This moves the iframe so the widget aligns with the visible area's top-left corner
+  const iframeOffsetTop = -(playerWidgetRect.top - marginTop);
+  const iframeOffsetLeft = -(playerWidgetRect.left - marginLeft);
+  playerFrameEl.style.top = `${Math.round(iframeOffsetTop)}px`;
+  playerFrameEl.style.left = `${Math.round(iframeOffsetLeft)}px`;
   playerFrameEl.style.width = `${Math.max(1, Math.round(viewportWidth))}px`;
   playerFrameEl.style.height = `${Math.max(1, Math.round(viewportHeight))}px`;
 
   console.debug('[preview] overlay layout applied', {
     widget: playerWidgetRect,
+    iframeRect: {
+      top: iframeRect.top,
+      left: iframeRect.left,
+      width: iframeRect.width,
+      height: iframeRect.height
+    },
+    rootRect: {
+      top: rootRect.top,
+      left: rootRect.left,
+      width: rootRect.width,
+      height: rootRect.height
+    },
+    widgetViewport: {
+      top: widgetTopViewport,
+      left: widgetLeftViewport
+    },
     container: {
       width: containerWidth,
       height: containerHeight,
       top: containerTop,
       left: containerLeft
     },
+    iframeOffset: {
+      top: iframeOffsetTop,
+      left: iframeOffsetLeft
+    },
     viewport: playerViewportSize,
-    mode: playerMode
+    mode: playerMode,
+    iframePositioned,
+    geometryRetryCount,
+    pendingGeometryUpdates: pendingGeometryUpdates.length
   });
   playerViewportSize = {
     width: viewportWidth,

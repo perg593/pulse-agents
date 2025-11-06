@@ -631,6 +631,9 @@ function createProtocolBridge({ container, onReady, onStatus, onStateChange, onE
     getConfig() {
       return currentConfig;
     },
+    get state() {
+      return bridgeInstance?.state;
+    },
     waitUntilReady({ timeout } = {}) {
       if (bridgeReady) {
         return Promise.resolve();

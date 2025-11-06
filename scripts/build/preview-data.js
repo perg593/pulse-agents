@@ -95,7 +95,7 @@ function buildManifest(clientIndex) {
 }
 
 function run() {
-  const generateThemePath = path.join(rootDir, 'theme-generator', 'generate-theme-v2.mjs');
+  const generateThemePath = path.join(rootDir, 'theme-generator', 'v1', 'generate-theme-v2.mjs');
   if (!fs.existsSync(generateThemePath)) {
     throw new Error('generate-theme-v2.mjs not found.');
   }

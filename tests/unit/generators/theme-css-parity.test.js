@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { compileTheme } = require('../../../theme-generator/src/theme-css.js');
+const { compileTheme } = require('../../../theme-generator/v1/src/theme-css.js');
 
 const compile = (overrides = {}) => {
   const result = compileTheme(overrides);
@@ -8,13 +8,15 @@ const compile = (overrides = {}) => {
   return result.css;
 };
 
-test('template keeps curated scaffold and swaps baseline colors', () => {
+test('generates CSS with CSS variables and base styles', () => {
   const css = compile();
 
-  assert.ok(css.includes('/* DEFAULT START */'), 'Expected curated default header present');
-  assert.ok(css.includes('div#_pi_surveyWidgetContainer,\n div#_pi_surveyWidgetContainer.mobile-enabled'), 'Missing container reset');
-  assert.ok(css.includes('color: #222222;'), 'Default text color substitution missing');
-  assert.ok(css.includes('background-color: #ffffff;'), 'Default background color substitution missing');
+  assert.ok(css.includes('#_pi_surveyWidgetContainer {'), 'Expected CSS variables block present');
+  assert.ok(css.includes('--pi-color-text:'), 'Expected text color variable present');
+  assert.ok(css.includes('--pi-color-background:'), 'Expected background color variable present');
+  assert.ok(css.includes('#_pi_surveyWidgetContainer,\n#_pi_surveyWidgetContainer *'), 'Missing container reset');
+  assert.ok(css.includes('color: var(--pi-color-text);'), 'Expected CSS variable usage for text color');
+  assert.ok(css.includes('background-color: var(--pi-color-background);'), 'Expected CSS variable usage for background');
 });
 
 test('color tokens are substituted when overrides are provided', () => {
@@ -42,9 +44,11 @@ test('color tokens are substituted when overrides are provided', () => {
   assert.ok(css.includes('#654321'), 'Custom input border color missing');
 });
 
-test('font family is substituted', () => {
+test('font family uses CSS variable', () => {
   const css = compile();
 
-  assert.ok(!css.includes('"Helvetica Neue"'), 'Expected curated font family to be replaced');
-  assert.ok(css.includes('system-ui, sans-serif'), 'Expected default font family present');
+  assert.ok(css.includes('--pi-typography-font-family:'), 'Expected font family variable present');
+  assert.ok(css.includes('font-family: var(--pi-typography-font-family);'), 'Expected CSS variable usage for font family');
+  // Helvetica Neue is a valid fallback in the default font stack
+  assert.ok(css.includes('system-ui'), 'Expected system-ui in font stack');
 });

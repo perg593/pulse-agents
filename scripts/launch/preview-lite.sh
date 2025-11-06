@@ -6,7 +6,7 @@
 
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 # Load port configuration (falls back to sensible defaults)
 SERVER_PORT="${SERVER_PORT:-8000}"

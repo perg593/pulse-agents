@@ -1,45 +1,78 @@
-# Quick Setup Steps
+# Quick Reference: Testing & Launch
 
-## Step 1: Create GitHub Repository
-
-1. **Make sure you're logged into GitHub** (in your browser)
-2. Go to: https://github.com/new
-3. Fill in:
-   - **Repository name:** `pulse-agents`
-   - **Description:** (optional) "Pulse Preview application with Protocol v1"
-   - **Visibility:** Choose **Public** (free Cloudflare Pages) or **Private**
-   - **DO NOT** check:
-     - ❌ Add a README file
-     - ❌ Add .gitignore
-     - ❌ Choose a license
-4. Click **"Create repository"**
-
-## Step 2: After Creating the Repo
-
-GitHub will show you commands. **Don't use those** - we already have code committed locally.
-
-Instead, tell me when the repo is created, and I'll run these commands for you:
+## 🚀 Launch Commands
 
 ```bash
-# Add GitHub as remote
-git remote add origin https://github.com/perg593/pulse-agents.git
+# Full preview (recommended)
+npm start
 
-# Rename branch to main (if needed)
-git branch -M main
+# Lightweight preview (fast)
+npm run start:lite
 
-# Push code to GitHub
-git push -u origin main
+# Custom ports
+SERVER_PORT=8001 BACKGROUND_PROXY_PORT=3101 npm start
 ```
 
-## Step 3: Connect to Cloudflare Pages
+## 🧪 Test Commands
 
-After the code is pushed, we'll:
-1. Go to Cloudflare Pages
-2. Connect your GitHub repo
-3. Configure deployment settings
-4. Deploy!
+```bash
+# All tests
+npm test
 
----
+# Specific suites
+npm run test:unit
+npm run test:integration
+npm run test:preview
+npm run test:generators
+```
 
-**Ready?** Once you've created the repo on GitHub, let me know and I'll push the code!
+## 🧹 Cleanup Commands
 
+```bash
+# Clean logs and temp files
+npm run clean
+
+# Clean everything (including build artifacts and node_modules)
+npm run clean:all
+
+# Manual cleanup
+bash scripts/cleanup.sh
+```
+
+## 📍 Service Ports
+
+- **Preview Server**: `http://localhost:8000`
+- **Background Proxy**: `http://localhost:3100`
+- **Stripe Demo**: `http://localhost:4242` (optional)
+
+## 🔍 Health Checks
+
+```bash
+curl http://localhost:8000/ && echo "✅ Preview"
+curl http://localhost:3100/background-proxy/health && echo "✅ Proxy"
+curl http://localhost:4242/stripe-demo/health && echo "✅ Stripe"
+```
+
+## 🛑 Stop Services
+
+```bash
+# Stop all
+pkill -f "python3 -m http.server"
+pkill -f "background-proxy-server.js"
+pkill -f "stripe-demo-server.js"
+
+# Or use cleanup script
+npm run clean
+```
+
+## 📋 Log Files
+
+- Preview: `/tmp/pulse-preview.log`
+- Proxy: `/tmp/pulse-background-proxy.log`
+- Stripe: `/tmp/pulse-stripe-demo.log`
+
+View logs: `tail -f /tmp/pulse-*.log`
+
+## 📚 Full Documentation
+
+See [Testing and Launch Guide](docs/getting-started/testing-and-launch-guide.md) for complete details.

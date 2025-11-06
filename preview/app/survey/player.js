@@ -87,6 +87,7 @@ let geometryResizeObserver = null;
 let geometryIntersectionObserver = null;
 let geometryMutationObserver = null;
 let geometryStateSignature = '';
+let lastViewportSize = { width: 0, height: 0 };
 let currentGeometryState = createHiddenGeometryState();
 const geometryWaiters = new Set();
 let geometryTransitionHandler = null;
@@ -96,13 +97,57 @@ refreshGeometryState();
 
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden) {
+    lastPolledViewport = { width: window.innerWidth, height: window.innerHeight };
+    startViewportPolling();
     refreshGeometryState();
+  } else {
+    stopViewportPolling();
   }
 });
 
 window.addEventListener('resize', () => {
   refreshGeometryState();
 });
+
+// DevTools-aware viewport change detection
+// DevTools opening/closing may not always trigger resize events reliably
+let viewportPollInterval = null;
+let lastPolledViewport = { width: window.innerWidth, height: window.innerHeight };
+
+function startViewportPolling() {
+  if (viewportPollInterval) return;
+  viewportPollInterval = window.setInterval(() => {
+    const currentViewport = { width: window.innerWidth, height: window.innerHeight };
+    const viewportChanged = 
+      Math.abs(currentViewport.width - lastPolledViewport.width) > 50 ||
+      Math.abs(currentViewport.height - lastPolledViewport.height) > 50;
+    
+    if (viewportChanged) {
+      lastPolledViewport = currentViewport;
+      refreshGeometryState();
+    }
+  }, 500);
+}
+
+function stopViewportPolling() {
+  if (viewportPollInterval) {
+    clearInterval(viewportPollInterval);
+    viewportPollInterval = null;
+  }
+}
+
+// Start polling on load
+if (!document.hidden) {
+  startViewportPolling();
+}
+
+// Use ResizeObserver if available for more reliable viewport change detection
+if (typeof window.ResizeObserver === 'function') {
+  const viewportResizeObserver = new ResizeObserver(() => {
+    refreshGeometryState();
+  });
+  viewportResizeObserver.observe(document.documentElement);
+}
 
 window.addEventListener('pulseinsights:ready', (event) => {
   tagReady = true;
@@ -493,7 +538,28 @@ function finalizePresentAck(ackId, extra = {}) {
     broadcastStatus(extra);
     return;
   }
-  waitForVisibleGeometry(2400).then((geometryState) => {
+  // Adaptive timeout: increase if page seems slow or DevTools might be open
+  // Base timeout increased from 2400ms to 4000ms for better reliability
+  let timeoutMs = 4000;
+  
+  // Detect slow rendering: if page load took long, extend timeout
+  if (typeof window.performance !== 'undefined' && window.performance.timing) {
+    const loadTime = window.performance.timing.loadEventEnd - window.performance.timing.navigationStart;
+    if (loadTime > 3000) {
+      timeoutMs = 6000; // Extend timeout for slow pages
+    }
+  }
+  
+  // Detect potential DevTools: if outerHeight significantly different from innerHeight
+  // This suggests DevTools might be open (though not always reliable)
+  if (typeof window.outerHeight !== 'undefined' && window.outerHeight > 0) {
+    const heightDiff = window.outerHeight - window.innerHeight;
+    if (heightDiff > 200 || heightDiff < -200) {
+      timeoutMs = Math.max(timeoutMs, 5000); // Extend timeout if DevTools might be affecting layout
+    }
+  }
+  
+  waitForVisibleGeometry(timeoutMs).then((geometryState) => {
     const snapshot = geometryState || captureWidgetGeometryState();
     const payload = { ok: true, ...extra };
     sendAckStatus(ackId, payload, { geometryOverride: snapshot });
@@ -1129,6 +1195,7 @@ function detachGeometryObservers() {
 
 function refreshGeometryState(target = geometryTarget, intersectionEntry = null) {
   if (!target || !document.body.contains(target)) {
+    console.debug('[player] geometry target missing or detached, creating hidden state');
     updateGeometryState(createHiddenGeometryState());
     return;
   }
@@ -1162,26 +1229,73 @@ function refreshGeometryState(target = geometryTarget, intersectionEntry = null)
       : { visible: false },
     placement
   };
+  
+  // Log visibility determination for debugging
+  if (!isVisible && area > 0) {
+    console.debug('[player] widget not visible despite area', {
+      area,
+      visibility,
+      display,
+      opacity,
+      isIntersecting: intersectionEntry?.isIntersecting,
+      intersectionRatio: intersectionEntry?.intersectionRatio
+    });
+  }
+  
   updateGeometryState(state);
 }
 
 function updateGeometryState(state) {
-  const signature = computeGeometrySignature(state.widget);
-  if (signature === geometryStateSignature) {
+  const currentViewport = {
+    width: window.innerWidth || 0,
+    height: window.innerHeight || 0
+  };
+  const viewportChanged = 
+    Math.abs(currentViewport.width - lastViewportSize.width) > 1 ||
+    Math.abs(currentViewport.height - lastViewportSize.height) > 1;
+  
+  const signature = computeGeometrySignature(state.widget, currentViewport);
+  const signatureMatches = signature === geometryStateSignature;
+  
+  // Force update if viewport changed, even if widget coordinates are the same
+  if (signatureMatches && !viewportChanged) {
     return;
   }
+  
+  // Log geometry state changes for debugging
+  if (viewportChanged) {
+    console.debug('[player] viewport size changed, forcing geometry update', {
+      previous: lastViewportSize,
+      current: currentViewport,
+      widgetVisible: state.widget?.visible
+    });
+  }
+  
   geometryStateSignature = signature;
+  lastViewportSize = currentViewport;
   currentGeometryState = cloneGeometryState(state);
+  
+  console.debug('[player] geometry state updated', {
+    widgetVisible: state.widget?.visible,
+    widgetBounds: state.widget?.bounds,
+    placement: state.placement,
+    viewport: currentViewport,
+    signature
+  });
+  
   broadcastStatus({}, { geometryOverride: currentGeometryState });
   postLegacyStatus('widget-geometry', buildLegacyGeometryPayload(currentGeometryState));
   resolveGeometryWaiters(currentGeometryState);
 }
 
-function computeGeometrySignature(widgetState) {
+function computeGeometrySignature(widgetState, viewport = null) {
   if (!widgetState || !widgetState.visible) return 'hidden';
   const bounds = widgetState.bounds;
   if (!bounds) return 'hidden';
-  return `${round(bounds.x)}|${round(bounds.y)}|${round(bounds.w)}|${round(bounds.h)}`;
+  const viewportPart = viewport 
+    ? `${round(viewport.width)}|${round(viewport.height)}`
+    : `${round(window.innerWidth)}|${round(window.innerHeight)}`;
+  return `${round(bounds.x)}|${round(bounds.y)}|${round(bounds.w)}|${round(bounds.h)}|${viewportPart}`;
 }
 
 function cloneGeometryState(state) {
@@ -1234,7 +1348,7 @@ function resolveGeometryWaiters(state) {
   }
 }
 
-function waitForVisibleGeometry(timeoutMs = 2400) {
+function waitForVisibleGeometry(timeoutMs = 4000) {
   const current = captureWidgetGeometryState();
   if (current?.widget?.visible) {
     return Promise.resolve(current);

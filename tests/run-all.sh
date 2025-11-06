@@ -30,7 +30,7 @@ node tests/unit/lib/validators.test.js
 
 echo ""
 echo "Testing theme-generator/v1..."
-cd theme-generator/v1 && npm run test:unit && cd ../..
+(cd theme-generator/v1 && npm run test:unit)
 
 # Integration tests
 echo ""
@@ -45,7 +45,11 @@ node tests/integration/preview/surveyBridge.integration.test.mjs
 
 echo ""
 echo "Testing theme-generator/v2..."
-cd theme-generator/v2 && npm test && cd ../..
+if [ ! -d "theme-generator/v2/node_modules" ]; then
+  echo "➡️  Installing theme-generator/v2 dependencies..."
+  (cd theme-generator/v2 && npm install)
+fi
+(cd theme-generator/v2 && npm test)
 
 echo ""
 echo "✅ All tests completed"

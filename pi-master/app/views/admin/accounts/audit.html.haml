@@ -1,8 +1,0 @@
-%h1 Audit Log for Account (#{ @account.id }) #{ @account.name }
-
-- if @audits.present?
-  .auditing_container
-    - @audits.each do |audit|
-      = render "application/audit", audit: audit
-- else
-  No activity recorded yet

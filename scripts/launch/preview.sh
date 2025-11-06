@@ -2,16 +2,16 @@
 
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 LOG_FILE="${LOG_FILE:-/tmp/pulse-preview.log}"
 export LOG_FILE
 
-if [ ! -d "${ROOT_DIR}/theme-generator/node_modules" ]; then
+if [ ! -d "${ROOT_DIR}/theme-generator/v1/node_modules" ]; then
   echo "➡️  Installing theme-generator dependencies (first run)…"
-  (cd "${ROOT_DIR}/theme-generator" && npm install)
+  (cd "${ROOT_DIR}/theme-generator/v1" && npm install)
 fi
 
-if [ ! -d "${ROOT_DIR}/pi-master/node_modules" ]; then
+if [ -d "${ROOT_DIR}/pi-master" ] && [ ! -d "${ROOT_DIR}/pi-master/node_modules" ]; then
   echo "➡️  Installing pi-master dependencies (first run)…"
   (cd "${ROOT_DIR}/pi-master" && npm install)
 fi

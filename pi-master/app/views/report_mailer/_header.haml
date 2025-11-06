@@ -1,8 +1,0 @@
-= image_tag 'pulse-insights-logo-white-vert-85x85.png', style: "display: none; height: 0px;width:0px", width: "0", height: "0"
-%div{ style: 'height: 230px; width: 100%; background-color: #6086C1; text-align: center'}
-  = image_tag 'logo.png', class: 'img-responsive center-block', style: 'width: 100px; margin: 20px 0px;'
-  .survey_name{ style: 'margin-bottom: 10px; font-size: 18px; color: #FFFFFF'}= @reportee.name
-  - if @from && @to
-    .dates{ style: 'color: #D2D2D2; font-size: 12px;' }= "#{@from.strftime('%m/%d/%Y')} through #{@to.strftime('%m/%d/%Y')}"
-  - else
-    .dates{ style: 'color: #D2D2D2; font-size: 12px;' } All time

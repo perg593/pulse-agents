@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const SimpleSiteAnalyzer = require('../../../theme-generator/analyze-site.js');
+const SimpleSiteAnalyzer = require('../../../theme-generator/v1/analyze-site.js');
 
 test('fallback analysis returns normalized structures', () => {
   const analyzer = new SimpleSiteAnalyzer();

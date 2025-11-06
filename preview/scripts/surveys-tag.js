@@ -72,40 +72,229 @@
         /* ignore */
       }
       
-      // Add error handler wrapper for PulseInsightsObject.survey.render if it exists
-      if (w.PulseInsightsObject && w.PulseInsightsObject.survey) {
-        const originalSurvey = w.PulseInsightsObject.survey;
-        if (originalSurvey && typeof originalSurvey.render === 'function') {
-          const originalRender = originalSurvey.render;
-          originalSurvey.render = function() {
-            try {
-              if (this && typeof originalRender === 'function') {
-                return originalRender.apply(this, arguments);
+      // Add error handler wrapper for PulseInsightsObject.survey.render
+      // This wrapper handles cases where survey might be null at runtime
+      function wrapSurveyRender() {
+        if (!w.PulseInsightsObject) return;
+        
+        // Use Object.defineProperty to create a getter that always checks for survey
+        const surveyDescriptor = Object.getOwnPropertyDescriptor(w.PulseInsightsObject, 'survey');
+        if (surveyDescriptor && surveyDescriptor.get) {
+          // Already has a getter, wrap it
+          const originalGetter = surveyDescriptor.get;
+          Object.defineProperty(w.PulseInsightsObject, 'survey', {
+            get: function() {
+              const survey = originalGetter.call(this);
+              if (survey && typeof survey.render === 'function' && !survey.render._wrapped) {
+                wrapRenderFunction(survey);
               }
-            } catch (error) {
-              try {
-                console.error('[surveys-tag] survey.render() error caught', error);
-                // Dispatch error event for preview application to handle
-                if (typeof w.dispatchEvent === 'function') {
-                  w.dispatchEvent(new CustomEvent('pulseinsights:error', {
-                    detail: {
-                      type: 'render-error',
-                      error: error.message || String(error),
-                      stack: error.stack
-                    }
-                  }));
-                }
-              } catch (_consoleError) {
-                /* ignore */
+              return survey;
+            },
+            configurable: true
+          });
+        } else {
+          // Direct property, wrap it if it exists
+          if (w.PulseInsightsObject.survey) {
+            wrapRenderFunction(w.PulseInsightsObject.survey);
+          }
+          
+          // Also set up a proxy to catch when survey is accessed later
+          let surveyValue = w.PulseInsightsObject.survey;
+          Object.defineProperty(w.PulseInsightsObject, 'survey', {
+            get: function() {
+              return surveyValue;
+            },
+            set: function(newValue) {
+              surveyValue = newValue;
+              if (newValue && typeof newValue.render === 'function' && !newValue.render._wrapped) {
+                wrapRenderFunction(newValue);
               }
-            }
-          };
+            },
+            configurable: true
+          });
         }
       }
+      
+      function wrapRenderFunction(survey) {
+        if (!survey || typeof survey.render !== 'function' || survey.render._wrapped) {
+          return;
+        }
+        
+        const originalRender = survey.render;
+        survey.render = function() {
+          try {
+            // Runtime check: ensure survey still exists
+            if (!w.PulseInsightsObject || !w.PulseInsightsObject.survey) {
+              const error = new Error('PulseInsightsObject.survey is null when render() was called');
+              error.name = 'SurveyNullError';
+              throw error;
+            }
+            
+            if (this && typeof originalRender === 'function') {
+              return originalRender.apply(this, arguments);
+            }
+          } catch (error) {
+            try {
+              const errorMessage = error.message || String(error);
+              const isNullError = errorMessage.includes('null') || errorMessage.includes('Cannot read properties');
+              
+              console.error('[surveys-tag] survey.render() error caught', {
+                error: errorMessage,
+                surveyNull: isNullError,
+                hasPulseInsightsObject: !!w.PulseInsightsObject,
+                hasSurvey: !!(w.PulseInsightsObject && w.PulseInsightsObject.survey)
+              });
+              
+              // Dispatch error event for preview application to handle
+              if (typeof w.dispatchEvent === 'function') {
+                w.dispatchEvent(new CustomEvent('pulseinsights:error', {
+                  detail: {
+                    type: isNullError ? 'survey-null-error' : 'render-error',
+                    error: errorMessage,
+                    stack: error.stack,
+                    surveyNull: isNullError
+                  }
+                }));
+              }
+            } catch (_consoleError) {
+              /* ignore */
+            }
+            // Re-throw to maintain original error behavior
+            throw error;
+          }
+        };
+        survey.render._wrapped = true;
+      }
+      
+      wrapSurveyRender();
       
       const priorPi = w.pi;
       const priorQueue = Array.isArray(priorPi && priorPi.q) ? priorPi.q.slice() : [];
       const priorTimestamp = (priorPi && priorPi.l) || Date.now();
+
+      // Wrap processCommand to catch errors when survey is null
+      // Also adds retry logic for present commands when survey isn't ready yet
+      const originalProcessCommand = w.PulseInsightsObject.processCommand;
+      if (typeof originalProcessCommand === 'function') {
+        w.PulseInsightsObject.processCommand = function(command) {
+          try {
+            // Check if this is a 'present' command and survey might be null
+            const isPresentCommand = Array.isArray(command) && command.length > 0 && command[0] === 'present';
+            
+            if (isPresentCommand) {
+              const surveyId = command[1];
+              
+              // Check if survey exists before processing present command
+              if (!w.PulseInsightsObject.survey) {
+                // Survey is null - this might be during initialization after iframe reload
+                // Try waiting a bit for survey to become available
+                const maxWaitMs = 2000; // Max 2 seconds
+                const checkInterval = 50; // Check every 50ms
+                let waited = 0;
+                
+                const waitForSurvey = () => {
+                  return new Promise((resolve, reject) => {
+                    const checkSurvey = () => {
+                      if (w.PulseInsightsObject && w.PulseInsightsObject.survey) {
+                        resolve();
+                        return;
+                      }
+                      
+                      waited += checkInterval;
+                      if (waited >= maxWaitMs) {
+                        const error = new Error(`Cannot present survey ${surveyId}: PulseInsightsObject.survey is null after ${waited}ms wait. This may indicate the survey data hasn't loaded yet or there's a configuration issue.`);
+                        error.name = 'SurveyNullError';
+                        error.surveyId = surveyId;
+                        reject(error);
+                        return;
+                      }
+                      
+                      setTimeout(checkSurvey, checkInterval);
+                    };
+                    checkSurvey();
+                  });
+                };
+                
+                // Wait for survey to become available, then process command
+                return waitForSurvey()
+                  .then(() => {
+                    // Survey is now available, process the command
+                    return originalProcessCommand.apply(this, arguments);
+                  })
+                  .catch((error) => {
+                    // Survey never became available
+                    try {
+                      console.error('[surveys-tag] processCommand failed: survey is null after wait', {
+                        command,
+                        surveyId,
+                        waited,
+                        hasPulseInsightsObject: !!w.PulseInsightsObject,
+                        hasSurvey: false
+                      });
+                      
+                      // Dispatch error event
+                      if (typeof w.dispatchEvent === 'function') {
+                        w.dispatchEvent(new CustomEvent('pulseinsights:error', {
+                          detail: {
+                            type: 'survey-null-error',
+                            error: error.message,
+                            surveyId,
+                            command: command[0],
+                            waited
+                          }
+                        }));
+                      }
+                    } catch (_consoleError) {
+                      /* ignore */
+                    }
+                    
+                    // Still try to process - let surveys.js handle the error
+                    // This maintains original behavior while we've logged the issue
+                    try {
+                      return originalProcessCommand.apply(this, arguments);
+                    } catch (innerError) {
+                      // Re-throw the original wait error, not the inner error
+                      throw error;
+                    }
+                  });
+              }
+            }
+            
+            return originalProcessCommand.apply(this, arguments);
+          } catch (error) {
+            try {
+              const errorMessage = error.message || String(error);
+              const isNullError = errorMessage.includes('null') || 
+                                 errorMessage.includes('Cannot read properties') ||
+                                 error.name === 'SurveyNullError';
+              
+              console.error('[surveys-tag] processCommand failed', {
+                command,
+                error: errorMessage,
+                surveyNull: isNullError,
+                hasPulseInsightsObject: !!w.PulseInsightsObject,
+                hasSurvey: !!(w.PulseInsightsObject && w.PulseInsightsObject.survey)
+              });
+              
+              // Dispatch error event
+              if (typeof w.dispatchEvent === 'function') {
+                w.dispatchEvent(new CustomEvent('pulseinsights:error', {
+                  detail: {
+                    type: isNullError ? 'survey-null-error' : 'processcommand-error',
+                    error: errorMessage,
+                    command: Array.isArray(command) ? command[0] : String(command),
+                    surveyId: Array.isArray(command) && command.length > 1 ? command[1] : undefined
+                  }
+                }));
+              }
+            } catch (_consoleError) {
+              /* ignore console issues */
+            }
+            // Re-throw to maintain original error behavior
+            throw error;
+          }
+        };
+      }
 
       class PulseInsightsCommands extends Array {
         push(...commands) {

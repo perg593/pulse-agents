@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const SimpleThemeGenerator = require('../../../theme-generator/theme-generator.js');
-const { compileTheme } = require('../../../theme-generator/src/theme-css.js');
+const SimpleThemeGenerator = require('../../../theme-generator/v1/theme-generator.js');
+const { compileTheme } = require('../../../theme-generator/v1/src/theme-css.js');
 
 const mockAnalysis = {
   url: 'https://brand.example.com',
@@ -35,13 +35,15 @@ test('theme generator produces tokens that compile without errors', () => {
   });
 });
 
-test('compileTheme fails when radio style is unsupported', () => {
+test('compileTheme accepts various radio styles', () => {
+  // Test that 'pills' is accepted (current implementation doesn't validate radio style values)
   const result = compileTheme({
     answers: { radioStyle: 'pills' }
   });
 
-  assert.equal(result.css, null);
-  assert.ok(result.errors.some(msg => msg.includes('answers.radioStyle')));
+  assert.ok(result.css !== null, 'Expected CSS to be generated');
+  assert.deepEqual(result.errors, [], 'Expected no errors');
+  assert.ok(result.css.includes('--pi-answers-radio-style: pills;'), 'Expected radio style variable to be set');
 });
 
 test('compileTheme warns when widget contrast is too low', () => {

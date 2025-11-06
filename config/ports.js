@@ -17,7 +17,7 @@ const PORTS = {
   /** Background proxy server port */
   BACKGROUND_PROXY_PORT: 3100,
   
-  /** Webpack dev server port (for pi-master) */
+  /** Webpack dev server port (legacy - for optional pi-master reference) */
   WEBPACK_DEV_PORT: 3035,
   
   /** Test server port */

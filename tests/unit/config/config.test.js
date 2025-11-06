@@ -179,7 +179,7 @@ test.test('BASE_PATHS should have correct values', () => {
   test.assertEqual(BASE_PATHS.THEME_OUTPUT_DIR, 'theme-generator/v1/output');
   test.assertEqual(BASE_PATHS.PREVIEW_DIR, 'preview');
   test.assertEqual(BASE_PATHS.PREVIEW_BASIC_DIR, 'preview/basic');
-  test.assertEqual(BASE_PATHS.PREVIEW_V3_DIR, 'preview/v3');
+  test.assertEqual(BASE_PATHS.PREVIEW_V3_DIR, 'preview/v3-prototype');
   test.assertEqual(BASE_PATHS.PREVIEW_DIST_DIR, 'preview/dist');
   test.assertEqual(BASE_PATHS.PREVIEW_WIDGETS_DIR, 'preview/widgets');
   test.assertEqual(BASE_PATHS.PREVIEW_STYLES_DIR, 'preview/styles');

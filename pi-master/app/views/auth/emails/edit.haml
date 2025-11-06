@@ -1,6 +1,0 @@
-- title 'Reset Email'
-= simple_form_for @user, url: email_path, method: :patch do |form|
-  = form.input :password, label: false, input_html: { placeholder: 'Password', autofocus: true, autocomplete: "off" }
-  = form.hidden_field :new_email, value: @user.email
-  = form.hidden_field :reset_email_token, value: @user.reset_email_token
-  = form.submit 'Confirm'

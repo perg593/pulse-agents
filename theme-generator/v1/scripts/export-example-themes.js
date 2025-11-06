@@ -3,11 +3,23 @@
 const fs = require('fs');
 const path = require('path');
 
-const rootDir = path.resolve(__dirname, '..', '..');
-const INPUT_CSV = path.join(rootDir, 'theme-generator', 'output', 'examples', 'latest-themes.csv');
+// Script is in theme-generator/v1/scripts/, need to go up 3 levels to reach root
+const rootDir = path.resolve(__dirname, '..', '..', '..');
+const REGULAR_CSV = path.join(rootDir, 'theme-generator', 'output', 'examples', 'latest-themes.csv');
 const GROUPED_CSV = path.join(rootDir, 'theme-generator', 'output', 'examples', 'latest-themes-groups.csv');
 const OUTPUT_DIR = path.join(rootDir, 'preview', 'styles', 'examples', 'generated');
 const MANIFEST_PATH = path.join(OUTPUT_DIR, 'themes.json');
+
+// Prefer grouped CSV if available (more complete with account_group, industry, theme_id)
+function determinePrimaryCsv() {
+  if (fs.existsSync(GROUPED_CSV)) {
+    return { primary: GROUPED_CSV, secondary: REGULAR_CSV, primaryLabel: 'Grouped themes CSV' };
+  }
+  if (fs.existsSync(REGULAR_CSV)) {
+    return { primary: REGULAR_CSV, secondary: null, primaryLabel: 'Latest themes CSV' };
+  }
+  return null;
+}
 
 function assertFileExists(filePath, label) {
   if (!fs.existsSync(filePath)) {
@@ -247,16 +259,23 @@ function mergeThemeData(primary, grouped) {
 }
 
 function run() {
-  assertFileExists(INPUT_CSV, 'Latest themes CSV');
+  const csvConfig = determinePrimaryCsv();
+  if (!csvConfig) {
+    throw new Error(`No CSV files found. Expected one of:
+  - ${GROUPED_CSV}
+  - ${REGULAR_CSV}`);
+  }
+
+  assertFileExists(csvConfig.primary, csvConfig.primaryLabel);
   cleanOutputDir(OUTPUT_DIR);
 
-  const primaryData = loadCsvData(INPUT_CSV);
-  const groupedData = fs.existsSync(GROUPED_CSV) ? loadCsvData(GROUPED_CSV) : null;
+  const primaryData = loadCsvData(csvConfig.primary);
+  const secondaryData = csvConfig.secondary && fs.existsSync(csvConfig.secondary) ? loadCsvData(csvConfig.secondary) : null;
   const seenSlugs = new Set();
 
   const primaryThemes = extractThemes(primaryData, seenSlugs);
-  const groupedThemes = groupedData ? extractThemes(groupedData, seenSlugs) : [];
-  const merged = mergeThemeData(primaryThemes, groupedThemes);
+  const secondaryThemes = secondaryData ? extractThemes(secondaryData, seenSlugs) : [];
+  const merged = mergeThemeData(primaryThemes, secondaryThemes);
 
   if (!merged.length) {
     throw new Error('No themes were exported; aborting manifest creation.');
@@ -283,8 +302,8 @@ function run() {
 
   const manifest = {
     generatedAt: new Date().toISOString(),
-    sourceCsv: path.relative(rootDir, INPUT_CSV),
-    groupedCsv: fs.existsSync(GROUPED_CSV) ? path.relative(rootDir, GROUPED_CSV) : null,
+    primaryCsv: path.relative(rootDir, csvConfig.primary),
+    secondaryCsv: csvConfig.secondary && fs.existsSync(csvConfig.secondary) ? path.relative(rootDir, csvConfig.secondary) : null,
     total: themes.length,
     themes
   };
@@ -298,6 +317,13 @@ function run() {
 try {
   run();
 } catch (error) {
-  console.error(`export-example-themes failed: ${error.message}`);
-  process.exit(1);
+  if (error.message.includes('not found')) {
+    console.warn(`⚠️  ${error.message}`);
+    console.warn('   Skipping examples export - CSV file not available.');
+    console.warn('   Using existing themes.json if available.');
+    process.exit(0); // Exit gracefully, don't fail the build
+  } else {
+    console.error(`export-example-themes failed: ${error.message}`);
+    process.exit(1);
+  }
 }
