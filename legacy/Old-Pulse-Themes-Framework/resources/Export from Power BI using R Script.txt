@@ -1,9 +1,0 @@
-How to export data from Visa Power BI
-
-https://smailexp.trusted.visa.com/
-
-projas@pulseinsights.com
-kovqoh3wabmokyCsus
-
-# 'dataset' holds the input data for this script
-write.csv(dataset, "C:\\Users\\pulseinsights\\Pulse Insights Dropbox\\Pulse Insights Shared\\VM Dropbox Share\\PowerBI\\Visa\\data\\export\\2020-12-21\\metadata.csv")
