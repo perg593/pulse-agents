@@ -1,0 +1,65 @@
+// .structure-start { background-color: $test-value; }
+
+// ================== STRUCTURE ==================
+
+// A. Survey Widget
+// 	A-default: 					Default Widget
+// 	A-inline: 					Inline
+// 	A-bottombar: 				Bottom Bar
+// 	A-docked: 					Docked Widget
+// 	A-fullscreen: 				Fullscreen Widget Type
+// 	A-customcontent-full: 	Custom Content Fullscreen
+// 	A-topbar: 					Top Bar
+
+// 	B1. Close Button
+// 		B1-default: 		Default
+// 		B1-custom-full: 	Custom Content Fullscreen
+
+// 	B2. Content Container
+
+// 		C1. Question
+// 			C1-single: 			Default
+// 			C1-multi:  			Multiple Choice
+// 			C1-free:   			Free Text
+// 			C1-custom: 			Custom Content Default
+// 			C1-custom-full: 	Custom Content Fullscreen
+
+// 		C2. Answers Container
+
+// 			D1. <li> Tag for Single and Multiple Choice
+
+// 				E1. <a> Tag for Single Choice
+// 					F1. Radio Button Outer 		(span._pi_radio_button_outer)
+// 						G1. Radio Button Inner 		(span._pi_radio_button_inner)
+// 					F2a. <label> for Single Choice (Radio Button OFF)
+// 					F2b. <label> for Single Choice (Radio Button ON)
+
+// 				E2. <label> for Multiple Choice 		(label._pi-control-checkbox)
+// 					F3. Hidden <input> Form Element 		(input._pi_checkbox)
+// 					F4. Fake Checkbox <div> 				(div._pi-control-indicator)
+// 					F5. Fake Checkmark <div> 				(div._pi-control-indicator:after)
+
+// 			D2. Free Text Question Field Container
+// 				E3. Multiple Choice Selection Count
+// 				E5. Free Text Field - Single and Multi-line 
+// 				E6. Free Text - Character Count
+
+// 			D3. Multiple Choice Submit Button Container
+// 				E4. Multiple Choice Submit Button
+
+// 			D4. Free Text Submit Button Container
+// 				E7. Free Text Submit Button
+
+// 			D5. Custom Content Button (actually within C1)
+
+// 		C3. Invitation Text Container
+
+// 		C4. Invitation Start Button
+
+// 		C5. Thank You Text
+
+// 	B3. Branding
+
+
+
+// .structure-end { background-color: $test-value; }

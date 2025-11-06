@@ -1,0 +1,49 @@
+body {
+  background-color: #b3b3b3;
+  /* 		background-color: white; */
+}
+
+h4 {
+  display: none;
+}
+
+#desktop-div {
+  max-width: initial;
+  margin: 20px auto;
+  background-color: rgba(87, 127, 117, 0.58);
+  /* 		background-color: white; */
+}
+
+#tablet-div {
+  max-width: 768px;
+  margin: 20px auto;
+  background-color: rgba(220, 128, 128, 0.48);
+  /* 		background-color: white; */
+}
+
+#mobile-div {
+  width: 414px;
+  margin: 20px auto;
+  background-color: rgba(0, 84, 113, 0.58);
+  /* 		background-color: white; */
+}
+
+/* 	#desktop-div 	{ display: none; } */
+
+/* 	#tablet-div 	{ display: none; } */
+
+/* 	#mobile-div 	{ display: none; } */
+
+/* 	div[data-question-type="single_choice_question"] 						{ display: none !important; } */
+
+/* 	div[data-question-type="multiple_choices_question"] 					{ display: none !important; } */
+
+/* 	div[data-question-type="free_text_question"] 							{ display: none !important; } */
+
+/* 	div[data-question-type="thankyou"] 											{ display: none !important; } */
+
+/* 	#_pi_surveyWidget[data-question-type="custom_content_question"] 	{ display: none !important; } */
+
+#_pi_surveyWidgetCustom {
+  display: none !important;
+}

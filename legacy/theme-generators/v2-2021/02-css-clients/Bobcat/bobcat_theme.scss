@@ -1,0 +1,49 @@
+// THE _selectors FILE:
+@import '../../01-css-pulse/_selectors';
+
+// DEFAULT VARIABLES
+@import '../_default/_default-1-variables';
+
+// CLIENT-SPECIFIC DESIGN VARIABLES
+@import '_bobcat_variables';
+
+// GLOBAL MAPS:
+@import '../../01-css-pulse/_maps';
+
+// GLOBAL MIXINS
+@import '../../01-css-pulse/_mixins';
+
+// THE GLOBAL STRUCTURE FOR FRAMEWORK V2:
+@import '../../01-css-pulse/_theme-structure';
+
+div#_pi_surveyWidgetContainer,
+div#_pi_surveyWidgetContainer.mobile-enabled,
+div#_pi_surveyWidgetContainer *,
+div#_pi_surveyWidgetContainer.mobile-enabled * {
+  -webkit-font-smoothing: auto;
+}
+
+div#_pi_surveyWidget[data-question-type="single_choice_question"]
+  li a label {
+    padding: 12px 30px;
+  }
+
+@media (max-width: 414px) {
+  div#_pi_surveyWidgetContainer.mobile-enabled
+    div#_pi_surveyWidget[data-question-type="single_choice_question"]
+    li a label {
+      padding: 12px 12px !important;
+    }
+}
+
+
+._pi_scale_container {
+  font-family: $font-md-family;
+  // font-size: 1.5rem !important;
+  color: #ff3600 !important;
+}
+
+._pi_scale_container_after {
+  margin-bottom: 0px !important;
+  padding: 0px 0 5px;
+}

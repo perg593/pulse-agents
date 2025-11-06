@@ -1,0 +1,40 @@
+// THE _selectors FILE:
+@import '../../01-css-pulse/_selectors';
+
+// DEFAULT VARIABLES
+@import '../_default/_default-1-variables';
+
+// CLIENT-SPECIFIC DESIGN VARIABLES
+@import '_clariant_variables';
+
+// GLOBAL MAPS:
+@import '../../01-css-pulse/_maps';
+
+// GLOBAL MIXINS
+@import '../../01-css-pulse/_mixins';
+
+// THE GLOBAL STRUCTURE FOR FRAMEWORK V2:
+@import '../../01-css-pulse/_theme-structure';
+
+// div[data-question-type="free_text_question"] ul._pi_answers_container {
+//   margin-top: 10px !important;
+// }
+
+div._pi_free_text_question_field_container,
+div._pi_free_text_question_submit_button_container,
+#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget ._pi_widgetContentContainer ul._pi_answers_container ._pi_free_text_question_submit_button_container {
+  margin: 5px auto !important;
+  padding: 0 !important;
+  flex: 1 1 100% !important;
+}
+//
+// #_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget ._pi_widgetContentContainer ul._pi_answers_container ._pi_free_text_question_submit_button_container {
+//   padding: 0 !important;
+//   padding-left: 5px !important;
+//   margin: 0 !important;
+//   flex: 0 1 auto;
+// }
+
+div._pi_free_text_question_characters_count {
+  padding-top: 1px !important;
+}

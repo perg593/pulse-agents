@@ -1,0 +1,37 @@
+// THE _selectors FILE:
+@import '../../../01-css-pulse/_selectors';
+
+// DEFAULT VARIABLES
+@import '../_default/_default-1-variables';
+
+// CLIENT-SPECIFIC DESIGN VARIABLES
+@import '../ofi-variable-colors/_ofi-dark_variables';
+
+// GLOBAL MAPS:
+@import '../../../01-css-pulse/_maps';
+
+// GLOBAL MIXINS
+@import '../../../01-css-pulse/_mixins';
+
+// THE GLOBAL STRUCTURE FOR FRAMEWORK V2:
+@import '../../../01-css-pulse/_theme-structure';
+
+// CLIENT-SPECIFIC STRUCTURES
+@import '../ofi-structures/_ofi-structure_right_rail.scss';
+
+div#_pi_surveyWidget[data-question-type="multiple_choices_question"] input._pi_multiple_choices_question_submit_button,
+div#_pi_surveyWidget[data-question-type="multiple_choices_question"].mobile-enabled input._pi_multiple_choices_question_submit_button {
+  background-color: #fff !important;
+  color: #000 !important;
+}
+
+div#_pi_surveyWidget[data-question-type="multiple_choices_question"] input._pi_multiple_choices_question_submit_button:hover,
+div#_pi_surveyWidget[data-question-type="multiple_choices_question"].mobile-enabled input._pi_multiple_choices_question_submit_button:hover {
+  background-color: #000 !important;
+  color: #fff !important;
+}
+
+ul._pi_answers_container div._pi_free_text_question_field_container textarea._pi_free_text_question_field {
+  background-color: #4e4e4e !important;
+  border-color: #4e4e4e !important;
+}

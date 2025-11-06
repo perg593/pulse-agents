@@ -1,0 +1,249 @@
+
+
+// FEEDBACK TAB
+// macbook-pro-16.local
+// global-bobcat-com-preview.dibhids.net
+(function() {
+  var checkWildcard = function(tabHost, wildcardSelector){
+    if(tabHost.indexOf(wildcardSelector) !== -1){
+      //substring exists
+      return true;
+    }
+    return false;
+  };
+  var buildClickEvents = function(){
+    window.piMobileclickEventListener = function(e){
+      var mobileMenuTrigger = document.querySelector(".btn.btn-menu.mobile-trigger[data-target='#mobile-menu']");
+      if(mobileMenuTrigger !== null){
+        if(mobileMenuTrigger.classList.contains("collapsed")){
+          display();
+        }
+      }
+    };
+    window.piClickEventListener = function(e){
+      display();
+    };
+
+    var delayInMilliseconds = 1000; //1 sec
+
+    if(typeof window.piInit  == "undefined"){
+      window.survey_answered = false;
+    }
+
+    function display() {
+      if(typeof window.PulseInsightsObject.survey != "undefined"){
+        pi_nav = window.PulseInsightsObject.survey;
+      }
+      //we're already on the right survey, or its already been answered, window.survey set in the complete cb field
+      if(typeof pi_nav != "undefined"){
+        if (pi_nav.attributes.id === 3961 || pi_nav.attributes.id === 4002 || window.survey_answered === true) {
+          return;
+        }
+      }
+      else{
+        if(window.innerWidth <= 990){
+          pi("present", 4002);
+          setTimeout(function(){pi("present", 4002);}, 700);
+        }
+        else{
+          pi("present", 3961);
+        }
+      }
+    }
+
+    //attach event listeners on a timer
+    setTimeout(function () {
+      window.piInit = false;
+      var desktopMenuTrigger = document.querySelector("#main-nav > li.level-1:nth-child(8) a");
+      if(desktopMenuTrigger !== null){
+        desktopMenuTrigger.addEventListener("click", window.piClickEventListener, true);
+      }
+      var menuTrigger = document.querySelector(".btn.btn-menu.mobile-trigger[data-target='#mobile-menu']");
+      if(menuTrigger !== null){
+        menuTrigger.addEventListener("click", window.piMobileclickEventListener, true);
+      }
+    });
+  };
+  var buildEl = function(){
+    var css = document.createElement('style');
+    css.type = "text/css";
+    css.className = "pulse_feedback_css";
+
+    if (css.styleSheet) {
+      css.styleSheet.cssText = cssText;
+    } else {
+      css.appendChild(document.createTextNode(cssText));
+    }
+
+    var a = document.createElement('a');
+    var linkText = document.createTextNode("FEEDBACK");
+    a.appendChild(linkText);
+    a.id = "pulse_feedback_tab";
+    // a.addEventListener("click", function() { pi('present', 'pi-feedback-tab') });
+    a.addEventListener("click", function() { pi('present', eventName) });
+
+
+    document.body.appendChild(a);
+
+    var body = document.getElementsByTagName('body')[0];
+
+    body.appendChild(css);
+    body.appendChild(a);
+  };
+  var tabHost = document.location.hostname,
+      eventName,
+      cssText =
+      '#pulse_feedback_tab {'+
+        'position: fixed;'+
+        'transform: rotate(-90deg);'+
+        'right: -10px;'+
+        'transform-origin: 100% 100%;'+
+        'padding: 10px 25px 15px;'+
+        'color: white;'+
+        'text-transform: uppercase;'+
+        'text-decoration: none;'+
+        'font-size: 14px;'+
+        'font-family: HelveticaNeue-CondensedBold,HelveticaNeueBoldCondensed,HelveticaNeue-Bold-Condensed,"Helvetica Neue Bold Condensed","Roboto Condensed",Sans-serif;'+
+        'font-weight: normal;'+
+        'letter-spacing: normal;'+
+        'cursor: pointer;'+
+        'z-index: 600;'+
+        'border: 1px solid #ffffff;'+
+      '}'
+      +
+      '@media only screen and (min-width: 769px) {'+
+        '#pulse_feedback_tab {'+
+          'background-color: #ff3600;'+
+          'top: 73%;'+
+        '}'+
+        '#pulse_feedback_tab:hover {'+
+          'background-color: #ff3600;'+
+          'right: 0px;'+
+        '}'+
+      '}'
+      +
+      '@media only screen and (min-width: 426px) and (max-width: 768px) {'+
+        '#pulse_feedback_tab {'+
+          'background-color: #ff3600;'+
+          'top: 70%;'+
+        '}'+
+      '}'
+      +
+      '@media only screen and (max-width: 425px) {'+
+        '#pulse_feedback_tab {'+
+          'background-color: #ff3600;'+
+          'padding: 8px 20px 15px;'+
+          'top: 68%;'+
+        '}'+
+      '}'
+    ;
+
+  if(tabHost == "global-bobcat-com-preview.dibhids.net" || tabHost == "www.bobcat.com"){
+    //marketing
+
+    buildClickEvents();
+    eventName = 'marketing-site-feedback';
+    buildEl();
+  }
+  else if(tabHost == "new.my.bobcat.com" || tabHost == "my.bobcat.com" || tabHost == "my-bobcat2.qa.dice-tools.com" || checkWildcard(tabHost, "my-bobcat.dev.dice-tools.com")){
+    // owners portal
+    eventName = 'my-bobcat-feedback';
+    cssText =
+      '#pulse_feedback_tab {'+
+        'box-shadow: 0px 0px 2px gray;' +
+        'position: fixed;'+
+        'transform: rotate(-90deg);'+
+        'right: -10px;'+
+        'transform-origin: 100% 100%;'+
+        'padding: 10px 25px 15px;'+
+        'color: white;'+
+        'text-transform: uppercase;'+
+        'text-decoration: none;'+
+        'font-size: 14px;'+
+        'font-family: HelveticaNeue-CondensedBold,HelveticaNeueBoldCondensed,HelveticaNeue-Bold-Condensed,"Helvetica Neue Bold Condensed","Roboto Condensed",Sans-serif;'+
+        'font-weight: normal;'+
+        'letter-spacing: normal;'+
+        'cursor: pointer;'+
+        'z-index: 600;'+
+      '}'
+      +
+      '@media only screen and (min-width: 769px) {'+
+        '#pulse_feedback_tab {'+
+          'background-color: #ff3600;'+
+          'top: 50%;'+
+        '}'+
+        '#pulse_feedback_tab:hover {'+
+          'background-color: #ff3600;'+
+          'right: 0px;'+
+        '}'+
+      '}'
+      +
+      '@media only screen and (min-width: 426px) and (max-width: 768px) {'+
+        '#pulse_feedback_tab {'+
+          'background-color: #ff3600;'+
+          'top: 70%;'+
+        '}'+
+      '}'
+      +
+      '@media only screen and (max-width: 425px) {'+
+        '#pulse_feedback_tab {'+
+          'background-color: #ff3600;'+
+          'padding: 8px 20px 15px;'+
+          'top: 68%;'+
+        '}'+
+      '}'
+    ;
+
+    buildEl();
+  }
+  else if(tabHost == "dealer.bobcat.com" || checkWildcard(tabHost, "bobcatdealernet.dev.dice-tools.com") || tabHost == "bobcatdealernet.qa.dice-tools.com"){
+    // dealer portal
+    eventName = 'dealer-feedback';
+    cssText =
+      '#pulse_feedback_tab {'+
+        'box-shadow: 0px 0px 2px gray;' +
+        'position: fixed;'+
+        'transform: rotate(-90deg);'+
+        'right: -10px;'+
+        'transform-origin: 100% 100%;'+
+        'padding: 10px 25px 15px;'+
+        'color: white;'+
+        'text-transform: uppercase;'+
+        'text-decoration: none;'+
+        'font-size: 14px;'+
+        'font-family: HelveticaNeue-CondensedBold,HelveticaNeueBoldCondensed,HelveticaNeue-Bold-Condensed,"Helvetica Neue Bold Condensed","Roboto Condensed",Sans-serif;'+
+        'font-weight: normal;'+
+        'letter-spacing: normal;'+
+        'cursor: pointer;'+
+        'z-index: 600;'+
+      '}'
+      +
+      '@media only screen and (min-width: 769px) {'+
+        '#pulse_feedback_tab {'+
+          'background-color: #ff3600;'+
+          'top: 50%;'+
+        '}'+
+        '#pulse_feedback_tab:hover {'+
+          'background-color: #ff3600;'+
+          'right: 0px;'+
+        '}'+
+      '}'
+      +
+      '@media only screen and (min-width: 426px) and (max-width: 768px) {'+
+        '#pulse_feedback_tab {'+
+          'background-color: #ff3600;'+
+          'top: 70%;'+
+        '}'+
+      '}'
+      +
+      '@media only screen and (max-width: 425px) {'+
+        '#pulse_feedback_tab {'+
+          'background-color: #ff3600;'+
+          'padding: 8px 20px 15px;'+
+          'top: 68%;'+
+        '}'+
+      '}'
+    ;
+    buildEl();
+  }
+})();

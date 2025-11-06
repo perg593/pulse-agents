@@ -1,0 +1,95 @@
+/* ------------------------------ RADIO BUTTONS ON/OFF -------------------------------------------- */
+div[data-radio-button="off"] ul._pi_answers_container li a span._pi_radio_button_outer {
+	display: none !important; }
+
+div[data-radio-button="on"] ul._pi_answers_container li a span._pi_radio_button_outer {
+	display: block !important; }
+
+
+
+
+
+/* ------------------------------ TEXT ALIGNMENT: RADIO AND CHECKBOX ------------------------------ */
+div[data-radio-button="off"] ul._pi_answers_container li a label {
+	text-align: center !important; }
+
+div[data-radio-button="on"] ul._pi_answers_container li a label {
+	text-align: left !important; }
+
+div[data-answer-widths="fixed"] ul._pi_answers_container li label._pi-control-checkbox {
+	text-align: left !important; }
+
+
+
+
+
+/* ------------------------------ BUTTON GROUP ALIGNMENT: FIXED, VARIABLE LEFT/RIGHT ------------- */
+div[data-answer-widths="fixed"] ul._pi_answers_container {
+	justify-content: 	flex-start;	}
+	
+div[data-answer-widths="variable-left"] ul._pi_answers_container {
+	justify-content: 	flex-start;	}
+	
+div[data-answer-widths="variable-center"] ul._pi_answers_container {
+	justify-content: 	center;	}
+
+
+
+
+
+/* ------------------------------ BUTTON WIDTHS: VARIABLE ---------------------------------------- */
+div[data-answer-widths="variable-left"] ul._pi_answers_container li,
+div[data-answer-widths="variable-center"] ul._pi_answers_container li {
+	flex: 0 0 auto;	}
+
+
+
+
+
+/* ------------------------------ BUTTON WIDTHS: FIXED ------------------------------------------- */
+/* THE DEFAULT FOR FIXED: 3 PER ROW ------------------------------ */
+div[data-answer-widths="fixed"] ul._pi_answers_container li {
+	flex: 0 0 31%; 
+	max-width: 31%; }
+	
+div[data-answer-widths="fixed"][data-answers-per-row="1"] ul._pi_answers_container li {
+	margin: 5px 7% !important;
+	flex: 0 0 86% !important; 
+	max-width: 86% !important; }
+
+div[data-answer-widths="fixed"][data-answers-per-row="2"] ul._pi_answers_container li {
+	flex: 0 0 48% !important; 
+	max-width: 48% !important; }
+	
+div[data-answer-widths="fixed"][data-answers-per-row="3"] ul._pi_answers_container li {
+	flex: 0 0 31% !important; 
+	max-width: 31% !important; }	
+
+div[data-answer-widths="fixed"][data-answers-per-row="4"] ul._pi_answers_container li {
+	flex: 0 0 23% !important; 
+	max-width: 23% !important; }
+
+div[data-answer-widths="fixed"][data-answers-per-row="5"] ul._pi_answers_container li {
+	flex: 0 0 18% !important; 
+	max-width: 18% !important; }
+
+div[data-answer-widths="fixed"][data-answers-per-row="6"] ul._pi_answers_container li {
+	flex: 0 0 14.5% !important; 
+	max-width: 14.5% !important; }
+
+div[data-answer-widths="fixed"][data-answers-per-row="7"] ul._pi_answers_container li {
+	flex: 0 0 12.25% !important; 
+	max-width: 12.25% !important; }
+
+div[data-answer-widths="fixed"][data-answers-per-row="8"] ul._pi_answers_container li {
+	flex: 0 0 10.5% !important; 
+	max-width: 10.5% !important; }
+	
+div[data-answer-widths="fixed"][data-answers-per-row="9"] ul._pi_answers_container li {
+	flex: 0 0 9.1% !important; 
+	max-width: 9.1% !important; }
+	
+div[data-answer-widths="fixed"][data-answers-per-row="10"] ul._pi_answers_container li {
+	flex: 0 0 8% !important; 
+	max-width: 8% !important; }	
+

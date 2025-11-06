@@ -1,0 +1,20 @@
+/* ------------------------------------------------------------------------
+	                 				SINGLE CHOICE
+---------------------------------------------------------------------------
+
+	B2. Content Container
+
+		C1. Question
+			C1-single: 			Default
+
+		C2. Answers Container
+
+			D1. <li> Tag for Single and Multiple Choice
+
+				E1. <a> Tag for Single Choice
+					F1. Radio Button Outer 		(span._pi_radio_button_outer)
+						G1. Radio Button Inner 		(span._pi_radio_button_inner)
+					F2a. <label> for Single Choice (Radio Button OFF)
+					F2b. <label> for Single Choice (Radio Button ON)
+
+------------------------------------------------------------------------ */

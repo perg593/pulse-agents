@@ -1,0 +1,69 @@
+<script>
+  // var list = PulseInsightsObject.survey.questions;
+  // var question = {};
+  // var answers = [];
+  // for (var i = 0; i < list.length; i++) {
+  //   question = list[i];
+  //   //is a menu
+  //   if(question.question_type == "single_choice_question" && question.button_type == 2){
+  //     answers = question.possible_answers;
+  //     for (var j = 0; j < answers; j++) {
+  //       if(answers[j].next_question_id !== null){
+  //         //bind the events
+  //       }
+  //     }
+  //   }
+  // }
+setTimeout(function(){
+
+  var select = PulseInsightsObject.survey.widgetContent.querySelector("#_pi_surveyWidget > div._pi_widgetContentContainer > ul:nth-child(4) > li:nth-child(4) > label");
+  var selectTargetQuestion1 = PulseInsightsObject.survey.widgetContent.querySelector("#_pi_surveyWidget > div._pi_widgetContentContainer > div:nth-child(12)");
+  var selectTargetInput1 = PulseInsightsObject.survey.widgetContent.querySelector("#_pi_surveyWidget > div._pi_widgetContentContainer > ul:nth-child(13)");
+  select.addEventListener("click", function(e){
+    var parent = document.querySelector("#_pi_surveyWidget > div._pi_widgetContentContainer > ul:nth-child(4)");
+      if(select.querySelector("input").checked == false){
+        selectTargetInput1.style.setProperty("display", "flex", "important");
+        selectTargetInput1.setAttribute("data-question-optional", "f");
+        selectTargetQuestion1.style.setProperty("display", "block", "important");
+
+      }
+      else{
+        selectTargetInput1.style.setProperty("display", "none", "important");
+        selectTargetInput1.setAttribute("data-question-optional", "t");
+        selectTargetInput1.removeAttribute("data-answer");
+        selectTargetInput1.querySelector("input").value="";
+        selectTargetQuestion1.style.setProperty("display", "none", "important");
+
+      }
+  });
+  var radioYes = PulseInsightsObject.survey.widget.querySelector("div._pi_widgetContentContainer > ul:nth-child(6) li:nth-child(1) a");
+  var radioTargetQuestion = PulseInsightsObject.survey.widget.querySelector("div._pi_widgetContentContainer > div:nth-child(7)");
+  var radioTargetInput = PulseInsightsObject.survey.widget.querySelector("div._pi_widgetContentContainer > ul:nth-child(8)");
+  var radioTargetScale = PulseInsightsObject.survey.widget.querySelector("div._pi_widgetContentContainer > div:nth-child(9)");
+  radioYes.addEventListener("click", function(e){
+      radioTargetInput.style.setProperty("display", "flex", "important");
+      radioTargetInput.setAttribute("data-question-optional", "f");
+      radioTargetQuestion.style.setProperty("display", "block", "important");
+      radioTargetScale.style.setProperty("display", "flex", "important");
+  });
+  var radioNo = PulseInsightsObject.survey.widget.querySelector("div._pi_widgetContentContainer > ul:nth-child(6) li:nth-child(2) a");
+  radioNo.addEventListener("click", function(e){
+        radioTargetInput.style.setProperty("display", "none", "important");
+        radioTargetInput.setAttribute("data-question-optional", "t");
+        radioTargetInput.removeAttribute("data-answer");
+        radioTargetQuestion.style.setProperty("display", "none", "important");
+        radioTargetScale.style.setProperty("display", "none", "important");
+  });
+  // document.querySelector("#_pi_surveyWidget > div._pi_widgetContentContainer > ul:nth-child(6) > li:last-child > a").addEventListener("click", function(e){
+  //   var target = document.querySelector("#_pi_surveyWidget > div._pi_widgetContentContainer > ul:nth-child(8) > li:last-child > a");
+  //
+  //     target.click();
+  //
+  // });
+  // document.querySelector("#_pi_surveyWidget > div._pi_widgetContentContainer > ul:nth-child(6) > li:first-child > a").addEventListener("click", function(e){
+  //   var target = document.querySelector("#_pi_surveyWidget > div._pi_widgetContentContainer > ul:nth-child(8) > li:last-child");
+  //     target.classList.remove("selected");
+  //     target.parentNode.setAttribute("data-answer","");
+  // });
+}, 500);
+</script>

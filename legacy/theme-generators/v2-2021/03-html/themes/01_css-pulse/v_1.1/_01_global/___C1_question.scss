@@ -1,0 +1,29 @@
+		/* ================== C1. QUESTION ================== */
+		// Shared
+		._pi_question,
+		#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget ._pi_question {
+			background-color: transparent;
+		}
+
+		div[data-question-type="free_text_question"] ._pi_question  { }
+
+		// Desktop
+		div._pi_question,
+		div._pi_question_custom_content_question,
+		div._pi_question_custom_content_question_fullscreen {
+			height: 	auto;
+			width: 	90%;
+			margin: 	0 auto 0 auto;
+			padding: 0 0 10px 0;
+			// background-color: lavender;
+		}
+
+		// Mobile
+		#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidget ._pi_widgetContentContainer div._pi_question,
+		#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidgetCustom ._pi_widgetContentContainer div._pi_question_custom_content_question,
+		#_pi_surveyWidgetContainer.mobile-enabled #_pi_surveyWidgetCustom ._pi_widgetContentContainer div._pi_question_custom_content_question_fullscreen {
+			width: 	95%;
+			margin: 	0 auto 0 auto !important;
+			padding: 0 0 10px 0;
+			// background-color: lavender !important;
+		}

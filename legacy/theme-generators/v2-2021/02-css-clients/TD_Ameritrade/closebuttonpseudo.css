@@ -1,0 +1,18 @@
+div#_pi_surveyWidgetContainer div#_pi_surveyWidget div._pi_closeButton, div#_pi_surveyWidgetContainer div#_pi_surveyWidget div._pi_closeButton:hover{
+  color: transparent !important;
+}
+._pi_closeButton:before {
+    content: "\2715";
+    color: #ffffff;
+    font-family: helvetica;
+    font-size: 14px;
+    position: absolute;
+    line-height: 20px;
+    width: 20px;
+    left: -50%;
+    transform: translate(50%, 50%);
+    top: -50%;
+}
+._pi_closeButton:hover:before{
+   color: #666666;
+}

@@ -1,0 +1,215 @@
+/* ------------ SHARED BETWEEN SINGLE AND MULTI ---------------------------------- */
+
+ul._pi_answers_container {
+
+	margin: 					0 !important;
+	padding: 				0 !important;
+	list-style: 			none !important;
+
+	display: 				flex !important;
+	flex-direction: 		row !important;
+	flex-wrap: 				wrap !important;
+/* 	justify-content: 	flex-start;	 DEPENDS ON FIXED VS. VARIABLE WIDTHS*/
+	align-items: 			stretch !important;
+	align-content: 		stretch !important;
+}
+
+	ul._pi_answers_container li,
+	ul._pi_answers_container li a,
+	ul._pi_answers_container li a label,
+	ul._pi_answers_container li label._pi-control-checkbox {
+		cursor: 				pointer !important;
+		box-sizing: 		border-box;
+	}
+	
+	ul._pi_answers_container li {
+/* 		background-color: initial; */
+		text-align: 		inherit !important;
+		width: 				auto !important;
+		height: 				auto !important;
+		overflow: 			hidden !important;
+		max-width: 			none !important;
+		float: 				none !important;
+
+		padding: 			0 !important;
+/* 		margin: 				5px 1% !important; */
+		margin: 				5px 0 !important;
+
+		display: 			flex;
+		flex-direction: 	row;
+		flex-wrap: 			wrap;
+		justify-content: 	center;
+		align-items: 		stretch;
+		align-content: 	stretch;
+	}
+
+	ul._pi_answers_container li:hover {
+/* 		background-color: initial; */
+	}
+
+
+/* ------------------------------ SINGLE CHOICE ------------------------------ */
+
+		ul._pi_answers_container li a {
+			padding: 			0 !important;
+			height: 				auto;
+
+			flex-grow: 			0;
+			flex-shrink: 		0;
+			flex-basis: 		100%;
+			
+			position: 			static;
+			
+			display: 			flex;			
+			flex-direction: 	row;
+			flex-wrap: 			nowrap;
+			justify-content: 	flex-start;
+			align-items: 		center;
+			align-content: 	center;
+
+			min-width: 			100% !important;
+		}
+
+			ul._pi_answers_container li a span._pi_radio_button_outer {
+				position: static;
+				
+				margin-top: 	0;
+				margin-bottom: 0;
+				margin-left: 	10px; /* make sure it matches the variable for checkbox right and left margin */
+				margin-right: 	0;
+
+				/* VISUAL PARAMETERS - CAN BE OVERRIDDEN BY CIENT USING !IMPORTANT */
+				width: 		14px;
+				min-width: 	14px;
+				max-width: 	14px;
+				height: 		14px;
+				min-height: 14px;
+				max-height: 14px;
+				
+				background-color: rgba(255,255,255,0.2);			/* backup value */
+				border: 1px solid rgba(255, 255, 255, 0.5);		/* backup value */
+				border-radius: 50%;				
+			}
+
+				ul._pi_answers_container li a span._pi_radio_button_inner,
+				ul._pi_answers_container li:hover a span._pi_radio_button_inner {
+					position: 	relative;
+					display: 	block;
+					
+					width: 		8px;
+					min-width: 	8px;
+					max-width: 	8px;
+					height: 		8px;
+					min-height: 8px;
+					max-height: 8px; 
+					
+					top: 			2px;
+					left: 		2px;
+					border-radius: 50%;
+				}
+
+				ul._pi_answers_container li:hover a span._pi_radio_button_inner {
+					background-color: rgba(255, 255, 255, 0.5);	/* backup value */
+					border: 1px solid transparent;					/* backup value */
+				}
+
+			ul._pi_answers_container li a label {
+				padding: 		8px 15px; 			/* Match it to multi-choice label right padding ONLY */
+				margin: 			0 !important;
+				
+				min-width: 		100%;
+				width: 			auto !important;
+			}
+
+
+
+/* ------------------------------ MULTIPLE CHOICE ------------------------------ */
+
+		/* Text */
+		ul._pi_answers_container li label._pi-control-checkbox {
+/* 			width: initial; */
+/* 			float: initial; */
+/* 			margin: initial; */
+
+			flex-grow: 			0;
+			flex-shrink: 		0;
+			flex-basis: 		100%;
+			
+			position: 			static;
+			overflow: 			hidden;
+			margin: 				0;
+			
+			display: 			flex;			
+			flex-direction: 	row;
+			flex-wrap: 			nowrap;
+			justify-content: 	flex-start;
+			align-items: 		flex-start;
+			align-content: 	flex-start;
+
+			padding-top: 		8px;			/* Match to single-choice */
+			padding-bottom: 	8px;			/* Match to single-choice */
+			padding-left: 		0; 			/* Do NOT make it a variable. There's a margin already in checkbox  */
+			padding-right: 	15px; 		/* Match it to single-choice label right & left padding */
+		}
+
+
+			/* Hidden Checkbox Form Element (nothing) */
+			ul._pi_answers_container li label input._pi_checkbox {
+			}
+
+			
+			/* Simulated Checkbox */
+			._pi-control-indicator {
+				position: 			static;
+				display: 			block;
+				
+				flex-grow: 			0;
+				flex-shrink: 		0;
+				flex-basis: 		14px;
+				
+				margin-top: 		2px;		/* CREATE a variable for vertical adjust of the box */
+				margin-bottom: 	0;
+				margin-left: 		10px; 	/* Make sure it matches the variable for radio left margin */
+				margin-right: 		10px; 	/* Make sure it matches the variable for radio left margin */
+				width: 				14px;
+				height: 				14px;
+				border: 				1px solid #000;
+			}
+
+
+				/* Simulated Checkmark (nothing) */
+				._pi-control input:checked ~ ._pi-control-indicator:after {
+				}
+				
+				._pi-control-checkbox ._pi-control-indicator:after {
+					left: 			4px;
+					width: 			4px;
+					height: 			10px;
+					border: 			solid #000;
+					border-width: 	0 2px 2px 0;
+					transform: 		rotate(45deg);
+				}
+				
+				._pi-control-indicator:after {
+					content: 		'';
+					position: 		relative;
+					display: 		none;
+				}
+
+
+		/* Maximum Count - Container */
+		/* Submit Button - Container */
+		div[data-question-type="multiple_choices_question"] ._pi_free_text_question_field_container,
+		div[data-question-type="multiple_choices_question"] ._pi_multiple_choices_question_submit_button_container {
+			margin: 	3px 0;
+			width: 	100%;
+			display: inline-block;
+		}
+
+		input._pi_free_text_question_field,
+		textarea._pi_free_text_question_field,
+		#_pi_surveyWidgetContainer.mobile-enabled input._pi_free_text_question_field,
+		#_pi_surveyWidgetContainer.mobile-enabled textarea._pi_free_text_question_field {
+			min-width: 100% !important;
+			max-width: 100% !important;
+		}

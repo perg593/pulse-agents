@@ -1,0 +1,62 @@
+/* ------------------------------------------------------------------------
+	            ITEMS PER ROW SHARED | SINGLE AND MULTIPLE CHOICE 
+------------------------------------------------------------------------ */
+
+	ul._pi_answers_container li,
+	ul._pi_answers_container li a,
+	ul._pi_answers_container li a label,
+	ul._pi_answers_container li label._pi-control-checkbox {
+		background-color: #fff !important;
+		color: #0272b6;
+		font-size: 16px;
+		font-weight: 300;
+		text-align: left;
+		text-decoration: none;
+		text-transform: none;
+		letter-spacing: 0.2px;
+		border-radius: 25px;
+		cursor: 				pointer !important;
+		box-sizing: 		border-box;
+	}
+
+
+	// Desktop Only Hover
+	@media (min-width:769px) {
+		ul._pi_answers_container li:hover,
+		ul._pi_answers_container li:hover a,
+		ul._pi_answers_container li:hover a label,
+		ul._pi_answers_container li:hover label._pi-control-checkbox {
+			background-color: #0272b6 !important;
+			color: #fff;
+			text-decoration: none;
+		}
+	}
+
+
+
+/* ------------ SHARED BETWEEN SINGLE AND MULTI FROM FRAMEWORK V1 ---------------------------------- */
+
+
+
+
+	
+	ul._pi_answers_container li {
+		// background-color: initial;
+		text-align: 		inherit !important;
+		width: 				auto !important;
+		height: 				auto !important;
+		overflow: 			hidden !important;
+		max-width: 			none !important;
+		float: 				none !important;
+
+		padding: 			0 !important;
+		// margin: 				5px 1% !important;
+		margin: 				5px 0 !important;
+
+		display: 			flex;
+		flex-direction: 	row;
+		flex-wrap: 			wrap;
+		justify-content: 	center;
+		align-items: 		stretch;
+		align-content: 	stretch;
+	}

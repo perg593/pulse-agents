@@ -1,0 +1,75 @@
+// 5. ADDED TO "LEFT" THEMES TO MAKE SURE LI TAGS HAVE NO MARGIN ON THE LEFT
+
+// BUTTON WIDTHS: FIXED ------------------------------------------
+// THE DEFAULT FOR FIXED: 3 PER ROW ------------------------------
+div[data-answer-widths=fixed] ul._pi_answers_container li {
+    margin: 5px 2% 5px 0!important;
+    flex: 0 0 31.333%;
+    max-width: 31.333%
+}
+
+// INDIVIDUAL ANSWERS PER ROW VALUES ------------------------------
+div[data-answer-widths=fixed][data-answers-per-row="1"] ul._pi_answers_container li {
+    margin: 5px 2% 5px 0!important;
+    flex: 0 0 86%!important;
+    max-width: 86%!important
+}
+
+div[data-answer-widths=fixed][data-answers-per-row="2"] ul._pi_answers_container li {
+    margin: 5px 2% 5px 0!important;
+    flex: 0 0 48%!important;
+    max-width: 48%!important
+}
+
+div[data-answer-widths=fixed][data-answers-per-row="3"] ul._pi_answers_container li {
+    margin: 5px 2% 5px 0!important;
+    flex: 0 0 31.333%!important;
+    max-width: 31.333%!important
+}
+
+div[data-answer-widths=fixed][data-answers-per-row="4"] ul._pi_answers_container li {
+    margin: 5px 2% 5px 0!important;
+    flex: 0 0 23%!important;
+    max-width: 23%!important
+}
+
+div[data-answer-widths=fixed][data-answers-per-row="5"] ul._pi_answers_container li {
+    margin: 5px 2% 5px 0!important;
+    flex: 0 0 18%!important;
+    max-width: 18%!important
+}
+
+div[data-answer-widths=fixed][data-answers-per-row="6"] ul._pi_answers_container li {
+    margin: 5px 2% 5px 0!important;
+    flex: 0 0 14.5%!important;
+    max-width: 14.5%!important
+}
+
+div[data-answer-widths=fixed][data-answers-per-row="7"] ul._pi_answers_container li {
+    margin: 5px 2% 5px 0!important;
+    flex: 0 0 12.25%!important;
+    max-width: 12.25%!important
+}
+
+div[data-answer-widths=fixed][data-answers-per-row="8"] ul._pi_answers_container li {
+    margin: 5px 2% 5px 0!important;
+    flex: 0 0 10.5%!important;
+    max-width: 10.5%!important
+}
+
+div[data-answer-widths=fixed][data-answers-per-row="9"] ul._pi_answers_container li {
+    margin: 5px 2% 5px 0!important;
+    flex: 0 0 9.1%!important;
+    max-width: 9.1%!important
+}
+
+div[data-answer-widths=fixed][data-answers-per-row="10"] ul._pi_answers_container li {
+    margin: 5px 2% 5px 0!important;
+    flex: 0 0 8%!important;
+    max-width: 8%!important
+}
+
+// BUTTON WIDTHS: VARIABLE LEFT -------------------------------------------
+#_pi_surveyWidget[data-question-type=single_choice_question][data-answer-widths=variable-left][data-radio-button=off] li {
+    margin: 5px 2% 5px 0!important
+}

@@ -1,0 +1,374 @@
+// ------------------------------ 0.5 ITEMS PER ROW --------------
+ul._pi_answers_container li,
+ul._pi_answers_container li a,
+ul._pi_answers_container li a label,
+ul._pi_answers_container li label._pi-control-checkbox {
+    background-color: #fff!important;
+    color: #0272b6;
+    font-size: 16px;
+    font-weight: 300;
+    text-align: left;
+    text-decoration: none;
+    text-transform: none;
+    letter-spacing: .2px;
+    border-radius: 25px
+}
+
+@media (min-width:769px) {
+    ul._pi_answers_container li:hover,
+    ul._pi_answers_container li:hover a,
+    ul._pi_answers_container li:hover a label,
+    ul._pi_answers_container li:hover label._pi-control-checkbox {
+        background-color: #0272b6!important;
+        color: #fff;
+        text-decoration: none
+    }
+}
+
+// ------------------------------- SINGLE CHOICE ONLY -------------------------------
+#_pi_surveyWidgetContainer.mobile-enabled div[data-question-type=single_choice_question] li,
+div[data-question-type=single_choice_question] li {
+    border: 1px solid #0272b6
+}
+
+div[data-question-type=single_choice_question] li a label {
+    padding: 12px 25px!important
+}
+
+div[data-question-type=single_choice_question][data-radio-button=on] li a label {
+    padding: 12px 10px!important;
+    max-width: calc(100% - 26px)!important;
+    min-width: calc(100% - 26px)!important
+}
+
+// Tablet
+@media (min-width:415px) and (max-width:768px) {
+    div[data-question-type=single_choice_question] li a label {
+        padding: 10px 20px!important
+    }
+    div[data-question-type=single_choice_question][data-radio-button=on] li a label {
+        padding: 10px 10px!important;
+        max-width: calc(100% - 26px)!important;
+        max-width: calc(100% - 26px)!important
+    }
+}
+
+// Mobile
+#_pi_surveyWidgetContainer.mobile-enabled div[data-question-type=single_choice_question] li a label {
+    font-size: 18px;
+    padding: 8px 10px!important
+}
+
+#_pi_surveyWidgetContainer.mobile-enabled div[data-question-type=single_choice_question][data-radio-button=on] li a label {
+    padding: 10px 10px!important
+}
+
+// Radio Button
+// Sizing
+ul._pi_answers_container li a span._pi_radio_button_outer {
+    margin-top: 0;
+    margin-bottom: 0;
+    margin-left: 10px;
+    margin-right: 0;
+    // VISUAL PARAMETERS - CAN BE OVERRIDDEN BY CIENT USING !IMPORTANT
+    width: 17px;
+    min-width: 17px;
+    max-width: 17px;
+    height: 17px;
+    min-height: 17px;
+    max-height: 17px
+}
+
+ul._pi_answers_container li a span._pi_radio_button_inner,
+ul._pi_answers_container li:hover a span._pi_radio_button_inner {
+    width: 9px;
+    min-width: 9px;
+    max-width: 9px;
+    height: 9px;
+    min-height: 9px;
+    max-height: 9px;
+    top: 3px;
+    left: 3px;
+    border-radius: 50%
+}
+
+ul._pi_answers_container li a span._pi_radio_button_outer {
+    background-color: #fff!important;
+    border: 1px solid #868f96!important
+}
+
+// Tablet and Desktop Hover
+@media (min-width:769px) {
+    ul._pi_answers_container li:hover a span._pi_radio_button_outer {
+        background-color: #0272b6!important;
+        border: 1px solid #fff!important
+    }
+    ul._pi_answers_container li:hover a span._pi_radio_button_inner {
+        background-color: #fff!important;
+        border: 1px solid transparent
+    }
+}
+
+// Maximum Count - Container
+// Submit Button - Container
+div[data-question-type=multiple_choices_question] ._pi_free_text_question_field_container,
+div[data-question-type=multiple_choices_question] ._pi_multiple_choices_question_submit_button_container {
+    background-color: rgba(255, 255, 255, 0);
+    margin: 0!important
+}
+
+div._pi_multiple_choices_count {
+    height: auto;
+    padding: 4px 0 6px!important;
+    text-align: center
+}
+
+// ------------------------------ RADIO BUTTONS ON/OFF --------------------------------------------
+div[data-radio-button=off] ul._pi_answers_container li a span._pi_radio_button_outer {
+    display: none!important
+}
+
+div[data-radio-button=on] ul._pi_answers_container li a span._pi_radio_button_outer {
+    display: block!important
+}
+
+// ------------------------------ TEXT ALIGNMENT: RADIO AND CHECKBOX ------------------------------
+div[data-radio-button=off] ul._pi_answers_container li a label {
+    text-align: center!important
+}
+
+div[data-radio-button=on] ul._pi_answers_container li a label {
+    text-align: left!important
+}
+
+div[data-answer-widths=fixed] ul._pi_answers_container li label._pi-control-checkbox {
+    text-align: left!important
+}
+
+// ------------------------------ BUTTON GROUP ALIGNMENT: FIXED, VARIABLE LEFT/RIGHT -------------
+div[data-answer-widths=variable-center] ul._pi_answers_container {
+    justify-content: center
+}
+
+div[data-answer-widths=variable-center] ul._pi_answers_container li {
+    margin: 5px 1%!important
+}
+
+div[data-answer-widths=variable-left] ul._pi_answers_container {
+    justify-content: flex-start
+}
+
+div[data-answer-widths=variable-left] ul._pi_answers_container li {
+    margin: 5px 1%!important
+}
+
+div[data-answer-widths=fixed] ul._pi_answers_container {
+    justify-content: flex-start
+}
+
+div[data-answer-widths=fixed] ul._pi_answers_container li {
+    margin: 5px 1%!important
+}
+
+// ------------------------------ BUTTON WIDTHS: VARIABLE ----------------------------------------
+div[data-answer-widths=variable-center] ul._pi_answers_container li,
+div[data-answer-widths=variable-left] ul._pi_answers_container li {
+    flex-grow: 0;
+    flex-shrink: 0;
+    flex-basis: auto
+}
+
+// ------------------------------ BUTTON WIDTHS: FIXED -------------------------------------------
+// THE DEFAULT FOR FIXED: 3 PER ROW ------------------------------
+div[data-answer-widths=fixed] ul._pi_answers_container li {
+    flex: 0 0 31.333%;
+    max-width: 31.333%
+}
+
+div[data-answer-widths=fixed][data-answers-per-row="1"] ul._pi_answers_container li {
+    margin: 5px 7%!important;
+    flex: 0 0 86%!important;
+    max-width: 86%!important
+}
+
+div[data-answer-widths=fixed][data-answers-per-row="2"] ul._pi_answers_container li {
+    flex: 0 0 48%!important;
+    max-width: 48%!important
+}
+
+div[data-answer-widths=fixed][data-answers-per-row="3"] ul._pi_answers_container li {
+    flex: 0 0 31.333%!important;
+    max-width: 31.333%!important
+}
+
+div[data-answer-widths=fixed][data-answers-per-row="4"] ul._pi_answers_container li {
+    flex: 0 0 23%!important;
+    max-width: 23%!important
+}
+
+div[data-answer-widths=fixed][data-answers-per-row="5"] ul._pi_answers_container li {
+    flex: 0 0 18%!important;
+    max-width: 18%!important
+}
+
+div[data-answer-widths=fixed][data-answers-per-row="6"] ul._pi_answers_container li {
+    flex: 0 0 14.5%!important;
+    max-width: 14.5%!important
+}
+
+div[data-answer-widths=fixed][data-answers-per-row="7"] ul._pi_answers_container li {
+    flex: 0 0 12.25%!important;
+    max-width: 12.25%!important
+}
+
+div[data-answer-widths=fixed][data-answers-per-row="8"] ul._pi_answers_container li {
+    flex: 0 0 10.5%!important;
+    max-width: 10.5%!important
+}
+
+div[data-answer-widths=fixed][data-answers-per-row="9"] ul._pi_answers_container li {
+    flex: 0 0 9.1%!important;
+    max-width: 9.1%!important
+}
+
+div[data-answer-widths=fixed][data-answers-per-row="10"] ul._pi_answers_container li {
+    flex: 0 0 8%!important;
+    max-width: 8%!important
+}
+
+// ------------------------------- MULTIPLE CHOICE ONLY -------------------------------
+div[data-question-type=multiple_choices_question] ul._pi_answers_container {
+    width: 100%!important;
+    background-color: #fff;
+    margin-bottom: 10px!important
+}
+
+// LARGE DESKTOP
+@media (min-width:1072px) {
+    div[data-question-type=multiple_choices_question] ul._pi_answers_container {
+        max-width: 1035px!important
+    }
+}
+
+// SMALL DESKTOP
+@media (min-width:769px) and (max-width:1071px) {
+    div[data-question-type=multiple_choices_question] ul._pi_answers_container {
+        max-width: 900px!important
+    }
+}
+
+// TABLET
+@media (min-width:415px) and (max-width:768px) {
+    div[data-question-type=multiple_choices_question] ul._pi_answers_container {
+        max-width: 700px!important
+    }
+}
+
+// MOBILE
+@media (max-width:414px) {
+    div[data-question-type=multiple_choices_question] ul._pi_answers_container {
+        max-width: 100%!important
+    }
+}
+
+div[data-question-type=multiple_choices_question][data-answers-per-row="2"][data-possible-answers="10"] ul._pi_answers_container,
+div[data-question-type=multiple_choices_question][data-answers-per-row="2"][data-possible-answers="12"] ul._pi_answers_container,
+div[data-question-type=multiple_choices_question][data-answers-per-row="2"][data-possible-answers="14"] ul._pi_answers_container,
+div[data-question-type=multiple_choices_question][data-answers-per-row="2"][data-possible-answers="2"] ul._pi_answers_container,
+div[data-question-type=multiple_choices_question][data-answers-per-row="2"][data-possible-answers="4"] ul._pi_answers_container,
+div[data-question-type=multiple_choices_question][data-answers-per-row="2"][data-possible-answers="6"] ul._pi_answers_container,
+div[data-question-type=multiple_choices_question][data-answers-per-row="2"][data-possible-answers="8"] ul._pi_answers_container {
+    max-width: 750px!important
+}
+
+div[data-question-type=multiple_choices_question][data-answer-widths=fixed][data-answers-per-row="2"][data-possible-answers="10"] ul._pi_answers_container li,
+div[data-question-type=multiple_choices_question][data-answer-widths=fixed][data-answers-per-row="2"][data-possible-answers="12"] ul._pi_answers_container li,
+div[data-question-type=multiple_choices_question][data-answer-widths=fixed][data-answers-per-row="2"][data-possible-answers="14"] ul._pi_answers_container li,
+div[data-question-type=multiple_choices_question][data-answer-widths=fixed][data-answers-per-row="2"][data-possible-answers="2"] ul._pi_answers_container li,
+div[data-question-type=multiple_choices_question][data-answer-widths=fixed][data-answers-per-row="2"][data-possible-answers="4"] ul._pi_answers_container li,
+div[data-question-type=multiple_choices_question][data-answer-widths=fixed][data-answers-per-row="2"][data-possible-answers="6"] ul._pi_answers_container li,
+div[data-question-type=multiple_choices_question][data-answer-widths=fixed][data-answers-per-row="2"][data-possible-answers="8"] ul._pi_answers_container li {
+    -ms-flex: 0 0 48%!important;
+    flex: 0 0 48%!important;
+    max-width: 48%!important
+}
+
+#_pi_surveyWidgetContainer.mobile-enabled div[data-question-type=multiple_choices_question] ul._pi_answers_container {
+    width: 98%!important
+}
+
+div[data-question-type=multiple_choices_question] ul._pi_answers_container li,
+div[data-question-type=multiple_choices_question] ul._pi_answers_container li:hover,
+div[data-question-type=multiple_choices_question] ul._pi_answers_container li:hover label._pi-control-checkbox {
+    border-radius: 0!important;
+    border: 1px solid #fff!important;
+    background-color: #fff!important
+}
+
+// Text
+ul._pi_answers_container li label._pi-control-checkbox {
+    background-color: #fff!important;
+    color: #44484c!important;
+    border: 1px solid #fff!important;
+    border-radius: 0!important;
+    padding: 8px 10px 8px 0!important;
+    line-height: 20px!important
+}
+
+// Text - Tablet and Desktop Hover
+@media (min-width:769px) {
+    ul._pi_answers_container li:hover label._pi-control-checkbox {
+        background-color: #fff!important;
+        border: 1px solid #fff!important;
+        color: #44484c!important
+    }
+}
+
+// Text - Mobile
+#_pi_surveyWidgetContainer.mobile-enabled label._pi-control._pi-control-checkbox {
+    font-size: 15px!important;
+    padding: 8px 10px 8px 0!important
+}
+
+// Checkbox
+._pi-control-indicator {
+    background-color: #f2f4f5!important;
+    border: 1px solid #646a70!important;
+    border-radius: 3px!important;
+    border-width: 1px!important;
+    margin-top: 0!important;
+    margin-left: 0!important;
+    width: 18px!important;
+    -ms-flex-preferred-size: 18px!important;
+    flex-basis: 18px!important;
+    height: 18px!important
+}
+
+._pi-control-indicator:after {
+    border-color: #0272b6!important;
+    top: 2px!important;
+    left: 6px!important;
+    width: 3px!important;
+    height: 10px!important
+}
+
+// Checkbox - Tablet and Desktop Hover
+@media (min-width:769px) {
+    ul._pi_answers_container li:hover ._pi-control-indicator {
+        background-color: #0272b6!important;
+        border: 1px solid #0272b6!important
+    }
+    ul._pi_answers_container li:hover ._pi-control-indicator:after {
+        border-color: #fff!important
+    }
+}
+
+div[data-question-type=multiple_choices_question] ._pi_multiple_choices_question_submit_button_container {
+    margin-top: 10px!important
+}
+
+div[data-question-type=multiple_choices_question] div._pi_multiple_choices_question_submit_button_container input._pi_multiple_choices_question_submit_button {
+    font-size: 16px!important;
+    min-width: 160px!important;
+    min-height: 44px!important
+}

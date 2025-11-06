@@ -1,0 +1,45 @@
+/* ================== IE SELECTORS ================== */
+
+/* ----- ALL BROWSERS  */
+#_pi_surveyWidget:before { 
+	content: 				'NOT IE';
+	display: 				inline-block;
+	font-size: 				20px;
+	color: 					white;
+	text-align: 			center;
+	width: 					100%;
+	font-weight: 			bold; 
+	background-color: 	green;
+}
+
+
+/* ----- IE 9+ (and above..)  */
+:root #_pi_surveyWidget:before { 
+	content: 				'IE 9 (and above?)'\9;
+	display: 				inline-block\9;
+	font-size: 				20px\9;
+	color: 					white\9;
+	text-align: 			center\9;
+	width: 					100%\9;
+	font-weight: 			bold\9; 
+	background-color: 	blue\9;
+}
+
+
+:root #_pi_surveyWidget { display: none\9; }
+
+
+/* ----- IE 11 (and above..)  */
+_:-ms-fullscreen, :root #_pi_surveyWidget:before {
+	content: 				'IE 11 (and above?)';
+	display: 				inline-block;
+	font-size: 				20px;
+	color: 					white;
+	text-align: 			center;
+	width: 					100%;
+	font-weight: 			bold; 
+	background-color: 	red;
+}
+
+
+_:-ms-fullscreen, :root #_pi_surveyWidget { display: none !important; }

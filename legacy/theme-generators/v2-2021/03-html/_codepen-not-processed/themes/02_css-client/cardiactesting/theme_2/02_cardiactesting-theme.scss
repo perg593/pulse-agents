@@ -1,0 +1,19 @@
+// PLACEHOLDER CLASS FOR TESTING
+.theme_2 {margin: 12px}
+
+
+// INCLUDES THE _selectors FILE:
+@import '../../../01_css-pulse/v_2.0/_include_1_before_variables';
+
+
+// CLIENT-SPECIFIC DESIGN VARIABLES
+@import '_02-1_cardiactesting_variables.scss';
+@import '_02-2_cardiactesting_variables.scss';
+
+
+// INCLUDES _maps AND _mixins:
+@import '../../../01_css-pulse/v_2.0/_include_2_after_variables';
+
+
+// THE GLOBAL STRUCTURE FOR FRAMEWORK V2:
+@import '../../../01_css-pulse/v_2.0/default_theme_1/_default_theme_1_structure';

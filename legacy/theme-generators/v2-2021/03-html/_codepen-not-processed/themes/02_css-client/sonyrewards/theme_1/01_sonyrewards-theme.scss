@@ -1,0 +1,28 @@
+// PLACEHOLDER CLASS FOR TESTING
+// .sonyrewards-theme-1 {margin: 12px}
+
+
+// THE _selectors FILE:
+@import '../../../01_css-pulse/assets/_selectors';
+
+
+// CLIENT-SPECIFIC DESIGN VARIABLES
+@import '_01-1_sonyrewards_variables';
+
+
+
+// GLOBAL MAPS:
+@import '../../../01_css-pulse/assets/_maps';
+
+
+// HACKY SECOND PART OF VARIABLES THAT TIM WILL FIX
+@import '_01-1_sonyrewards_map_2';
+
+
+
+// GLOBAL MIXINS
+@import '../../../01_css-pulse/assets/_mixins';
+
+
+// THE GLOBAL STRUCTURE FOR FRAMEWORK V2:
+@import '../../../01_css-pulse/v_2.0/default_theme_1/_default_theme_1_structure';

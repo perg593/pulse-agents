@@ -1,0 +1,176 @@
+#_pi_surveyWidgetContainer div#_pi_surveyWidget[survey-widget-type="inlinesurvey"]{
+  // max-width: 740px !important;
+  select{
+    display: none !important;
+  }
+  #topContainer{
+    width: 100%;
+    #sliderContainer{
+      box-shadow: none !important;
+      border-color: transparent !important;
+      overflow: visible !important;
+      width: 84%;
+      margin: 20px auto;
+      margin-bottom: 60px;
+      .noUi-connect{
+        background-color: #cccccc;
+      }
+      .noUi-base{
+        border-radius: 50px !important;
+        background: #cccccc;
+        .noUi-connects{
+          border-radius: 25px;
+          background: #cccccc;
+          opacity: 0;
+          transition: opacity 0.5s;
+          &.interacted{
+            opacity: 1;
+            background: rgb(247,133,28);
+            background: -moz-linear-gradient(90deg, rgba(247,133,28,1) 0%, rgba(255,228,128,1) 100%);
+            background: -webkit-linear-gradient(90deg, rgba(247,133,28,1) 0%, rgba(255,228,128,1) 100%);
+            background: linear-gradient(90deg, rgba(247,133,28,1) 0%, rgba(255,228,128,1) 100%);
+            filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#f7851c",endColorstr="#ffe480",GradientType=1);
+          }
+        }
+        &:before{
+          content: "👎";
+          position: absolute;
+          right: calc(100% + 19px);
+          top: -6px;
+          font-size: 30px;
+          /* transform: translateY(-50%); */
+          z-index: 9;
+          // background-color: white;
+        }
+        &:after{
+          content: "👍";
+          position: absolute;
+          left: calc(100% + 20px);
+          top: -17px;
+          font-size: 30px;
+          /* transform: translateY(-50%); */
+          z-index: 9;
+          // background-color: white;
+        }
+        .ctr-pips-cloned{
+          position: absolute;
+          height: 0px;
+          width: 100%;
+          div.noUi-marker.noUi-marker-horizontal.noUi-marker-large{
+            height: 16px !important;
+            top: -16px;
+            bottom: auto;
+            background: white;
+            &:first-child, &:last-child{
+              display: none;
+            }
+            &:first-child{
+              text-align: right;
+              width: 25%;
+            }
+            &:last-child{
+              text-align: left;
+              width: 25%;
+            }
+          }
+        }
+      }
+      .noUi-pips-horizontal{
+        // top: 25px;
+        height: 100px;
+        .noUi-marker{
+          &.noUi-marker-normal{
+            display: none;
+          }
+          &.noUi-marker-sub{
+            display: none;
+          }
+          &.noUi-marker-large{
+            display: none !important;
+            top: -17px;
+            height: 18px;
+            color: white;
+            z-index: 9;
+            background: white;
+            &:first-child, &:nth-child(9){
+              display: none;
+            }
+          }
+        }
+        .noUi-value{
+          color: #333 !important;
+          font-size: 12px !important;
+          width: 25% !important;
+          white-space: normal !important;
+          padding: 0px 3px;
+          transform: translateX(-50%) !important;
+          top: 30px !important;
+          font-family: "Helvetica Neue",Helvetica,Arial,sans-serif !important;
+          &.active{
+            font-weight: 700;
+          }
+        }
+      }
+
+      .noUi-handle{
+        height: 26px;
+        width: 26px;
+        border-radius: 200px;
+        background-color: white;
+        outline: none !important;
+        right: -13px !important;
+        &:before, &:after{
+          display: none;
+        }
+        #slideBar{
+          display: block;
+          content: "";
+          height: 16px;
+          left: calc(100% - 10px);
+          top: 5px;
+          width: 100%;
+          z-index: -1;
+          position: absolute;
+          background-color: #cccccc;
+          border-radius: 25px;
+        }
+        &:after{
+
+        }
+        .noUi-touch-area{
+
+        }
+      }
+    }
+
+  }
+
+}
+#_pi_surveyWidgetContainer.mobile-enabled div#_pi_surveyWidget[survey-widget-type="inlinesurvey"]{
+  #topContainer #sliderContainer{
+    width: 70% !important;
+    margin-bottom: 70px;
+    .noUi-value.noUi-value-horizontal.noUi-value-large{
+      font-size: 10px !important;
+      width: 33% !important;
+    }
+    .noUi-base{
+      &:before{
+        content: "👎";
+        position: absolute;
+        right: calc(100% + 19px);
+        top: -4px;
+        font-size: 18px;
+        z-index: 9;
+      }
+      &:after{
+        content: "👍";
+        position: absolute;
+        left: calc(100% + 15px);
+        top: -10px;
+        font-size: 18px;
+        z-index: 9;
+      }
+    }
+  }
+}

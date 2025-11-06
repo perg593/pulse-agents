@@ -1,0 +1,758 @@
+<!doctype html>
+<html ⚡4email>
+<head><meta charset="utf-8"><style amp4email-boilerplate>body{visibility:hidden}</style>
+
+   <script async src="https://cdn.ampproject.org/v0.js"></script>
+   <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+   <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
+   <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+   <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+   <script async custom-element="amp-accordion" src="https://cdn.ampproject.org/v0/amp-accordion-0.1.js"></script>
+
+   <style amp-custom>
+      /* INSERT CUSTOM CSS */
+      [id^="question_container_"] {
+         padding: 50px 5%;
+         display: flex;
+         flex-direction: row;
+         flex-wrap: wrap;
+         justify-content: space-between;
+         background-color: #ffffff;
+      }
+      #question_container_14336 br{
+         display: none;
+      }
+      #question_container_14336 ._pi_img_wrapper{
+         /* flex-basis: 120px; */
+         max-width: calc(16% - 26px);
+         margin: 10px;
+         cursor: pointer;
+         border: solid 1px transparent;
+         border-radius: 10px;
+         padding: 3px;
+         display: flex;
+      }
+      #question_container_14336 ._pi_img_wrapper:hover{
+         border-color: #051c2d;
+      }
+      [id^="question_container_"] h1, [id^="question_container_"] h2, [id^="question_container_"] h3, [id^="question_container_"] h4, [id^="question_container_"] h5 {
+         color: #051c2d;
+         width: 100%;
+         font-family: Helvetica, Arial, sans-serif;
+         font-size: 28px;
+         font-weight: bold;
+         text-align: center;
+      }
+      #question_container_14336 > label, #question_container_14336 > input{
+         width: 0;
+         height: 0;
+         overflow: hidden;
+         opacity: 0;
+         margin: 0;
+      }
+      #thank_you_message_container {
+         font-family: Helvetica, Arial, sans-serif;
+         font-size: 28px;
+         color: #051c2d;
+         text-align: center;
+         background-color: #ffffff;
+         padding: 50px 5%;
+      }
+      @media(max-width: 1024px){
+         #question_container_14336 ._pi_img_wrapper{
+            max-width: calc(20% - 26px);
+         }
+      }
+      @media(max-width: 600px){
+         #question_container_14336 ._pi_img_wrapper{
+            max-width: calc(25% - 26px);
+         }
+      }
+      @media(max-width: 480px){
+         #question_container_14336 ._pi_img_wrapper{
+            max-width: calc(50% - 26px);
+         }
+      }
+a:hover {
+text-decoration: none; outline: none;
+}
+a:visited {
+   text-decoration: none; outline: none;
+}
+@media screen and (max-width: 480px) {
+   .st-col {
+      width: 100%;
+   }
+   .st-mobile-full-width {
+      width: 100%;
+   }
+   .st-module-wrapper-table {
+      width: 100%;
+   }
+   .st-wrapper {
+      width: 100%;
+   }
+   .st-wrapper-table {
+      width: 100%;
+   }
+   .st-col {
+      padding: 0;
+   }
+   .st-resize {
+      width: 100%;
+   }
+   .st-mobile-width-constraint {
+      display: block; height: auto;
+   }
+   .st-resize {
+      display: block; height: auto;
+   }
+   .st-mobile-width-constraint {
+      max-width: 100%;
+   }
+   .st-equal-height {
+      height: auto;
+   }
+   .st-height-auto {
+      height: auto;
+   }
+   .st-hide-desktop {
+      display: table-row;
+   }
+   .st-hide-mobile {
+      display: none;
+   }
+   .st-mobile-inline {
+      display: inline;
+   }
+   .show-img-mobile {
+      display: table-row; width: 100%; float: none; overflow: visible; height: auto;
+   }
+   .st-dynamic-12768-2 {
+      background-image: none;
+   }
+   .st-wrapper-table {
+      width: 100%; max-width: 480px; margin: 0 auto;
+   }
+   .minw {
+      width: 10px;
+   }
+   .minw40 {
+      min-width: 40px;
+   }
+   .min46 {
+      min-width: 46px;
+   }
+   .minw-img-89 img {
+      min-width: 89px;
+   }
+   .min-width110 {
+      min-width: 110px;
+   }
+   .reset-padding-sides {
+      padding-left: 0px; padding-right: 0px;
+   }
+   .padding-sides-20 {
+      padding-left: 20px; padding-right: 20px;
+   }
+   .padding-bottom-20 {
+      padding-bottom: 20px;
+   }
+   .padding-bottom-20-only {
+      padding: 0px 0px 20px 0px;
+   }
+   .minw-150 img {
+      min-width: 150px;
+   }
+   .maxw-150 a img {
+      max-width: 150px;
+   }
+}
+@media (max-width:599px) and (min-width:480px) {
+   .st-module-wrapper-table {
+      margin-top: -1px;
+   }
+}
+</style>
+</head>
+<body class="st-email-body st-center-gmail" style="width: 100%; -webkit-text-size-adjust: 100%; margin: 0 auto; padding: 0px;">
+
+   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="st-wrapper-table" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; background-color: #DEDEDE;">
+      <tbody>
+         <tr>
+            <td width="100%" valign="top" align="center" class="st-dynamic-12768-2" style="-webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+               <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center" width="600" class="st-wrapper st-wrapper-background st-module-wrapper-table" style="width: 600px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                  <tbody>
+                     <tr>
+                        <td width="100%" valign="top" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                           <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" class="st-mso-full-width st-mobile-full-width" style="width: 600px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                              <tbody>
+                                 <tr>
+                                    <td width="100%" align="center" valign="top" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                          <tbody>
+                                             <tr>
+                                                <td width="100%" valign="top" align="center" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                   <!-- Native Partner Block --><!-- Native First-Party Block --><!-- Left 300x50 --><!-- Right 300x50 --><!-- 300x250 Banner --><!-- Full-width Marquee Banner --></td>
+                                                </tr>
+                                             </tbody>
+                                          </table>
+                                       </td>
+                                    </tr>
+                                 </tbody>
+                              </table>
+                           </td>
+                        </tr>
+                     </tbody>
+                  </table>
+               </td>
+            </tr>
+            <tr>
+               <td width="100%" valign="top" align="center" class="st-dynamic-12768-2" style="-webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                  <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center" width="600" class="st-wrapper st-wrapper-background st-module-wrapper-table" style="width: 600px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                     <tbody>
+                        <tr>
+                           <td width="100%" valign="top" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                              <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center" width="100%" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                 <tbody>
+                                    <tr>
+                                       <td width="600" valign="top" style="width: 600px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="-webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                             <tbody>
+                                                <tr>
+                                                   <td width="100%" valign="top" align="center" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                      <a href="https://ablink.email.nba.com/ls/click?upn=6vF5Da5WwIOUNoQHdU-2BNTnGzlgWJi9wwygruRqRYNt-2F780Ja8A5k0cjzZdLZlxtOL8V2lufEjqWbRMS3YXgDWrnQeCHkvHwC7F0IvWdUvGMHTBNgpk-2FzCeCCl8EWG-2FgGyLtw_8pC2IyF2z6RX6e6vrzQvqrAd6FF-2BQVFPuXVWzwLVOZlgDI2t15mw1CL44fwKcMApKdx4Vialzi0qZLYjc4UaBnUYPc06rXdlzOODg71nJlFBXrBs305Eo7xOqzvcLLRwoG2GCPy5f9vc20CCKcyEiT76eTVPtILKaOYznJ9trz4isT-2FFuXxvXXyA0XNhGSMTJslAiX6XZkJv-2FX5-2BG6peJyi3TQMev-2BLM9XbuyDkxddn-2B9F4y-2Bg-2FUyVIvkpKovCoeNIYxaNYT5liIeRxH9VGxmbZmb9yHBXbaEmJCiR9l2OBS074T4QT8zJLu7EzgJL1geziI68Brd29wajmi3gGd-2B0odCetyuDFMvkrZ-2B5xt-2FXqf4XK71eLK2o8IzK5zT3zxNvByLFeUg5ELSHbSkn3XsX5on3v8b9kqmUgupJxMXPtut7c9pshzBhJiR4BNKoFioBjxpUPO7lgRv3eGygQEv9CbQEj9XNMW0h-2B8WnNGrPsLvjTioYM0nPKtVmRAA0kvnNqac-2B-2F8imJOZZCVSlkMd2zDSyLbbhVfxzTV3fzF8F99Yz-2B64POih2-2BBvZMVJxDicFlurU4c4TeJ2Q3RoOvIRleuZQAvEUKD2MZELIOIRiU-3D"  target="_blank" style="display: block; text-decoration: none; outline: none;"><amp-img layout="responsive" width="600" height="100" src="https://www.emailimagecdnzcqq.com/v9p3j6b8ka/en_us/images/60301ea9bea11-1613766313.7808.png"  class="st-resize" style="display: block; width: 600px; max-width: 100%; border: 0px;">
+                                                      </a></td>
+                                                   </tr>
+                                                </tbody>
+                                             </table>
+                                          </td>
+                                       </tr>
+                                    </tbody>
+                                 </table>
+                              </td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </td>
+               </tr>
+               <tr>
+                  <td width="100%" valign="top" align="center" class="st-dynamic-12768-2" style="-webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                     <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center" width="600" class="st-wrapper st-wrapper-background st-module-wrapper-table" style="width: 600px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                        <tbody>
+                           <tr>
+                              <td width="100%" valign="top" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                 <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center" width="100%" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                    <tbody>
+                                       <tr>
+                                          <td width="100%" valign="top" align="left" style="padding-top: 9px; padding-bottom: 10px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+
+                                             <table role="presentation" align="left" cellpadding="0" cellspacing="0" border="0" width="300" class="st-mso-full-width st-mobile-full-width" style="width: 300px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                <tbody>
+                                                   <tr>
+                                                      <td width="100%" align="center" height="15.3333" valign="top" class="st-equal-height" style="width: 100%; height: 15.3333px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                            <tbody>
+                                                               <tr>
+                                                                  <td width="100%" valign="top" align="left" style="font-family: Helvetica, Arial, sans-serif; color: #000000; font-size: 11px; font-weight: normal; letter-spacing: normal; line-height: 14px; width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                                     <p style="margin: 0px; padding: 0;" align="center"><strong><span style="font-size: 11px; line-height: 14px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;"><a href="https://ablink.email.nba.com/ls/click?upn=6vF5Da5WwIOUNoQHdU-2BNTkoYA9QUNp7CJqkWuPcmiEP-2F3u6rB6zQrUnNbtMxZN3JsheXVxABtJ-2Bd9XMAnwuYDacKeDiMAYDM9mBDA640IyyNPAg1HirNXfstBAYg9ZdV3UJzHQFGwai9yP-2ByHLRvFJ3y6AjjtCt2ucAnfoCL7Z4-3Dp2b9_8pC2IyF2z6RX6e6vrzQvqrAd6FF-2BQVFPuXVWzwLVOZlgDI2t15mw1CL44fwKcMApKdx4Vialzi0qZLYjc4UaBnUYPc06rXdlzOODg71nJlFBXrBs305Eo7xOqzvcLLRwoG2GCPy5f9vc20CCKcyEiT76eTVPtILKaOYznJ9trz4isT-2FFuXxvXXyA0XNhGSMTJslAiX6XZkJv-2FX5-2BG6peJyi3TQMev-2BLM9XbuyDkxddn-2B9F4y-2Bg-2FUyVIvkpKovCoeNIYxaNYT5liIeRxH9VGxmbZmb9yHBXbaEmJCiR9l2OBS074T4QT8zJLu7EzgJL1geziI68Brd29wajmi3gGd-2B0odCetyuDFMvkrZ-2B5xt-2FXqf4XK71eLK2o8IzK5zT3zxNvByLFeUg5ELSHbSkn3XsX5on3v8b9kqmUgupJxMXPtut7c9pshzBhJiR4BNKoFioBjxpUPO7lgRv3eGygQEv2I2-2BOQ-2BHbWiG0PiYiNUj6UHSV0zATCe6LAkvf0EQzy2P06atPNctyCrJ6LxOsuym4OSkv5YEiwAyjVzebfMN7-2FyNOqApTb-2BT52Wvi1RhErlMIpoYGYKdvR1gCPLYhL4Bp5ZPA-2B26Rg9BBuq0lBJMkI-3D" style="color: #000000; text-decoration: none; outline: none;"><span style="color: #000000; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;"><span style="color: #ffffff; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">NBA
+                                                                        League Pass&nbsp; &nbsp;</span> &nbsp; &nbsp; &nbsp; </span></a></span></strong><span style="color: #ffffff; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;"><a href="https://ablink.email.nba.com/ls/click?upn=6vF5Da5WwIOUNoQHdU-2BNTkoYA9QUNp7CJqkWuPcmiEP-2F3u6rB6zQrUnNbtMxZN3JoRDEe9suWfaDW3y04uwKdrls2Kdl56WdMn0yE0cLY2FcR3po8JdhBodp6xBFs-2Facn26uN9Bsz-2FCHcBOBCs-2FokVOtn-2BrCXZOyF-2Bjntp5Kmic-3Ds7U2_8pC2IyF2z6RX6e6vrzQvqrAd6FF-2BQVFPuXVWzwLVOZlgDI2t15mw1CL44fwKcMApKdx4Vialzi0qZLYjc4UaBnUYPc06rXdlzOODg71nJlFBXrBs305Eo7xOqzvcLLRwoG2GCPy5f9vc20CCKcyEiT76eTVPtILKaOYznJ9trz4isT-2FFuXxvXXyA0XNhGSMTJslAiX6XZkJv-2FX5-2BG6peJyi3TQMev-2BLM9XbuyDkxddn-2B9F4y-2Bg-2FUyVIvkpKovCoeNIYxaNYT5liIeRxH9VGxmbZmb9yHBXbaEmJCiR9l2OBS074T4QT8zJLu7EzgJL1geziI68Brd29wajmi3gGd-2B0odCetyuDFMvkrZ-2B5xt-2FXqf4XK71eLK2o8IzK5zT3zxNvByLFeUg5ELSHbSkn3XsX5on3v8b9kqmUgupJxMXPtut7c9pshzBhJiR4BNKoFioBjxpUPO7lgRv3eGygQEv-2F25d8m6i8oefxPU6JGj7tyAl3-2BrQmgshoV-2BkJTScqZodba0TfxFjie21cGp7naQFp0uJW-2BUtb7zThsG4Gpv9ajGx0REbGfCeaIoBKAtxv08noAtq8PbKvtjLkr7DeyACU-2Ft2zKx2wD5GvHfA8oIwxo-3D" style="color: #ffffff; text-decoration: none; outline: none;"><strong><span style="font-size: 11px; line-height: 14px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">&nbsp;</span></strong><strong><span style="font-size: 11px; line-height: 14px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">NBA
+                                                                           TV </span></strong></a></span><strong><span style="font-size: 11px; line-height: 14px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;"><a href="https://ablink.email.nba.com/ls/click?upn=ilDWURBjDePmXg-2FhzYVQDLVAAe69qnB8ru0ACeZfhTr-2BVdQtkYb68qavZrXpCzx6CDsl_8pC2IyF2z6RX6e6vrzQvqrAd6FF-2BQVFPuXVWzwLVOZlgDI2t15mw1CL44fwKcMApKdx4Vialzi0qZLYjc4UaBnUYPc06rXdlzOODg71nJlFBXrBs305Eo7xOqzvcLLRwoG2GCPy5f9vc20CCKcyEiT76eTVPtILKaOYznJ9trz4isT-2FFuXxvXXyA0XNhGSMTJslAiX6XZkJv-2FX5-2BG6peJyi3TQMev-2BLM9XbuyDkxddn-2B9F4y-2Bg-2FUyVIvkpKovCoeNIYxaNYT5liIeRxH9VGxmbZmb9yHBXbaEmJCiR9l2OBS074T4QT8zJLu7EzgJL1geziI68Brd29wajmi3gGd-2B0odCetyuDFMvkrZ-2B5xt-2FXqf4XK71eLK2o8IzK5zT3zxNvByLFeUg5ELSHbSkn3XsX5on3v8b9kqmUgupJxMXPtut7c9pshzBhJiR4BNKoFioBjxpUPO7lgRv3eGygQEv8EASWL6O5IA-2BHdcVlBt2l-2BE9v7gfB8rPLNac-2FscxAKMzETeC2psAajzzLr1O6PUNkVi11hCNCyvqD5kjkNF231ZNbMT9ZMbLI7-2FQitpWfBle3pGAqDa2TrCnsILU4YWI2d5YBUOn8Y5i3xa7gvsm8Y-3D" style="color: #000000; text-decoration: none; outline: none;"><span style="color: #000000; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;"><span style="color: #ffffff; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">&nbsp;</span></span></a></span></strong><span style="color: #ffffff; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;"><strong><span style="font-size: 11px; line-height: 14px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;"><a href="https://ablink.email.nba.com/ls/click?upn=ilDWURBjDePmXg-2FhzYVQDEKblH4k-2BEz0-2FxIFSui0z8CzsZJs6nOrr4kqNHrCHOuhSKm3_8pC2IyF2z6RX6e6vrzQvqrAd6FF-2BQVFPuXVWzwLVOZlgDI2t15mw1CL44fwKcMApKdx4Vialzi0qZLYjc4UaBnUYPc06rXdlzOODg71nJlFBXrBs305Eo7xOqzvcLLRwoG2GCPy5f9vc20CCKcyEiT76eTVPtILKaOYznJ9trz4isT-2FFuXxvXXyA0XNhGSMTJslAiX6XZkJv-2FX5-2BG6peJyi3TQMev-2BLM9XbuyDkxddn-2B9F4y-2Bg-2FUyVIvkpKovCoeNIYxaNYT5liIeRxH9VGxmbZmb9yHBXbaEmJCiR9l2OBS074T4QT8zJLu7EzgJL1geziI68Brd29wajmi3gGd-2B0odCetyuDFMvkrZ-2B5xt-2FXqf4XK71eLK2o8IzK5zT3zxNvByLFeUg5ELSHbSkn3XsX5on3v8b9kqmUgupJxMXPtut7c9pshzBhJiR4BNKoFioBjxpUPO7lgRv3eGygQEvxtikv74dNzG5jkzE8qFy5hgy8-2B9X98-2BbLub-2FC6HP5unuKfUFSsErpbLbaDAWIUbtF-2B-2F9JbuhSjM63y53kDyK40HA2zKjdr0Pfi3yn-2BDr4EGHqrNSkSKde5B4aNxo4JLCTdwHCxyNOCGFJ7JnvQ0Nr4-3D" style="color: #ffffff; text-decoration: none; outline: none;">&nbsp;
+                                                                              &nbsp; &nbsp; &nbsp; &nbsp;</a></span></strong><strong><span style="font-size: 11px; line-height: 14px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;"><a href="https://ablink.email.nba.com/ls/click?upn=6vF5Da5WwIOUNoQHdU-2BNTueomGo-2Ff4CjNy29-2B8Jxo1g-3Ddcbs_8pC2IyF2z6RX6e6vrzQvqrAd6FF-2BQVFPuXVWzwLVOZlgDI2t15mw1CL44fwKcMApKdx4Vialzi0qZLYjc4UaBnUYPc06rXdlzOODg71nJlFBXrBs305Eo7xOqzvcLLRwoG2GCPy5f9vc20CCKcyEiT76eTVPtILKaOYznJ9trz4isT-2FFuXxvXXyA0XNhGSMTJslAiX6XZkJv-2FX5-2BG6peJyi3TQMev-2BLM9XbuyDkxddn-2B9F4y-2Bg-2FUyVIvkpKovCoeNIYxaNYT5liIeRxH9VGxmbZmb9yHBXbaEmJCiR9l2OBS074T4QT8zJLu7EzgJL1geziI68Brd29wajmi3gGd-2B0odCetyuDFMvkrZ-2B5xt-2FXqf4XK71eLK2o8IzK5zT3zxNvByLFeUg5ELSHbSkn3XsX5on3v8b9kqmUgupJxMXPtut7c9pshzBhJiR4BNKoFioBjxpUPO7lgRv3eGygQEv1PAWTSSRdptvCpq32EBORXGyiMu-2BoijE1YVk9Sl-2FohjAUJyGTwCjyqMl4xCelcDQOvAXkcfMfWLvpSALe7JCAAHW3ZZ6Z8HdjhNhzNPO6NLGMEjazko0H3yVAhQba5sYXi-2FKqRz2SPd8ooy9Nkb4Mc-3D" style="color: #ffffff; text-decoration: none; outline: none;">Merchandise</a></span></strong></span></p>
+                                                                           </td>
+                                                                        </tr>
+                                                                     </tbody>
+                                                                  </table>
+                                                               </td>
+                                                            </tr>
+                                                         </tbody>
+                                                      </table>
+
+                                                   <table role="presentation" align="left" cellpadding="0" cellspacing="0" border="0" width="300" class="st-mso-full-width st-mobile-full-width" style="width: 300px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                      <tbody>
+                                                         <tr>
+                                                            <td width="100%" align="center" height="15.3333" valign="top" class="st-equal-height" style="width: 100%; height: 15.3333px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                                  <tbody>
+                                                                     <tr>
+                                                                        <td width="100%" valign="top" align="left" style="font-family: Helvetica, Arial, sans-serif; color: #000000; font-size: 12px; font-weight: normal; letter-spacing: normal; line-height: 15px; width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                                           <p style="margin: 0px; padding: 0;" align="center"><span style="font-size: 12px; line-height: 15px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;"><strong><span style="color: #ffffff; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;"><a href="https://ablink.email.nba.com/ls/click?upn=6vF5Da5WwIOUNoQHdU-2BNTs-2FT65sZXWyNROkvbkf4VQ0VgPiw1vv4AYUDJDh6HPaGTQ9kK4LKSzKPBagirJQGuj-2FfO3f8VOr59bb2569p3mFJZBWFeszTI1gyKdFq-2BeMaXq2IGvsOSSKvtG-2BZuPQWLg-3D-3D-Vxd_8pC2IyF2z6RX6e6vrzQvqrAd6FF-2BQVFPuXVWzwLVOZlgDI2t15mw1CL44fwKcMApKdx4Vialzi0qZLYjc4UaBnUYPc06rXdlzOODg71nJlFBXrBs305Eo7xOqzvcLLRwoG2GCPy5f9vc20CCKcyEiT76eTVPtILKaOYznJ9trz4isT-2FFuXxvXXyA0XNhGSMTJslAiX6XZkJv-2FX5-2BG6peJyi3TQMev-2BLM9XbuyDkxddn-2B9F4y-2Bg-2FUyVIvkpKovCoeNIYxaNYT5liIeRxH9VGxmbZmb9yHBXbaEmJCiR9l2OBS074T4QT8zJLu7EzgJL1geziI68Brd29wajmi3gGd-2B0odCetyuDFMvkrZ-2B5xt-2FXqf4XK71eLK2o8IzK5zT3zxNvByLFeUg5ELSHbSkn3XsX5on3v8b9kqmUgupJxMXPtut7c9pshzBhJiR4BNKoFioBjxpUPO7lgRv3eGygQEvz93CpInyF1riZG0G3D-2FNDy9-2BQUEjhgCj2MkXkiiLpuLwgA-2BuvExtqSnW-2FdXpGFl9Eax7rb-2BF0D-2BRnK-2B2ZHWw-2B5f3haGauTE2KKmx2FZg6zdWj1oQbAiOnW5okpFj317zkO9PpSEGCDYad0C2I-2FrJi4-3D" style="color: #ffffff; text-decoration: none; outline: none;">Fantasy</a>&nbsp;
+                                                                              &nbsp; &nbsp; &nbsp; &nbsp; <a href="https://ablink.email.nba.com/ls/click?upn=6vF5Da5WwIOUNoQHdU-2BNTo29D76MvpZcVtFAr5NmXMKiYa1nosVXtgrqbpY-2FqUlKsirhZ-2FKSzk0rUwY9D7-2FlFkoFpvtE9TDXjRHiuOLvB9ooCX8015S0vvzv8kpSLumZzZOV_8pC2IyF2z6RX6e6vrzQvqrAd6FF-2BQVFPuXVWzwLVOZlgDI2t15mw1CL44fwKcMApKdx4Vialzi0qZLYjc4UaBnUYPc06rXdlzOODg71nJlFBXrBs305Eo7xOqzvcLLRwoG2GCPy5f9vc20CCKcyEiT76eTVPtILKaOYznJ9trz4isT-2FFuXxvXXyA0XNhGSMTJslAiX6XZkJv-2FX5-2BG6peJyi3TQMev-2BLM9XbuyDkxddn-2B9F4y-2Bg-2FUyVIvkpKovCoeNIYxaNYT5liIeRxH9VGxmbZmb9yHBXbaEmJCiR9l2OBS074T4QT8zJLu7EzgJL1geziI68Brd29wajmi3gGd-2B0odCetyuDFMvkrZ-2B5xt-2FXqf4XK71eLK2o8IzK5zT3zxNvByLFeUg5ELSHbSkn3XsX5on3v8b9kqmUgupJxMXPtut7c9pshzBhJiR4BNKoFioBjxpUPO7lgRv3eGygQEvwLWNJWH0zUOsMIy8Ddo6UrRBofK7qaVn2BhvCi1NckpFnMypSoppXFfhvW3ZEVLBJ5R6rkgeq7X2OkZ8PYNn9vLGeYELMAZihtCha5o18WVlErzDF-2FdE3blzgpstMMJ6q8ezc3J8o-2BfLDtkeGKwFJ0-3D" style="color: #ffffff; text-decoration: none; outline: none;">
+                                                                                 Scores&nbsp;</a><a href="https://ablink.email.nba.com/ls/click?upn=6vF5Da5WwIOUNoQHdU-2BNTqXigCpUWVlfNAqt-2BbkK8jU-3DdSup_8pC2IyF2z6RX6e6vrzQvqrAd6FF-2BQVFPuXVWzwLVOZlgDI2t15mw1CL44fwKcMApKdx4Vialzi0qZLYjc4UaBnUYPc06rXdlzOODg71nJlFBXrBs305Eo7xOqzvcLLRwoG2GCPy5f9vc20CCKcyEiT76eTVPtILKaOYznJ9trz4isT-2FFuXxvXXyA0XNhGSMTJslAiX6XZkJv-2FX5-2BG6peJyi3TQMev-2BLM9XbuyDkxddn-2B9F4y-2Bg-2FUyVIvkpKovCoeNIYxaNYT5liIeRxH9VGxmbZmb9yHBXbaEmJCiR9l2OBS074T4QT8zJLu7EzgJL1geziI68Brd29wajmi3gGd-2B0odCetyuDFMvkrZ-2B5xt-2FXqf4XK71eLK2o8IzK5zT3zxNvByLFeUg5ELSHbSkn3XsX5on3v8b9kqmUgupJxMXPtut7c9pshzBhJiR4BNKoFioBjxpUPO7lgRv3eGygQEvxmPlLlBc6rfF0JMC3pITt7HMlNJKXIGBVP8Ko3DnGaffH9CIC2QFvXJD3m0zq-2FeDYBMXicvN6p1T1ZEN2F5EwRf4zRynqJ5N4tQ5xvFrJ4ab6SlGZPqdKs4UDEdJJGSRhKunaa0YkoatbKZHqrnGLc-3D" style="color: #ffffff; text-decoration: none; outline: none;">&nbsp;&nbsp;
+                                                                                    &nbsp;</a>&nbsp; &nbsp; &nbsp; &nbsp;<a href="https://ablink.email.nba.com/ls/click?upn=6vF5Da5WwIOUNoQHdU-2BNToOp7UMGbMRiRJnKRVJNVJWWmgPdrI4JLXU32IYw-2FkEMToLupAa7x1U-2FEoa6BdjMLXliNPHyrntnKuhdm-2BfII-2FqLu840gud-2FIANYDfUpd-2B20BISy_8pC2IyF2z6RX6e6vrzQvqrAd6FF-2BQVFPuXVWzwLVOZlgDI2t15mw1CL44fwKcMApKdx4Vialzi0qZLYjc4UaBnUYPc06rXdlzOODg71nJlFBXrBs305Eo7xOqzvcLLRwoG2GCPy5f9vc20CCKcyEiT76eTVPtILKaOYznJ9trz4isT-2FFuXxvXXyA0XNhGSMTJslAiX6XZkJv-2FX5-2BG6peJyi3TQMev-2BLM9XbuyDkxddn-2B9F4y-2Bg-2FUyVIvkpKovCoeNIYxaNYT5liIeRxH9VGxmbZmb9yHBXbaEmJCiR9l2OBS074T4QT8zJLu7EzgJL1geziI68Brd29wajmi3gGd-2B0odCetyuDFMvkrZ-2B5xt-2FXqf4XK71eLK2o8IzK5zT3zxNvByLFeUg5ELSHbSkn3XsX5on3v8b9kqmUgupJxMXPtut7c9pshzBhJiR4BNKoFioBjxpUPO7lgRv3eGygQEv3QtvWZ4mWj0Nrct9yohGezFUjcGrrKGMfiZhpIchD7MmR3dMCmL3PRQjoZmAEkSAlU1t4NXOkOpYhrjECbyiPFMCFJy330YPUHngDCY2B-2BJeerscU-2Frj62OCKpZm13Pg0zSsubhPjHaK908xp4uzkQ-3D" style="color: #ffffff; text-decoration: none; outline: none;">&nbsp;Video&nbsp;
+                                                                                       &nbsp;</a> &nbsp; &nbsp; &nbsp; <a href="https://ablink.email.nba.com/ls/click?upn=6vF5Da5WwIOUNoQHdU-2BNTjqaARcop2Sv29Pu-2BD88fo47GTNqtMhH7l5-2F7WxIraMs-2BR-2FPgT0BUpj7L5ynHFLtLpf5O-2Bkbi4FByF-2B5h-2ByxCn5A2ECT4FvfVju1Uj8b3BuR6nAm_8pC2IyF2z6RX6e6vrzQvqrAd6FF-2BQVFPuXVWzwLVOZlgDI2t15mw1CL44fwKcMApKdx4Vialzi0qZLYjc4UaBnUYPc06rXdlzOODg71nJlFBXrBs305Eo7xOqzvcLLRwoG2GCPy5f9vc20CCKcyEiT76eTVPtILKaOYznJ9trz4isT-2FFuXxvXXyA0XNhGSMTJslAiX6XZkJv-2FX5-2BG6peJyi3TQMev-2BLM9XbuyDkxddn-2B9F4y-2Bg-2FUyVIvkpKovCoeNIYxaNYT5liIeRxH9VGxmbZmb9yHBXbaEmJCiR9l2OBS074T4QT8zJLu7EzgJL1geziI68Brd29wajmi3gGd-2B0odCetyuDFMvkrZ-2B5xt-2FXqf4XK71eLK2o8IzK5zT3zxNvByLFeUg5ELSHbSkn3XsX5on3v8b9kqmUgupJxMXPtut7c9pshzBhJiR4BNKoFioBjxpUPO7lgRv3eGygQEv-2Fg4eKHmDN8oSStL1s93Qp3gQggYBCMTlTSnxSps1o6tfrnhrgkTNlHFnnI-2FUx9lLNh4LxWdZOGp75HaWBKtBBbFZMmh0d49SH-2FkyRlkPr3cOEQifpOGvf7aor02BBbdxVgM-2F1jWX6Nq2jsTApf4TIw-3D" style="color: #ffffff; text-decoration: none; outline: none;">
+                                                                                          &nbsp; &nbsp;Stats&nbsp;&nbsp;&nbsp;</a></span></strong></span></p>
+                                                                                       </td>
+                                                                                    </tr>
+                                                                                 </tbody>
+                                                                              </table>
+                                                                           </td>
+                                                                        </tr>
+                                                                     </tbody>
+                                                                  </table>
+                                                                  </td>
+                                                      </tr>
+                                                   </tbody>
+                                                </table>
+                                             </td>
+                                          </tr>
+                                       </tbody>
+                                    </table>
+                                 </td>
+                              </tr>
+                              <tr>
+                                 <td width="100%" valign="top" align="center" class="st-dynamic-12768-2" style="-webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center" width="600" class="st-wrapper st-wrapper-background st-module-wrapper-table" style="width: 600px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                       <tbody>
+                                          <tr>
+                                             <td width="100%" valign="top" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" class="st-mso-full-width st-mobile-full-width" style="width: 600px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                   <tbody>
+                                                      <tr>
+                                                         <td width="100%" align="center" valign="top" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                               <tbody>
+                                                                  <tr>
+                                                                     <td width="100%" valign="top" align="center" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; padding: 0px;">
+                                                                        <p style="mso-line-height-rule: exactly; mso-table-lspace: 0pt; mso-table-rspace: 0pt; text-size-adjust: 100%; width: 100%; height: 5px; max-height: 5px; font-size: 5px; line-height: 5px; margin: 0px; padding: 0;">
+                                                                           &nbsp; </p>
+                                                                        </td>
+                                                                     </tr>
+                                                                  </tbody>
+                                                               </table>
+                                                            </td>
+                                                         </tr>
+                                                      </tbody>
+                                                   </table>
+                                                </td>
+                                             </tr>
+                                          </tbody>
+                                       </table>
+                                    </td>
+                                 </tr>
+                                 <tr>
+                                    <td width="100%" valign="top" align="center" class="st-dynamic-12768-2" style="-webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                       <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center" width="600" class="st-wrapper st-wrapper-background st-module-wrapper-table" style="width: 600px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                          <tbody>
+                                             <tr>
+                                                <td width="100%" valign="top" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" class="st-mso-full-width st-mobile-full-width" style="width: 600px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                      <tbody>
+                                                         <tr>
+                                                            <td width="100%" align="center" valign="top" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                                  <tbody>
+                                                                     <tr>
+                                                                        <td width="100%" valign="top" align="center" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; padding: 0px;">
+                                                                           <p style="mso-line-height-rule: exactly; mso-table-lspace: 0pt; mso-table-rspace: 0pt; text-size-adjust: 100%; width: 100%; height: 5px; max-height: 5px; font-size: 5px; line-height: 5px; margin: 0px; padding: 0;">
+                                                                              &nbsp; </p>
+                                                                           </td>
+                                                                        </tr>
+                                                                     </tbody>
+                                                                  </table>
+                                                               </td>
+                                                            </tr>
+                                                         </tbody>
+                                                      </table>
+                                                   </td>
+                                                </tr>
+                                             </tbody>
+                                          </table>
+                                       </td>
+                                    </tr>
+                                    <tr>
+                                       <td width="100%" valign="top" align="center" class="st-dynamic-12768-2" style="-webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                          <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center" width="600" class="st-wrapper st-wrapper-background st-module-wrapper-table" style="width: 600px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                             <tbody>
+                                                <tr>
+                                                   <td width="100%" valign="top" style="width: 100%; padding-top: 5px; padding-bottom: 5px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                      <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center" width="100%" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                         <tbody>
+                                                            <tr>
+                                                               <td width="100%" valign="top" align="left" style="-webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                                  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" class="st-mso-full-width st-mobile-full-width" style="width: 600px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                                     <tbody>
+                                                                        <tr>
+                                                                           <td width="100%" align="center" valign="top" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                                              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                                                 <tbody>
+                                                                                    <tr>
+                                                                                       <td width="100%" valign="top" align="center" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                                                          <a href="https://ablink.email.nba.com/ls/click?upn=ilDWURBjDePmXg-2FhzYVQDFSijkz6Q-2B7ZvVfR-2Flp2TGcFING652z527QxNJDUjl-2FxMjJyppKNWqeK3jayJYQcwjsCqmkh5gGy-2FKyEME5HczLEHJLXMqguUt-2BzP9PcrKHibmH1VCH-2FhKwuSf8UvTMorfvFOLlsEXUC-2BwisMOGFbmeW7Frd0YAivpTx2ZwXcuYg24YHqXG3KjJEGrIlSI-2BjfvuDOUfu4cxd-2FpQu0tKRHyQ-3Djsb2_8pC2IyF2z6RX6e6vrzQvqrAd6FF-2BQVFPuXVWzwLVOZlgDI2t15mw1CL44fwKcMApKdx4Vialzi0qZLYjc4UaBnUYPc06rXdlzOODg71nJlFBXrBs305Eo7xOqzvcLLRwoG2GCPy5f9vc20CCKcyEiT76eTVPtILKaOYznJ9trz4isT-2FFuXxvXXyA0XNhGSMTJslAiX6XZkJv-2FX5-2BG6peJyi3TQMev-2BLM9XbuyDkxddn-2B9F4y-2Bg-2FUyVIvkpKovCoeNIYxaNYT5liIeRxH9VGxmbZmb9yHBXbaEmJCiR9l2OBS074T4QT8zJLu7EzgJL1geziI68Brd29wajmi3gGd-2B0odCetyuDFMvkrZ-2B5xt-2FXqf4XK71eLK2o8IzK5zT3zxNvByLFeUg5ELSHbSkn3XsX5on3v8b9kqmUgupJxMXPtut7c9pshzBhJiR4BNKoFioBjxpUPO7lgRv3eGygQEv5dOPH-2FWHE-2BYwwmz6UbbqrExnnbzAAGt09UqQh4wYS5g3F92ihx678gnVpHTQwb-2BmML5zqQ-2FbChRMMm7uMRhI2H5-2FiGXPZFwnMICbxXv9gzIO8GPprq3JIDWX34wZKaZA8LatPb9QrjnU12UJJpdpRs-3D" style="display: block; text-decoration: none; outline: none;"><amp-img layout="responsive" width="600" height="100" style="display: block; border: 0;" src="https://mi.the.nba.com/p/rp/ba9f25f06054227b.png?mi_u=&amp;mi_fav_team=Los%20Angeles%20Lakers"></a></td>
+                                                                                       </tr>
+                                                                                    </tbody>
+                                                                                 </table>
+                                                                              </td>
+                                                                           </tr>
+                                                                        </tbody>
+                                                                     </table>
+                                                                  </td>
+                                                               </tr>
+                                                               <tr>
+                                                                  <td width="100%" valign="top" align="left" style="-webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                                     <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="left" width="100%" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                                        <tbody>
+                                                                           <tr>
+                                                                              <td width="300" valign="top" style="width: 300px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                                                 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="-webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                                                    <tbody>
+                                                                                       <tr>
+                                                                                          <td width="100%" valign="top" align="center" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                                                             <a href="https://ablink.email.nba.com/ls/click?upn=ilDWURBjDePmXg-2FhzYVQDFSijkz6Q-2B7ZvVfR-2Flp2TGcFING652z527QxNJDUjl-2FxMjJyppKNWqeK3jayJYQcwjsCqmkh5gGy-2FKyEME5HczLEHJLXMqguUt-2BzP9PcrKHibmH1VCH-2FhKwuSf8UvTMorfvFOLlsEXUC-2BwisMOGFbmerOjgV2K6bEwbjCZDq6QJlPSAp4-2Byx3tFG6kQxQ8wr-2B7x3tbdZN3Cj1jFS4sqlHMI-3DJADR_8pC2IyF2z6RX6e6vrzQvqrAd6FF-2BQVFPuXVWzwLVOZlgDI2t15mw1CL44fwKcMApKdx4Vialzi0qZLYjc4UaBnUYPc06rXdlzOODg71nJlFBXrBs305Eo7xOqzvcLLRwoG2GCPy5f9vc20CCKcyEiT76eTVPtILKaOYznJ9trz4isT-2FFuXxvXXyA0XNhGSMTJslAiX6XZkJv-2FX5-2BG6peJyi3TQMev-2BLM9XbuyDkxddn-2B9F4y-2Bg-2FUyVIvkpKovCoeNIYxaNYT5liIeRxH9VGxmbZmb9yHBXbaEmJCiR9l2OBS074T4QT8zJLu7EzgJL1geziI68Brd29wajmi3gGd-2B0odCetyuDFMvkrZ-2B5xt-2FXqf4XK71eLK2o8IzK5zT3zxNvByLFeUg5ELSHbSkn3XsX5on3v8b9kqmUgupJxMXPtut7c9pshzBhJiR4BNKoFioBjxpUPO7lgRv3eGygQEv9kQLII1rzrjeIuITC177yDKn012FuSwIlLkEslvAQWJwlfBxWQ8u8l01EABWhlXJgbCi31N3uvYiCOJbv3ZnaEOCro2aqnNVv6DXPaqZRIL2-2FR3SGfXq3CQJAT7gVHe0mFwt9YNp3JmXeavdmS7cSE-3D" style="display: block; text-decoration: none; outline: none;"><amp-img layout="responsive" width="300" height="130" style="display: block; border: 0;" src="https://mi.the.nba.com/p/rp/4ffcf1fea26cf3ae.png?mi_u=&amp;mi_fav_team=Los%20Angeles%20Lakers"></a></td>
+                                                                                          </tr>
+                                                                                       </tbody>
+                                                                                    </table>
+                                                                                 </td>
+                                                                                 <td width="300" valign="top" style="width: 300px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                                                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="-webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                                                       <tbody>
+                                                                                          <tr>
+                                                                                             <td width="100%" valign="top" align="center" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                                                                <a href="https://ablink.email.nba.com/ls/click?upn=ilDWURBjDePmXg-2FhzYVQDFSijkz6Q-2B7ZvVfR-2Flp2TGcFING652z527QxNJDUjl-2FxMjJyppKNWqeK3jayJYQcwjsCqmkh5gGy-2FKyEME5HczLEHJLXMqguUt-2BzP9PcrKHibmH1VCH-2FhKwuSf8UvTMorfvFOLlsEXUC-2BwisMOGFbmcO9SDDfYJ2p-2B7prbTFic-2BQLVx54K-2Fgllkn4D8bS0acq-2B8jmcI3ueQFV-2F-2FwZnh5Qo8-3DIc7D_8pC2IyF2z6RX6e6vrzQvqrAd6FF-2BQVFPuXVWzwLVOZlgDI2t15mw1CL44fwKcMApKdx4Vialzi0qZLYjc4UaBnUYPc06rXdlzOODg71nJlFBXrBs305Eo7xOqzvcLLRwoG2GCPy5f9vc20CCKcyEiT76eTVPtILKaOYznJ9trz4isT-2FFuXxvXXyA0XNhGSMTJslAiX6XZkJv-2FX5-2BG6peJyi3TQMev-2BLM9XbuyDkxddn-2B9F4y-2Bg-2FUyVIvkpKovCoeNIYxaNYT5liIeRxH9VGxmbZmb9yHBXbaEmJCiR9l2OBS074T4QT8zJLu7EzgJL1geziI68Brd29wajmi3gGd-2B0odCetyuDFMvkrZ-2B5xt-2FXqf4XK71eLK2o8IzK5zT3zxNvByLFeUg5ELSHbSkn3XsX5on3v8b9kqmUgupJxMXPtut7c9pshzBhJiR4BNKoFioBjxpUPO7lgRv3eGygQEvxNAQnFFDlcvYbp9cUbHtXJJDEt1MqldXuDCQ3CifAtK0RK6a1xt6mAcXlqWDuB-2BKKUgv1o2ZDKHtTfTm5-2F9129EauH-2FNvZVJHkX8ajbE80xNumecD7FtveJTjdgtsoojp69p3tckUA-2FHieccw-2F1WSA-3D" style="display: block; text-decoration: none; outline: none;"><amp-img layout="responsive" width="300" height="130" style="display: block; border: 0;" src="https://mi.the.nba.com/p/rp/14cc6d65fcb1cc5f.png?mi_u=&amp;mi_fav_team=Los%20Angeles%20Lakers"></a></td>
+                                                                                             </tr>
+                                                                                          </tbody>
+                                                                                       </table>
+                                                                                    </td>
+                                                                                 </tr>
+                                                                              </tbody>
+                                                                           </table>
+                                                                        </td>
+                                                                     </tr>
+                                                                     <tr>
+                                                                        <td width="100%" valign="top" align="left" style="-webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                                           <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" class="st-mso-full-width st-mobile-full-width" style="width: 600px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                                              <tbody>
+                                                                                 <tr>
+                                                                                    <td width="100%" align="center" valign="top" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                                                       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                                                          <tbody>
+                                                                                             <tr>
+                                                                                                <td width="100%" valign="top" align="center" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                                                                   <a href="https://ablink.email.nba.com/ls/click?upn=ilDWURBjDePmXg-2FhzYVQDFSijkz6Q-2B7ZvVfR-2Flp2TGcFING652z527QxNJDUjl-2FxMjJyppKNWqeK3jayJYQcwjsCqmkh5gGy-2FKyEME5HczLEHJLXMqguUt-2BzP9PcrKHibmH1VCH-2FhKwuSf8UvTMorfvFOLlsEXUC-2BwisMOGFbmfVF8LpMxXndqdP1R-2FWgfcVWIUmierwUXD8vRF3Sy2B0Ev88ZLPbvtoO3bXfd7gzNM-3DPxdi_8pC2IyF2z6RX6e6vrzQvqrAd6FF-2BQVFPuXVWzwLVOZlgDI2t15mw1CL44fwKcMApKdx4Vialzi0qZLYjc4UaBnUYPc06rXdlzOODg71nJlFBXrBs305Eo7xOqzvcLLRwoG2GCPy5f9vc20CCKcyEiT76eTVPtILKaOYznJ9trz4isT-2FFuXxvXXyA0XNhGSMTJslAiX6XZkJv-2FX5-2BG6peJyi3TQMev-2BLM9XbuyDkxddn-2B9F4y-2Bg-2FUyVIvkpKovCoeNIYxaNYT5liIeRxH9VGxmbZmb9yHBXbaEmJCiR9l2OBS074T4QT8zJLu7EzgJL1geziI68Brd29wajmi3gGd-2B0odCetyuDFMvkrZ-2B5xt-2FXqf4XK71eLK2o8IzK5zT3zxNvByLFeUg5ELSHbSkn3XsX5on3v8b9kqmUgupJxMXPtut7c9pshzBhJiR4BNKoFioBjxpUPO7lgRv3eGygQEv1RLgsjyWCv7lYHTP272ve-2BkUnbt-2FJ0Q5nDYhV4X4g9hD8ulUXIEHB4ed-2BOnCC093gWk8Go8ZwxfYr6Z0YkynFXukuhMgxutuc6ivQGvaxA49XOqQ6nE7l5kfmZUle20vK5F8zFIwV4ylQ-2FE5fJjomM-3D" style="display: block; text-decoration: none; outline: none;"><amp-img layout="responsive" width="600" height="130" style="display: block; border: 0;" src="https://mi.the.nba.com/p/rp/8c51873cb213f401.png?mi_u=&amp;mi_fav_team=Los%20Angeles%20Lakers"></a></td>
+                                                                                                </tr>
+                                                                                             </tbody>
+                                                                                          </table>
+                                                                                       </td>
+                                                                                    </tr>
+                                                                                 </tbody>
+                                                                              </table>
+                                                                           </td>
+                                                                        </tr>
+                                                                     </tbody>
+                                                                  </table>
+                                                               </td>
+                                                            </tr>
+                                                         </tbody>
+                                                      </table>
+                                                   </td>
+                                                </tr>
+                                                <tr>
+                                                   <td width="100%" valign="top" align="center" class="st-dynamic-12768-2" style="-webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                      <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center" width="600" class="st-wrapper st-wrapper-background st-module-wrapper-table" style="width: 600px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                         <tbody>
+                                                            <tr>
+                                                               <td width="100%" valign="top" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                                  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" class="st-mso-full-width st-mobile-full-width" style="width: 600px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                                     <tbody>
+                                                                        <tr>
+                                                                           <td width="100%" align="center" valign="top" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                                              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                                                 <tbody>
+                                                                                    <tr>
+                                                                                       <td width="100%" valign="top" align="center" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; padding: 0px;">
+                                                                                          <p style="mso-line-height-rule: exactly; mso-table-lspace: 0pt; mso-table-rspace: 0pt; text-size-adjust: 100%; width: 100%; height: 5px; max-height: 5px; font-size: 5px; line-height: 5px; margin: 0px; padding: 0;">
+                                                                                             &nbsp; </p>
+                                                                                          </td>
+                                                                                       </tr>
+                                                                                    </tbody>
+                                                                                 </table>
+                                                                              </td>
+                                                                           </tr>
+                                                                        </tbody>
+                                                                     </table>
+                                                                  </td>
+                                                               </tr>
+                                                            </tbody>
+                                                         </table>
+                                                      </td>
+                                                   </tr>
+
+
+
+
+                                                   <tr>
+                                                      <td width="100%" valign="top" align="center" class="st-dynamic-12768-2" style="-webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                         <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center" width="600" class="st-wrapper st-wrapper-background st-module-wrapper-table" style="width: 600px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                            <tbody>
+                                                               <tr>
+                                                               <td>
+                                                               <!-- insert here -->
+                                                               <template type="amp-mustache" id="surveyTemplate">
+                                                                  {{#invitation}}
+                                                                  <div id="invitation_container">
+                                                                     {{#button_present}}
+                                                                     <h2>{{label_text}}</h2>
+                                                                     <button on="tap:invitation_container.hide,question_container_{{first_question_id}}.show">{{button_text}}</button>
+                                                                     {{/button_present}}
+                                                                     {{^button_present}}
+                                                                     <h2 role="button" tabindex="-1" on="tap:invitation_container.hide,question_container_{{first_question_id}}.show">{{label_text}}</h2>
+                                                                     {{/button_present}}
+                                                                  </div>
+                                                                  {{/invitation}}
+
+                                                                  {{^invitation}}
+                                                                  {{#first_question_and_possible_answers}}
+                                                                  <form id="survey_response_form_{{question_id}}" method="get" action-xhr="https://survey.pulseinsights.com/submissions/email_answer">
+                                                                     <input type="hidden" name="identifier" value="PI-19609781">
+                                                                     <input type="hidden" name="submission_udid" value={{submission_udid}}>
+                                                                     <input type="hidden" name="question_id" value={{question_id}}>
+                                                                     <input type="hidden" name="udid" value={{device_udid}}>
+                                                                     <input type="hidden" name="client_key" value="-clientkey-">
+                                                                     <input type="hidden" name="custom_data" value="null">
+
+                                                                     <div id="question_container_{{question_id}}">
+                                                                        <h3>{{content}}</h3>
+
+                                                                        {{#possible_answers}}
+                                                                        {{#image_url}}
+                                                                        {{#next_question_id}}
+                                                                        <div class="_pi_img_wrapper"><amp-img
+                                                                        src={{image_url}}
+                                                                        alt=""
+                                                                        width="120"
+                                                                        height="120"
+                                                                        layout="intrinsic"
+                                                                        role="button"
+                                                                        tabindex="-1"
+                                                                        on="tap:survey_response_form_{{question_id}}.submit,question_container_{{question_id}}.hide,question_container_{{next_question_id}}.show" id="question_{{question_id}}_possible_answer_{{possible_answer_id}}"
+                                                                        >
+                                                                     </amp-img>
+                                                                  </div>
+                                                                     <br>
+                                                                     <br>
+                                                                     {{/next_question_id}}
+                                                                     {{^next_question_id}}
+                                                                     <div class="_pi_img_wrapper"><amp-img
+                                                                     src={{image_url}}
+                                                                     alt=""
+                                                                     width="120"
+                                                                     height="120"
+                                                                     layout="intrinsic"
+                                                                     role="button"
+                                                                     tabindex="-1"
+                                                                     on="tap:survey_response_form_{{question_id}}.submit,question_container_{{question_id}}.hide,thank_you_message_container.show" id="question_{{question_id}}_possible_answer_{{possible_answer_id}}"
+                                                                     >
+                                                                  </amp-img>
+                                                               </div>
+                                                                  <br>
+                                                                  <br>
+                                                                  {{/next_question_id}}
+                                                                  {{/image_url}}
+
+                                                                  {{#is_free_text_question}}
+                                                                  <input type="text" name="text_answer" placeholder={{placeholder}} maxlength={{max_length}}>
+                                                                  {{#next_question_id}}
+                                                                  <button on="tap:survey_response_form_{{question_id}}.submit,question_container_{{question_id}}.hide,question_container_{{next_question_id}}.show">{{question_button_label}}</button>
+                                                                  {{/next_question_id}}
+                                                                  {{^next_question_id}}
+                                                                  <button on="tap:survey_response_form_{{question_id}}.submit,question_container_{{question_id}}.hide,thank_you_message_container.show">{{question_button_label}}</button>
+                                                                  {{/next_question_id}}
+                                                                  {{/is_free_text_question}}
+
+                                                                  {{^is_free_text_question}}
+                                                                  <input type="hidden" name="text_answer" value="">
+                                                                  {{#next_question_id}}
+                                                                  <input type="radio" name="question_{{question_id}}_possible_answer_id" value={{possible_answer_id}} on="change:survey_response_form_{{question_id}}.submit,question_container_{{question_id}}.hide,question_container_{{next_question_id}}.show" id="question_{{question_id}}_possible_answer_{{possible_answer_id}}" >
+                                                                  {{/next_question_id}}
+                                                                  {{^next_question_id}}
+                                                                  <input type="radio" name="question_{{question_id}}_possible_answer_id" value={{possible_answer_id}} on="change:survey_response_form_{{question_id}}.submit,question_container_{{question_id}}.hide,thank_you_message_container.show" id="question_{{question_id}}_possible_answer_{{possible_answer_id}}" >
+                                                                  {{/next_question_id}}
+                                                                  <label for="question_{{question_id}}_possible_answer_{{possible_answer_id}}">{{content}}</label>
+                                                                  {{/is_free_text_question}}
+                                                                  {{/possible_answers}}
+                                                               </div>
+                                                            </form>
+                                                            {{/first_question_and_possible_answers}}
+                                                            {{/invitation}}
+
+                                                            {{#questions_and_possible_answers}}
+                                                            <form id="survey_response_form_{{question_id}}" method="get" action-xhr="https://survey.pulseinsights.com/submissions/email_answer">
+                                                               <input type="hidden" name="identifier" value="PI-19609781">
+                                                               <input type="hidden" name="submission_udid" value={{submission_udid}}>
+                                                               <input type="hidden" name="question_id" value={{question_id}}>
+                                                               <input type="hidden" name="udid" value={{device_udid}}>
+                                                               <input type="hidden" name="client_key" value="32109832098ojsdl">
+                                                               <input type="hidden" name="custom_data" value="null">
+
+                                                               <div id="question_container_{{question_id}}" hidden>
+                                                                  <h3>{{content}}</h3>
+
+                                                                  {{#possible_answers}}
+                                                                  {{#image_url}}
+                                                                  {{#next_question_id}}
+                                                                  <div class="_pi_img_wrapper"><amp-img
+                                                                  src={{image_url}}
+                                                                  alt=""
+                                                                  width="120"
+                                                                  height="120"
+                                                                  layout="intrinsic"
+                                                                  role="button"
+                                                                  tabindex="-1"
+                                                                  on="tap:survey_response_form_{{question_id}}.submit,question_container_{{question_id}}.hide,question_container_{{next_question_id}}.show" id="question_{{question_id}}_possible_answer_{{possible_answer_id}}"
+                                                                  >
+                                                               </amp-img>
+                                                            </div>
+                                                               <br>
+                                                               <br>
+                                                               {{/next_question_id}}
+                                                               {{^next_question_id}}
+                                                               <div class="_pi_img_wrapper"><amp-img
+                                                               src={{image_url}}
+                                                               alt=""
+                                                               width="120"
+                                                               height="120"
+                                                               layout="intrinsic"
+                                                               role="button"
+                                                               tabindex="-1"
+                                                               on="tap:survey_response_form_{{question_id}}.submit,question_container_{{question_id}}.hide,thank_you_message_container.show" id="question_{{question_id}}_possible_answer_{{possible_answer_id}}"
+                                                               >
+                                                            </amp-img>
+                                                            </div>
+                                                            <br>
+                                                            <br>
+                                                            {{/next_question_id}}
+                                                            {{/image_url}}
+
+                                                            {{#is_free_text_question}}
+                                                            <input type="text" name="text_answer" placeholder={{hint_text}} maxlength={{max_length}}>
+                                                            {{#next_question_id}}
+                                                            <button on="tap:survey_response_form_{{question_id}}.submit,question_container_{{question_id}}.hide,question_container_{{next_question_id}}.show">{{question_button_label}}</button>
+                                                            {{/next_question_id}}
+                                                            {{^next_question_id}}
+                                                            <button on="tap:survey_response_form_{{question_id}}.submit,question_container_{{question_id}}.hide,thank_you_message_container.show">{{question_button_label}}</button>
+                                                            {{/next_question_id}}
+                                                            {{/is_free_text_question}}
+
+                                                            {{^is_free_text_question}}
+                                                            <input type="hidden" name="text_answer" value="">
+                                                            {{#next_question_id}}
+                                                            <input type="radio" name="question_{{question_id}}_possible_answer_id" value={{possible_answer_id}} on="change:survey_response_form_{{question_id}}.submit,question_container_{{question_id}}.hide,question_container_{{next_question_id}}.show" id="question_{{question_id}}_possible_answer_{{possible_answer_id}}" >
+                                                            {{/next_question_id}}
+                                                            {{^next_question_id}}
+                                                            <input type="radio" name="question_{{question_id}}_possible_answer_id" value={{possible_answer_id}} on="change:survey_response_form_{{question_id}}.submit,question_container_{{question_id}}.hide,thank_you_message_container.show" id="question_{{question_id}}_possible_answer_{{possible_answer_id}}" >
+                                                            {{/next_question_id}}
+                                                            <label for="question_{{question_id}}_possible_answer_{{possible_answer_id}}">{{content}}</label>
+                                                            {{/is_free_text_question}}
+                                                            {{/possible_answers}}
+                                                            </div>
+                                                            </form>
+                                                            {{/questions_and_possible_answers}}
+
+                                                            {{#thank_you_message}}
+                                                            <div id="thank_you_message_container" hidden>
+                                                               <h2>{{thank_you_message}}</h2>
+                                                            </div>
+                                                            {{/thank_you_message}}
+                                                            </template>
+                                                            <amp-list src="https://survey.pulseinsights.com/serve?device_type=email&identifier=PI-19609781&client_key=-clientkey-&device_data=null"
+                                                            width="2"
+                                                            height="3"
+                                                            layout="responsive"
+                                                            items="survey"
+                                                            single-item="survey"
+                                                            template="surveyTemplate">
+                                                            <div fallback>
+                                                               <h2 style="opacity: 0;">Survey failure fallback</h2>
+                                                            </div>
+                                                            </amp-list>
+                                                            </td>
+                                                            </tr>
+                                                            </tbody>
+                                                         </table>
+                                                      </td>
+                                                   </tr>
+                                                   <tr>
+                                                      <td width="100%" valign="top" align="center" class="st-dynamic-12768-2" style="-webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                         <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center" width="600" class="st-wrapper st-wrapper-background st-module-wrapper-table" style="width: 600px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                            <tbody>
+                                                               <tr>
+                                                                  <td width="100%" valign="top" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; padding: 10px; background-color: rgb(13, 19, 60);">
+                                                                     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="580" class="st-mso-full-width st-mobile-full-width" style="width: 580px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                                        <tbody>
+                                                                           <tr>
+                                                                              <td width="100%" align="center" valign="top" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                                                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                                                    <tbody>
+                                                                                       <tr>
+                                                                                          <td width="100%" valign="top" align="left" style="font-family: Helvetica, Arial, sans-serif; color: #000000; font-size: 12px; font-weight: normal; letter-spacing: normal; line-height: 15px; width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                                                             <p style="margin: 0px; padding: 0;" align="center"><span style="font-size: 12px; line-height: 15px; color: #ffffff; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">You are receiving this email because you are subscribed to receive
+                                                                                                NBA emails. This email was sent to: <a style="color: #ffffff; text-decoration: none; outline: none;" href="mailto:NBA.team@listerdigital.com">
+                                                                                                </a></span></p>
+                                                                                                <p style="margin: 0px; padding: 0;" align="center">‌<br>
+                                                                                                </p>
+                                                                                                <p style="margin: 0px; padding: 0;" align="center"><span style="font-size: 12px; line-height: 15px; color: #ffffff; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;"><a style="color: #ffffff; text-decoration: none; outline: none;" href="https://ablink.email.nba.com/ls/click?upn=6vF5Da5WwIOUNoQHdU-2BNTn1F3S2SpeTBoFtyOOOtgFHKfOBQ-2BUeGbaeMnsR5IL7FF3tCQY86VvePxI4QPuvNccGBNMdPKc6ym2Ux11-2F2x1-2BJNbqcSA43HaHwycjxTkhb4-2BdSBN-2BzVyXG0aSLLciEB6-2BtyqvQOlIw8EyiyKzfKeGrQ9cOr9DanLemlyxc0UNXVKOb0dXfDbGmuZaRbJlDbnRpYXdB8BekfEMI0sWnm0WghCIVTqEr04aTKBseHCt8pcgfaOpaH1PF5Jh-2F18O1SOrS8gu40rAYk2cvVwa-2FhtWkgLPcL2Z-2FbZSTarprK4OEQgHcrv9fzVerqIZ-2F6Zdxdoodq2JC6nVdrU4ntLAALHhQ0c3AHPMNv8w-2F6s4eTE797WkcANaYQWO36jp9jAlI0-2FoPQkAxwc1-2BYE3gyZgpUTcuthTOyjvQHr6UtZcfqEhDEFBsVYL8QkRlNg4bWGJm0Qgu13YlzOhQ0NbYpTN4nY1SVyQ1nVr6mLnpXDC8T3cQ-2FMIzV1jAHwjR5nfc-2BcYRg48mjS9r47KcsiXwsUyQJf6X3b8vd-2F3KhzIZRRs0cnITnhFI_8pC2IyF2z6RX6e6vrzQvqrAd6FF-2BQVFPuXVWzwLVOZlgDI2t15mw1CL44fwKcMApKdx4Vialzi0qZLYjc4UaBnUYPc06rXdlzOODg71nJlFBXrBs305Eo7xOqzvcLLRwoG2GCPy5f9vc20CCKcyEiT76eTVPtILKaOYznJ9trz4isT-2FFuXxvXXyA0XNhGSMTJslAiX6XZkJv-2FX5-2BG6peJyi3TQMev-2BLM9XbuyDkxddn-2B9F4y-2Bg-2FUyVIvkpKovCoeNIYxaNYT5liIeRxH9VGxmbZmb9yHBXbaEmJCiR9l2OBS074T4QT8zJLu7EzgJL1geziI68Brd29wajmi3gGd-2B0odCetyuDFMvkrZ-2B5xt-2FXqf4XK71eLK2o8IzK5zT3zxNvByLFeUg5ELSHbSkn3XsX5on3v8b9kqmUgupJxMXPtut7c9pshzBhJiR4BNKoFioBjxpUPO7lgRv3eGygQEv8qgTGxry5SJu3-2BKp88lXMnSZiiL9CuUP2oSIDQeCjWJvQRL9kobLWdoGgnPMuRbWGcADoDr03kYQiulkGA9ZljQ4BA7VUfWGmp7RVum0fdC9EKV-2FGPYjZMBsBS88gYM9q-2FlK81BAMzvFJifKBkBj-2B0-3D"><span style="text-decoration: underline; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;"><span style="color: #ffffff; text-decoration: underline; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">Click
+                                                                                                </span></span><span style="color: #3366ff; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;"><span style="text-decoration: underline; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;"><span style="color: #ffffff; text-decoration: underline; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">here</span></span></span></a>
+                                                                                                to unsubscribe from these communications.</span></p>
+                                                                                                <p style="margin: 0px; padding: 0;" align="center">‌<br>
+                                                                                                </p>
+                                                                                                <p style="margin: 0px; padding: 0;" align="center"><span style="font-size: 12px; line-height: 15px; color: #ffffff; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">National Basketball Association</span></p>
+                                                                                                <p style="margin: 0px; padding: 0;" align="center"><span style="font-size: 12px; line-height: 15px; color: #ffffff; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">645 Fifth Avenue , New York, NY 10022</span></p>
+                                                                                                <p style="margin: 0px; padding: 0;" align="center">‌<br>
+                                                                                                </p>
+                                                                                                <p style="margin: 0px; padding: 0;" align="center"><span style="font-size: 12px; line-height: 15px; color: #ffffff; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">The NBA identifications are the intellectual property of NBA Properties,
+                                                                                                   Inc. and the respective NBA member teams.</span></p>
+                                                                                                   <p style="margin: 0px; padding: 0;" align="center"><span style="font-size: 12px; line-height: 15px; color: #ffffff; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">© 2021 NBA Properties, Inc. All Rights Reserved.</span></p>
+                                                                                                   <p style="margin: 0px; padding: 0;" align="center">‌<br>
+                                                                                                   </p>
+                                                                                                   <p style="margin: 0px; padding: 0;" align="center"><span style="font-size: 12px; line-height: 15px; color: #ffffff; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;"><a style="color: #ffffff; text-decoration: none; outline: none;" href="https://ablink.email.nba.com/ls/click?upn=6vF5Da5WwIOUNoQHdU-2BNTuQAcouCWrEaW6Unsor9PFA-3Dyoxy_8pC2IyF2z6RX6e6vrzQvqrAd6FF-2BQVFPuXVWzwLVOZlgDI2t15mw1CL44fwKcMApKdx4Vialzi0qZLYjc4UaBnUYPc06rXdlzOODg71nJlFBXrBs305Eo7xOqzvcLLRwoG2GCPy5f9vc20CCKcyEiT76eTVPtILKaOYznJ9trz4isT-2FFuXxvXXyA0XNhGSMTJslAiX6XZkJv-2FX5-2BG6peJyi3TQMev-2BLM9XbuyDkxddn-2B9F4y-2Bg-2FUyVIvkpKovCoeNIYxaNYT5liIeRxH9VGxmbZmb9yHBXbaEmJCiR9l2OBS074T4QT8zJLu7EzgJL1geziI68Brd29wajmi3gGd-2B0odCetyuDFMvkrZ-2B5xt-2FXqf4XK71eLK2o8IzK5zT3zxNvByLFeUg5ELSHbSkn3XsX5on3v8b9kqmUgupJxMXPtut7c9pshzBhJiR4BNKoFioBjxpUPO7lgRv3eGygQEv-2BGPzqdMcYZbBxCqV1sMzMfBdf5zAI2sDCzTz7jY0DWXtoY2Yb8HH4IGZtfaS7e0rBSOpyX-2F-2FC7O7omzoLLcoFn7Q4Un60mYgzOEX8O45Fi9CatoDsviFsVtcMw8wOFWFW8NKz0p4GPoMFv3OwLcHp4-3D">NBA.com</a>
+                                                                                                      | <a style="color: #ffffff; text-decoration: none; outline: none;" href="https://ablink.email.nba.com/ls/click?upn=ilDWURBjDePmXg-2FhzYVQDHFf-2BU7sedJVCqVrTdKOQ-2Bh3taAryaqs18GqjQVqa3J9cfrqIcf0I0lotSvnpWGSag-3D-3DFzxX_8pC2IyF2z6RX6e6vrzQvqrAd6FF-2BQVFPuXVWzwLVOZlgDI2t15mw1CL44fwKcMApKdx4Vialzi0qZLYjc4UaBnUYPc06rXdlzOODg71nJlFBXrBs305Eo7xOqzvcLLRwoG2GCPy5f9vc20CCKcyEiT76eTVPtILKaOYznJ9trz4isT-2FFuXxvXXyA0XNhGSMTJslAiX6XZkJv-2FX5-2BG6peJyi3TQMev-2BLM9XbuyDkxddn-2B9F4y-2Bg-2FUyVIvkpKovCoeNIYxaNYT5liIeRxH9VGxmbZmb9yHBXbaEmJCiR9l2OBS074T4QT8zJLu7EzgJL1geziI68Brd29wajmi3gGd-2B0odCetyuDFMvkrZ-2B5xt-2FXqf4XK71eLK2o8IzK5zT3zxNvByLFeUg5ELSHbSkn3XsX5on3v8b9kqmUgupJxMXPtut7c9pshzBhJiR4BNKoFioBjxpUPO7lgRv3eGygQEvwCIqk3ZjS6f8UExEDNSZtUreMZdg6X6S7xVAbrVGo3ab372rlYivU2ya9Dzu5lmVViWJSB9qTjXmKqDHZAXtBaV-2Bfmh3o3mSi4BR8MZTYv-2FCnCoWuenYr9cM1aHn3VS3zkUepO0l833-2FcU6ibYn7AM-3D">
+                                                                                                         Privacy Policy</a></span></p>
+                                                                                                      </td>
+                                                                                                   </tr>
+                                                                                                </tbody>
+                                                                                             </table>
+                                                                                          </td>
+                                                                                       </tr>
+                                                                                    </tbody>
+                                                                                 </table>
+                                                                              </td>
+                                                                           </tr>
+                                                                        </tbody>
+                                                                     </table>
+                                                                  </td>
+                                                               </tr>
+                                                               <tr>
+                                                                  <td width="100%" valign="top" align="center" class="st-dynamic-12768-2" style="-webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                                     <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center" width="600" class="st-wrapper st-wrapper-background st-module-wrapper-table" style="width: 600px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                                        <tbody>
+                                                                           <tr>
+                                                                              <td width="100%" valign="top" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                                                 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" class="st-mso-full-width st-mobile-full-width" style="width: 600px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                                                    <tbody>
+                                                                                       <tr>
+                                                                                          <td width="100%" align="center" valign="top" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                                                             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+                                                                                                <tbody>
+                                                                                                   <tr>
+                                                                                                      <td width="100%" valign="top" align="center" style="width: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; padding: 0px;">
+                                                                                                         <p style="mso-line-height-rule: exactly; mso-table-lspace: 0pt; mso-table-rspace: 0pt; text-size-adjust: 100%; width: 100%; height: 5px; max-height: 5px; font-size: 5px; line-height: 5px; margin: 0px; padding: 0;">
+                                                                                                            &nbsp; </p>
+                                                                                                         </td>
+                                                                                                      </tr>
+                                                                                                   </tbody>
+                                                                                                </table>
+                                                                                             </td>
+                                                                                          </tr>
+                                                                                       </tbody>
+                                                                                    </table>
+                                                                                 </td>
+                                                                              </tr>
+                                                                           </tbody>
+                                                                        </table>
+                                                                     </td>
+                                                                  </tr>
+
+                                                               </tbody>
+                                                            </table>
+                                                         </body>
+                                                         </html>

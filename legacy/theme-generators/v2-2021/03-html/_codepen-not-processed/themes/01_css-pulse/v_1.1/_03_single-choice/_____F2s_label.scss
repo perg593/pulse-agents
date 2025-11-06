@@ -1,0 +1,53 @@
+			// ================== F2a. <label> TAG | RADIO BUTTON OFF ====================================
+			// ---- Desktop
+			div[data-question-type="single_choice_question"][data-radio-button="off"] li a label {
+				padding: 12px 25px !important;
+			}
+
+			// ---- Tablet
+			@media (min-width:415px) and (max-width:768px) {
+				div[data-question-type="single_choice_question"][data-radio-button="off"] li a label {
+					padding: 10px 20px !important;
+				}
+			}
+
+			// ---- Mobile
+			#_pi_surveyWidgetContainer.mobile-enabled div[data-question-type="single_choice_question"][data-radio-button="off"] li a label {
+				font-size: 15px;
+				padding: 8px 10px !important;
+			}
+
+
+
+
+
+
+			// ================== F2b. <label> TAG | RADIO BUTTON ON ====================================
+			// ---- Desktop
+			div[data-question-type="single_choice_question"][data-radio-button="on"] li a label {
+				padding: 12px 10px !important;
+			}
+
+			// ---- Tablet
+			@media (min-width:415px) and (max-width:768px) {
+				div[data-question-type="single_choice_question"][data-radio-button="on"] li a label {
+					padding: 10px 10px !important;
+				}
+			}
+
+			// ---- Mobile
+			#_pi_surveyWidgetContainer.mobile-enabled div[data-question-type="single_choice_question"][data-radio-button="on"] li a label {
+				padding: 8px 8px !important;
+			}
+
+
+
+
+// FLEX
+			ul._pi_answers_container li a label {
+				padding: 		8px 15px; 			/* Match it to multi-choice label right padding ONLY */
+				margin: 			0 !important;
+				
+				min-width: 		100%;
+				width: 			auto !important;
+			}

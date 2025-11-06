@@ -1,0 +1,31 @@
+ul._pi_answers_container {
+	// width: initial !important;
+	// margin: initial !important;
+	// padding: initial !important;
+	// list-style: initial !important;
+	// overflow: initial !important;
+
+	margin: 					0 !important;
+	padding: 				0 !important;
+	list-style: 			none !important;
+
+	display: 				flex !important;
+	flex-direction: 		row !important;
+	flex-wrap: 				wrap !important;
+	// justify-content: 	flex-start;	 DEPENDS ON FIXED VS. VARIABLE WIDTHS
+	align-items: 			stretch !important;
+	align-content: 		stretch !important;
+}
+
+
+
+
+#_pi_surveyWidget[survey-widget-type="inlinesurvey"] ul._pi_answers_container {
+	min-width: 		320px !important;
+}	
+
+
+
+#_pi_surveyWidget[survey-widget-type="inlinesurvey"] ul._pi_answers_container {
+	min-width: 320px !important;
+}

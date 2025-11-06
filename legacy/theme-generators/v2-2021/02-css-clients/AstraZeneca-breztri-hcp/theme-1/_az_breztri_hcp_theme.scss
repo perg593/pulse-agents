@@ -1,0 +1,72 @@
+// THE _selectors FILE:
+@import '../../01-css-pulse/_selectors';
+
+// DEFAULT VARIABLES
+@import '../_default/_default-1-variables';
+
+// CLIENT-SPECIFIC DESIGN VARIABLES
+@import './_az_breztri_hcp_variables';
+
+// GLOBAL MAPS:
+@import '../../01-css-pulse/_maps';
+
+// GLOBAL MIXINS
+@import '../../01-css-pulse/_mixins';
+
+// THE GLOBAL STRUCTURE FOR FRAMEWORK V2:
+@import '../../01-css-pulse/_theme-structure';
+div#_pi_surveyWidgetContainer{
+  div#_pi_surveyWidget{
+    div._pi_widgetContentContainer{
+      ._pi_question_custom_content_question{
+        a{
+          color: #80CEC8 !important;
+        }
+        a:hover{
+          color: #fdb714 !important;
+        }
+      }
+      ._pi_answers_container{
+        li{
+          outline: none !important;
+          *{
+            outline: none !important;
+          }
+          label{
+            font-family: AvenirBlack, sans-serif;
+          }
+          &:hover{
+            label{
+              font-family: AvenirBlack, sans-serif !important;
+            }
+          }
+        }
+        &[data-question-nps="t"]{
+             li{
+               label{
+                 padding: 10px !important;
+               }
+             }
+           }
+         ._pi_question_custom_content_question{
+           a:hover{
+             color: #fdb714 !important;
+           }
+         }
+      }
+    }
+  }
+}
+div#_pi_surveyWidgetContainer ul[data-radio-button="on"] li{
+  a span._pi_radio_button_outer{
+    min-width: 14px !important;
+    min-height: 14px !important;
+    > span{
+      left: 1px !important;
+      top: 1px !important;
+    }
+  }
+}
+div#_pi_surveyWidget[data-question-type="custom_content_question"] ._pi_question_custom_content_question *:first-child{
+  margin: auto !important;
+}

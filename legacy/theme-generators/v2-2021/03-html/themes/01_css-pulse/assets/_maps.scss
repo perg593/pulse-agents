@@ -1,0 +1,661 @@
+// .map-global {margin:60px}
+
+// ------------ BACKGROUND COLORS MAP ------------------------------------
+$background-colors: (
+	widget-container: 						$bg-color-widget-container,
+	widget-default: 							$bg-color-widget-default,
+	widget-custom:								$bg-color-widget-custom,
+	widget-inline: 							$bg-color-widget-inline,
+	widget-bottombar: 						$bg-color-widget-bottombar,
+	widget-docked: 							$bg-color-widget-docked,
+	widget-topbar: 							$bg-color-widget-topbar,
+	widget-fullscreen: 						$bg-color-widget-fullscreen,
+	
+	close-default:								$bg-color-close-default,
+	close-custom:								$bg-color-close-custom,
+	close-inline: 								$bg-color-close-inline,
+	close-bottombar: 							$bg-color-close-bottombar,
+	close-docked: 								$bg-color-close-docked,
+	close-topbar: 								$bg-color-close-topbar,
+	close-fullscreen: 						$bg-color-close-fullscreen,
+	
+	close-default-hover:						$bg-color-close-default-hover,
+	close-custom-hover:						$bg-color-close-custom-hover,
+	close-inline-hover: 						$bg-color-close-inline-hover,
+	close-bottombar-hover: 					$bg-color-close-bottombar-hover,
+	close-docked-hover: 						$bg-color-close-docked-hover,
+	close-topbar-hover: 						$bg-color-close-topbar-hover,
+	close-fullscreen-hover: 				$bg-color-close-fullscreen-hover,	
+	
+	content-container-default:				$bg-color-content-container-default,
+	content-container-single:				$bg-color-content-container-single,
+	content-container-multi:				$bg-color-content-container-multi,
+	content-container-free:					$bg-color-content-container-free,
+	content-container-custom:				$bg-color-content-container-custom,
+	content-container-custom-full:		$bg-color-content-container-custom-full,
+
+	content-container-default-mobi:		$bg-color-content-container-default-mobi,
+	content-container-single-mobi:		$bg-color-content-container-single-mobi,
+	content-container-multi-mobi:			$bg-color-content-container-multi-mobi,
+	content-container-free-mobi:			$bg-color-content-container-free-mobi,
+	content-container-custom-mobi:		$bg-color-content-container-custom-mobi,
+	content-container-custom-full-mobi:	$bg-color-content-container-custom-full-mobi,
+	
+	question-single:							$bg-color-question-single,
+	question-multi:							$bg-color-question-multi,
+	question-free:								$bg-color-question-free,
+	question-custom:							$bg-color-question-custom,
+	question-custom-full:					$bg-color-question-custom-full,
+
+	question-single-mobi:					$bg-color-question-single-mobi,
+	question-multi-mobi:						$bg-color-question-multi-mobi,
+	question-free-mobi:						$bg-color-question-free-mobi,
+	question-custom-mobi:					$bg-color-question-custom-mobi,
+	question-custom-full-mobi:				$bg-color-question-custom-full-mobi,	
+		
+	answers-container: 						$bg-color-answers-container,
+	answers-container-single: 				$bg-color-answers-container,
+	answers-container-multi: 				$bg-color-answers-container,
+	answers-container-free: 				$bg-color-answers-container,
+	answers-container-custom: 				$bg-color-answers-container,
+	answers-container-custom-full: 		$bg-color-answers-container,
+
+	single-choice-answer-all:				$bg-color-single-choice-answer-all,
+	single-choice-answer-all-hover:		$bg-color-single-choice-answer-all-hover,
+	multi-choice-answer-all:				$bg-color-multi-choice-answer-all,
+	multi-choice-answer-all-hover:		$bg-color-multi-choice-answer-all-hover,
+
+	radio-button-outer:						$bg-color-radio-button-outer,
+	radio-button-outer-hover:				$bg-color-radio-button-outer-hover,
+	radio-button-inner-hover:				$bg-color-radio-button-inner-hover,
+	
+	multi-checkbox-outer:					$bg-color-multi-checkbox-outer,
+	multi-checkbox-outer-hover:			$bg-color-multi-checkbox-outer-hover,
+	
+	free-text-question-field-container: $bg-color-free-text-question-field-container,
+	
+	thank-you:									$bg-color-thank-you,
+	invitation:									$bg-color-invitation,
+
+	submit-button:								$bg-color-submit-button,
+	submit-button-hover: 					$bg-color-submit-button-hover,
+
+	branding:									$bg-color-branding,
+	branding-custom:							$bg-color-branding-custom,
+);
+
+
+$box-shadows: (
+	widget-inline: 							$shadow-inline,
+	widget-bottombar: 						$shadow-bottombar,
+	widget-docked: 							$shadow-docked,
+	widget-topbar: 							$shadow-topbar,
+	widget-fullscreen: 						$shadow-fullscreen,
+	
+	// pending custon fullscreen content container
+);
+
+
+$z-indexes: (
+	// widget-container:								$z-index-global,
+	widget-default:								$z-index-widget-default,
+	widget-inline:									$z-index-widget-inline,
+	widget-bottombar:								$z-index-widget-bottombar,
+	widget-docked:									$z-index-widget-docked,
+	widget-topbar:									$z-index-widget-topbar,
+	widget-fullscreen:							$z-index-widget-fullscreen,
+	content-container-custom-full:			$z-index-content-container-custom-full,
+);
+
+
+$opacities: (
+	widget-custom:									$opacity-widget-custom,
+);
+
+
+// ------------------------ MAPS - FONTS ------------------------------------------------
+$font-families: (
+	close-default:					$close-family,
+	close-custom:					$close-family,
+	close-inline:					$close-family,
+	close-bottombar:				$close-family,
+	close-docked:					$close-family,
+	close-topbar:					$close-family,
+	close-fullscreen:				$close-family,
+	
+	question-single:				$font-lg-family,
+	question-multi:				$font-lg-family,
+	question-free:					$font-lg-family,
+	question-custom:				$font-lg-family,
+	question-custom-full:		$font-lg-family,
+
+	medium-font:					$font-md-family,
+	small-font:						$font-sm-family,
+	
+	thank-you:						$font-lg-family,
+	invitation:						$font-lg-family,
+
+	submit-button:					$font-button-family,
+);
+
+$font-colors: (
+	close-default:					$close-color,
+	close-custom:					$close-color,
+	close-inline:					$close-color,
+	close-bottombar:				$close-color,
+	close-docked:					$close-color,
+	close-topbar:					$close-color,
+	close-fullscreen:				$close-color,
+
+	close-default-hover:			$close-color-hover,
+	close-custom-hover:			$close-color-hover,
+	close-inline-hover:			$close-color-hover,
+	close-bottombar-hover:		$close-color-hover,
+	close-docked-hover:			$close-color-hover,
+	close-topbar-hover:			$close-color-hover,
+	close-fullscreen-hover:		$close-color-hover,
+	
+	question-single:				$font-lg-color,
+	question-multi:				$font-lg-color,
+	question-free:					$font-lg-color,
+	question-custom:				$font-lg-color,
+	question-custom-full:		$font-lg-color,
+	
+	medium-font:					$font-md-color,
+	medium-font-hover:			$font-md-color-hover,
+	small-font:						$font-sm-color,
+	small-font-hover:				$font-sm-color-hover,	
+	
+	thank-you:						$font-lg-color,
+	invitation:						$font-lg-color,
+
+	submit-button:					$font-button-color,
+	submit-button-hover:			$font-button-color-hover,
+);
+
+$font-sizes: (
+	close-default:					$close-size,
+	close-custom:					$close-size,
+	close-inline:					$close-size,
+	close-bottombar:				$close-size,
+	close-docked:					$close-size,
+	close-topbar:					$close-size,
+	close-fullscreen:				$close-size-full,
+	
+	close-default-mobi:			$close-size-mobi,
+	close-custom-mobi:			$close-size-mobi,
+	close-inline-mobi:			$close-size-mobi,
+	close-bottombar-mobi:		$close-size-mobi,
+	close-docked-mobi:			$close-size-mobi,
+	close-topbar-mobi:			$close-size-mobi,
+	close-fullscreen-mobi:		$close-size-full-mobi,
+	
+	question-single:				$font-lg-size,
+	question-multi:				$font-lg-size,
+	question-free:					$font-lg-size,
+	question-custom:				$font-lg-size,
+	question-custom-full:		$font-lg-size,
+	question-single-mobi:		$font-lg-size-mobi,
+	question-multi-mobi:			$font-lg-size-mobi,
+	question-free-mobi:			$font-lg-size-mobi,
+	question-custom-mobi:		$font-lg-size-mobi,
+	question-custom-full-mobi:	$font-lg-size-mobi,
+
+	medium-font:					$font-md-size,	
+	medium-font-mobi:				$font-md-size-mobi,	
+	small-font:						$font-sm-size,	
+	small-font-mobi:				$font-sm-size-mobi,	
+	
+	thank-you:						$font-lg-size,
+	thank-you-mobi:				$font-lg-size-mobi,
+
+	invitation:						$font-lg-size,
+	invitation-mobi:				$font-lg-size-mobi,
+	
+	submit-button:					$font-button-size,
+	submit-button-mobi:			$font-button-size-mobi,
+);
+
+$font-weights: (
+	close-default:					$close-weight,
+	close-custom:					$close-weight,
+	close-inline:					$close-weight,
+	close-bottombar:				$close-weight,
+	close-docked:					$close-weight,
+	close-topbar:					$close-weight,
+	close-fullscreen:				$close-weight,
+	
+	question-single:				$font-lg-weight,
+	question-multi:				$font-lg-weight,
+	question-free:					$font-lg-weight,
+	question-custom:				$font-lg-weight,
+	question-custom-full:		$font-lg-weight,
+
+	medium-font:					$font-md-weight,		
+	small-font:						$font-sm-weight,		
+	
+	thank-you:						$font-lg-weight,
+	invitation:						$font-lg-weight,
+
+	submit-button:					$font-button-weight,
+);
+
+$font-styles: (
+	close-default:					$close-style,
+	close-custom:					$close-style,
+	close-inline:					$close-style,
+	close-bottombar:				$close-style,
+	close-docked:					$close-style,
+	close-topbar:					$close-style,
+	close-fullscreen:				$close-style,
+	
+	question-single:				$font-lg-style,
+	question-multi:				$font-lg-style,
+	question-free:					$font-lg-style,
+	question-custom:				$font-lg-style,
+	question-custom-full:		$font-lg-style,	
+
+	medium-font:					$font-md-style,		
+	small-font:						$font-sm-style,		
+	
+	thank-you:						$font-lg-style,
+	invitation:						$font-lg-style,
+	
+	submit-button:					$font-button-style,
+);
+
+$font-variants: (
+	close-default:					$close-variant,
+	close-custom:					$close-variant,
+	close-inline:					$close-variant,
+	close-bottombar:				$close-variant,
+	close-docked:					$close-variant,
+	close-topbar:					$close-variant,
+	close-fullscreen:				$close-variant,
+	
+	question-single:				$font-lg-variant,
+	question-multi:				$font-lg-variant,
+	question-free:					$font-lg-variant,
+	question-custom:				$font-lg-variant,
+	question-custom-full:		$font-lg-variant,
+
+	medium-font:					$font-md-variant,	
+	small-font:						$font-sm-variant,	
+	
+	thank-you:						$font-lg-variant,
+	invitation:						$font-lg-variant,
+	
+	submit-button:					$font-button-variant,
+);
+
+$text-alignments: (
+	close-default:					$close-align,
+	close-custom:					$close-align,
+	close-inline:					$close-align,
+	close-bottombar:				$close-align,
+	close-docked:					$close-align,
+	close-topbar:					$close-align,
+	close-fullscreen:				$close-align,
+	
+	question-single:				$font-lg-align,
+	question-multi:				$font-lg-align,
+	question-free:					$font-lg-align,
+	question-custom:				$font-lg-align,
+	question-custom-full:		$font-lg-align,	
+
+	medium-font:					$font-md-align,
+	small-font:						$font-sm-align,		
+	
+	thank-you:						$font-lg-align,
+	invitation:						$font-lg-align,
+	
+	submit-button:					$font-button-align,
+);
+
+$text-transforms: (
+	close-default:					$close-transform,
+	close-custom:					$close-transform,
+	close-inline:					$close-transform,
+	close-bottombar:				$close-transform,
+	close-docked:					$close-transform,
+	close-topbar:					$close-transform,
+	close-fullscreen:				$close-transform,
+	
+	question-single:				$font-lg-transform,
+	question-multi:				$font-lg-transform,
+	question-free:					$font-lg-transform,
+	question-custom:				$font-lg-transform,
+	question-custom-full:		$font-lg-transform,
+
+	medium-font:					$font-md-transform,
+	small-font:						$font-sm-transform,		
+	
+	thank-you:						$font-lg-transform,
+	invitation:						$font-lg-transform,
+	
+	submit-button:					$font-button-transform,
+);
+
+$text-decorations: (
+	close-default:					$close-decoration,
+	close-custom:					$close-decoration,
+	close-inline:					$close-decoration,
+	close-bottombar:				$close-decoration,
+	close-docked:					$close-decoration,
+	close-topbar:					$close-decoration,
+	close-fullscreen:				$close-decoration,
+
+	close-default-hover:			$close-decoration-hover,
+	close-custom-hover:			$close-decoration-hover,
+	close-inline-hover:			$close-decoration-hover,
+	close-bottombar-hover:		$close-decoration-hover,
+	close-docked-hover:			$close-decoration-hover,
+	close-topbar-hover:			$close-decoration-hover,
+	close-fullscreen-hover:		$close-decoration-hover,
+	
+	question-single:				$font-lg-decoration,
+	question-multi:				$font-lg-decoration,
+	question-free:					$font-lg-decoration,
+	question-custom:				$font-lg-decoration,
+	question-custom-full:		$font-lg-decoration,
+
+	medium-font:					$font-md-decoration,		
+	medium-font-hover:			$font-md-decoration-hover,
+	small-font:						$font-sm-decoration,		
+	small-font-hover:				$font-sm-decoration-hover,
+
+	thank-you:						$font-lg-decoration,
+	invitation:						$font-lg-decoration,
+
+	submit-button:					$font-button-decoration,
+	submit-button-hover:			$font-button-decoration-hover,
+
+);
+
+$letter-spacings: (
+	close-default:					$close-letter-spacing,
+	close-custom:					$close-letter-spacing,
+	close-inline:					$close-letter-spacing,
+	close-bottombar:				$close-letter-spacing,
+	close-docked:					$close-letter-spacing,
+	close-topbar:					$close-letter-spacing,
+	close-fullscreen:				$close-letter-spacing,
+	
+	question-single:				$font-lg-letter-spacing,
+	question-multi:				$font-lg-letter-spacing,
+	question-free:					$font-lg-letter-spacing,
+	question-custom:				$font-lg-letter-spacing,
+	question-custom-full:		$font-lg-letter-spacing,
+
+	medium-font:					$font-md-letter-spacing,
+	small-font:						$font-sm-letter-spacing,		
+	
+	thank-you:						$font-lg-letter-spacing,
+	submit-button:					$font-button-letter-spacing,
+);
+
+$line-heights: (
+	close-default:					$close-line-height,
+	close-custom:					$close-line-height,
+	close-inline:					$close-line-height,
+	close-bottombar:				$close-line-height,
+	close-docked:					$close-line-height,
+	close-topbar:					$close-line-height,
+	close-fullscreen:				$close-line-height,	
+	
+	question-single:				$font-lg-line-height,
+	question-multi:				$font-lg-line-height,
+	question-free:					$font-lg-line-height,
+	question-custom:				$font-lg-line-height,
+	question-custom-full:		$font-lg-line-height,
+
+	medium-font:					$font-md-line-height,
+	small-font:						$font-sm-line-height,	
+	
+	thank-you:						$font-lg-line-height,
+	invitation:						$font-lg-line-height,
+
+	submit-button:					$font-button-line-height,
+);
+
+$text-shadows: (
+	close-default:					$close-shadow,
+	close-custom:					$close-shadow,
+	close-inline:					$close-shadow,
+	close-bottombar:				$close-shadow,
+	close-docked:					$close-shadow,
+	close-topbar:					$close-shadow,
+	close-fullscreen:				$close-shadow,	
+	
+	question-single:				$font-lg-shadow,
+	question-multi:				$font-lg-shadow,
+	question-free:					$font-lg-shadow,
+	question-custom:				$font-lg-shadow,
+	question-custom-full:		$font-lg-shadow,
+
+	medium-font:					$font-md-shadow,
+	small-font:						$font-sm-shadow,	
+	
+	thank-you:						$font-lg-shadow,
+	invitation:						$font-lg-shadow,
+
+	submit-button:					$font-button-shadow,
+);
+
+
+
+
+
+// ------------------------ MAPS - BORDERS ------------------------
+$border-colors: (
+	widget-container: 					transparent,
+	
+	widget-default: 						transparent,
+	widget-custom:							transparent,
+	widget-inline: 						transparent,
+	widget-bottombar: 					#00aeef,
+	widget-docked: 						#00aeef,
+	widget-topbar: 						transparent,
+	widget-fullscreen: 					transparent,	
+	
+	single-choice-answer-each:			#00aeef,
+	single-choice-answer-each-hover:	#00aeef,
+	multi-choice-answer-each:			#00aeef,
+	multi-choice-answer-each-hover:	#00aeef,	
+	
+	radio-button-outer:					#00aeef,
+	radio-button-inner-hover:			#00aeef,
+	
+	multi-checkbox-outer:				#00aeef,
+	multi-checkbox-outer-hover:		#00aeef,	
+	multi-checkbox-checkmark:			#00aeef,
+	multi-checkbox-checkmark-hover:	#00aeef,
+	
+	submit-button: 						#00aeef,
+	submit-button-hover:					#00aeef,
+);
+
+$border-widths: (
+	widget-container: 					0px,
+	
+	widget-default: 						0px,
+	widget-custom:							0px,
+	widget-inline: 						0px,
+	widget-bottombar: 					2px 0 0 0,
+	widget-docked: 						3px 3px 0 3px,
+	widget-topbar: 						0px,
+	widget-fullscreen: 					0px,
+
+	single-choice-answer-all:			0, 	// Don't change
+	single-choice-answer-all-hover:	0,
+	multi-choice-answer-all:			0,
+	multi-choice-answer-all-hover:	0,
+	
+	single-choice-answer-each:			2px,
+	single-choice-answer-each-hover:	2px,
+	multi-choice-answer-each:			2px,
+	multi-choice-answer-each-hover:	2px,	
+	
+	radio-button-outer:					1px,
+	radio-button-inner-hover:			2px,
+
+	multi-checkbox-outer:				1px,
+	multi-checkbox-checkmark:			0 2px 2px 0,
+	
+	submit-button:							2px,
+);
+
+$border-styles: (
+	widget-container: 					solid,
+	
+	widget-default: 						solid,
+	widget-custom:							solid,
+	widget-inline: 						solid,
+	widget-bottombar: 					solid,
+	widget-docked: 						solid,
+	widget-topbar: 						solid,
+	widget-fullscreen: 					solid,
+
+	single-choice-answer-each:			solid,
+	single-choice-answer-each-hover:	solid,
+	multi-choice-answer-each:			solid,
+	multi-choice-answer-each-hover:	solid,		
+
+	radio-button-outer:					solid,
+	radio-button-inner-hover:			solid,
+
+	multi-checkbox-outer:				solid,
+	multi-checkbox-checkmark:			solid,
+	
+	submit-button: 						solid,
+);
+
+$border-radiuses: (
+	widget-container: 					0px,
+	
+	widget-default: 						0px,
+	widget-custom:							0px,
+	widget-inline: 						0px,
+	widget-bottombar: 					0px,
+	widget-docked: 						0,
+	widget-topbar: 						0px,
+	widget-fullscreen: 					0px,
+
+	close-default:							$close-default-radius,
+	close-custom:							$close-custom-radius,
+	close-inline:							$close-inline-radius,
+	close-bottombar:						$close-bottombar-radius,
+	close-docked:							$close-docked-radius,
+	close-topbar:							$close-topbar-radius,
+	close-fullscreen:						$close-fullscreen-radius,			
+	
+	single-choice-answer-each:			0px,
+	single-choice-answer-each-hover:	0px,
+	multi-choice-answer-each:			0px,
+	multi-choice-answer-each-hover:	0px,	
+
+	multi-checkbox-outer:				0px,
+	multi-checkbox-checkmark:			0px,
+	
+	submit-button:							0px,
+);
+
+
+
+// ------------------------ MAPS - PADDINGS, MARGINS, MIN/MAX WIDTHS ------------------------------------
+$paddings: (	
+	// widget-bottombar: 					$padding-widget-bottombar,
+	
+	close-default:							$close-default-padding,
+	close-custom:							$close-custom-padding,
+	close-inline:							$close-inline-padding,
+	close-bottombar:						$close-bottombar-padding,
+	close-docked:							$close-docked-padding,
+	close-topbar:							$close-topbar-padding,
+	close-fullscreen:						$close-fullscreen-padding,		
+	
+	submit-button:							$button-padding-lg,
+	submit-button-mobi:					$button-padding-sm,
+	
+	invitation-button:					$button-padding-lg,
+	invitation-button-mobi:				$button-padding-sm,
+
+	invitation:								10px 20px,
+	invitation-mobi:						8px 10px,	
+	
+	thank-you:								30px 10px,
+	
+	branding:								$branding-padding,
+);
+
+$margins: (
+	widget-bottombar: 					$margin-widget-bottombar,	
+	
+	
+	close-default:							$close-default-margin,
+	close-custom:							$close-custom-margin,
+	close-inline:							$close-inline-margin,
+	close-bottombar:						$close-bottombar-margin,
+	close-docked:							$close-docked-margin,
+	close-topbar:							$close-topbar-margin,
+	close-fullscreen:						$close-fullscreen-margin,	
+	
+	content-container:					$content-container-margin,
+	content-container-single:			$content-container-margin,
+	content-container-multi:			$content-container-margin,
+	content-container-free:				$content-container-margin,
+	content-container-custom:			$content-container-custom-margin,
+	content-container-custom-full:	$content-container-margin,
+	
+	widget-inline:							0,
+	
+	submit-button:							$button-margin-lg,
+	submit-button-mobi:					$button-margin-sm,
+
+	invitation-button:					$button-margin-lg,
+	invitation-button-mobi:				$button-margin-sm,
+	
+	invitation:								15px auto,
+	invitation-mobi:						10px auto,
+	
+	thank-you:								0,
+	
+	branding:								$branding-margin,
+);
+
+$widths: (
+	submit-button:							auto,
+	submit-button-mobi:					auto,
+	
+	invitation-button:					auto,	
+
+	invitation: 							90%,
+
+	thank-you:								90%,
+	thank-you-mobi:						95%,		
+);
+
+$min-widths: (
+	submit-button: 						$button-min-width,
+	submit-button-mobi: 					$button-min-width-mobi,
+	
+	invitation-button:					$button-min-width,
+	invitation-button-mobi:				$button-min-width-mobi,
+);
+
+$max-widths: (
+	widget-docked:							320px,
+	
+	submit-button: 						$button-max-width,
+	submit-button-mobi: 					$button-max-width-mobi,
+	
+	invitation-button:					$button-max-width,
+	invitation-button-mobi:				$button-max-width-mobi,
+);
+
+
+
+// ------------------------ MAPS - MISCELLANEOUS ------------------------------------
+$transitions: ();
+
+$cursors: ();

@@ -1,0 +1,307 @@
+// ======================= MISCELLANEOUS ========================
+$pseudo-hover:					':hover';
+$pseudo-focus:					':focus';
+$pseudo-after:					':after';
+
+$radio-button-on:				'[data-radio-button="on"]';
+$radio-button-off:			'[data-radio-button="off"]';
+
+$answer-widths-fixed:		'[data-answer-widths="fixed"]';
+$answer-widths-var-left:	'[data-answer-widths="variable-left"]';
+$answer-widths-var-center:	'[data-answer-widths="variable-center"]';
+
+
+// ======================= TOP CONTAINER ========================
+$top-container: 			'div#_pi_surveyWidgetContainer';
+$top-container-mobi: 	'div#_pi_surveyWidgetContainer.mobile-enabled';
+$top-container-not-mobi: 'div#_pi_surveyWidgetContainer:not(.mobile-enabled)';
+
+
+// ======================= SURVEY WIDGET ========================
+$widget-default: 			'div#_pi_surveyWidget';
+$widget-custom: 			'div#_pi_surveyWidgetCustom';
+$widget-inline: 			'div#_pi_surveyWidget[survey-widget-type="inlinesurvey"]';
+$widget-bottom: 			'div#_pi_surveyWidget[survey-widget-type="bottombarsurvey"]';
+$widget-docked: 			'div#_pi_surveyWidget[survey-widget-type="dockedwidgetsurvey"]';
+$widget-topbar: 			'div#_pi_surveyWidget[survey-widget-type="topbarsurvey"]';
+$widget-fullsc: 			'div#_pi_surveyWidget[survey-widget-type="fullscreensurvey"]';
+
+$widget-default-mobi: 	#{$top-container-mobi} #{$widget-default};
+$widget-custom-mobi: 	#{$top-container-mobi} #{$widget-custom};
+$widget-inline-mobi: 	#{$top-container-mobi} #{$widget-inline};
+$widget-bottom-mobi: 	#{$top-container-mobi} #{$widget-bottom};
+$widget-docked-mobi: 	#{$top-container-mobi} #{$widget-docked};
+$widget-topbar-mobi: 	#{$top-container-mobi} #{$widget-topbar};
+$widget-fullsc-mobi: 	#{$top-container-mobi} #{$widget-fullsc};
+
+$widget-default-not-mobi: 	#{$top-container-not-mobi} #{$widget-default};
+$widget-custom-not-mobi: 	#{$top-container-not-mobi} #{$widget-custom};
+$widget-inline-not-mobi: 	#{$top-container-not-mobi} #{$widget-inline};
+$widget-bottom-not-mobi: 	#{$top-container-not-mobi} #{$widget-bottom};
+$widget-docked-not-mobi: 	#{$top-container-not-mobi} #{$widget-docked};
+$widget-topbar-not-mobi: 	#{$top-container-not-mobi} #{$widget-topbar};
+$widget-fullsc-not-mobi: 	#{$top-container-not-mobi} #{$widget-fullsc};
+
+
+// ======================= CLOSE BUTTON ========================
+$close-default: 			'._pi_closeButton';
+$close-custom: 			'._pi_closeCustomButton';
+$close-inline: 			#{$widget-inline} #{$close-default};
+$close-bottom: 			#{$widget-bottom} #{$close-default};
+$close-docked: 			#{$widget-docked} #{$close-default};
+$close-topbar: 			#{$widget-topbar} #{$close-default};
+$close-fullsc: 			#{$widget-fullsc} #{$close-default};
+
+$close-inline-not-mobi: 			#{$widget-inline-not-mobi} #{$close-default};
+$close-bottom-not-mobi: 			#{$widget-bottom-not-mobi} #{$close-default};
+$close-docked-not-mobi: 			#{$widget-docked-not-mobi} #{$close-default};
+$close-topbar-not-mobi: 			#{$widget-topbar-not-mobi} #{$close-default};
+$close-fullsc-not-mobi: 			#{$widget-fullsc-not-mobi} #{$close-default};
+
+$close-default-hover: 	#{$top-container-not-mobi} #{$close-default}#{$pseudo-hover};
+$close-custom-hover: 	#{$top-container-not-mobi} #{$close-custom}#{$pseudo-hover};
+$close-inline-hover: 	#{$close-inline-not-mobi}#{$pseudo-hover};
+$close-bottom-hover: 	#{$close-bottom-not-mobi}#{$pseudo-hover};
+$close-docked-hover: 	#{$close-docked-not-mobi}#{$pseudo-hover};
+$close-topbar-hover: 	#{$close-topbar-not-mobi}#{$pseudo-hover};
+$close-fullsc-hover: 	#{$close-fullsc-not-mobi}#{$pseudo-hover};
+
+$close-default-mobi: 	#{$top-container-mobi} #{$close-default};
+$close-custom-mobi: 		#{$top-container-mobi} #{$close-custom};
+$close-inline-mobi: 		#{$top-container-mobi} #{$close-inline};
+$close-bottom-mobi: 		#{$top-container-mobi} #{$close-bottom};
+$close-docked-mobi: 		#{$top-container-mobi} #{$close-docked};
+$close-topbar-mobi: 		#{$top-container-mobi} #{$close-topbar};
+$close-fullsc-mobi: 		#{$top-container-mobi} #{$close-fullsc};
+
+
+// ======================= CARD TYPES ======================
+$card-type-single: 				'div#_pi_surveyWidget[data-question-type="single_choice_question"]';
+$card-type-multi: 				'div#_pi_surveyWidget[data-question-type="multiple_choices_question"]';
+$card-type-free: 					'div#_pi_surveyWidget[data-question-type="free_text_question"]';
+$card-type-custom: 				'div#_pi_surveyWidget[data-question-type="custom_content_question"]';
+$card-type-custom-full: 	'div#_pi_surveyWidgetCustom[data-question-type="custom_content_question"]';
+
+$card-type-single-mobi: 		#{$top-container-mobi} #{$card-type-single};
+$card-type-multi-mobi: 			#{$top-container-mobi} #{$card-type-multi};
+$card-type-free-mobi: 			#{$top-container-mobi} #{$card-type-free};
+$card-type-custom-mobi: 		#{$top-container-mobi} #{$card-type-custom};
+$card-type-custom-full-mobi: 	#{$top-container-mobi} #{$card-type-custom-full};
+
+$card-type-single-not-mobi: 		#{$top-container-not-mobi} #{$card-type-single};
+$card-type-multi-not-mobi: 			#{$top-container-not-mobi} #{$card-type-multi};
+$card-type-free-not-mobi: 			#{$top-container-not-mobi} #{$card-type-free};
+$card-type-custom-not-mobi: 		#{$top-container-not-mobi} #{$card-type-custom};
+$card-type-custom-full-not-mobi: 	#{$top-container-not-mobi} #{$card-type-custom-full};
+
+
+// ======================= CONTENT CONTAINERS ===================
+$content-container-default: 				'div._pi_widgetContentContainer';
+$content-container-single:					#{$card-type-single} 		'div._pi_widgetContentContainer';
+$content-container-multi:					#{$card-type-multi} 			'div._pi_widgetContentContainer';
+$content-container-free:					#{$card-type-free} 			'div._pi_widgetContentContainer';
+$content-container-custom:					#{$card-type-custom} 		'div._pi_widgetContentContainer';
+$content-container-custom-full:			#{$card-type-custom-full} 	'div._pi_widgetContentContainer';
+
+$content-container-default-mobi: 		#{$top-container-mobi} #{$content-container-default};
+$content-container-single-mobi: 			#{$top-container-mobi} #{$content-container-single};
+$content-container-multi-mobi: 			#{$top-container-mobi} #{$content-container-multi};
+$content-container-free-mobi: 			#{$top-container-mobi} #{$content-container-free};
+$content-container-custom-mobi: 			#{$top-container-mobi} #{$content-container-custom};
+$content-container-custom-full-mobi:	#{$top-container-mobi} #{$content-container-custom-full};
+
+
+// ======================= QUESTION TYPES ======================
+$question-default: 				'._pi_question';
+$question-single: 				#{$card-type-single} 		  '._pi_question';
+$question-multi: 					#{$card-type-multi} 			'._pi_question';
+$question-free: 					#{$card-type-free} 			  '._pi_question';
+$question-custom: 				#{$card-type-custom} 		  '._pi_question_custom_content_question p:first-child';
+$question-custom-full: 		#{$card-type-custom-full} '._pi_question_custom_content_question_fullscreen p:first-child';
+
+$question-default-mobi: 		#{$top-container-mobi} '._pi_question';
+$question-single-mobi: 			#{$top-container-mobi} #{$question-single};
+$question-multi-mobi: 			#{$top-container-mobi} #{$question-multi};
+$question-free-mobi: 			  #{$top-container-mobi} #{$question-free};
+$question-custom-mobi: 			#{$top-container-mobi} #{$question-custom};
+$question-custom-full-mobi: #{$top-container-mobi} #{$question-custom-full};
+
+// ======================= QUESTION HEADER BEFORE/AFTER HELPERS ======================
+$question-header-before:  '._pi_header.pi_header_before';
+$question-header-after:   '._pi_header.pi_header_after';
+
+$question-header-before-mobi:   #{$top-container-mobi} #{$question-header-before};
+$question-header-after-mobi:   #{$top-container-mobi} #{$question-header-after};
+
+// ======================= SCALE CONTAINER BEFORE/AFTER (least...most) ======================
+$pi-scale-container:       '._pi_scale_container';
+$pi-scale-container-mobi: #{$top-container-mobi} #{$pi-scale-container};
+
+$pi-scale-container-before: '._pi_scale_container_before';
+$pi-scale-container-before-mobi: #{$top-container-mobi} #{$pi-scale-container-before};
+
+$pi-scale-container-after: '._pi_scale_container_after';
+$pi-scale-container-after-mobi: #{$top-container-mobi} #{$pi-scale-container-after};
+
+
+// ======================= TEXT LABEL TYPES ======================
+$single-choice-text:				'label';
+$multi-choice-text:				'label._pi-control._pi-control-checkbox';
+$free-text-one-line-text:		'input._pi_free_text_question_field';
+$free-text-multi-line-text:	'textarea._pi_free_text_question_field';
+$custom-text:						'._pi_question_custom_content_question';
+$custom-full-text:				'._pi_question_custom_content_question_fullscreen';
+
+
+// ======================= RADIO BUTTONS (SINGLE CHOICE ONLY ) ======================
+$card-type-single-radio-on:		#{$card-type-single}#{$radio-button-on};
+$card-type-single-radio-off:		#{$card-type-single}#{$radio-button-off};
+$card-type-single-radio-on-not-mobi:		#{$card-type-single-not-mobi}#{$radio-button-on};
+$card-type-single-radio-off-not-mobi:		#{$card-type-single-not-mobi}#{$radio-button-off};
+$radio-button-outer: 				#{$card-type-single} 'li a span._pi_radio_button_outer';
+$radio-button-outer-hover: 		#{$card-type-single-not-mobi} 'li:hover a span._pi_radio_button_outer';
+$radio-button-inner:    #{$card-type-single} 'li a span._pi_radio_button_inner';
+$radio-button-inner-hover: 		#{$card-type-single-not-mobi} 'li:hover a span._pi_radio_button_inner';
+
+$card-type-single-radio-on-mobi:	#{$top-container-mobi} #{$card-type-single}#{$radio-button-on};
+
+
+// ======================= RADIO BUTTONS (MULTI CHOICE ONLY ) ======================
+$multi-checkbox-outer: 				   #{$card-type-multi} 'li ._pi-control-indicator';
+$multi-checkbox-outer-hover: 		 #{$card-type-multi-not-mobi} 'li:hover ._pi-control-indicator';
+$multi-checkbox-checkmark: 		   #{$card-type-multi} 'li ._pi-control-indicator:after';
+$multi-checkbox-checkmark-hover: #{$card-type-multi-not-mobi} 'li:hover ._pi-control-indicator:after';
+
+$multi-checkbox-outer-mobi:      #{$top-container-mobi} #{$multi-checkbox-checkmark};
+
+// ======================= MISCELLANEOUS ========================
+$character-count:				'div._pi_free_text_question_characters_count';
+$multi-max-count:				'div._pi_multiple_choices_count';
+
+$character-count-mobi:		#{$top-container-mobi} #{$character-count};
+$multi-max-count-mobi:		#{$top-container-mobi} #{$multi-max-count};
+
+$branding:						   'a._pi_branding';
+$branding-not-mobi:		   #{$top-container-not-mobi} 'a._pi_branding';
+$branding-hover:			   #{$branding-not-mobi}#{$pseudo-hover};
+$branding-mobi:				   #{$top-container-mobi} #{$branding};
+
+$branding-custom:				#{$card-type-custom} #{$branding};
+$branding-custom-not-mobi:				#{$card-type-custom-not-mobi} #{$branding};
+$branding-custom-hover:		#{$branding-custom-not-mobi}#{$pseudo-hover};
+$branding-custom-mobi:		#{$top-container-mobi} #{$branding-custom};
+
+$invitation:					'div._pi_invitationTextContainer';
+$invitation-mobi:				#{$top-container-mobi} #{$invitation};
+
+$invitation-button:			'a._pi_startButton';
+$invitation-button-hover:	#{$top-container-not-mobi} #{$invitation-button}#{$pseudo-hover};
+$invitation-button-mobi:	#{$top-container-mobi} #{$invitation-button};
+
+$thank-you:						'div._pi_thankYouSurvey';
+$thank-you-mobi:				#{$top-container-mobi} #{$thank-you};
+
+// ======================= SURVEY LEVEL IMAGE ========================
+$image-survey-level:        #{$widget-default} 'img._pi_background_image';
+$image-survey-level-mobi:   #{$top-container-mobi} #{$image-survey-level};
+
+// ======================= AAO ========================
+$aao:									    '.all-at-once';
+$aao-top-container:       #{$top-container}#{$aao};
+$aao-top-container-not-mobi:       #{$top-container-not-mobi}#{$aao};
+$aao-top-container-mobi:  #{$top-container-mobi}#{$aao};
+
+$aao-content-container:   #{$top-container}	'div._pi_widgetContentContainer';
+$aao-content-container-not-mobi:   #{$top-container-not-mobi}	'div._pi_widgetContentContainer';
+
+$widget-fullsc-aao:               #{$aao-top-container} 'div#_pi_surveyWidget[survey-widget-type="fullscreensurvey"]';
+$widget-fullsc-aao-mobi:          #{$aao-top-container-mobi} 'div#_pi_surveyWidget[survey-widget-type="fullscreensurvey"]';
+
+$aao-close-default: 				          #{$aao-top-container} '._pi_closeButton';
+$aao-close-fullsc: 					          #{$widget-fullsc-aao} #{$close-default};
+$aao-close-fullsc-mobi: 		          #{$widget-fullsc-aao-mobi} '._pi_closeButton';
+
+// card types
+$aao-card-type-single: 						#{$aao-top-container} '._pi_answers_container[data-question-type="single_choice_question"]';
+$aao-card-type-multi: 						#{$aao-top-container} '._pi_answers_container[data-question-type="multiple_choices_question"]';
+$aao-card-type-free: 							#{$aao-top-container} '._pi_answers_container[data-question-type="free_text_question"]';
+$aao-card-type-custom: 						#{$aao-top-container}; //'._pi_answers_container[data-question-type="custom_content_question"]';
+$aao-card-type-custom-full: 			#{$aao-top-container} '._pi_answers_container[data-question-type="custom_content_question"]';
+
+$aao-card-type-single-mobi: 			#{$aao-top-container-mobi} '._pi_answers_container[data-question-type="single_choice_question"]';
+$aao-card-type-multi-mobi: 				#{$aao-top-container-mobi} '._pi_answers_container[data-question-type="multiple_choices_question"]';
+$aao-card-type-free-mobi: 				#{$aao-top-container-mobi} '._pi_answers_container[data-question-type="free_text_question"]';
+$aao-card-type-custom-mobi: 			#{$aao-top-container-mobi} '._pi_answers_container[data-question-type="custom_content_question"]';
+$aao-card-type-custom-full-mobi: 	#{$aao-top-container-mobi} '._pi_answers_container[data-question-type="custom_content_question"]';
+
+$aao-card-type-single-not-mobi: 			#{$aao-content-container-not-mobi} '._pi_answers_container[data-question-type="single_choice_question"]';
+$aao-card-type-multi-not-mobi: 				#{$aao-content-container-not-mobi} '._pi_answers_container[data-question-type="multiple_choices_question"]';
+$aao-card-type-free-not-mobi: 				#{$aao-content-container-not-mobi} '._pi_answers_container[data-question-type="free_text_question"]';
+$aao-card-type-custom-not-mobi: 			#{$aao-content-container-not-mobi} '._pi_answers_container[data-question-type="custom_content_question"]';
+$aao-card-type-custom-full-not-mobi: 	#{$aao-content-container-not-mobi} '._pi_answers_container[data-question-type="custom_content_question"]';
+
+// answers
+$aao-question-single: 						#{$aao-top-container} '._pi_question._pi_question_single_choice_question';
+$aao-question-multi: 							#{$aao-top-container} '._pi_question._pi_question_multiple_choices_question';
+$aao-question-free: 							#{$aao-top-container} '._pi_question._pi_question_free_text_question';
+$aao-question-custom: 						#{$aao-top-container} '._pi_question._pi_question_custom_content_question p:first-child';
+$aao-question-custom-full: 				#{$aao-top-container} '._pi_question._pi_question_custom_content_question_fullscreen p:first-child';
+
+$aao-question-single-mobi: 				#{$aao-top-container-mobi} '._pi_question._pi_question_single_choice_question';
+$aao-question-multi-mobi: 				#{$aao-top-container-mobi} '._pi_question._pi_question_multiple_choices_question';
+$aao-question-free-mobi: 					#{$aao-top-container-mobi} '._pi_question._pi_question_free_text_question';
+$aao-question-custom-mobi: 				#{$aao-top-container-mobi} '._pi_question._pi_question_custom_content_question p:first-child';
+$aao-question-custom-full-mobi: 	#{$aao-top-container-mobi} '._pi_question._pi_question_custom_content_question_fullscreen p:first-child';
+
+// radio buttons & checkboxes
+$aao-card-type-single-radio-on:		     #{$aao-card-type-single}#{$radio-button-on};
+$aao-card-type-single-radio-off:		   #{$aao-card-type-single}#{$radio-button-off};
+$aao-card-type-single-radio-on-not-mobi:		     #{$aao-card-type-single-not-mobi}#{$radio-button-on};
+$aao-card-type-single-radio-off-not-mobi:		   #{$aao-card-type-single-not-mobi}#{$radio-button-off};
+$aao-card-type-single-radio-on-mobi:   #{$aao-top-container-mobi} #{$aao-card-type-single-radio-on};
+$aao-radio-button-outer-hover:         #{$aao-card-type-single-not-mobi} #{$radio-button-outer-hover};
+$aao-radio-button-inner-hover:         #{$aao-card-type-single-not-mobi} #{$radio-button-inner-hover};
+
+$aao-multi-checkbox-outer: 				   #{$aao-card-type-multi} 'li ._pi-control-indicator';
+$aao-multi-checkbox-outer-hover: 		 #{$aao-card-type-multi-not-mobi} 'li:hover ._pi-control-indicator';
+$aao-multi-checkbox-checkmark: 		   #{$aao-card-type-multi} 'li ._pi-control-indicator:after';
+$aao-multi-checkbox-checkmark-hover: #{$aao-card-type-multi-not-mobi} 'li:hover ._pi-control-indicator:after';
+
+$aao-multi-checkbox-outer-mobi:      #{$aao-top-container-mobi} #{$multi-checkbox-checkmark};
+
+// submit button
+$aao-submit-button:               #{$aao-top-container} 'input._pi_all_questions_submit_button';
+$aao-submit-button-not-mobi:               #{$aao-top-container-not-mobi} 'input._pi_all_questions_submit_button';
+$aao-submit-button-mobi:          #{$aao-top-container-mobi} 'input._pi_all_questions_submit_button';
+
+$aao-selected-single-choice:      #{$aao-top-container} 'ul._pi_answers_container li.selected';
+
+// menu select
+$selected:                  #{$top-container} 'select._pi_select';
+$selected-mobi:             #{$top-container-mobi} 'select._pi_select';
+
+$aao-selected:              #{$aao-top-container} 'select._pi_select';
+$aao-selected-mobi:         #{$aao-top-container-mobi} 'select._pi_select';
+
+// question headers
+$aao-question-header-before:  #{$aao-top-container} #{$question-header-before};
+$aao-question-header-after:   #{$aao-top-container} #{$question-header-after};
+$aao-question-header-before-mobi:  #{$aao-top-container-mobi} #{$question-header-before};
+$aao-question-header-after-mobi:   #{$aao-top-container-mobi} #{$question-header-after};
+
+// ======================= ANSWER LEVEL IMAGE ========================
+$with-image:                      'li.with-image';
+$answer-image-top:                'a.with-img.with-img-top';
+$answer-image-bottom:             'a.with-img.with-img-bottom';
+$answer-image-right:              'a.with-img.with-img-right';
+$answer-image-left:               'a.with-img.with-img-left';
+
+// ======================= POLL SELECTORS ========================
+$poll-container:                  'div._pi_pollContainer';
+$poll-name:                       'div._pi_pollName';
+$poll-choice:                     'label._pi_pollChoice';
+$poll-chart:                      'span._pi_pollChart';
+$poll-text:                       'span._pi_pollText';
+$poll-progress:                   'div._pi_pollProgress';
+$poll-progress-percentage:        'div._pi_pollProgressPercentage';
+$poll-progress-count:             'div._pi_pollProgressCount';

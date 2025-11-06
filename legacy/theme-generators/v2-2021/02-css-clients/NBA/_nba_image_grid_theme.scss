@@ -1,0 +1,115 @@
+// THE _selectors FILE:
+@import '../../01-css-pulse/_selectors';
+
+// DEFAULT VARIABLES
+@import '../_default/_default-1-variables';
+
+// CLIENT-SPECIFIC DESIGN VARIABLES
+@import '_nba_image_grid_variables';
+
+// GLOBAL MAPS:
+@import '../../01-css-pulse/_maps';
+
+// GLOBAL MIXINS
+@import '../../01-css-pulse/_mixins';
+
+// THE GLOBAL STRUCTURE FOR FRAMEWORK V2:
+@import '../../01-css-pulse/_theme-structure';
+
+div#_pi_surveyWidgetContainer{
+  div#_pi_surveyWidget{
+    div._pi_widgetContentContainer{
+      ul._pi_answers_container{
+        li{
+          a{
+            &:focus{
+              outline: none !important;
+            }
+          }
+          label{
+            color: #ffffff !important;
+            &:focus{
+              outline: none !important;
+            }
+          }
+          &:hover{
+            label{
+              color: rgb(5, 28, 45) !important;
+            }
+          }
+          ._pi_radio_button_outer{
+            min-height: 14px !important;
+            ._pi_radio_button_inner{
+              top: 1px !important;
+              left: 1px !important;
+            }
+          }
+        }
+        ._pi_free_text_question_field_container{
+          max-width: 100% !important;
+        }
+      }
+      ._pi_question._pi_question_custom_content_question{
+        div._pi_logo_wrapper{
+          box-shadow: rgba(208, 208, 208, 0.5) 0px 0px 10px 0px;
+          max-width: 120px;
+          margin-left: auto;
+          margin-right: auto;
+          border-radius: 100%;
+          margin-bottom: 30px;
+        }
+        hr{
+          max-width: 140px;
+          border: none;
+          border-bottom: solid 1px rgb(231, 231, 231);
+        }
+        img{
+          max-width: 100%;
+        }
+        text-align: center !important;
+        *{
+          text-align: center !important;
+        }
+        p{
+          margin: 5px 0px;
+        }
+        h1,h2,h3,h4,h5{
+          color: rgb(5, 28, 45) !important;
+          font-size: 24px !important;
+          font-weight: 700 !important;
+          font-family: inherit !important;
+          margin: 3px 0px 7px 0px !important;
+        }
+        a{
+          color: rgb(5, 28, 45) !important;
+          &:hover{
+            text-decoration: underline !important;
+          }
+        }
+      }
+      input[type="submit"]{
+        padding: 13px 30px !important;
+      }
+    }
+  }
+  &.mobile-enabled{
+    div#_pi_surveyWidget{
+      div._pi_widgetContentContainer{
+        ul._pi_answers_container{
+          li{
+            &:hover{
+              label{
+                color: #ffffff !important;
+              }
+            }
+          }
+        }
+        ._pi_question._pi_question_custom_content_question{
+          h1,h2,h3,h4,h5{
+            font-size: 18px !important;
+          }
+        }
+      }
+    }
+  }
+}

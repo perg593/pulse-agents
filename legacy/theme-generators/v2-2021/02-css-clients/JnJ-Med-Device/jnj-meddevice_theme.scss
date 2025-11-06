@@ -1,0 +1,46 @@
+// THE _selectors FILE:
+@import '../../01-css-pulse/_selectors';
+
+// DEFAULT VARIABLES
+@import '../_default/_default-1-variables';
+
+// CLIENT-SPECIFIC DESIGN VARIABLES
+@import '_jnj-meddevice_variables';
+
+// GLOBAL MAPS:
+@import '../../01-css-pulse/_maps';
+
+// GLOBAL MIXINS
+@import '../../01-css-pulse/_mixins';
+
+// THE GLOBAL STRUCTURE FOR FRAMEWORK V2:
+@import '../../01-css-pulse/_theme-structure';
+
+
+
+div[data-question-type="free_text_question"] ul._pi_answers_container {
+  margin-top: 10px !important;
+}
+
+._pi_free_text_question_field_container,
+._pi_free_text_question_submit_button_container {
+  margin-top: 5px !important;
+  flex: 1 1 100% !important;
+}
+
+div#_pi_surveyWidget[data-question-type="free_text_question"] input._pi_free_text_question_field,
+div#_pi_surveyWidget[data-question-type="free_text_question"] textarea._pi_free_text_question_field,
+div#_pi_surveyWidget[data-question-type="free_text_question"] input._pi_free_text_question_field:hover,
+div#_pi_surveyWidget[data-question-type="free_text_question"] textarea._pi_free_text_question_field:hover,
+div#_pi_surveyWidget[data-question-type="free_text_question"] input._pi_free_text_question_field:focus,
+div#_pi_surveyWidget[data-question-type="free_text_question"] textarea._pi_free_text_question_field:focus {
+  font-weight: 300 !important;
+}
+
+div#_pi_surveyWidget[data-question-type="multiple_choices_question"]
+  li label._pi-control._pi-control-checkbox,
+div#_pi_surveyWidget[data-question-type="multiple_choices_question"]
+  li label._pi-control._pi-control-checkbox:hover {
+    color: #212121 !important;
+    font-weight: 300 !important;
+}

@@ -1,0 +1,67 @@
+	#desktop-div {
+	  display: none;
+	}
+
+	#tablet-div {
+	  display: none;
+	}
+
+	#mobile-div {
+	  display: none;
+	}
+
+	div[data-question-type="single_choice_question"] {
+	  display: none !important;
+	}
+
+	div[data-question-type="multiple_choices_question"] {
+	  display: none !important;
+	}
+
+	div[data-question-type="free_text_question"] {
+	  display: none !important;
+	}
+
+	div[data-question-type="thankyou"] {
+	  display: none !important;
+	}
+
+	#_pi_surveyWidget[data-question-type="custom_content_question"] {
+	  display: none !important;
+	}
+
+	#_pi_surveyWidgetCustom {
+	  display: none !important;
+	}
+
+	div#invite-container {
+	  display: none !important;
+	}
+
+	div[data-question-type="single_choice_question"][survey-widget-type="bottombarsurvey"] {
+	  display: none !important;
+	}
+
+	div[data-question-type="multiple_choices_question"][survey-widget-type="bottombarsurvey"] {
+	  display: none !important;
+	}
+
+	div[data-question-type="free_text_question"][survey-widget-type="bottombarsurvey"] {
+	  display: none !important;
+	}
+
+	div[data-question-type="thankyou"][survey-widget-type="bottombarsurvey"] {
+	  display: none !important;
+	}
+
+	#_pi_surveyWidget[data-question-type="custom_content_question"][survey-widget-type="bottombarsurvey"] {
+	  display: none !important;
+	}
+
+	#_pi_surveyWidgetCustom[survey-widget-type="bottombarsurvey"] {
+	  display: none !important;
+	}
+
+	#invite-container {
+	  display: none !important;
+	}

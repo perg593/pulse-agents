@@ -1,0 +1,95 @@
+[id^="question_container_"]{
+  padding: 50px 5%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-content: center;
+  align-items: flex-start;
+  background-color: #f6f6f6;
+ 			 h1,h2,h3,h4,h5{
+         color: #444444;
+         width: 100%;
+         font-family: Raleway;
+         font-size: 28px;
+         font-weight: bold;
+       }
+
+       input:not([type="text"]) {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+        height: 0;
+        width: 0;
+      }
+      input[type="text"]{
+        padding: 10px;
+        font-size: 18px;
+        flex-grow: 1;
+        margin-right: 20px;
+      }
+      label{
+        font-family: Raleway;
+        font-size: 18px;
+        padding: 10px 20px;
+        border: solid 1px #c75f72;
+        margin: 5px 0px;
+        text-align: center;
+        transition: all 0.3s;
+        &:hover{
+          color: white;
+          background-color: #c75f72;
+          transition: all 0.3s;
+        }
+      }
+      button{
+        font-family: Raleway;
+        font-size: 18px;
+        background-color: transparent;
+        border: solid 1px #c75f72;
+        padding: 10px 25px;
+        appearance: none;
+        -moz-appearance: none;
+        -webkit-appearance: none;
+        transition: all 0.3s;
+        &:hover{
+          color: white;
+          background-color: #c75f72;
+          transition: all 0.3s;
+        }
+      }
+}
+#question_container_8697{
+  label{
+    width: calc((100% / 6) - 50px);
+    @media(max-width: 600px){
+      width: calc((100% / 3) - 50px);
+    }
+  }
+}
+#question_container_8707{
+  label{
+    width: calc((100% / 5) - 50px);
+    @media(max-width: 600px){
+      width: calc((100% / 2) - 50px);
+    }
+  }
+}
+#question_container_8692{
+  label{
+    width: calc((100% / 6) - 50px);
+  }
+}
+#question_container_8695{
+  label{
+    width: calc((100% / 3) - 50px);
+  }
+}
+#thank_you_message_container{
+  font-family: Raleway;
+  font-size: 28px;
+  color: #c75f72;
+  text-align: center;
+  background-color: #f6f6f6;
+  padding: 50px 5%;
+}

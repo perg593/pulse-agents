@@ -1,0 +1,18 @@
+// PLACEHOLDER CLASS FOR TESTING
+// .default_theme_1 {margin: 80px}
+
+
+// SELECTORS:
+@import '../_include_1_before_variables';
+
+
+// CLIENT-SPECIFIC DESIGN VARIABLES
+@import '_default_theme_1_variables';
+
+
+// MAPS and MIXINS:
+@import '../_include_2_after_variables';
+
+
+// THE STRUCTURE TO USE:
+@import '_default_theme_1_structure';

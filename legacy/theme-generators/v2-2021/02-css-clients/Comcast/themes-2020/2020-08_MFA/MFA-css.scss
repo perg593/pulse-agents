@@ -1,0 +1,44 @@
+#_pi_surveyWidget[data-question-type=single_choice_question][data-answer-widths=fixed][data-radio-button=off] ul[data-question-id="8635"][data-answers-layout='fixed'][data-answers-per-row='2'] {
+  li, li a, li a label {
+      background-color: #0272b6 !important;
+      // border: 0 !important;
+      color: white !important;
+      // border-radius: 40px !important;
+      // width: 200px !important;
+      // min-width: 200px !important;
+      // max-width: 200px !important;
+      // // height: 60px !important;
+      //
+      // border-width: 0;
+      // padding: 0px;
+      // margin: 0px;
+      // height: auto !important;
+      // display: flex;
+      // align-items: center !important;
+      // cursor: pointer !important;
+
+  }
+  li {
+    // background-color: #0272b6 !important;
+    max-width: calc((100% / 2) - 15%) !important;
+  }
+  // li a {
+  //
+  // }
+  // li a span._pi_radio_button_outer {
+  //   display: none !important;
+  // }
+  // li a label {
+  //   margin: 0 !important;
+  //   padding: 14px 25px !important;
+  //   text-align: center !important;
+  // }
+}
+// div[data-answers-layout='fixed'][data-answers-per-row='2']:not([data-survey-display='all-at-once']) ul._pi_answers_container li,
+// ul[data-answers-layout='fixed'][data-answers-per-row='2'] li {
+//   max-width: calc((100% / 2) - 15%) !important;
+// }
+
+#_pi_surveyWidgetContainer #_pi_surveyWidget ._pi_widgetContentContainer ul._pi_answers_container[data-radio-button="on"] li a label {
+  color: #191919;
+}

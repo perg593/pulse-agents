@@ -1,0 +1,128 @@
+@import '_az_brilinta_hcp_v2_theme';
+
+div#_pi_surveyWidgetContainer:not(.mobile-enabled) div#_pi_surveyWidget[survey-widget-type="inlinesurvey"]{
+  z-index: 9 !important;
+}
+div#_pi_surveyWidgetContainer, div#_pi_surveyWidgetContainer:not(.mobile-enabled){
+ min-width: 320px;
+ z-index: 9 !important;
+}
+#_pi_surveyWidgetContainer.mobile-enabled{
+  margin-top: 15px !important;
+  margin-bottom: 15px !important;
+}
+#_pi_surveyWidgetContainer.mobile-enabled{
+  z-index: 0 !important;
+}
+div#_pi_surveyWidgetContainer.mobile-enabled{
+  position: relative;
+  float: left;
+  width: 100%;
+}
+#_pi_surveyWidget{
+  width: 100% !important;
+  z-index: 1 !important;
+}
+div#_pi_surveyWidgetContainer:not(.mobile-enabled) {
+  position: fixed;
+  top: auto;
+  right: 4%;
+  left: auto;
+  bottom: 70px;
+  background-color: white !important;
+  max-width: 350px;
+}
+@media (max-width: 1045px){
+  div#_pi_surveyWidgetContainer:not(.mobile-enabled) {
+    bottom: 226px !important;
+  }
+}
+div#_pi_surveyWidgetContainer:not(.mobile-enabled) div#_pi_surveyWidget[survey-widget-type="inlinesurvey"] ._pi_closeButton{
+  opacity: 1 !important;
+}
+div#_pi_surveyWidgetContainer:not(.mobile-enabled)  ._pi_widgetContentContainer{
+  width:90% !important;
+}
+div#_pi_surveyWidgetContainer:not(.mobile-enabled) div#_pi_surveyWidget[survey-widget-type="inlinesurvey"] {
+  background-color: #e8eced;
+  border-color: #bfc6cb;
+  border-width: 1px 1px 0 1px;
+  border-style: solid;
+  border-radius: 0px;
+  box-shadow: 0px -1px 7px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 350px;
+  overflow: visible !important;
+  box-shadow:  0 2px 10px 2px rgba(0,0,0, 0.5) !important;
+}
+div#_pi_surveyWidgetContainer:not(.mobile-enabled) div#_pi_surveyWidget[survey-widget-type="inlinesurvey"] {
+  border-color: rgba(174, 174, 174, 0.6);
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 0px;
+}
+div#_pi_surveyWidgetContainer:not(.mobile-enabled) div#_pi_surveyWidget[survey-widget-type="inlinesurvey"] ._pi_closeButton {
+  color: #4a4a4a;
+  font-family: sans-serif;
+  font-size: 32px;
+  font-weight: lighter;
+  font-style: normal;
+  font-variant: normal;
+  text-align: center;
+  text-transform: normal;
+  text-decoration: none;
+  text-shadow: none;
+  letter-spacing: 0;
+  line-height: 100%;
+  background-color: transparent;
+  border-radius: 0px;
+  padding: 3px 5px;
+  margin: 0 0 0 auto;
+}
+div#_pi_surveyWidgetContainer:not(.mobile-enabled) div#_pi_surveyWidget[survey-widget-type="inlinesurvey"] ._pi_closeButton {
+  font-size: 26px;
+}
+
+div#_pi_surveyWidgetContainer:not(.mobile-enabled) div#_pi_surveyWidget[survey-widget-type="inlinesurvey"] ._pi_closeButton:hover {
+  color: #4a4a4a;
+  text-decoration: none;
+  background-color: transparent;
+}
+div#_pi_surveyWidgetContainer:not(.mobile-enabled) #_pi_surveyWidget[survey-widget-type="inlinesurvey"] ._pi_free_text_question_submit_button_container {
+  padding: 4px 0 2px 0 !important;
+  flex: 1 1 auto;
+}
+@media(max-height: 768px){
+  div#_pi_surveyWidgetContainer:not(.mobile-enabled) div#_pi_surveyWidget[survey-widget-type="inlinesurvey"] div._pi_widgetContentContainer ul._pi_answers_container li label{
+    padding: 7px 20px !important;
+    font-size: 12px !important;
+  }
+  div#_pi_surveyWidgetContainer:not(.mobile-enabled) div#_pi_surveyWidget[survey-widget-type="inlinesurvey"] div._pi_widgetContentContainer div._pi_question{
+    font-size: 16px !important;
+  }
+  div#_pi_surveyWidgetContainer:not(.mobile-enabled) div#_pi_surveyWidget[survey-widget-type="inlinesurvey"] ._pi_branding{
+
+  }
+}
+div#_pi_surveyWidget[survey-widget-type="inlinesurvey"]:after {
+    font-size: 11px;
+    color: #5f2167;
+    font-family: 'Dinot-Light';
+    position: absolute;
+    left: 50%;
+    right: 10px;
+    bottom: 11px;
+    text-align: right;
+}
+div#_pi_surveyWidget[survey-widget-type="inlinesurvey"] a._pi_branding {
+  opacity: 1 !important;
+  color: #5f2167;
+  font-size: 11px !important;
+  padding-bottom: 12px !important;
+  padding-left: 10px !important;
+  font-family: 'Dinot-Light';
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 50%;
+}
