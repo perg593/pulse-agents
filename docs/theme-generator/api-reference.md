@@ -4,7 +4,7 @@
 
 The following environment variables can be used to configure paths:
 
-- `PULSE_SASS_ROOT` - Path to SASS source files (default: `../Old-Pulse-Themes-Framework-2025/01-css-pulse`)
+- `PULSE_SASS_ROOT` - Path to SASS source files (default: `../sass-framework/01-css-pulse`)
 - `PULSE_OUTPUT_DIR` - Path to output directory (default: `./output`)
 
 ## API Endpoints

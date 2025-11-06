@@ -18,7 +18,7 @@ export function getSassRoot(): string {
     return path.resolve(envPath);
   }
   // Default relative to project root
-  return path.resolve(projectRoot, "../Old-Pulse-Themes-Framework-2025/01-css-pulse");
+  return path.resolve(projectRoot, "../sass-framework/01-css-pulse");
 }
 
 /**

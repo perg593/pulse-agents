@@ -16,7 +16,7 @@ function printUsage() {
   console.log(`Pulse Theme Mapper
 
 Usage:
-  tsx scripts/map-to-pulse.ts --raw ./output/raw-findings.json [--out ./output] [--sass ./Old-Pulse-Themes-Framework-2025/01-css-pulse]
+  tsx scripts/map-to-pulse.ts --raw ./output/raw-findings.json [--out ./output] [--sass ./sass-framework/01-css-pulse]
 `);
 }
 

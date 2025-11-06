@@ -175,7 +175,7 @@ SKIP_PUBLIC_SITE_TESTS=1 npm test
 ### Required Environment Variables (Optional)
 
 ```bash
-# SASS root directory (defaults to ../Old-Pulse-Themes-Framework-2025/01-css-pulse)
+# SASS root directory (defaults to ../sass-framework/01-css-pulse)
 export PULSE_SASS_ROOT=/path/to/sass
 
 # Output directory (defaults to ./output)

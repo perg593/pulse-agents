@@ -12,7 +12,7 @@ const SKIP = process.env.SKIP_PUBLIC_SITE_TESTS === "1";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, "../../../pulse-theme-generator-v2");
-const sassRoot = path.resolve(projectRoot, "../Old-Pulse-Themes-Framework-2025/01-css-pulse");
+const sassRoot = path.resolve(projectRoot, "../sass-framework/01-css-pulse");
 
 const fixtures = [
   {

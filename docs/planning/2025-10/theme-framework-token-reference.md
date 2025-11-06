@@ -2,18 +2,18 @@
 
 ## Purpose
 
-- Capture the complete token surface area exposed by the legacy CodeKit-based SCSS framework under `Old-Pulse-Themes-Framework/01-css-pulse`.
-- Translate the plain-language comments (“Multiple-choice border”, “Submit button bg hover”, etc.) into a reusable knowledge base for the modern, demo-focused theme generator.
-- Document where each legacy token is consumed so we can validate coverage, spot gaps, and decide which semantics are still relevant when producing quick “looks like your site” demos.
+- Capture the complete token surface area exposed by the legacy CodeKit-based SCSS framework under `sass-framework/01-css-pulse`.
+- Translate the plain-language comments ("Multiple-choice border", "Submit button bg hover", etc.) into a reusable knowledge base for the modern, demo-focused theme generator.
+- Document where each legacy token is consumed so we can validate coverage, spot gaps, and decide which semantics are still relevant when producing quick "looks like your site" demos.
 
 ## Architecture Snapshot
 
-- **Token Source:** `_variables.scss` defines raw values and includes explanatory comments for every widget part (`Old-Pulse-Themes-Framework/01-css-pulse/_variables.scss`).
+- **Token Source:** `_variables.scss` defines raw values and includes explanatory comments for every widget part (`sass-framework/01-css-pulse/_variables.scss`).
 - **Distribution Maps:** `_maps.scss` groups those values by component/state (backgrounds, typography, borders, spacing, etc.) so selectors can consume them.
 - **Selector Dictionary:** `_selectors.scss` lists every DOM slice touched by the framework, including widget types, question types, pseudo-states, and mobile variants.
 - **Rule Assembly:** `_theme-structure.scss` combines selector strings with the `@include builder(...)` mixin to emit the final CSS.
 - **Client Overrides:** `/02-css-clients/{client}/_default-1-variables.scss` mirrors `_variables.scss`, confirming which tokens were expected to change per brand.
-- **2025 Additions:** The updated drop (`Old-Pulse-Themes-Framework-2025`) introduces helper modules (`02-css-clients/_modules`) for button states and focus outlines, plus `exampleVariables.scss` that demonstrates consolidated tokens (e.g., `$btn-border-radius`) and a CSS-variable driven approach to interactive states.
+- **2025 Additions:** The updated drop (`sass-framework`) introduces helper modules (`02-css-clients/_modules`) for button states and focus outlines, plus `exampleVariables.scss` that demonstrates consolidated tokens (e.g., `$btn-border-radius`) and a CSS-variable driven approach to interactive states.
 
 ## Token Families & Semantics
 

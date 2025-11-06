@@ -20,7 +20,7 @@ function printUsage() {
   console.log(`Pulse Theme Generator v2
 
 Usage:
-  tsx scripts/extract-theme.ts --url https://example.com [--out ./output] [--pages 3] [--scheme light|dark] [--sass ./Old-Pulse-Themes-Framework-2025/01-css-pulse]
+  tsx scripts/extract-theme.ts --url https://example.com [--out ./output] [--pages 3] [--scheme light|dark] [--sass ./sass-framework/01-css-pulse]
 `);
 }
 

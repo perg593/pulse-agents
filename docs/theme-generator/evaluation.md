@@ -59,7 +59,7 @@ const paletteControlMap = new Map();   // ❌ DUPLICATE
 
 **Example** (`extract-theme.ts:68`):
 ```typescript
-const defaultSass = path.resolve(projectRoot, "../Old-Pulse-Themes-Framework-2025/01-css-pulse");
+const defaultSass = path.resolve(projectRoot, "../sass-framework/01-css-pulse");
 ```
 
 **Impact**: Brittle path assumptions that break if directory structure changes.
