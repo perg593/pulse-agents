@@ -200,26 +200,201 @@ function toPublicPath(filePath: string): string {
   return `/${relative.split(path.sep).join("/")}`;
 }
 
-function collectDistinctColors(findings: RawFinding[]): string[] {
+interface ColorCategory {
+  category: string;
+  colors: string[];
+}
+
+function categorizeColor(finding: RawFinding): string | null {
+  const normalizedName = finding.normalizedName.toLowerCase();
+  const value = finding.value.trim().toLowerCase();
+  
+  if (value.length === 0) return null;
+  
+  // Check computed selector from evidence (priority 1)
+  for (const source of finding.sources) {
+    if (source.type === "computed") {
+      const selector = source.selector.toLowerCase();
+      const property = source.property.toLowerCase();
+      
+      // Headings (h1, h2, h3 color properties)
+      if ((selector.includes("h1") || selector.includes("h2") || selector.includes("h3")) && property === "color") {
+        return "Headings";
+      }
+      
+      // Buttons (button/.btn background-color and color)
+      if ((selector.includes("button") || selector.includes(".btn")) && (property === "background-color" || property === "color")) {
+        return property === "background-color" ? "Button Backgrounds" : "Button Text";
+      }
+      
+      // Links (a color properties)
+      if (selector.includes("a[") && property === "color") {
+        return "Links";
+      }
+      
+      // Body text
+      if (selector.includes("body[") && property === "color") {
+        return "Text";
+      }
+      
+      // Cards/Surfaces
+      if (selector.includes(".card") && (property === "background-color" || property === "background")) {
+        return "Cards/Surfaces";
+      }
+    }
+    
+    // Check property type for CSS declarations
+    if (source.type === "css-prop" || source.type === "css-var") {
+      const property = source.property.toLowerCase();
+      const selector = source.selector.toLowerCase();
+      
+      // Headings from CSS rules
+      if ((selector.includes("h1") || selector.includes("h2") || selector.includes("h3")) && property === "color") {
+        return "Headings";
+      }
+      
+      // Buttons from CSS rules
+      if ((selector.includes("button") || selector.includes(".btn")) && (property === "background-color" || property === "color")) {
+        return property === "background-color" ? "Button Backgrounds" : "Button Text";
+      }
+      
+      // Links from CSS rules
+      if (selector.includes("a") && property === "color") {
+        return "Links";
+      }
+      
+      // Body/global backgrounds
+      if ((selector.includes("body") || selector.includes(":root") || selector.includes("html")) && 
+          (property === "background-color" || property === "background")) {
+        return "Backgrounds";
+      }
+      
+      // Body text
+      if ((selector.includes("body") || selector.includes(":root") || selector.includes("html")) && property === "color") {
+        return "Text";
+      }
+      
+      // Cards/Surfaces
+      if ((selector.includes(".card") || selector.includes(".surface") || selector.includes(".panel")) && 
+          (property === "background-color" || property === "background")) {
+        return "Cards/Surfaces";
+      }
+    }
+  }
+  
+  // Check normalized name patterns (priority 2)
+  if (normalizedName.includes("h1") || normalizedName.includes("h2") || normalizedName.includes("h3") || normalizedName.includes("heading")) {
+    if (normalizedName.includes("color")) {
+      return "Headings";
+    }
+  }
+  
+  if (normalizedName.includes("button") || normalizedName.includes("btn")) {
+    if (normalizedName.includes("background") || normalizedName.includes("bg")) {
+      return "Button Backgrounds";
+    }
+    if (normalizedName.includes("color")) {
+      return "Button Text";
+    }
+  }
+  
+  if (normalizedName.includes("link") || normalizedName.includes("a.")) {
+    if (normalizedName.includes("color")) {
+      return "Links";
+    }
+  }
+  
+  if (normalizedName.includes("background") || normalizedName.includes("bg")) {
+    if (normalizedName.includes("body") || normalizedName.includes("root") || normalizedName.includes("html")) {
+      return "Backgrounds";
+    }
+    if (normalizedName.includes("card") || normalizedName.includes("surface") || normalizedName.includes("panel")) {
+      return "Cards/Surfaces";
+    }
+    return "Backgrounds";
+  }
+  
+  if (normalizedName.includes("body") || normalizedName.includes("root") || normalizedName.includes("html")) {
+    if (normalizedName.includes("color")) {
+      return "Text";
+    }
+  }
+  
+  // Check property type (priority 3)
+  for (const source of finding.sources) {
+    if (source.type === "computed" || source.type === "css-prop") {
+      const property = source.property.toLowerCase();
+      if (property === "background-color" || property === "background") {
+        return "Backgrounds";
+      }
+      if (property === "color") {
+        return "Text";
+      }
+    }
+  }
+  
+  return null;
+}
+
+function collectDistinctColors(findings: RawFinding[]): ColorCategory[] {
   const colorRegex =
     /(#(?:[0-9a-fA-F]{3,8})(?![0-9a-fA-F]))|(rgba?\([^)]*\))|(hsla?\([^)]*\))|(\boklch\([^)]*\))/g;
-  const candidates = new Set<string>();
+  
+  const categoryMap = new Map<string, Set<string>>();
+  
+  // Initialize category order
+  const categoryOrder = [
+    "Headings",
+    "Button Backgrounds",
+    "Button Text",
+    "Links",
+    "Backgrounds",
+    "Text",
+    "Cards/Surfaces",
+    "Other"
+  ];
+  
+  for (const category of categoryOrder) {
+    categoryMap.set(category, new Set<string>());
+  }
+  
   for (const finding of findings) {
     if (finding.category === "color") {
       const normalized = finding.value.trim().toLowerCase();
       if (normalized.length === 0) continue;
-      candidates.add(normalized);
+      
+      const category = categorizeColor(finding) || "Other";
+      const categorySet = categoryMap.get(category) || categoryMap.get("Other")!;
+      categorySet.add(normalized);
       continue;
     }
-    let match: RegExpExecArray | null;
-    while ((match = colorRegex.exec(finding.value)) !== null) {
+    
+    // Extract colors from non-color findings (e.g., shadow values)
+    // Use matchAll to avoid regex state issues
+    const matches = finding.value.matchAll(colorRegex);
+    for (const match of matches) {
       const token = match[0]?.toLowerCase();
       if (token) {
-        candidates.add(token);
+        const category = categorizeColor(finding) || "Other";
+        const categorySet = categoryMap.get(category) || categoryMap.get("Other")!;
+        categorySet.add(token);
       }
     }
   }
-  return Array.from(candidates).slice(0, 24);
+  
+  // Convert to array format and filter empty categories
+  const result: ColorCategory[] = [];
+  for (const category of categoryOrder) {
+    const colors = Array.from(categoryMap.get(category)!);
+    if (colors.length > 0) {
+      result.push({
+        category,
+        colors: colors.slice(0, 12), // Limit colors per category
+      });
+    }
+  }
+  
+  return result;
 }
 
 function buildCssFromLegacyCompiler(legacyTokens: Record<string, unknown>): string {
@@ -298,3 +473,4 @@ app.listen(port, () => {
   console.log(`Pulse Theme Generator v2 UI available at http://localhost:${port}`);
   console.log(`Outputs will be saved under ${outputDir}`);
 });
+

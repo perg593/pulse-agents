@@ -39,6 +39,8 @@ const paletteSelectPrimary = document.getElementById("palette-primary");
 const paletteSelectSecondary = document.getElementById("palette-secondary");
 const paletteSelectBackground = document.getElementById("palette-background");
 const paletteSelectText = document.getElementById("palette-text");
+const paletteSelectBackground1 = document.getElementById("palette-background1");
+const paletteSelectBackground2 = document.getElementById("palette-background2");
 const paletteApplyButton = document.getElementById("apply-palette");
 const paletteStatus = document.getElementById("palette-status");
 const paletteDefaultList = document.getElementById("palette-default-list");
@@ -76,10 +78,12 @@ const PALETTE_GROUPS = [
 ];
 
 const paletteConfig = [
-  { target: "text", select: paletteSelectText, colorName: "color-1", group: "bodyPrimary", label: "Body text" },
-  { target: "primary", select: paletteSelectPrimary, colorName: "color-1-alt", group: "bodyPrimary", label: "Primary accents" },
-  { target: "background", select: paletteSelectBackground, colorName: "color-2", group: "surfaceSecondary", label: "Surface background" },
-  { target: "secondary", select: paletteSelectSecondary, colorName: "color-2-font", group: "surfaceSecondary", label: "Secondary text" },
+  { target: "background1", select: paletteSelectBackground1, colorName: "color-2", group: "background", label: "Background 1", swatchId: "background1-swatch", hexId: "background1-hex" },
+  { target: "background2", select: paletteSelectBackground2, colorName: "color-2", group: "background", label: "Background 2", swatchId: "background2-swatch", hexId: "background2-hex" },
+  { target: "text", select: paletteSelectText, colorName: "color-1", group: "bodyPrimary", label: "Color 1", swatchId: "color1-swatch", hexId: "color1-hex" },
+  { target: "primary", select: paletteSelectPrimary, colorName: "color-1-alt", group: "bodyPrimary", label: "Color 1 alternate", swatchId: "color1-alt-swatch", hexId: "color1-alt-hex" },
+  { target: "background", select: paletteSelectBackground, colorName: "color-2", group: "surfaceSecondary", label: "Color 2", swatchId: "color2-swatch", hexId: "color2-hex" },
+  { target: "secondary", select: paletteSelectSecondary, colorName: "color-2-font", group: "surfaceSecondary", label: "Color 2 alternate", swatchId: "color2-alt-swatch", hexId: "color2-alt-hex" },
 ];
 
 let latestCssSnippet = "";
@@ -269,17 +273,57 @@ function renderColors(colors) {
   }
   colorsSection.classList.remove("hidden");
   colorGrid.innerHTML = "";
-  for (const color of colors) {
-    const chip = document.createElement("div");
-    chip.className = "color-chip";
-    const swatch = document.createElement("div");
-    swatch.className = "color-swatch";
-    swatch.style.background = color;
-    chip.appendChild(swatch);
-    const label = document.createElement("code");
-    label.textContent = color;
-    chip.appendChild(label);
-    colorGrid.appendChild(chip);
+  
+  // Check if colors are categorized (new format) or flat array (old format)
+  const isCategorized = Array.isArray(colors) && colors.length > 0 && typeof colors[0] === 'object' && colors[0].category;
+  
+  if (isCategorized) {
+    // Render categorized colors
+    for (const category of colors) {
+      if (!category.colors || category.colors.length === 0) continue;
+      
+      // Create category section
+      const categorySection = document.createElement("div");
+      categorySection.className = "color-category-section";
+      
+      const categoryHeader = document.createElement("h4");
+      categoryHeader.className = "color-category-header";
+      categoryHeader.textContent = category.category;
+      categorySection.appendChild(categoryHeader);
+      
+      const categoryGrid = document.createElement("div");
+      categoryGrid.className = "color-grid";
+      
+      for (const color of category.colors) {
+        const chip = document.createElement("div");
+        chip.className = "color-chip";
+        const swatch = document.createElement("div");
+        swatch.className = "color-swatch";
+        swatch.style.background = color;
+        chip.appendChild(swatch);
+        const label = document.createElement("code");
+        label.textContent = color;
+        chip.appendChild(label);
+        categoryGrid.appendChild(chip);
+      }
+      
+      categorySection.appendChild(categoryGrid);
+      colorGrid.appendChild(categorySection);
+    }
+  } else {
+    // Render flat array (backward compatibility)
+    for (const color of colors) {
+      const chip = document.createElement("div");
+      chip.className = "color-chip";
+      const swatch = document.createElement("div");
+      swatch.className = "color-swatch";
+      swatch.style.background = color;
+      chip.appendChild(swatch);
+      const label = document.createElement("code");
+      label.textContent = color;
+      chip.appendChild(label);
+      colorGrid.appendChild(chip);
+    }
   }
 }
 
@@ -398,11 +442,41 @@ function resetCopyButton() {
 }
 
 hydrateStatus();
+
+// Read URL query parameters and auto-fill/submit form if present
+const urlParams = new URLSearchParams(window.location.search);
+const urlParam = urlParams.get("url");
+const schemeParam = urlParams.get("scheme");
+const pagesParam = urlParams.get("pages");
+
+if (urlParam) {
+  // Auto-fill form fields
+  const urlInput = document.getElementById("url-input");
+  const schemeInput = document.getElementById("scheme-input");
+  const pagesInput = document.getElementById("pages-input");
+  
+  if (urlInput) urlInput.value = decodeURIComponent(urlParam);
+  if (schemeInput && schemeParam) schemeInput.value = schemeParam;
+  if (pagesInput && pagesParam) pagesInput.value = pagesParam;
+  
+  // Auto-submit if URL is complete (not just "https://www.")
+  if (urlParam && urlParam !== "https://www." && urlParam.length > 12) {
+    // Wait for status to load, then submit
+    setTimeout(() => {
+      form.dispatchEvent(new Event("submit"));
+    }, 1000);
+  }
+}
 setInterval(hydrateStatus, 10000);
 
 function buildPaletteColors(data, colors) {
+  // Handle categorized colors (new format) or flat array (old format)
+  const flatColors = Array.isArray(colors) && colors.length > 0 && typeof colors[0] === 'object' && colors[0].category
+    ? colors.flatMap(cat => cat.colors || [])
+    : colors || [];
+  
   const set = new Set(
-    (colors || []).map((value) => value.trim().toLowerCase()).filter(Boolean),
+    flatColors.map((value) => value.trim().toLowerCase()).filter(Boolean),
   );
   if (data.summary?.colors) {
     Object.values(data.summary.colors).forEach((value) => {
@@ -429,6 +503,17 @@ function buildPaletteColors(data, colors) {
   return list;
 }
 
+function updateSwatchDisplay(swatchId, hexId, colorValue) {
+  const swatch = document.getElementById(swatchId);
+  const hex = document.getElementById(hexId);
+  if (swatch) {
+    swatch.style.background = colorValue || "transparent";
+  }
+  if (hex) {
+    hex.textContent = (colorValue || "#000000").toUpperCase();
+  }
+}
+
 function renderPaletteControls() {
   if (!paletteCard || !paletteForm || !latestSummary) {
     if (paletteCard) paletteCard.classList.add("hidden");
@@ -443,29 +528,10 @@ function renderPaletteControls() {
 
   paletteControlMap.clear();
 
-  const groupHeaders = new Map([
-    ["bodyPrimary", document.querySelector('[data-palette-group="bodyPrimary"] header p')],
-    ["surfaceSecondary", document.querySelector('[data-palette-group="surfaceSecondary"] header p')],
-  ]);
-
-  paletteConfig.forEach(({ select, colorName, label, group, target }) => {
-    if (!select) return;
-    const labelElement = select.previousElementSibling;
-    const defaultValue = normalizeColorValue(getSassDefaultValue(colorName));
-    if (labelElement) {
-      labelElement.textContent = defaultValue ? `${label} — default ${defaultValue.toUpperCase()}` : label;
-    }
-    const groupDescription = groupHeaders.get(group);
-    if (groupDescription) {
-      const baseText = group === "bodyPrimary" ? "$color-1 & $color-1-alt" : "$color-2 & $color-2-font";
-      groupDescription.textContent = `${baseText}${defaultValue ? ` · default ${defaultValue.toUpperCase()}` : ""}`;
-    }
-  });
-
   const defaults = initialPaletteSelections ?? buildInitialSelections(latestSummary);
   currentPaletteDefaults = { ...defaults };
 
-  const fillSelect = (select, value) => {
+  const fillSelect = (select, value, swatchId, hexId) => {
     if (!select) return;
     select.innerHTML = "";
     availablePaletteColors.forEach((color) => {
@@ -487,16 +553,26 @@ function renderPaletteControls() {
       option.selected = true;
       select.appendChild(option);
     }
+    // Update swatch and hex display
+    updateSwatchDisplay(swatchId, hexId, value || "");
   };
 
-  paletteConfig.forEach(({ target, select }) => {
-    const normalized = currentPaletteDefaults?.[target] ?? "";
-    fillSelect(select, normalized);
+  // Map old targets to new targets for background1/background2
+  const targetMapping = {
+    background1: "background",
+    background2: "background",
+  };
+
+  paletteConfig.forEach(({ target, select, swatchId, hexId }) => {
+    // For background1/background2, use the same default as background
+    const mappedTarget = targetMapping[target] || target;
+    const normalized = currentPaletteDefaults?.[mappedTarget] ?? "";
+    fillSelect(select, normalized, swatchId, hexId);
     if (select) {
       select.dataset.defaultValue = normalized;
-      reflectSelectionState(select);
       select.onchange = () => {
-        reflectSelectionState(select);
+        const selectedValue = select.value || "";
+        updateSwatchDisplay(swatchId, hexId, selectedValue);
         paletteStatus?.classList.add("hidden");
         updatePaletteActions();
         updatePalettePreview();
@@ -516,7 +592,11 @@ paletteForm?.addEventListener("submit", async (event) => {
   const selections = {};
   paletteControlMap.forEach(({ select }, target) => {
     const selected = select?.value ?? "";
-    selections[target] = selected ? selected : null;
+    // Map background1/background2 to background for API
+    const apiTarget = target === "background1" || target === "background2" ? "background" : target;
+    if (!selections[apiTarget]) {
+      selections[apiTarget] = selected ? selected : null;
+    }
   });
   isApplyingPalette = true;
   paletteApplyButton.disabled = true;
@@ -566,9 +646,14 @@ paletteForm?.addEventListener("submit", async (event) => {
 
 resetPaletteButton?.addEventListener("click", () => {
   if (!currentPaletteDefaults) return;
+  const targetMapping = {
+    background1: "background",
+    background2: "background",
+  };
   paletteControlMap.forEach(({ select }, target) => {
     if (!select) return;
-    const defaultValue = currentPaletteDefaults?.[target] ?? "";
+    const mappedTarget = targetMapping[target] || target;
+    const defaultValue = currentPaletteDefaults?.[mappedTarget] ?? "";
     if (!Array.from(select.options).some((option) => option.value === defaultValue)) {
       const option = document.createElement("option");
       option.value = defaultValue;
@@ -576,6 +661,11 @@ resetPaletteButton?.addEventListener("click", () => {
       select.appendChild(option);
     }
     select.value = defaultValue;
+    // Update swatch and hex display
+    const config = paletteConfig.find((c) => c.target === target);
+    if (config && config.swatchId && config.hexId) {
+      updateSwatchDisplay(config.swatchId, config.hexId, defaultValue);
+    }
     reflectSelectionState(select);
   });
   paletteStatus?.classList.add("hidden");
@@ -636,7 +726,7 @@ function renderDefaultColorPairs() {
     swatches.className = "palette-default-swatches";
     group.entries.forEach((entry) => {
       const defaultValue = getSassDefaultValue(entry.colorName);
-      const currentValue = (reference?.[entry.target] ?? defaultValue || "").toUpperCase();
+      const currentValue = ((reference?.[entry.target] ?? defaultValue) || "").toUpperCase();
       const swatchWrapper = document.createElement("div");
       swatchWrapper.className = "palette-default-swatch";
       const swatch = document.createElement("div");
@@ -656,21 +746,28 @@ function renderDefaultColorPairs() {
 }
 
 function reflectSelectionState(select) {
-  const parent = select.closest(".palette-field");
+  // Legacy function - kept for compatibility but not actively used in new design
   const defaultValue = select.dataset.defaultValue ?? "";
-  if (!parent) return;
   if ((select.value || "").toLowerCase() !== defaultValue) {
-    parent.classList.add("modified");
+    select.classList.add("modified");
   } else {
-    parent.classList.remove("modified");
+    select.classList.remove("modified");
   }
 }
 
 function getCurrentSelections() {
   const selections = {};
+  const targetMapping = {
+    background1: "background",
+    background2: "background",
+  };
   paletteControlMap.forEach(({ select }, target) => {
     if (!select) return;
-    selections[target] = normalizeColorValue(select.value);
+    const mappedTarget = targetMapping[target] || target;
+    // Use first value if multiple targets map to same (e.g., background1/background2 -> background)
+    if (!selections[mappedTarget]) {
+      selections[mappedTarget] = normalizeColorValue(select.value);
+    }
   });
   return selections;
 }

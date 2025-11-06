@@ -111,75 +111,90 @@
         <div id="palette-card" class="palette-card hidden">
           <div class="palette-header">
             <h3>Customize palette</h3>
-            <div class="palette-actions-row">
-              <button type="button" id="reset-palette" class="palette-btn secondary">Reset to defaults</button>
-            </div>
+            <button type="button" id="reset-palette" class="palette-btn secondary">Reset to defaults</button>
           </div>
-          <div class="palette-layout">
-            <section class="palette-defaults">
-              <h4>Pulse color pairs</h4>
-              <div id="palette-default-list" class="palette-default-list"></div>
-            </section>
-            <div class="palette-workspace">
-              <form id="palette-form" class="palette-form">
-                <section class="palette-group" data-palette-group="bodyPrimary">
-                  <header>
-                    <h4>Body + Primary pair</h4>
-                    <p>Maps to `$color-1` & `$color-1-alt`</p>
-                  </header>
-                  <label class="palette-field">
-                    <span>Body text</span>
-                    <select id="palette-text" name="text"></select>
-                  </label>
-                  <label class="palette-field">
-                    <span>Primary accents</span>
-                    <select id="palette-primary" name="primary"></select>
-                  </label>
-                </section>
-                <section class="palette-group" data-palette-group="surfaceSecondary">
-                  <header>
-                    <h4>Surface + Secondary pair</h4>
-                    <p>Maps to `$color-2` & `$color-2-font`</p>
-                  </header>
-                  <label class="palette-field">
-                    <span>Surface background</span>
-                    <select id="palette-background" name="background"></select>
-                  </label>
-                  <label class="palette-field">
-                    <span>Secondary text</span>
-                    <select id="palette-secondary" name="secondary"></select>
-                  </label>
-                </section>
-                <button type="submit" id="apply-palette" class="palette-btn primary">Apply selection</button>
-              </form>
-              <section class="palette-preview">
-                <h4>Preview</h4>
-                <div class="palette-preview-grid">
-                  <div class="preview-item" data-preview="primary">
-                    <span>Primary</span>
-                    <div class="swatch"></div>
-                    <code></code>
-                  </div>
-                  <div class="preview-item" data-preview="secondary">
-                    <span>Secondary</span>
-                    <div class="swatch"></div>
-                    <code></code>
-                  </div>
-                  <div class="preview-item" data-preview="background">
-                    <span>Background</span>
-                    <div class="swatch"></div>
-                    <code></code>
-                  </div>
-                  <div class="preview-item" data-preview="text">
-                    <span>Text</span>
-                    <div class="swatch"></div>
-                    <code></code>
+          <form id="palette-form" class="palette-form">
+            <section class="palette-section">
+              <h4 class="palette-section-title">Background Colors</h4>
+              <div class="palette-section-content">
+                <div class="palette-item">
+                  <label class="palette-label">Background 1</label>
+                  <div class="palette-input-wrapper">
+                    <div class="palette-swatch-display">
+                      <div class="palette-swatch" id="background1-swatch"></div>
+                      <code class="palette-hex" id="background1-hex">#000000</code>
+                    </div>
+                    <select id="palette-background1" name="background1" class="palette-select"></select>
                   </div>
                 </div>
-              </section>
-              <p id="palette-status" class="palette-status hidden"></p>
-            </div>
-          </div>
+                <div class="palette-item">
+                  <label class="palette-label">Background 2</label>
+                  <div class="palette-input-wrapper">
+                    <div class="palette-swatch-display">
+                      <div class="palette-swatch" id="background2-swatch"></div>
+                      <code class="palette-hex" id="background2-hex">#000000</code>
+                    </div>
+                    <select id="palette-background2" name="background2" class="palette-select"></select>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="palette-section">
+              <h4 class="palette-section-title">Color 1 (Body Text & Primary Accents)</h4>
+              <div class="palette-section-content">
+                <div class="palette-item">
+                  <label class="palette-label">Color 1</label>
+                  <div class="palette-input-wrapper">
+                    <div class="palette-swatch-display">
+                      <div class="palette-swatch" id="color1-swatch"></div>
+                      <code class="palette-hex" id="color1-hex">#000000</code>
+                    </div>
+                    <select id="palette-text" name="text" class="palette-select"></select>
+                  </div>
+                </div>
+                <div class="palette-item">
+                  <label class="palette-label">Color 1 alternate</label>
+                  <div class="palette-input-wrapper">
+                    <div class="palette-swatch-display">
+                      <div class="palette-swatch" id="color1-alt-swatch"></div>
+                      <code class="palette-hex" id="color1-alt-hex">#000000</code>
+                    </div>
+                    <select id="palette-primary" name="primary" class="palette-select"></select>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="palette-section">
+              <h4 class="palette-section-title">Color 2 (Surface Background & Secondary Text)</h4>
+              <div class="palette-section-content">
+                <div class="palette-item">
+                  <label class="palette-label">Color 2</label>
+                  <div class="palette-input-wrapper">
+                    <div class="palette-swatch-display">
+                      <div class="palette-swatch" id="color2-swatch"></div>
+                      <code class="palette-hex" id="color2-hex">#000000</code>
+                    </div>
+                    <select id="palette-background" name="background" class="palette-select"></select>
+                  </div>
+                </div>
+                <div class="palette-item">
+                  <label class="palette-label">Color 2 alternate</label>
+                  <div class="palette-input-wrapper">
+                    <div class="palette-swatch-display">
+                      <div class="palette-swatch" id="color2-alt-swatch"></div>
+                      <code class="palette-hex" id="color2-alt-hex">#000000</code>
+                    </div>
+                    <select id="palette-secondary" name="secondary" class="palette-select"></select>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <button type="submit" id="apply-palette" class="palette-btn primary generate-theme-btn">Generate Theme</button>
+          </form>
+          <p id="palette-status" class="palette-status hidden"></p>
         </div>
         <div id="css-card" class="copy-card hidden">
           <div class="copy-card__header">
@@ -191,7 +206,7 @@
         </div>
         <div id="colors-section" class="hidden">
           <h3>Distinct colors detected</h3>
-          <div id="color-swatches" class="color-grid"></div>
+          <div id="color-swatches" class="colors-container"></div>
         </div>
         <div id="errors-container" class="hidden">
           <h3>Extraction warnings</h3>
