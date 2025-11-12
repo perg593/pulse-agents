@@ -1,0 +1,41 @@
+%% Pulse Widgets Data Model - Database Schema ERD
+
+erDiagram
+    ACCOUNTS ||--o{ SURVEYS : "has"
+    SURVEYS ||--o| THEMES : "uses"
+    SURVEYS ||--o{ APPLIED_SURVEY_TAGS : "has"
+    SURVEY_TAGS ||--o{ APPLIED_SURVEY_TAGS : "tagged"
+    
+    ACCOUNTS {
+        int id PK
+        string name
+        string identifier
+    }
+    
+    SURVEYS {
+        int id PK
+        int account_id FK
+        int theme_id FK
+        string name
+        int status
+        int survey_type
+        string inline_target_selector
+        text custom_css
+    }
+    
+    THEMES {
+        int id PK
+        string name
+        text css
+    }
+    
+    SURVEY_TAGS {
+        int id PK
+        string name
+    }
+    
+    APPLIED_SURVEY_TAGS {
+        int survey_id FK
+        int survey_tag_id FK
+    }
+

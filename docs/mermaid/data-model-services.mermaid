@@ -1,0 +1,28 @@
+%% Pulse Widgets Data Model - Service Models ERD
+
+erDiagram
+    SURVEY_RECORD ||--o| ACCOUNT_INFO : "belongs to"
+    SURVEY_RECORD ||--o| THEME_DESCRIPTOR : "uses"
+    
+    SURVEY_RECORD {
+        string id
+        string label
+        string identifier
+        string backgroundUrl
+    }
+    
+    ACCOUNT_INFO {
+        string name
+        string identifier
+    }
+    
+    THEME_DESCRIPTOR {
+        string id
+        string label
+        string origin
+        string href
+        string blobUrl
+        object tokens
+        object meta
+    }
+

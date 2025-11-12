@@ -26,13 +26,8 @@
   const bootCommands = Array.isArray(w.PULSE_TAG_BOOT_COMMANDS) ? w.PULSE_TAG_BOOT_COMMANDS : [];
 
   let deferredPresentIds = [];
-  try {
-    const params = new URLSearchParams(w.location.search);
-    deferredPresentIds = deferredPresentIds.concat(params.getAll('pi_present').filter(Boolean));
-  } catch (error) {
-    // URL parsing failed; ignore and continue booting the tag.
-  }
-
+  // Note: We do NOT read 'present' parameter from URL here to avoid conflicts with Pulse Insights service.
+  // The player iframe sets PULSE_TAG_PRESENT_IDS which is the only source for auto-present IDs.
   if (Array.isArray(w.PULSE_TAG_PRESENT_IDS)) {
     deferredPresentIds = deferredPresentIds.concat(w.PULSE_TAG_PRESENT_IDS.filter(Boolean));
   }
