@@ -196,6 +196,9 @@ class PresentationDeduplicator {
       source
     });
 
+    // Cleanup old entries immediately to reduce memory footprint
+    this.cleanupAfterRecord();
+
     // Persist state
     if (this.persistState) {
       this.saveState();
@@ -252,6 +255,7 @@ class PresentationDeduplicator {
 
   /**
    * Clean up old entries (older than 2x cooldown)
+   * More aggressive cleanup - called on every operation
    * @private
    */
   cleanup() {
@@ -271,6 +275,16 @@ class PresentationDeduplicator {
       }
       log.debug('Cleaned up old presentation history entries', { cleaned });
     }
+  }
+
+  /**
+   * Clean up old entries immediately after recording presentation
+   * More aggressive cleanup to reduce memory footprint
+   * @private
+   */
+  cleanupAfterRecord() {
+    // Cleanup immediately after recording to keep memory footprint small
+    this.cleanup();
   }
 
   /**
