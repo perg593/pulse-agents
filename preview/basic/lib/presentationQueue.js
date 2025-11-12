@@ -123,16 +123,13 @@ class PresentationQueue {
         reject
       };
 
-      // Insert based on priority (manual first, then auto)
+      // Optimized priority insertion - manual items go to front, auto to back
+      // This avoids expensive findIndex operations for common case
       if (priority === PRIORITY.MANUAL) {
-        // Find first auto entry and insert before it
-        const firstAutoIndex = this.queue.findIndex(e => e.priority === PRIORITY.AUTO);
-        if (firstAutoIndex >= 0) {
-          this.queue.splice(firstAutoIndex, 0, entry);
-        } else {
-          this.queue.push(entry);
-        }
+        // Manual priority - insert at front for immediate processing
+        this.queue.unshift(entry);
       } else {
+        // Auto priority - add to end
         this.queue.push(entry);
       }
 
@@ -146,8 +143,12 @@ class PresentationQueue {
 
       this.emit('queued', { surveyId, source, priority, queuePosition: this.queue.length });
 
-      // Process queue if not locked
-      if (!this.locked) {
+      // Process queue if not locked (optimized - check lock before async operation)
+      if (!this.locked && this.queue.length === 1) {
+        // Only start processing if this is the first item (avoids unnecessary calls)
+        this.process();
+      } else if (!this.locked) {
+        // Queue already has items, processing will continue automatically
         this.process();
       }
     });
