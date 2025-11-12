@@ -719,6 +719,33 @@ select {
   transform: translateX(-50%) translateY(0);
 }
 
+.pi-present-id-not-found {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) translateY(-10px);
+  background: rgba(15, 23, 42, 0.95);
+  color: #f8fafc;
+  padding: 16px 24px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.4);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 100;
+  pointer-events: none;
+  font-family: 'Raleway', 'Helvetica Neue', Arial, sans-serif;
+}
+
+.pi-present-id-not-found.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, -50%) translateY(0);
+}
+
 .behavior-lab__stage {
   display: flex;
   flex-direction: column;

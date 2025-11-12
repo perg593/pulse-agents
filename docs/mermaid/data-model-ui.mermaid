@@ -1,0 +1,38 @@
+%% Pulse Widgets Data Model - UI Data Models ERD
+
+erDiagram
+    PREVIEW_STORE ||--o{ SURVEY_RECORD : "contains"
+    PREVIEW_STORE ||--o| SURVEY_RECORD : "selected"
+    PREVIEW_STORE ||--o{ THEME_DESCRIPTOR : "themes"
+    PREVIEW_STORE ||--o| THEME_DESCRIPTOR : "active"
+    PREVIEW_STORE ||--o{ LOG_ENTRY : "logs"
+    
+    PREVIEW_STORE {
+        string url
+        string device
+        string placement
+        boolean safeArea
+        boolean tagReady
+        string agentStatus
+        string lastPresentedId
+        string pendingSurveyId
+        array agents
+        object selectedAgent
+        map stylesheetRegistry
+        array generatedThemeAssets
+        string activeThemeId
+        array logs
+        string themeMode
+        string brandColor
+        number radius
+        number density
+    }
+    
+    LOG_ENTRY {
+        number ts
+        string level
+        string source
+        string message
+        object data
+    }
+

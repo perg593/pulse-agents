@@ -114,6 +114,19 @@ const overlayContainer = (() => {
   container.style.pointerEvents = 'none';
   return container;
 })();
+
+// Create "ID Not Found" overlay element
+const idNotFoundOverlay = (() => {
+  const overlay = document.createElement('div');
+  overlay.className = 'pi-present-id-not-found';
+  overlay.textContent = 'ID Not Found';
+  overlay.setAttribute('aria-live', 'polite');
+  overlay.setAttribute('aria-atomic', 'true');
+  if (siteRoot) {
+    siteRoot.appendChild(overlay);
+  }
+  return overlay;
+})();
 const surveyBridge = createSurveyBridge({
   container: overlayContainer,
   onReady: handlePlayerReady,
@@ -173,6 +186,13 @@ const logBehavior = installBehaviorLogProxy({ logBehavior: baseBehaviorLog });
 let latestThemes = [];
 let currentIndustry = '__all';
 let themeEntryById = new Map();
+/**
+ * Flag to prevent simulation events from being processed by behavior detectors.
+ * When true, behavior detector handlers (handlePointerLeave, handleRagePointer, handleScroll, noteBehaviorActivity)
+ * will return early without processing events. This prevents simulation functions from triggering duplicate behavior detections.
+ * @type {boolean}
+ */
+let isSimulatingBehavior = false;
 
 const params = new URLSearchParams(window.location.search);
 const demoCodeFilter = (params.get('demo') || params.get('demo_code') || '').trim().toLowerCase();
@@ -180,6 +200,15 @@ const demoForFilterRaw = (params.get('demo_for') || '').trim();
 const demoForFilterParam = demoForFilterRaw ? demoForFilterRaw.toLowerCase() : '';
 const demoDismissed = params.get('demo_dismissed') === 'true';
 const demoForFilter = demoDismissed ? '' : demoForFilterParam;
+
+// Parse present parameter (4-digit survey ID)
+const presentParam = (params.get('present') || '').trim();
+const presentSurveyId = (() => {
+  if (!presentParam) return null;
+  // Validate: must be exactly 4 digits
+  if (!/^\d{4}$/.test(presentParam)) return null;
+  return presentParam;
+})();
 
 const loadedAssets = new Set();
 let tagReady = false;
@@ -194,6 +223,8 @@ let activePresentOperation = null;
 let presentOperationId = 0;
 let surveyBridgeReady = false;
 let lastPresentedOptionId = null;
+// Track if present parameter has already triggered a presentation to prevent double triggers
+let presentTriggered = false;
 let logVisible = false;
 let railOpen = false;
 let sequenceBuffer = '';
@@ -212,6 +243,8 @@ let demoDirectoryActive = false;
 let demoDirectoryOptions = [];
 let lastDemoDirectoryFocus = null;
 let currentBackgroundUrl = DEFAULT_HOST_URL;
+// Flag to prevent change event handler from running when setting survey programmatically
+let isSettingSurveyProgrammatically = false;
 let playerFrameEl = null;
 let playerWidgetRect = null;
 let playerViewportSize = { width: 0, height: 0 };
@@ -453,16 +486,32 @@ async function init() {
 
   applyIdentifier(surveyInfo?.identifier || DEFAULT_IDENTIFIER);
   const hasDemoFilter = Boolean(demoCodeFilter || demoForFilter);
-  const requestedHost = hasDemoFilter ? surveyInfo?.backgroundUrl || '' : '';
+  
+  // Check if present parameter is set - if so, use that survey's background instead of default
+  let requestedHost = '';
+  if (presentSurveyId) {
+    const presentRecord = findRecordBySurveyId(presentSurveyId);
+    if (presentRecord && presentRecord.backgroundUrl) {
+      requestedHost = presentRecord.backgroundUrl;
+      addLog(`Using background URL from present survey ${presentSurveyId}: ${requestedHost}`, 'info');
+    }
+  }
+  
+  // Fall back to demo filter or default if present parameter didn't provide a background
+  if (!requestedHost) {
+    requestedHost = hasDemoFilter ? surveyInfo?.backgroundUrl || '' : '';
+  }
+  
   const hostToLoad = requestedHost || DEFAULT_HOST_URL;
-  if (!hasDemoFilter) {
+  if (!hasDemoFilter && !presentSurveyId) {
     addLog(`No demo parameter detected; defaulting host to ${DEFAULT_HOST_URL}.`);
-  } else if (!requestedHost) {
-    addLog(`Demo parameter provided but no background URL found; falling back to ${DEFAULT_HOST_URL}.`, 'warn');
+  } else if (!requestedHost && (hasDemoFilter || presentSurveyId)) {
+    addLog(`Background URL not found; falling back to ${DEFAULT_HOST_URL}.`, 'warn');
   }
 
   let hostLoaded = false;
-  hostLoaded = await loadHostPage(hostToLoad);
+  // Skip bridge load if present parameter is set - presentSurvey() will handle it with correct account
+  hostLoaded = await loadHostPage(hostToLoad, { skipBridgeLoad: Boolean(presentSurveyId) });
   if (hostLoaded && hostToLoad) {
     currentBackgroundUrl = normalizeBackgroundUrl(hostToLoad) || hostToLoad;
     if (backgroundInput) {
@@ -471,7 +520,16 @@ async function init() {
   }
 
   await initializeThemeSelect();
-  await bootPulseTag();
+  
+  // Skip loading Pulse Insights tag in main document when present parameter is active
+  // The tag should only be loaded inside the player iframe, not in the main document
+  // This prevents duplicate survey widgets from being created in the main document
+  if (!presentSurveyId) {
+    await bootPulseTag();
+  } else {
+    addLog('Skipping Pulse tag boot in main document - tag will be loaded inside player iframe only', 'info');
+  }
+  
   wireUi();
   setRailOpen(false);
   setLogVisibility(false);
@@ -482,8 +540,14 @@ async function init() {
     updateBehaviorSurveyLabel();
   }
 
+  // Handle present parameter if present
+  if (presentSurveyId) {
+    await handlePresentParameter();
+  }
+
   // Surface the demo directory so presenters can pick the correct demo before interacting.
-  if (demoDirectoryOptions.length && !demoForFilterParam && !demoDismissed) {
+  // Skip demo directory if present parameter is set (user wants specific survey)
+  if (demoDirectoryOptions.length && !demoForFilterParam && !demoDismissed && !presentSurveyId) {
     openDemoDirectory();
     logBehavior('Demo directory opened by default so the demo context is explicit.');
   } else {
@@ -497,12 +561,27 @@ function wireUi() {
   });
 
   surveySelect.addEventListener('change', async () => {
+    // Skip if this change was triggered programmatically (e.g., from present parameter)
+    if (isSettingSurveyProgrammatically) {
+      return;
+    }
+    
     if (railOpen) {
       setRailOpen(false);
     }
     
     const newOptionId = surveySelect.value;
     const record = findRecordByOptionId(newOptionId);
+    
+    // Skip if present parameter has already triggered a presentation for this survey
+    // This prevents double triggers when present parameter sets the select value
+    if (presentTriggered && presentSurveyId && record && String(record.surveyId) === String(presentSurveyId)) {
+      addLog('Skipping survey select change handler - present parameter already handled this survey', 'info', {
+        surveyId: presentSurveyId,
+        optionId: newOptionId
+      });
+      return;
+    }
     
     if (!record) {
       addLog('Invalid survey selection', 'warn', { optionId: newOptionId });
@@ -629,15 +708,17 @@ function wireUi() {
   refreshAccordionHeights();
 }
 
-async function loadHostPage(url) {
-  const playerFrame = surveyBridge.load({
-    account: DEFAULT_IDENTIFIER,
-    host: DEFAULT_PULSE_HOST,
-    themeCss: resolveThemeHref(currentThemeHref) || undefined,
-    tagSrc: resolveProxyUrl(DEFAULT_TAG_SRC),
-    proxyOrigin: getProxyOrigin()
-  });
-  registerPlayerFrame(playerFrame);
+async function loadHostPage(url, { skipBridgeLoad = false } = {}) {
+  if (!skipBridgeLoad) {
+    const playerFrame = surveyBridge.load({
+      account: DEFAULT_IDENTIFIER,
+      host: DEFAULT_PULSE_HOST,
+      themeCss: resolveThemeHref(currentThemeHref) || undefined,
+      tagSrc: resolveProxyUrl(DEFAULT_TAG_SRC),
+      proxyOrigin: getProxyOrigin()
+    });
+    registerPlayerFrame(playerFrame);
+  }
 
   const target = (url || '').trim();
   if (!target) {
@@ -650,6 +731,19 @@ async function loadHostPage(url) {
   }
   siteRoot.innerHTML = '';
   siteRoot.classList.remove('loaded-site');
+
+  // Clear any existing iframes from overlayContainer before re-adding it
+  // This prevents duplicate survey widgets when loadHostPage is called multiple times
+  if (overlayContainer) {
+    const existingIframes = overlayContainer.querySelectorAll('iframe');
+    existingIframes.forEach(iframe => {
+      try {
+        iframe.remove();
+      } catch (_error) {
+        // Ignore errors when removing iframes
+      }
+    });
+  }
 
   const frame = document.createElement('iframe');
   frame.className = 'background-frame';
@@ -964,6 +1058,152 @@ async function populateSurveySelect() {
   };
 }
 
+async function handlePresentParameter() {
+  if (!presentSurveyId) return;
+  
+  // Prevent double triggers - if we've already handled present parameter, don't do it again
+  if (presentTriggered) {
+    addLog(`present parameter already triggered, skipping duplicate call.`, 'warn', {
+      stack: new Error().stack
+    });
+    return;
+  }
+  
+  // Mark as triggered immediately to prevent race conditions
+  presentTriggered = true;
+  addLog(`present parameter trigger flag set to prevent duplicates`, 'info', {
+    surveyId: presentSurveyId,
+    stack: new Error().stack
+  });
+  
+  // Remove any survey widgets that may have been created in the main document
+  // (e.g., if bootPulseTag was called before present parameter was detected, or if tag loaded asynchronously)
+  // Survey widgets should only exist inside the player iframe, not in the main document
+  const mainDocWidgetContainer = document.getElementById('_pi_surveyWidgetContainer');
+  if (mainDocWidgetContainer) {
+    // Check if it's not inside overlayContainer (which contains the player iframe)
+    // or if it's directly in the body or another part of the main document
+    const isInMainDocument = mainDocWidgetContainer.parentNode !== overlayContainer &&
+                              (mainDocWidgetContainer.parentNode === document.body ||
+                               !overlayContainer.contains(mainDocWidgetContainer));
+    
+    if (isInMainDocument) {
+      addLog('Removing survey widget from main document - should only exist in player iframe', 'info', {
+        surveyId: presentSurveyId,
+        parentNode: mainDocWidgetContainer.parentNode?.tagName || 'unknown'
+      });
+      try {
+        mainDocWidgetContainer.remove();
+      } catch (_error) {
+        addLog('Error removing survey widget from main document', 'warn', {
+          error: _error.message
+        });
+      }
+    }
+  }
+  
+  // Also check for the widget element itself (in case container was already removed)
+  const mainDocWidget = document.getElementById('_pi_surveyWidget');
+  if (mainDocWidget && mainDocWidget.parentNode !== overlayContainer) {
+    const isInMainDocument = mainDocWidget.parentNode === document.body ||
+                             !overlayContainer.contains(mainDocWidget);
+    if (isInMainDocument) {
+      addLog('Removing survey widget element from main document', 'info', {
+        surveyId: presentSurveyId
+      });
+      try {
+        mainDocWidget.remove();
+      } catch (_error) {
+        addLog('Error removing survey widget element from main document', 'warn', {
+          error: _error.message
+        });
+      }
+    }
+  }
+  
+  // Wait a bit for the UI to settle
+  await new Promise((resolve) => setTimeout(resolve, 100));
+  
+  // Find the survey by ID
+  const record = findRecordBySurveyId(presentSurveyId);
+  
+  if (!record) {
+    // Survey not found - show overlay and keep default state
+    addLog(`Survey ID ${presentSurveyId} not found in survey list.`, 'warn');
+    showIdNotFoundOverlay();
+    // Reset flag so user can try again if they fix the URL
+    presentTriggered = false;
+    return;
+  }
+  
+  // Find the option ID for this record in surveyRecords (filtered list)
+  let optionId = surveyRecords.find((r) => String(r.surveyId).trim() === String(record.surveyId).trim())?.__optionId;
+  
+  if (!optionId) {
+    // Record exists but wasn't included in filtered results
+    // Try to create an option ID for it manually so we can still present it
+    const index = allSurveyRecords.findIndex((r) => String(r.surveyId).trim() === String(record.surveyId).trim());
+    if (index >= 0) {
+      optionId = createRecordOptionId(record, index);
+      // Add to surveyRecords temporarily so presentSurvey can find it
+      const enriched = { ...record, __optionId: optionId };
+      surveyRecords.push(enriched);
+      // Also add to select dropdown
+      const option = document.createElement('option');
+      option.value = optionId;
+      option.textContent = formatSurveyOptionLabel(enriched);
+      if (surveySelect) {
+        surveySelect.appendChild(option);
+      }
+    } else {
+      addLog(`Survey ID ${presentSurveyId} found but could not create option.`, 'warn');
+      showIdNotFoundOverlay();
+      // Reset flag so user can try again if they fix the URL
+      presentTriggered = false;
+      return;
+    }
+  }
+  
+  // Set the survey select value
+  if (surveySelect) {
+    isSettingSurveyProgrammatically = true;
+    surveySelect.value = optionId;
+    // Keep flag true during async operations to prevent change event handler from running
+    // We'll reset it after presentSurvey completes
+  }
+  
+  // Update behavior survey label
+  updateBehaviorSurveyLabel();
+  
+  // Wait for tag to be ready before presenting
+  if (!tagReady) {
+    addLog(`Waiting for tag to be ready before presenting survey ${presentSurveyId}...`, 'info');
+    // Wait for tag ready
+    if (tagReadyPromise) {
+      await tagReadyPromise.catch(() => {});
+    }
+  }
+  
+  // Present the survey
+  addLog(`Auto-presenting survey ${presentSurveyId} from present parameter.`, 'info', {
+    optionId,
+    surveyId: presentSurveyId,
+    presentTriggered,
+    activePresentOperation: activePresentOperation?.key || null,
+    lastPresentedOptionId
+  });
+  
+  try {
+    await presentSurvey(optionId, { force: true });
+  } finally {
+    // Reset flag after presentSurvey completes (or fails)
+    // Use setTimeout to ensure any queued change events have been processed
+    setTimeout(() => {
+      isSettingSurveyProgrammatically = false;
+    }, 0);
+  }
+}
+
 async function fetchSurveySheet() {
   addLog('Loading survey list from Google Sheet…');
   try {
@@ -1161,6 +1401,31 @@ async function presentSurvey(optionId, options = {}) {
       return;
     }
 
+    // For present parameter scenarios, prevent double presentation
+    // Check if this is the present parameter survey and if we've already started/completed presenting it
+    if (presentSurveyId && String(record.surveyId) === String(presentSurveyId)) {
+      const optionIdStr = record.__optionId || String(record.surveyId || '');
+      // If we've already triggered present parameter and there's an active operation for this survey, skip
+      // This prevents double triggers when present parameter is active
+      if (presentTriggered && activePresentOperation && activePresentOperation.surveyId === record.surveyId && !options.forceReload && !options.allowDuplicate) {
+        addLog(
+          `present parameter survey ${record.surveyId} presentation already in progress; skipping duplicate presentSurvey call.`,
+          'info',
+          { operationId: operationKey, surveyId: record.surveyId, activeOperationId: activePresentOperation.key }
+        );
+        return;
+      }
+      // Also check if we've already completed presenting this survey
+      if (presentTriggered && lastPresentedOptionId === optionIdStr && !options.force && !options.forceReload && !options.allowDuplicate) {
+        addLog(
+          `present parameter survey ${record.surveyId} already presented; skipping duplicate presentSurvey call.`,
+          'info',
+          { operationId: operationKey, surveyId: record.surveyId }
+        );
+        return;
+      }
+    }
+
     // Cancel previous operation if still in progress
     if (activePresentOperation && activePresentOperation.cancelToken) {
       addLog(
@@ -1228,7 +1493,10 @@ async function presentSurvey(optionId, options = {}) {
       'info',
       { operationId: operationKey, step: 1, total: 4, surveyId: record.surveyId }
     );
-    await ensureBackgroundForRecord(record, { force: Boolean(force) });
+    await ensureBackgroundForRecord(record, { 
+      force: Boolean(force),
+      skipBridgeLoad: Boolean(presentSurveyId)
+    });
 
     // Step 2: Ensure player loaded and ready
     if (cancelled) return;
@@ -1238,7 +1506,8 @@ async function presentSurvey(optionId, options = {}) {
       { operationId: operationKey, step: 2, total: 4, surveyId: record.surveyId }
     );
     const ensureResult = ensurePlayerLoadedForRecord(record, {
-      forceReload: Boolean(forceReload || force)
+      forceReload: Boolean(forceReload || force),
+      excludePresent: true  // Don't auto-present via URL, we'll call sendPresentForRecord explicitly
     });
     
     // Wait for player bridge to be ready
@@ -1346,10 +1615,25 @@ function sendPresentForRecord(record, { force = false, forceReload = false, allo
     return;
   }
 
+  // For present parameter scenarios, check if we've already presented this survey
+  // This prevents double triggers when present parameter is active
+  if (presentSurveyId && String(surveyId) === String(presentSurveyId) && !force && !forceReload && !allowDuplicate && lastPresentedOptionId === optionId) {
+    addLog(
+      `present parameter survey ${label} already presented; skipping duplicate.`,
+      'info',
+      { operationId: opKey, surveyId: label }
+    );
+    setSurveyStatus(`Survey: already presenting ${label}`);
+    return;
+  }
+
   const ensureResult =
     ensured && ensured.config
       ? ensured
-      : ensurePlayerLoadedForRecord(record, { forceReload: Boolean(force || forceReload) });
+      : ensurePlayerLoadedForRecord(record, { 
+          forceReload: Boolean(force || forceReload),
+          excludePresent: true  // Don't auto-present via URL, we're calling present explicitly
+        });
   const reloaded = Boolean(ensureResult && ensureResult.reloaded);
 
   if (!force && !forceReload && !allowDuplicate && !reloaded && lastPresentedOptionId === optionId) {
@@ -1463,6 +1747,24 @@ function findRecordByOptionId(optionId) {
   return surveyRecords.find((record) => record.__optionId === optionId) || null;
 }
 
+function findRecordBySurveyId(surveyId) {
+  if (!surveyId) return null;
+  const idStr = String(surveyId).trim();
+  // Search in allSurveyRecords first (before filtering)
+  return allSurveyRecords.find((record) => String(record.surveyId).trim() === idStr) || null;
+}
+
+function showIdNotFoundOverlay() {
+  if (!idNotFoundOverlay) return;
+  idNotFoundOverlay.classList.add('is-visible');
+  // Auto-hide after 4 seconds
+  setTimeout(() => {
+    if (idNotFoundOverlay) {
+      idNotFoundOverlay.classList.remove('is-visible');
+    }
+  }, 4000);
+}
+
 function resolveIdentifier(record) {
   const raw = record && record.identifier ? String(record.identifier).trim() : '';
   return raw || DEFAULT_IDENTIFIER;
@@ -1476,7 +1778,7 @@ function normalizeInlineSelector(value) {
   return trimmed;
 }
 
-function buildPlayerConfigForRecord(record) {
+function buildPlayerConfigForRecord(record, { excludePresent = false } = {}) {
   if (!record) return null;
   const account = resolveIdentifier(record);
   const inlineSelector = normalizeInlineSelector(record.inlineTargetSelector);
@@ -1487,7 +1789,7 @@ function buildPlayerConfigForRecord(record) {
     host: DEFAULT_PULSE_HOST,
     mode: inlineMode ? 'inline' : 'overlay',
     tagSrc: resolveProxyUrl(DEFAULT_TAG_SRC),
-    present: record.surveyId ? [String(record.surveyId)] : []
+    present: excludePresent ? [] : (record.surveyId ? [String(record.surveyId)] : [])
   };
   const proxyOrigin = getProxyOrigin();
   if (proxyOrigin) {
@@ -1566,12 +1868,12 @@ function waitForPlayerBridgeReady(timeoutMs = 10000) {
   });
 }
 
-function ensurePlayerLoadedForRecord(record, { forceReload = false } = {}) {
+function ensurePlayerLoadedForRecord(record, { forceReload = false, excludePresent = false } = {}) {
   if (!record || !surveyBridge || typeof surveyBridge.load !== 'function') {
     return { reloaded: false, config: null };
   }
 
-  const config = buildPlayerConfigForRecord(record);
+  const config = buildPlayerConfigForRecord(record, { excludePresent });
   if (!config) {
     return { reloaded: false, config: null };
   }
@@ -1972,13 +2274,13 @@ function applyBackgroundNormalization(records) {
   });
 }
 
-async function ensureBackgroundForRecord(record, { force = false } = {}) {
+async function ensureBackgroundForRecord(record, { force = false, skipBridgeLoad = false } = {}) {
   const raw = resolveRecordBackgroundUrl(record);
   const normalized = normalizeBackgroundUrl(raw);
 
   if (!normalized) {
     if (force && currentBackgroundUrl !== DEFAULT_HOST_URL) {
-      const success = await loadHostPage(DEFAULT_HOST_URL);
+      const success = await loadHostPage(DEFAULT_HOST_URL, { skipBridgeLoad });
       if (success) {
         currentBackgroundUrl = DEFAULT_HOST_URL;
         if (backgroundInput) {
@@ -1990,11 +2292,17 @@ async function ensureBackgroundForRecord(record, { force = false } = {}) {
     return;
   }
 
+  // Skip reloading if background already matches (even with force=true when present parameter is set)
+  if (normalized === currentBackgroundUrl && skipBridgeLoad) {
+    addLog(`Background already loaded: ${normalized}`, 'info');
+    return;
+  }
+
   if (!force && normalized === currentBackgroundUrl) {
     return;
   }
 
-  const success = await loadHostPage(normalized);
+  const success = await loadHostPage(normalized, { skipBridgeLoad });
   if (success) {
     currentBackgroundUrl = normalized;
     if (backgroundInput) {
@@ -2522,6 +2830,13 @@ function updateBehaviorSurveyLabel() {
   behaviorSurveyLabel.textContent = selectedOption ? selectedOption.textContent : 'Selected survey';
 }
 
+/**
+ * Trigger a behavior and optionally present survey
+ * @param {string} triggerId - The ID of the trigger behavior
+ * @param {Object} options - Trigger options
+ * @param {string} options.source - Source of trigger ('button', 'detected', 'present')
+ * @param {string} options.detail - Optional detail message
+ */
 function triggerBehavior(triggerId, { source = 'button', detail } = {}) {
   if (!triggerId) return;
   const trigger = getTriggerById(triggerId);
@@ -2532,7 +2847,8 @@ function triggerBehavior(triggerId, { source = 'button', detail } = {}) {
   if (source === 'button') {
     showBehaviorOverlay({ focusTarget: true });
   }
-  handleTrigger(triggerId);
+  // handleTrigger returns true if it already presented the survey
+  const surveyPresented = handleTrigger(triggerId);
   highlightBehaviorButton(triggerId);
   highlightBehaviorStage();
   const prefix = source === 'detected' ? 'Detected' : source === 'present' ? 'Presented' : 'Simulated';
@@ -2543,7 +2859,9 @@ function triggerBehavior(triggerId, { source = 'button', detail } = {}) {
     const alertLabel = BEHAVIOR_LABELS[triggerId] || trigger.label || triggerId;
     showBehaviorBanner(`Detected ${alertLabel}`);
   }
-  if (surveySelect && surveySelect.value) {
+  // Only present survey if handleTrigger didn't already do it
+  // For detected behaviors, always present survey if not already presented
+  if (!surveyPresented && surveySelect && surveySelect.value) {
     presentSurvey(surveySelect.value, { allowDuplicate: true });
   }
   resetBehaviorIdleTimer();
@@ -2653,6 +2971,7 @@ function setupBehaviorDetectors() {
   behaviorStage.dataset.bound = 'true';
 
   const handlePointerLeave = (event) => {
+    if (isSimulatingBehavior) return;
     noteBehaviorActivity();
     if (event.pointerType && event.pointerType !== 'mouse') return;
     const rect = behaviorStage.getBoundingClientRect();
@@ -2676,6 +2995,7 @@ function setupBehaviorDetectors() {
   };
 
   const handleScroll = () => {
+    if (isSimulatingBehavior) return;
     noteBehaviorActivity();
     if (!isBehaviorListenerEnabled('scroll-depth')) return;
     const maxScroll = behaviorStage.scrollHeight - behaviorStage.clientHeight;
@@ -2702,6 +3022,7 @@ function setupBehaviorDetectors() {
   };
 
   const handleRagePointer = (event) => {
+    if (isSimulatingBehavior) return;
     if (event.type === 'pointerdown' && event.button !== 0) return;
     noteBehaviorActivity();
     if (!isBehaviorListenerEnabled('rage-click')) return;
@@ -2758,6 +3079,7 @@ function setupBehaviorDetectors() {
 }
 
 function noteBehaviorActivity() {
+  if (isSimulatingBehavior) return;
   highlightBehaviorStage();
   resetBehaviorIdleTimer();
 }
@@ -2793,51 +3115,74 @@ function initializeTriggers() {
   refreshAccordionHeights();
 }
 
+/**
+ * Handle a trigger action
+ * @param {string} triggerId - The ID of the trigger to handle
+ * @returns {boolean} True if survey was presented, false otherwise
+ */
 function handleTrigger(triggerId) {
   switch (triggerId) {
     case 'present-selected':
       if (!surveySelect.value) {
         addLog('Trigger cancelled: no survey selected.', 'warn');
-        return;
+        return false;
       }
       addLog('Trigger: Present selected survey');
       presentSurvey(surveySelect.value, { force: true });
-      break;
+      return true;
     case 'exit-intent':
       simulateExitIntent();
       addLog('Trigger: Simulated exit intent');
-      break;
+      return false;
     case 'rage-click':
       simulateRageClick();
       addLog('Trigger: Simulated rage clicks');
-      break;
+      return false;
     case 'scroll-depth':
       simulateScrollDepth();
       addLog('Trigger: Simulated scroll depth');
-      break;
+      return false;
     case 'time-delay':
       simulateTimer();
       addLog('Trigger: Started timer');
-      break;
+      return false;
     case 'pageview':
       simulatePageview();
       addLog('Trigger: Incremented pageview');
-      break;
+      return false;
     default:
       addLog(`Unknown trigger "${triggerId}"`, 'warn');
+      return false;
   }
 }
 
+/**
+ * Simulate exit intent behavior by dispatching a mouseout event
+ * Sets isolation flag to prevent behavior detectors from processing the event
+ */
 function simulateExitIntent() {
+  isSimulatingBehavior = true;
+  logBehavior('Simulating exit intent (isolation mode active)');
   const event = new MouseEvent('mouseout', {
     bubbles: true,
     clientY: 0,
     relatedTarget: null
   });
   document.dispatchEvent(event);
+  // Reset flag after event has propagated but before detectors process it
+  setTimeout(() => {
+    isSimulatingBehavior = false;
+  }, 100);
 }
 
+/**
+ * Simulate rage click behavior by dispatching multiple click events
+ * Sets isolation flag to prevent behavior detectors from processing the events
+ */
 function simulateRageClick() {
+  isSimulatingBehavior = true;
+  logBehavior('Simulating rage click (isolation mode active)');
+  // Use a safe target that won't trigger behaviorStage handlers
   const target = document.body || document.documentElement;
   for (let i = 0; i < 6; i += 1) {
     const event = new MouseEvent('click', {
@@ -2847,14 +3192,43 @@ function simulateRageClick() {
     });
     target.dispatchEvent(event);
   }
+  // Reset flag after all events are dispatched
+  setTimeout(() => {
+    isSimulatingBehavior = false;
+  }, 100);
 }
 
+/**
+ * Simulate scroll depth behavior by scrolling the behaviorStage element
+ * Sets isolation flag to prevent behavior detectors from processing the scroll event
+ */
 function simulateScrollDepth() {
-  window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'auto' });
-  window.dispatchEvent(new Event('scroll'));
+  isSimulatingBehavior = true;
+  logBehavior('Simulating scroll depth (isolation mode active)');
+  // Scroll behaviorStage directly if it exists, otherwise scroll window
+  if (behaviorStage) {
+    const maxScroll = behaviorStage.scrollHeight - behaviorStage.clientHeight;
+    if (maxScroll > 0) {
+      behaviorStage.scrollTo({ top: maxScroll, behavior: 'auto' });
+      // Trigger scroll event on behaviorStage
+      behaviorStage.dispatchEvent(new Event('scroll', { bubbles: false }));
+    }
+  } else {
+    window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'auto' });
+    window.dispatchEvent(new Event('scroll'));
+  }
+  // Reset flag after scroll completes
+  setTimeout(() => {
+    isSimulatingBehavior = false;
+  }, 100);
 }
 
+/**
+ * Simulate timer behavior by dispatching a pulse-timer-complete event after delay
+ * Note: This does not interfere with behavior detectors as there are no listeners for this event
+ */
 function simulateTimer() {
+  logBehavior('Simulating timer (will complete in 1.5s)');
   setTimeout(() => {
     window.dispatchEvent(new CustomEvent('pulse-timer-complete'));
     addLog('Timer completed (simulated)');

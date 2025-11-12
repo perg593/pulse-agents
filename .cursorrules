@@ -1,4 +1,6 @@
-# .cursorrules
+# .cursorrules for Pulse Widgets Theme Toolkit
+
+## Documentation Configuration
 ask_output_dir: docs/ask
 plan_output_dir: docs/planning
 default_templates:
@@ -7,3 +9,224 @@ default_templates:
 default_commit_prefixes:
   ask: "ask:"
   plan: "plan:"
+
+## Project Overview
+This is a JavaScript/Node.js project for generating themes from websites. The codebase uses:
+- CommonJS modules (require/module.exports)
+- JSDoc comments for documentation
+- Centralized configuration in `config/`
+- Custom error classes in `lib/errors.js`
+- Standardized logging via `lib/logger.js`
+- Comprehensive validation via `lib/validators.js`
+
+## Code Style & Conventions
+
+### JavaScript Style
+- Use CommonJS modules: `require()` and `module.exports`
+- Use JSDoc comments for all functions, classes, and modules
+- Use 2 spaces for indentation
+- Use single quotes for strings unless double quotes are needed
+- Use trailing commas in multi-line objects and arrays
+- Use camelCase for variables and functions
+- Use PascalCase for classes and constructors
+- Use UPPER_SNAKE_CASE for constants
+- Prefer `const` over `let`, use `let` only when reassignment is needed
+- Avoid `var` entirely
+
+### Error Handling
+- Always use custom error classes from `lib/errors.js`:
+  - `ThemeGenerationError` for theme generation failures
+  - `ValidationError` for input validation failures
+  - `ConfigError` for configuration issues
+  - `FileOperationError` for file operations
+  - `NetworkError` for network/HTTP errors
+  - `ProcessError` for process management errors
+- Use `ErrorFactory` to create typed errors
+- Use `ErrorHandler` to format and handle errors
+- Never silently catch errors - always log or handle appropriately
+- Include context in error messages (file paths, URLs, field names, etc.)
+
+### Logging
+- Use the centralized logger from `lib/logger.js`
+- Use appropriate log levels: `log.debug()`, `log.info()`, `log.warn()`, `log.error()`
+- Include context objects with log messages
+- Format: `log.level('Message', error, { context })`
+
+### Configuration
+- Never hardcode values (ports, timeouts, paths, etc.)
+- Use centralized configuration:
+  - `config/ports.js` for port management
+  - `config/constants.js` for behavior constants
+  - `config/paths.js` for path utilities
+- Use `getPort()` and `getPorts()` for port configuration
+- Support environment-specific overrides (development, production, test)
+
+### Validation
+- Always validate inputs using `lib/validators.js`
+- Use appropriate validators:
+  - `URLValidator` for URLs
+  - `FileValidator` for file paths
+  - `ParameterValidator` for CLI parameters
+  - `ThemeValidator` for theme objects
+- Return validation results with `{ valid: boolean, error?: string }` format
+- Throw `ValidationError` when validation fails
+
+### File Operations
+- Use `lib/paths.js` utilities for path operations
+- Use `PathUtils.resolveFromRoot()` for paths relative to project root
+- Always validate file existence before operations
+- Handle file operation errors with `FileOperationError`
+
+### Async/Await
+- Prefer async/await over callbacks or raw promises
+- Always handle errors in async functions with try/catch
+- Use Promise.all() for parallel operations when appropriate
+- Avoid mixing async/await with .then()/.catch() in the same function
+
+### Testing
+- Write unit tests for all utilities in `lib/`
+- Write integration tests for preview and theme generation workflows
+- Place tests in `tests/unit/` and `tests/integration/`
+- Use descriptive test names that explain what is being tested
+- Test error cases, edge cases, and happy paths
+- Run tests before committing: `npm test`
+
+### Documentation
+- Add JSDoc comments to all exported functions and classes
+- Include `@fileoverview` at the top of module files
+- Document parameters with `@param {type} name - description`
+- Document return values with `@returns {type} description`
+- Document thrown errors with `@throws {ErrorType} description`
+- Update README.md when adding new features or workflows
+- Add architecture decisions to `docs/decisions/`
+- Document API changes in `docs/api/`
+
+### Code Organization
+- Keep modules focused and single-purpose
+- Extract reusable logic into `lib/` utilities
+- Group related functionality together
+- Avoid deep nesting (max 3-4 levels)
+- Keep functions small and focused (ideally < 50 lines)
+- Use early returns to reduce nesting
+
+### Naming Conventions
+- Files: Use kebab-case for file names (e.g., `theme-generator.js`)
+- Directories: Use kebab-case for directory names
+- Classes: PascalCase (e.g., `ThemeGenerator`)
+- Functions: camelCase (e.g., `generateTheme`)
+- Constants: UPPER_SNAKE_CASE (e.g., `SERVER_PORT`)
+- Private functions: Prefix with underscore if needed (e.g., `_internalHelper`)
+
+### Imports & Exports
+- Group imports: external packages first, then internal modules
+- Use absolute paths from project root when importing config/lib modules
+- Export only what's needed - avoid exporting internal helpers
+- Use named exports for multiple exports
+- Use default exports only when appropriate (single main export)
+
+### Comments
+- Write self-documenting code - prefer clear code over comments
+- Use comments to explain "why", not "what"
+- Use JSDoc for API documentation
+- Use inline comments sparingly for complex logic
+- Keep comments up-to-date with code changes
+
+### Performance
+- Avoid premature optimization
+- Use appropriate data structures (Map for key-value, Set for uniqueness)
+- Cache expensive operations when appropriate
+- Be mindful of memory usage in theme generation (large CSS files)
+- Use streaming for large file operations when possible
+
+### Security
+- Validate and sanitize all user inputs
+- Never expose sensitive data in logs or error messages
+- Use environment variables for secrets (never commit secrets)
+- Validate URLs before making network requests
+- Handle network errors gracefully
+
+### Git & Version Control
+- Write clear, descriptive commit messages
+- Use conventional commit prefixes when appropriate
+- Keep commits focused and atomic
+- Don't commit generated files or node_modules
+- Update CHANGELOG.md for significant changes
+
+### Project-Specific Guidelines
+
+#### Theme Generation
+- Always validate theme JSON structure before processing
+- Handle missing or invalid CSS gracefully
+- Support multiple theme variants (Brand Faithful, High Contrast, Modern, Minimalist)
+- Include confidence scores in theme mappings
+- Preserve backward compatibility with legacy themes
+
+#### Preview Dashboard
+- Keep preview code modular and testable
+- Use ES modules in `preview/app/` (browser code)
+- Use CommonJS in `preview/scripts/` (Node.js scripts)
+- Support both production tag bridge and demo mode
+- Handle iframe communication securely
+
+#### Services
+- Use centralized port configuration
+- Implement health check endpoints for all services
+- Handle graceful shutdown for all services
+- Log service lifecycle events (start, stop, errors)
+- Support environment-specific configurations
+
+#### Legacy Code
+- Don't modify code in `legacy/` directory
+- Reference legacy code for historical context only
+- Migrate patterns from legacy code when updating active code
+- Document why legacy code exists if referenced
+
+## Code Review Checklist
+- [ ] Uses centralized configuration (no hardcoded values)
+- [ ] Uses custom error classes for error handling
+- [ ] Uses centralized logger for all logging
+- [ ] Validates all inputs
+- [ ] Includes JSDoc comments for exported functions
+- [ ] Handles errors appropriately (no silent catches)
+- [ ] Follows naming conventions
+- [ ] Tests pass (`npm test`)
+- [ ] No console.log/console.error (use logger instead)
+- [ ] Code is focused and modular
+
+## When Adding New Features
+1. Check if similar functionality exists in `lib/` or `config/`
+2. Create utilities in `lib/` if functionality is reusable
+3. Add configuration to `config/` if it's environment-specific
+4. Write tests for new functionality
+5. Update documentation (README, JSDoc, or docs/)
+6. Consider backward compatibility
+7. Update this file if adding new conventions
+
+## When Fixing Bugs
+1. Reproduce the bug with a test case
+2. Fix the bug
+3. Ensure the test passes
+4. Check for similar issues elsewhere
+5. Update error handling if needed
+6. Document the fix if it's a significant change
+
+## Deprecated Patterns (Don't Use)
+- ❌ Hardcoded values (ports, timeouts, paths)
+- ❌ `console.log()` or `console.error()` (use logger)
+- ❌ Generic `Error` objects (use custom error classes)
+- ❌ Silent error catching (`catch {}` or `catch (e) {}`)
+- ❌ No input validation
+- ❌ Scattered configuration
+- ❌ Inconsistent error handling
+- ❌ Missing JSDoc comments on exported functions
+
+## Preferred Patterns (Use These)
+- ✅ Centralized configuration via `config/`
+- ✅ Custom error classes via `lib/errors.js`
+- ✅ Standardized logging via `lib/logger.js`
+- ✅ Input validation via `lib/validators.js`
+- ✅ Path utilities via `lib/paths.js`
+- ✅ Comprehensive JSDoc documentation
+- ✅ Proper error handling with context
+- ✅ Environment-aware configuration
+- ✅ Modular, testable code structure

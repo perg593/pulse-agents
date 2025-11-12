@@ -1,0 +1,45 @@
+%% Pulse Widgets Data Model - Protocol Message Models ERD
+
+erDiagram
+    MESSAGE_ENVELOPE ||--o| HANDSHAKE_PAYLOAD : "contains"
+    MESSAGE_ENVELOPE ||--o| COMMAND_PAYLOAD : "contains"
+    MESSAGE_ENVELOPE ||--o| REPORT_PAYLOAD : "contains"
+    
+    MESSAGE_ENVELOPE {
+        number v
+        string id
+        string type
+        object payload
+        string origin
+    }
+    
+    HANDSHAKE_PAYLOAD {
+        string playerVersion
+        array supports
+        string placement
+        number density
+        object tokens
+    }
+    
+    COMMAND_PAYLOAD {
+        string surveyId
+        boolean force
+        string href
+        string css
+        object tokens
+        string placement
+        string command
+        array args
+    }
+    
+    REPORT_PAYLOAD {
+        boolean ok
+        object widget
+        string placement
+        array capabilities
+        string code
+        string message
+        boolean recoverable
+        string hint
+    }
+

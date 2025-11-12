@@ -1,0 +1,68 @@
+%% Pulse Widgets Data Model - Theme Generator Models ERD
+
+erDiagram
+    EXTRACTION_TARGET ||--|| SITE_EXTRACTION_RESULT : "produces"
+    SITE_EXTRACTION_RESULT ||--o{ PAGE_EXTRACTION_RESULT : "contains"
+    PAGE_EXTRACTION_RESULT ||--o{ RAW_FINDING : "contains"
+    RAW_FINDING ||--o{ EVIDENCE : "has"
+    RAW_FINDING ||--o| TOKEN_MAPPING : "maps to"
+    TOKEN_MAPPING ||--o{ EVIDENCE : "references"
+    TOKEN_SCHEMA ||--o{ TOKEN_GROUP : "contains"
+    TOKEN_GROUP ||--o{ TOKEN_DESCRIPTOR : "contains"
+    TOKEN_MAPPING ||--o| TOKEN_DESCRIPTOR : "maps"
+    TOKEN_MAPPING ||--|| THEME_JSON : "generates"
+    THEME_REPORT ||--o{ TOKEN_MAPPING : "contains"
+    
+    EXTRACTION_TARGET {
+        string url
+        number maxPages
+        string scheme
+    }
+    
+    RAW_FINDING {
+        string name
+        string normalizedName
+        string category
+        string value
+        array sources
+    }
+    
+    EVIDENCE {
+        string type
+        string selector
+        string property
+        string value
+        string href
+        number confidence
+    }
+    
+    TOKEN_MAPPING {
+        string id
+        string value
+        number confidence
+        array evidence
+        string fallbackReason
+        string notes
+    }
+    
+    TOKEN_DESCRIPTOR {
+        string id
+        string group
+        string key
+        string variable
+        string file
+        number line
+        number column
+    }
+    
+    THEME_JSON {
+        object colors
+        object typography
+        object spacing
+        object radius
+    }
+    
+    THEME_REPORT {
+        object tokenMappings
+    }
+
