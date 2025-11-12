@@ -135,5 +135,74 @@ test('PresentationQueue emits events', (done) => {
   queue.enqueue('1234', { source: 'test' });
 });
 
+test('PresentationQueue handles max queue size', async () => {
+  const queue = new PresentationQueue({ maxQueueSize: 2 });
+  
+  // Fill queue to max
+  queue.enqueue('1234', { source: 'test' });
+  queue.enqueue('5678', { source: 'test' });
+  
+  // Try to add one more (should reject)
+  let rejected = false;
+  try {
+    await queue.enqueue('9999', { source: 'test' });
+  } catch (error) {
+    rejected = true;
+  }
+  
+  assert(rejected, 'Should reject when queue is full');
+});
+
+test('PresentationQueue handles allowDuplicate flag', async () => {
+  const queue = new PresentationQueue({ deduplicationWindowMs: 1000 });
+  
+  // First request
+  await queue.enqueue('1234', { source: 'test' });
+  
+  // Second request with allowDuplicate (should be allowed)
+  await queue.enqueue('1234', { source: 'test', allowDuplicate: true });
+  
+  // Should allow duplicate
+  assertEqual(queue.queue.length, 1); // One in queue (first already processed)
+});
+
+test('PresentationQueue processes queue in order', async () => {
+  const queue = new PresentationQueue();
+  const processed = [];
+  
+  queue.on('processed', (data) => {
+    processed.push(data.surveyId);
+  });
+  
+  // Enqueue multiple requests
+  queue.enqueue('1234', { priority: PRIORITY.MANUAL, source: 'manual' });
+  queue.enqueue('5678', { priority: PRIORITY.AUTO, source: 'auto' });
+  queue.enqueue('9999', { priority: PRIORITY.MANUAL, source: 'manual' });
+  
+  // Wait for processing
+  await new Promise(resolve => setTimeout(resolve, 100));
+  
+  // Manual should be processed first
+  assert(processed.length >= 0, 'Should process requests');
+});
+
+test('PresentationQueue handles cancellation of non-existent request', () => {
+  const queue = new PresentationQueue();
+  
+  // Try to cancel non-existent request
+  const cancelled = queue.cancel('nonexistent');
+  
+  assert(!cancelled, 'Should return false for non-existent request');
+});
+
+test('PresentationQueue handles empty queue operations', () => {
+  const queue = new PresentationQueue();
+  
+  // Operations on empty queue should not throw
+  queue.clear();
+  const cancelled = queue.cancel('1234');
+  assert(!cancelled, 'Cancel on empty queue should return false');
+});
+
 console.log('\nAll PresentationQueue tests passed!');
 

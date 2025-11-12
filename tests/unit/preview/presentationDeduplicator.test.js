@@ -128,5 +128,127 @@ test('PresentationDeduplicator clears all history', () => {
   assert(deduplicator.getHistory('5678') === null);
 });
 
+test('PresentationDeduplicator respects allowDuplicate flag', () => {
+  const deduplicator = new PresentationDeduplicator({
+    cooldownMs: 1000,
+    persistState: false
+  });
+  
+  deduplicator.recordPresentation('1234', SOURCE.MANUAL);
+  
+  const result = deduplicator.checkDuplicate('1234', {
+    source: SOURCE.AUTO,
+    allowDuplicate: true
+  });
+  
+  assert(!result.isDuplicate, 'allowDuplicate flag should bypass deduplication');
+});
+
+test('PresentationDeduplicator allows URL param to override auto', () => {
+  const deduplicator = new PresentationDeduplicator({
+    cooldownMs: 1000,
+    persistState: false
+  });
+  
+  deduplicator.recordPresentation('1234', SOURCE.AUTO);
+  
+  const result = deduplicator.checkDuplicate('1234', {
+    source: SOURCE.URL_PARAM
+  });
+  
+  assert(!result.isDuplicate, 'URL param should override auto');
+});
+
+test('PresentationDeduplicator allows URL param to override behavior', () => {
+  const deduplicator = new PresentationDeduplicator({
+    cooldownMs: 1000,
+    persistState: false
+  });
+  
+  deduplicator.recordPresentation('1234', SOURCE.BEHAVIOR);
+  
+  const result = deduplicator.checkDuplicate('1234', {
+    source: SOURCE.URL_PARAM
+  });
+  
+  assert(!result.isDuplicate, 'URL param should override behavior');
+});
+
+test('PresentationDeduplicator allows behavior to override auto', () => {
+  const deduplicator = new PresentationDeduplicator({
+    cooldownMs: 1000,
+    persistState: false
+  });
+  
+  deduplicator.recordPresentation('1234', SOURCE.AUTO);
+  
+  const result = deduplicator.checkDuplicate('1234', {
+    source: SOURCE.BEHAVIOR
+  });
+  
+  assert(!result.isDuplicate, 'Behavior should override auto');
+});
+
+test('PresentationDeduplicator does not allow auto to override manual', () => {
+  const deduplicator = new PresentationDeduplicator({
+    cooldownMs: 1000,
+    persistState: false
+  });
+  
+  deduplicator.recordPresentation('1234', SOURCE.MANUAL);
+  
+  const result = deduplicator.checkDuplicate('1234', {
+    source: SOURCE.AUTO
+  });
+  
+  assert(result.isDuplicate, 'Auto should not override manual');
+});
+
+test('PresentationDeduplicator does not allow auto to override URL param', () => {
+  const deduplicator = new PresentationDeduplicator({
+    cooldownMs: 1000,
+    persistState: false
+  });
+  
+  deduplicator.recordPresentation('1234', SOURCE.URL_PARAM);
+  
+  const result = deduplicator.checkDuplicate('1234', {
+    source: SOURCE.AUTO
+  });
+  
+  assert(result.isDuplicate, 'Auto should not override URL param');
+});
+
+test('PresentationDeduplicator returns history entry', () => {
+  const deduplicator = new PresentationDeduplicator({ persistState: false });
+  
+  deduplicator.recordPresentation('1234', SOURCE.MANUAL);
+  
+  const history = deduplicator.getHistory('1234');
+  assert(history !== null, 'Should return history entry');
+  assert(history.source === SOURCE.MANUAL, 'History should have correct source');
+  assert(typeof history.timestamp === 'number', 'History should have timestamp');
+});
+
+test('PresentationDeduplicator returns null for non-existent history', () => {
+  const deduplicator = new PresentationDeduplicator({ persistState: false });
+  
+  const history = deduplicator.getHistory('nonexistent');
+  assert(history === null, 'Should return null for non-existent history');
+});
+
+test('PresentationDeduplicator handles empty survey ID gracefully', () => {
+  const deduplicator = new PresentationDeduplicator({ persistState: false });
+  
+  // Should not throw on empty string
+  try {
+    deduplicator.recordPresentation('', SOURCE.MANUAL);
+    deduplicator.checkDuplicate('', { source: SOURCE.AUTO });
+  } catch (error) {
+    // Expected to throw validation error
+    assert(error.message.includes('surveyId'), 'Should validate surveyId');
+  }
+});
+
 console.log('\nAll PresentationDeduplicator tests passed!');
 
