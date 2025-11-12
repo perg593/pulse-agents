@@ -1,0 +1,50 @@
+# Default owner for entire repository
+* @perg593
+
+# Configuration files
+/config/ @perg593
+/config/**/*.js @perg593
+
+# Core libraries
+/lib/ @perg593
+/lib/**/*.js @perg593
+
+# Preview system
+/preview/ @perg593
+/preview/**/*.js @perg593
+/preview/**/*.css @perg593
+/preview/**/*.html @perg593
+
+# Theme generator
+/theme-generator/ @perg593
+/theme-generator/**/*.js @perg593
+/theme-generator/**/*.ts @perg593
+
+# Tests
+/tests/ @perg593
+/tests/**/*.js @perg593
+/tests/**/*.mjs @perg593
+/tests/**/*.ts @perg593
+
+# Documentation
+/docs/ @perg593
+/docs/**/*.md @perg593
+
+# Build scripts
+/scripts/ @perg593
+/scripts/**/*.sh @perg593
+/scripts/**/*.js @perg593
+
+# GitHub workflows and templates
+/.github/ @perg593
+/.github/**/*.yml @perg593
+/.github/**/*.yaml @perg593
+/.github/**/*.md @perg593
+
+# Root configuration files
+/package.json @perg593
+/package-lock.json @perg593
+/wrangler.toml @perg593
+/.gitignore @perg593
+/.cursorrules @perg593
+
