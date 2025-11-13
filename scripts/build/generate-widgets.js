@@ -16,6 +16,12 @@ const fs = require('fs');
 const repoRoot = path.resolve(__dirname, '../..');
 const piMasterRoot = path.join(repoRoot, 'pi-master');
 
+if (!fs.existsSync(piMasterRoot)) {
+  console.log('⚠️  Skipping widget generation - pi-master directory not found (optional)');
+  process.exit(0);
+}
+
+
 process.chdir(piMasterRoot);
 process.env.NODE_ENV = 'test';
 
