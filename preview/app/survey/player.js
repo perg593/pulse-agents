@@ -163,6 +163,8 @@ window.addEventListener('pulseinsights:ready', (event) => {
     applyManualStylesheet(pendingManualCss).catch(() => {});
   }
   flushPendingPresents();
+  // Setup link handling when Pulse Insights is ready (widgets may be rendered)
+  setupCustomContentLinkHandling();
   postLegacyMessage({
     type: 'player-ready',
     account,
@@ -1494,6 +1496,8 @@ function loadTag() {
     } catch (_error) {
       /* ignore */
     }
+    // Setup link click handling after tag loads
+    setupCustomContentLinkHandling();
   };
   script.onerror = (event) => {
     try {
@@ -1503,6 +1507,77 @@ function loadTag() {
     }
   };
   document.head.appendChild(script);
+}
+
+let linkHandlerContainer = null;
+
+function setupCustomContentLinkHandling() {
+  // Use event delegation to handle dynamically added links
+  const container = document.getElementById('_pi_surveyWidgetContainer');
+  if (container && container !== linkHandlerContainer) {
+    attachLinkHandlers(container);
+    linkHandlerContainer = container;
+  }
+  
+  // Watch for widget container being added dynamically or recreated
+  if (!linkHandlerContainer || !document.body.contains(linkHandlerContainer)) {
+    const observer = new MutationObserver(() => {
+      const widgetContainer = document.getElementById('_pi_surveyWidgetContainer');
+      if (widgetContainer && widgetContainer !== linkHandlerContainer) {
+        attachLinkHandlers(widgetContainer);
+        linkHandlerContainer = widgetContainer;
+        observer.disconnect();
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+  }
+}
+
+function attachLinkHandlers(container) {
+  // Use event delegation - attach once to container, handles all links
+  container.addEventListener('click', handleCustomContentLinkClick, true);
+}
+
+function handleCustomContentLinkClick(event) {
+  // Find the clicked link element
+  let link = event.target;
+  while (link && link.tagName !== 'A') {
+    link = link.parentElement;
+  }
+  
+  if (!link || link.tagName !== 'A') {
+    return; // Not a link click
+  }
+  
+  // Check if link is within a custom content question
+  const customContentQuestion = link.closest('._pi_question_custom_content_question');
+  if (!customContentQuestion) {
+    return; // Not in custom content question, let default behavior handle it
+  }
+  
+  const href = link.getAttribute('href');
+  if (!href || href.trim() === '' || href.startsWith('javascript:')) {
+    return; // No href, empty href, or JavaScript link - let default behavior handle
+  }
+  
+  const target = link.getAttribute('target') || '_self';
+  
+  // Prevent default link behavior
+  event.preventDefault();
+  event.stopPropagation();
+  
+  // Send message to parent window to open link
+  postLegacyMessage({
+    type: 'link-click',
+    href: href.trim(),
+    target: target
+  });
+  
+  try {
+    console.log('[player] link click intercepted', { href, target });
+  } catch (_error) {
+    /* ignore */
+  }
 }
 
 function scheduleWidgetCheck(id, source, delay) {

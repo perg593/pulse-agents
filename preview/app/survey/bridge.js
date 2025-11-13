@@ -21,6 +21,70 @@ const globalFlags = (() => {
   }
 })();
 
+function handleLinkClick(data) {
+  const { href, target } = data;
+  if (!href || typeof href !== 'string') {
+    try {
+      console.warn('[bridge] link-click missing or invalid href', data);
+    } catch (_error) {
+      /* ignore */
+    }
+    return;
+  }
+
+  const linkTarget = target || '_self';
+  
+  try {
+    if (linkTarget === '_blank') {
+      // Open in new tab/window
+      const opened = window.open(href, '_blank', 'noopener');
+      if (!opened) {
+        try {
+          console.warn('[bridge] popup blocked for link', href);
+        } catch (_error) {
+          /* ignore */
+        }
+      } else {
+        try {
+          console.log('[bridge] link opened in new tab', href);
+        } catch (_error) {
+          /* ignore */
+        }
+      }
+    } else {
+      // Default behavior: navigate in same window
+      // Check if same origin to use window.location, otherwise use window.open
+      try {
+        const currentOrigin = window.location.origin;
+        const linkUrl = new URL(href, window.location.href);
+        if (linkUrl.origin === currentOrigin) {
+          window.location.href = href;
+        } else {
+          // Cross-origin: must use window.open even for _self
+          window.open(href, '_self');
+        }
+      } catch (_error) {
+        // Invalid URL or relative URL - try window.location
+        try {
+          window.location.href = href;
+        } catch (__error) {
+          try {
+            console.error('[bridge] failed to open link', href, __error);
+          } catch (___error) {
+            /* ignore */
+          }
+        }
+      }
+    }
+  } catch (error) {
+    try {
+      console.error('[bridge] error handling link click', { href, target, error });
+    } catch (_error) {
+      /* ignore */
+    }
+  }
+}
+
 export function createSurveyBridge(
   {
     container,
@@ -180,6 +244,11 @@ function createLegacyBridge({ container, onReady, onStatus, onStateChange, onClo
         return;
       }
 
+      if (data.type === 'link-click') {
+        handleLinkClick(data);
+        return;
+      }
+
       try {
         console.log('[bridge] status', data);
       } catch (_error) {
@@ -282,10 +351,15 @@ function createProtocolBridge({ container, onReady, onStatus, onStateChange, onE
   let bridgeInstance = null;
   let bridgeReady = false;
   const pendingActions = []; // queued entries: { run, reject }
+  let legacyMessageHandler = null;
 
   function teardown() {
     bridgeReady = false;
     failPending({ code: 'bridge_destroyed', message: 'Bridge destroyed' });
+    if (legacyMessageHandler) {
+      window.removeEventListener('message', legacyMessageHandler);
+      legacyMessageHandler = null;
+    }
     if (bridgeInstance) {
       bridgeInstance.destroy();
       bridgeInstance = null;
@@ -430,6 +504,19 @@ function createProtocolBridge({ container, onReady, onStatus, onStateChange, onE
           /* ignore */
         }
       });
+
+      // Handle legacy messages like link-click
+      legacyMessageHandler = (event) => {
+        if (!iframe || event.source !== iframe.contentWindow) return;
+        if (event.origin && event.origin !== playerOrigin) return;
+        const { data } = event;
+        if (!data || typeof data !== 'object') return;
+        
+        if (data.type === 'link-click') {
+          handleLinkClick(data);
+        }
+      };
+      window.addEventListener('message', legacyMessageHandler);
 
       bridgeInstance.init().catch((error) => {
         try {
