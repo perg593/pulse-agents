@@ -1613,18 +1613,44 @@ function setupCustomContentRedirectTimers() {
 }
 
 function detectAndStartRedirectTimers() {
+  try {
+    console.log('[player] detectAndStartRedirectTimers called');
+  } catch (_error) {
+    /* ignore */
+  }
+  
   // Ensure widget container exists and PulseInsightsObject is available
   const container = document.getElementById('_pi_surveyWidgetContainer');
   if (!container || !document.body.contains(container)) {
+    try {
+      console.log('[player] detectAndStartRedirectTimers: widget container not present');
+    } catch (_error) {
+      /* ignore */
+    }
     return; // Widget container not present
   }
   
   if (!window.PulseInsightsObject || !window.PulseInsightsObject.survey || !Array.isArray(window.PulseInsightsObject.survey.questions)) {
+    try {
+      console.log('[player] detectAndStartRedirectTimers: PulseInsightsObject not ready', {
+        hasObject: !!window.PulseInsightsObject,
+        hasSurvey: !!(window.PulseInsightsObject && window.PulseInsightsObject.survey),
+        hasQuestions: !!(window.PulseInsightsObject && window.PulseInsightsObject.survey && Array.isArray(window.PulseInsightsObject.survey.questions))
+      });
+    } catch (_error) {
+      /* ignore */
+    }
     return; // PulseInsightsObject not ready
   }
   
   // Find all custom content question elements
   const customContentQuestions = document.querySelectorAll('._pi_question_custom_content_question');
+  
+  try {
+    console.log('[player] detectAndStartRedirectTimers: found', customContentQuestions.length, 'custom content questions');
+  } catch (_error) {
+    /* ignore */
+  }
   
   if (customContentQuestions.length === 0) {
     return; // No custom content questions found
@@ -1633,17 +1659,43 @@ function detectAndStartRedirectTimers() {
   customContentQuestions.forEach((questionElement) => {
     const questionId = getQuestionIdFromElement(questionElement);
     if (!questionId) {
+      try {
+        console.log('[player] detectAndStartRedirectTimers: could not get questionId from element');
+      } catch (_error) {
+        /* ignore */
+      }
       return;
     }
     
     // Check if timer already running for this question
     if (activeRedirectTimers.has(questionId)) {
+      try {
+        console.log('[player] detectAndStartRedirectTimers: timer already running for question', questionId);
+      } catch (_error) {
+        /* ignore */
+      }
       return; // Timer already running
     }
     
     const question = getQuestionFromPulseInsightsObject(questionId);
     if (!question) {
+      try {
+        console.log('[player] detectAndStartRedirectTimers: question not found in PulseInsightsObject', questionId);
+      } catch (_error) {
+        /* ignore */
+      }
       return; // Question not found in PulseInsightsObject
+    }
+    
+    try {
+      console.log('[player] detectAndStartRedirectTimers: checking question', questionId, {
+        question_type: question.question_type,
+        autoredirect_enabled: question.autoredirect_enabled,
+        autoredirect_delay: question.autoredirect_delay,
+        autoredirect_url: question.autoredirect_url
+      });
+    } catch (_error) {
+      /* ignore */
     }
     
     // Check if auto-redirect is enabled
