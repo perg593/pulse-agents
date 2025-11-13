@@ -331,7 +331,8 @@ function createLegacyBridge({ container, onReady, onStatus, onStateChange, onClo
     }
     messageHandler = (event) => {
       if (!frame || event.source !== frame.contentWindow) return;
-      if (event.origin && event.origin !== playerOrigin) return;
+      // Accept messages from player origin or if playerOrigin not set yet
+      if (event.origin && playerOrigin && event.origin !== playerOrigin) return;
       const { data } = event;
       if (!data || typeof data !== 'object') return;
 
@@ -636,7 +637,8 @@ function createProtocolBridge({ container, onReady, onStatus, onStateChange, onE
       // Handle legacy messages like link-click and redirect
       legacyMessageHandler = (event) => {
         if (!iframe || event.source !== iframe.contentWindow) return;
-        if (event.origin && event.origin !== playerOrigin) return;
+        // Accept messages from player origin or if playerOrigin not set yet
+        if (event.origin && playerOrigin && event.origin !== playerOrigin) return;
         const { data } = event;
         if (!data || typeof data !== 'object') return;
         

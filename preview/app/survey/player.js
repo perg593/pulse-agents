@@ -50,10 +50,12 @@ try {
           // Send message to parent (bridge might not be ready yet, but try anyway)
           if (window.parent && window.parent !== window) {
             try {
+              // Use current origin - bridge should accept messages from player origin
+              const currentOrigin = window.location.origin;
               window.parent.postMessage({
                 type: 'redirect',
                 url: url
-              }, '*');
+              }, currentOrigin);
             } catch (_error) {
               /* ignore */
             }
