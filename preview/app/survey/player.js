@@ -166,7 +166,17 @@ window.addEventListener('pulseinsights:ready', (event) => {
   // Setup link handling when Pulse Insights is ready (widgets may be rendered)
   setupCustomContentLinkHandling();
   // Setup timer-based redirect handling when Pulse Insights is ready
+  try {
+    console.warn('[player] ABOUT TO CALL setupCustomContentRedirectTimers');
+  } catch (_error) {
+    /* ignore */
+  }
   setupCustomContentRedirectTimers();
+  try {
+    console.warn('[player] FINISHED CALLING setupCustomContentRedirectTimers');
+  } catch (_error) {
+    /* ignore */
+  }
   postLegacyMessage({
     type: 'player-ready',
     account,
