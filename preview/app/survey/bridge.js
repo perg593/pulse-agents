@@ -112,67 +112,27 @@ function handleRedirect(data, sourceFrame = null) {
   const redirectUrl = url.trim();
   
   try {
-    // Always redirect the top-level window, not any iframe
-    // Determine the target window - prefer window.top if accessible
-    let targetWindow = window;
-    let usingTopWindow = false;
-    
-    try {
-      // Always try to use top-level window if it exists and is different
-      if (window.top && window.top !== window) {
-        // Test if we can access top window location
-        void window.top.location;
-        targetWindow = window.top;
-        usingTopWindow = true;
-      }
-    } catch (_error) {
-      // Can't access top window (cross-origin restriction), use current window
-      targetWindow = window;
+    // Use same logic as handleLinkClick - navigate current window
+    // Bridge runs in preview app context, which should be top-level
+    const currentOrigin = window.location.origin;
+    const targetUrl = new URL(redirectUrl, window.location.href);
+    if (targetUrl.origin === currentOrigin) {
+      // Same origin: use location.href
+      window.location.href = redirectUrl;
+    } else {
+      // Cross-origin: use window.open with _self (same as link handler)
+      window.open(redirectUrl, '_self');
     }
-    
+  } catch (_error) {
+    // Invalid URL or relative URL - try window.location.href
     try {
-      console.log('[bridge] redirecting', { 
-        url: redirectUrl, 
-        usingTopWindow, 
-        windowTopExists: !!window.top,
-        windowTopEqualsWindow: window.top === window
-      });
-    } catch (_logError) {
-      /* ignore */
-    }
-    
-    // Navigate the target window
-    // Use location.replace for better cross-origin support, fall back to href
-    try {
-      targetWindow.location.replace(redirectUrl);
-    } catch (_replaceError) {
-      // If replace fails, try href
+      window.location.href = redirectUrl;
+    } catch (__error) {
       try {
-        targetWindow.location.href = redirectUrl;
-      } catch (_hrefError) {
-        // If both fail, try window.open as last resort
-        try {
-          targetWindow.open(redirectUrl, '_blank');
-        } catch (__error) {
-          try {
-            console.error('[bridge] failed to redirect', redirectUrl, __error);
-          } catch (___error) {
-            /* ignore */
-          }
-        }
+        console.error('[bridge] failed to redirect', redirectUrl, __error);
+      } catch (___error) {
+        /* ignore */
       }
-    }
-    
-    try {
-      console.log('[bridge] redirect executed', redirectUrl);
-    } catch (_error) {
-      /* ignore */
-    }
-  } catch (error) {
-    try {
-      console.error('[bridge] error handling redirect', { url: redirectUrl, error });
-    } catch (_error) {
-      /* ignore */
     }
   }
 }
