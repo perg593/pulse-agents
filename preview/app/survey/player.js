@@ -1555,6 +1555,23 @@ function attachLinkHandlers(container) {
   container.addEventListener('click', handleCustomContentLinkClick, true);
 }
 
+/**
+ * Checks if a URL uses a dangerous scheme that should be blocked.
+ * 
+ * @param {string} url - The URL to check
+ * @returns {boolean} True if the URL uses a dangerous scheme
+ */
+function isDangerousUrlScheme(url) {
+  if (!url || typeof url !== 'string') {
+    return false;
+  }
+  const trimmed = url.trim().toLowerCase();
+  // Block dangerous URL schemes that could be used for XSS attacks
+  return trimmed.startsWith('javascript:') ||
+         trimmed.startsWith('data:') ||
+         trimmed.startsWith('vbscript:');
+}
+
 function handleCustomContentLinkClick(event) {
   // Find the clicked link element
   let link = event.target;
@@ -1573,8 +1590,8 @@ function handleCustomContentLinkClick(event) {
   }
   
   const href = link.getAttribute('href');
-  if (!href || href.trim() === '' || href.startsWith('javascript:')) {
-    return; // No href, empty href, or JavaScript link - let default behavior handle
+  if (!href || href.trim() === '' || isDangerousUrlScheme(href)) {
+    return; // No href, empty href, or dangerous URL scheme - let default behavior handle
   }
   
   const target = link.getAttribute('target') || '_self';

@@ -32,6 +32,16 @@ function handleLinkClick(data) {
     return;
   }
 
+  // Block dangerous URL schemes
+  if (isDangerousUrlScheme(href)) {
+    try {
+      console.warn('[bridge] link-click blocked - dangerous URL scheme', href);
+    } catch (_error) {
+      /* ignore */
+    }
+    return;
+  }
+
   const linkTarget = target || '_self';
   
   try {
@@ -85,6 +95,23 @@ function handleLinkClick(data) {
   }
 }
 
+/**
+ * Checks if a URL uses a dangerous scheme that should be blocked.
+ * 
+ * @param {string} url - The URL to check
+ * @returns {boolean} True if the URL uses a dangerous scheme
+ */
+function isDangerousUrlScheme(url) {
+  if (!url || typeof url !== 'string') {
+    return false;
+  }
+  const trimmed = url.trim().toLowerCase();
+  // Block dangerous URL schemes that could be used for XSS attacks
+  return trimmed.startsWith('javascript:') ||
+         trimmed.startsWith('data:') ||
+         trimmed.startsWith('vbscript:');
+}
+
 function handleRedirect(data, sourceFrame = null) {
   const { url } = data;
   if (!url || typeof url !== 'string') {
@@ -109,6 +136,16 @@ function handleRedirect(data, sourceFrame = null) {
   }
 
   const redirectUrl = url.trim();
+  
+  // Block dangerous URL schemes
+  if (isDangerousUrlScheme(redirectUrl)) {
+    try {
+      console.warn('[bridge] redirect blocked - dangerous URL scheme', redirectUrl);
+    } catch (_error) {
+      /* ignore */
+    }
+    return;
+  }
   
   try {
     // Use same logic as handleLinkClick - navigate current window
