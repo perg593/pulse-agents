@@ -112,21 +112,55 @@ function handleRedirect(data, sourceFrame = null) {
   const redirectUrl = url.trim();
   
   try {
-    // Use same logic as handleLinkClick - navigate current window
-    // Bridge runs in preview app context, which should be top-level
-    const currentOrigin = window.location.origin;
-    const targetUrl = new URL(redirectUrl, window.location.href);
-    if (targetUrl.origin === currentOrigin) {
-      // Same origin: use location.href
-      window.location.href = redirectUrl;
-    } else {
-      // Cross-origin: use window.open with _self (same as link handler)
-      window.open(redirectUrl, '_self');
-    }
-  } catch (_error) {
-    // Invalid URL or relative URL - try window.location.href
+    // For redirects, always navigate the top-level browser window
+    // Use window.top to ensure we navigate the actual browser window, not any iframe
+    let targetWindow = window;
+    let usingTopWindow = false;
+    
     try {
-      window.location.href = redirectUrl;
+      // Try to use top-level window if accessible
+      if (window.top && window.top !== window) {
+        // Test if we can access top window (will throw if cross-origin restriction)
+        void window.top.location;
+        targetWindow = window.top;
+        usingTopWindow = true;
+        try {
+          console.log('[bridge] redirect using top window', { redirectUrl, topHref: window.top.location.href, currentHref: window.location.href });
+        } catch (_error) {
+          /* ignore */
+        }
+      } else {
+        try {
+          console.log('[bridge] redirect using current window (no top)', { redirectUrl, currentHref: window.location.href });
+        } catch (_error) {
+          /* ignore */
+        }
+      }
+    } catch (_error) {
+      // Can't access top window, use current window
+      targetWindow = window;
+      try {
+        console.warn('[bridge] cannot access top window, using current', { redirectUrl, error: _error.message });
+      } catch (__error) {
+        /* ignore */
+      }
+    }
+    
+    // Navigate the target window
+    // For redirects, we want to navigate away, so use location.href
+    // Browsers allow setting window.top.location.href even for cross-origin navigation
+    try {
+      console.log('[bridge] navigating to', { redirectUrl, usingTopWindow, targetWindowHref: targetWindow.location.href });
+    } catch (_error) {
+      /* ignore */
+    }
+    targetWindow.location.href = redirectUrl;
+  } catch (_error) {
+    // If direct navigation fails, try window.open as fallback
+    try {
+      console.warn('[bridge] redirect failed, trying window.open', { redirectUrl, error: _error.message });
+      const targetWindow = window.top && window.top !== window ? window.top : window;
+      targetWindow.open(redirectUrl, '_blank');
     } catch (__error) {
       try {
         console.error('[bridge] failed to redirect', redirectUrl, __error);
