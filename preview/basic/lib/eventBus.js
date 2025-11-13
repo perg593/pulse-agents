@@ -5,7 +5,7 @@
  * event filtering, event history, and subscriber management.
  */
 
-const { log } = require('../../lib/logger');
+const { log } = require('../../../lib/logger');
 
 /**
  * Event bus entry

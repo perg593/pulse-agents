@@ -5,7 +5,7 @@
  * time-windowed deduplication, source-aware handling, and force flag support.
  */
 
-const { log } = require('../../lib/logger');
+const { log } = require('../../../lib/logger');
 
 /**
  * Presentation source types

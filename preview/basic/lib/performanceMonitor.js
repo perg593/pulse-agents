@@ -5,7 +5,7 @@
  * success/failure rates, and error rates by type.
  */
 
-const { log } = require('../../lib/logger');
+const { log } = require('../../../lib/logger');
 const { getEventBus } = require('./eventBus');
 
 /**

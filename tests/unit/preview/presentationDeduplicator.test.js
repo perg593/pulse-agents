@@ -2,17 +2,70 @@
  * @fileoverview Unit tests for PresentationDeduplicator
  */
 
+// Mock logger before requiring the module
+const path = require('path');
+const Module = require('module');
+const loggerPath = path.resolve(__dirname, '../../../lib/logger.js');
+
+// Inject mock into module cache
+Module._cache[loggerPath] = {
+  exports: {
+    log: {
+      debug: () => {},
+      info: () => {},
+      warn: () => {},
+      error: () => {}
+    }
+  },
+  loaded: true
+};
+
 const { PresentationDeduplicator, SOURCE } = require('../../../preview/basic/lib/presentationDeduplicator');
 
-// Simple test framework
+// Simple test framework with async support
+const tests = [];
 function test(name, fn) {
-  try {
-    fn();
-    console.log(`✓ ${name}`);
-  } catch (error) {
-    console.error(`✗ ${name}`);
-    console.error(`  ${error.message}`);
-    throw error;
+  tests.push({ name, fn });
+}
+
+async function runTests() {
+  for (const { name, fn } of tests) {
+    try {
+      // Check if test uses callback (async)
+      if (fn.length > 0) {
+        await new Promise((resolve, reject) => {
+          const timeout = setTimeout(() => {
+            reject(new Error('Test timeout'));
+          }, 5000);
+          const done = (err) => {
+            clearTimeout(timeout);
+            if (err) {
+              reject(err);
+            } else {
+              resolve();
+            }
+          };
+          try {
+            fn(done);
+          } catch (error) {
+            clearTimeout(timeout);
+            reject(error);
+          }
+        });
+        console.log(`✓ ${name}`);
+      } else {
+        // Synchronous test
+        const result = fn();
+        if (result && typeof result.then === 'function') {
+          await result;
+        }
+        console.log(`✓ ${name}`);
+      }
+    } catch (error) {
+      console.error(`✗ ${name}`);
+      console.error(`  ${error.message}`);
+      throw error;
+    }
   }
 }
 
@@ -27,16 +80,6 @@ function assertEqual(actual, expected, message) {
     throw new Error(message || `Expected ${expected}, got ${actual}`);
   }
 }
-
-// Mock logger
-jest.mock('../../../lib/logger', () => ({
-  log: {
-    debug: () => {},
-    info: () => {},
-    warn: () => {},
-    error: () => {}
-  }
-}));
 
 // Tests
 test('PresentationDeduplicator creates instance', () => {
@@ -250,5 +293,11 @@ test('PresentationDeduplicator handles empty survey ID gracefully', () => {
   }
 });
 
-console.log('\nAll PresentationDeduplicator tests passed!');
+// Run all tests
+runTests().then(() => {
+  console.log('\nAll PresentationDeduplicator tests passed!');
+}).catch((error) => {
+  console.error('\nTests failed:', error.message);
+  process.exit(1);
+});
 

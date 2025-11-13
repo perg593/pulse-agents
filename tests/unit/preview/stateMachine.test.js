@@ -2,6 +2,24 @@
  * @fileoverview Unit tests for StateMachine
  */
 
+// Mock logger before requiring the module
+const path = require('path');
+const Module = require('module');
+const loggerPath = path.resolve(__dirname, '../../../lib/logger.js');
+
+// Inject mock into module cache
+Module._cache[loggerPath] = {
+  exports: {
+    log: {
+      debug: () => {},
+      info: () => {},
+      warn: () => {},
+      error: () => {}
+    }
+  },
+  loaded: true
+};
+
 const { StateMachine } = require('../../../preview/basic/lib/stateMachine');
 
 // Simple test framework
@@ -28,15 +46,6 @@ function assertEqual(actual, expected, message) {
   }
 }
 
-// Mock logger
-jest.mock('../../../lib/logger', () => ({
-  log: {
-    debug: () => {},
-    info: () => {},
-    warn: () => {},
-    error: () => {}
-  }
-}));
 
 // Tests
 test('StateMachine creates instance', () => {

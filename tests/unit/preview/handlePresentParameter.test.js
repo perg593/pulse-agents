@@ -72,15 +72,15 @@ function createMockEnvironment() {
     return `${record.surveyName} - ${record.surveyId}`;
   };
   
-  return {
+  const env = {
     logs,
-    presentSurveyId,
-    presentTriggered,
-    tagReady,
-    tagReadyPromise,
+    get presentSurveyId() { return presentSurveyId; },
+    get presentTriggered() { return presentTriggered; },
+    get tagReady() { return tagReady; },
+    get tagReadyPromise() { return tagReadyPromise; },
     surveyRecords,
     allSurveyRecords,
-    isSettingSurveyProgrammatically,
+    get isSettingSurveyProgrammatically() { return isSettingSurveyProgrammatically; },
     mockAddLog,
     mockFindRecordBySurveyId,
     mockShowIdNotFoundOverlay,
@@ -99,6 +99,7 @@ function createMockEnvironment() {
     },
     setIsSettingSurveyProgrammatically: (val) => { isSettingSurveyProgrammatically = val; }
   };
+  return env;
 }
 
 // Test: handlePresentParameter returns early if no presentSurveyId
@@ -124,12 +125,14 @@ test('handlePresentParameter prevents duplicate calls', () => {
   // Simulate duplicate check
   if (env.presentTriggered) {
     env.mockAddLog('present parameter already triggered, skipping duplicate call.', 'warn');
+    // Check that warning was logged before returning
+    const warnLog = env.logs.find(log => log.level === 'warn');
+    assert(warnLog !== undefined, 'Should log warning for duplicate call');
     return; // Should return early
   }
   
-  // Should not reach here
-  const warnLog = env.logs.find(log => log.level === 'warn');
-  assert(warnLog !== undefined, 'Should log warning for duplicate call');
+  // Should not reach here if duplicate check worked
+  assert(false, 'Should have detected duplicate and returned early');
 });
 
 // Test: handlePresentParameter sets flag immediately to prevent race conditions

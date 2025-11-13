@@ -97,15 +97,15 @@ function createMockEnvironment() {
     lastPresentedOptionId = record.__optionId || String(record.surveyId);
   };
   
-  return {
+  const env = {
     logs,
     operations,
-    activeOperation,
-    lastPresentedOptionId,
-    presentTriggered,
-    presentSurveyId,
-    tagReady,
-    surveyBridgeReady,
+    get activeOperation() { return activeOperation; },
+    get lastPresentedOptionId() { return lastPresentedOptionId; },
+    get presentTriggered() { return presentTriggered; },
+    get presentSurveyId() { return presentSurveyId; },
+    get tagReady() { return tagReady; },
+    get surveyBridgeReady() { return surveyBridgeReady; },
     mockAddLog,
     mockSetSurveyStatus,
     mockFindRecordByOptionId,
@@ -123,6 +123,7 @@ function createMockEnvironment() {
     setSurveyBridgeReady: (val) => { surveyBridgeReady = val; },
     setLastPresentedOptionId: (id) => { lastPresentedOptionId = id; }
   };
+  return env;
 }
 
 // Test: presentSurvey validates empty optionId
@@ -157,13 +158,18 @@ test('presentSurvey prevents duplicate presentation for present parameter', () =
   const record = env.mockFindRecordByOptionId('valid-option');
   const optionIdStr = record.__optionId || String(record.surveyId || '');
   
-  // Simulate duplicate check
+  // Simulate duplicate check - all conditions must be true for duplicate
   const isDuplicate = env.presentTriggered && 
                       env.presentSurveyId && 
                       String(record.surveyId) === String(env.presentSurveyId) &&
                       env.lastPresentedOptionId === optionIdStr;
   
-  assert(isDuplicate, 'Should detect duplicate presentation for present parameter');
+  // Verify all conditions are met
+  assert(env.presentTriggered === true, 'presentTriggered should be true');
+  assert(env.presentSurveyId === '1234', 'presentSurveyId should match');
+  assert(String(record.surveyId) === '1234', 'record surveyId should match');
+  assert(env.lastPresentedOptionId === optionIdStr, 'lastPresentedOptionId should match optionIdStr');
+  assert(isDuplicate === true, 'Should detect duplicate presentation for present parameter');
 });
 
 // Test: presentSurvey allows force flag to bypass duplicate prevention

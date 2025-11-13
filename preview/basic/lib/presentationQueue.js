@@ -5,7 +5,7 @@
  * priority handling, and locking to prevent race conditions.
  */
 
-const { log } = require('../../lib/logger');
+const { log } = require('../../../lib/logger');
 
 /**
  * Priority levels for presentation requests

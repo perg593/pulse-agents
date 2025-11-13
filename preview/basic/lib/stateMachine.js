@@ -5,7 +5,7 @@
  * actions on state entry/exit, and state history for debugging.
  */
 
-const { log } = require('../../lib/logger');
+const { log } = require('../../../lib/logger');
 
 /**
  * State transition definition
