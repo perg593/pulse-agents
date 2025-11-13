@@ -1858,6 +1858,11 @@ function setupRedirectTimerObserver() {
 
 // Setup observer when Pulse Insights is ready
 window.addEventListener('pulseinsights:ready', () => {
+  try {
+    console.log('[player] pulseinsights:ready event - setting up redirect timers');
+  } catch (_error) {
+    /* ignore */
+  }
   setupRedirectTimerObserver();
   // Also check for existing questions immediately
   detectAndStartRedirectTimers();
