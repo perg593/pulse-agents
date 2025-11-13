@@ -1592,12 +1592,28 @@ function handleCustomContentLinkClick(event) {
 const activeRedirectTimers = new Map();
 
 function setupCustomContentRedirectTimers() {
+  try {
+    console.log('[player] setupCustomContentRedirectTimers called');
+  } catch (_error) {
+    /* ignore */
+  }
+  
   // Check if PulseInsightsObject is available
   if (!window.PulseInsightsObject || !window.PulseInsightsObject.survey || !Array.isArray(window.PulseInsightsObject.survey.questions)) {
+    try {
+      console.log('[player] setupCustomContentRedirectTimers: PulseInsightsObject not ready, polling...');
+    } catch (_error) {
+      /* ignore */
+    }
     // Wait for PulseInsightsObject to be available
     const checkInterval = setInterval(() => {
       if (window.PulseInsightsObject && window.PulseInsightsObject.survey && Array.isArray(window.PulseInsightsObject.survey.questions)) {
         clearInterval(checkInterval);
+        try {
+          console.log('[player] setupCustomContentRedirectTimers: PulseInsightsObject ready, detecting timers');
+        } catch (_error) {
+          /* ignore */
+        }
         detectAndStartRedirectTimers();
       }
     }, 100);
@@ -1609,7 +1625,37 @@ function setupCustomContentRedirectTimers() {
     return;
   }
   
+  // PulseInsightsObject is ready, try to detect timers
+  // But widget container might not exist yet, so also set up observer
   detectAndStartRedirectTimers();
+  
+  // Also watch for widget container being added dynamically
+  const container = document.getElementById('_pi_surveyWidgetContainer');
+  if (!container || !document.body.contains(container)) {
+    try {
+      console.log('[player] setupCustomContentRedirectTimers: widget container not present, watching for it...');
+    } catch (_error) {
+      /* ignore */
+    }
+    const widgetObserver = new MutationObserver(() => {
+      const widgetContainer = document.getElementById('_pi_surveyWidgetContainer');
+      if (widgetContainer && document.body.contains(widgetContainer)) {
+        try {
+          console.log('[player] setupCustomContentRedirectTimers: widget container appeared, detecting timers');
+        } catch (_error) {
+          /* ignore */
+        }
+        detectAndStartRedirectTimers();
+        widgetObserver.disconnect();
+      }
+    });
+    widgetObserver.observe(document.body, { childList: true, subtree: true });
+    
+    // Stop watching after 10 seconds
+    setTimeout(() => {
+      widgetObserver.disconnect();
+    }, 10000);
+  }
 }
 
 function detectAndStartRedirectTimers() {
