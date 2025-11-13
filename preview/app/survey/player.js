@@ -29,6 +29,7 @@ try {
 
 // Set up location interceptor IMMEDIATELY, before surveys.js loads
 // This must happen before any other scripts can redirect the iframe
+// surveys.js uses: window.location = redirect_url
 (function setupLocationInterceptorEarly() {
   try {
     const originalLocation = window.location;
@@ -95,6 +96,114 @@ try {
       }
       return originalAssign(url);
     };
+    
+    // Intercept window.location = url assignments (what surveys.js uses)
+    // This is tricky because window.location is a special object
+    // We'll use Object.defineProperty to override window.location
+    try {
+      // Store the original location descriptor
+      const locationDescriptor = Object.getOwnPropertyDescriptor(window, 'location') || 
+                                  Object.getOwnPropertyDescriptor(Object.getPrototypeOf(window), 'location');
+      
+      if (locationDescriptor && locationDescriptor.configurable) {
+        // Override window.location getter/setter
+        Object.defineProperty(window, 'location', {
+          get: function() {
+            return originalLocation;
+          },
+          set: function(value) {
+            // surveys.js does: window.location = redirect_url
+            try {
+              const currentOrigin = window.location.origin;
+              const targetUrl = new URL(value, window.location.href);
+              
+              if (targetUrl.origin !== currentOrigin) {
+                console.error('[player] EARLY INTERCEPT window.location =', { from: window.location.href, to: value });
+                console.warn('[player] EARLY INTERCEPT window.location =', { from: window.location.href, to: value });
+                console.log('[player] EARLY INTERCEPT window.location =', { from: window.location.href, to: value });
+                
+                // Send message to parent
+                if (window.parent && window.parent !== window) {
+                  try {
+                    window.parent.postMessage({
+                      type: 'redirect',
+                      url: value
+                    }, '*');
+                  } catch (_error) {
+                    /* ignore */
+                  }
+                }
+                
+                return; // Don't navigate
+              }
+            } catch (_error) {
+              // Invalid URL, let it through
+            }
+            
+            // For same-origin or invalid URLs, allow navigation
+            originalLocation.href = value;
+          },
+          configurable: true,
+          enumerable: locationDescriptor.enumerable
+        });
+      } else {
+        // Fallback: try to override Location.prototype.href setter
+        try {
+          const Location = window.Location || window.location.constructor;
+          if (Location && Location.prototype) {
+            const hrefDescriptor = Object.getOwnPropertyDescriptor(Location.prototype, 'href');
+            if (hrefDescriptor && hrefDescriptor.set && hrefDescriptor.configurable) {
+              const originalHrefSetter = hrefDescriptor.set;
+              
+              Object.defineProperty(Location.prototype, 'href', {
+                get: hrefDescriptor.get,
+                set: function(value) {
+                  try {
+                    const currentOrigin = this.origin;
+                    const targetUrl = new URL(value, this.href);
+                    
+                    if (targetUrl.origin !== currentOrigin) {
+                      console.error('[player] EARLY INTERCEPT Location.prototype.href =', { from: this.href, to: value });
+                      console.warn('[player] EARLY INTERCEPT Location.prototype.href =', { from: this.href, to: value });
+                      console.log('[player] EARLY INTERCEPT Location.prototype.href =', { from: this.href, to: value });
+                      
+                      // Send message to parent
+                      if (window.parent && window.parent !== window) {
+                        try {
+                          window.parent.postMessage({
+                            type: 'redirect',
+                            url: value
+                          }, '*');
+                        } catch (_error) {
+                          /* ignore */
+                        }
+                      }
+                      
+                      return; // Don't navigate
+                    }
+                  } catch (_error) {
+                    // Invalid URL, let it through
+                  }
+                  
+                  // For same-origin URLs, call original setter
+                  return originalHrefSetter.call(this, value);
+                },
+                configurable: true,
+                enumerable: hrefDescriptor.enumerable
+              });
+            }
+          }
+        } catch (hrefError) {
+          console.warn('[player] Could not intercept Location.prototype.href', hrefError);
+        }
+      }
+    } catch (locationError) {
+      try {
+        console.warn('[player] Could not intercept window.location assignment', locationError);
+      } catch (_error) {
+        /* ignore */
+      }
+    }
   } catch (error) {
     try {
       console.warn('[player] Could not set up early location interceptor', error);
