@@ -163,6 +163,18 @@ window.addEventListener('pulseinsights:ready', (event) => {
     applyManualStylesheet(pendingManualCss).catch(() => {});
   }
   flushPendingPresents();
+  // Setup link handling when Pulse Insights is ready (widgets may be rendered)
+  setupCustomContentLinkHandling();
+  // Setup timer-based redirect handling when Pulse Insights is ready
+  try {
+    setupCustomContentRedirectTimers();
+  } catch (error) {
+    try {
+      console.error('[player] ERROR calling setupCustomContentRedirectTimers', error);
+    } catch (_error) {
+      /* ignore */
+    }
+  }
   postLegacyMessage({
     type: 'player-ready',
     account,
@@ -305,6 +317,10 @@ function handleLegacyMessage(data) {
         }
       }
       break;
+    case 'cleanup-timers':
+      // Clean up redirect timers when requested by bridge
+      cleanupRedirectTimers();
+      break;
     default:
       break;
   }
@@ -356,6 +372,9 @@ function handleProtocolPresent(id, payload = {}) {
 
 function handleProtocolDismiss(id) {
   if (!id) return;
+  // Clean up redirect timers when survey is dismissed
+  cleanupRedirectTimers();
+  
   let dismissed = false;
   if (typeof window.pi === 'function') {
     try {
@@ -1494,6 +1513,8 @@ function loadTag() {
     } catch (_error) {
       /* ignore */
     }
+    // Setup link click handling after tag loads
+    setupCustomContentLinkHandling();
   };
   script.onerror = (event) => {
     try {
@@ -1504,6 +1525,578 @@ function loadTag() {
   };
   document.head.appendChild(script);
 }
+
+let linkHandlerContainer = null;
+
+function setupCustomContentLinkHandling() {
+  // Use event delegation to handle dynamically added links
+  const container = document.getElementById('_pi_surveyWidgetContainer');
+  if (container && container !== linkHandlerContainer) {
+    attachLinkHandlers(container);
+    linkHandlerContainer = container;
+  }
+  
+  // Watch for widget container being added dynamically or recreated
+  if (!linkHandlerContainer || !document.body.contains(linkHandlerContainer)) {
+    const observer = new MutationObserver(() => {
+      const widgetContainer = document.getElementById('_pi_surveyWidgetContainer');
+      if (widgetContainer && widgetContainer !== linkHandlerContainer) {
+        attachLinkHandlers(widgetContainer);
+        linkHandlerContainer = widgetContainer;
+        observer.disconnect();
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+  }
+}
+
+function attachLinkHandlers(container) {
+  // Use event delegation - attach once to container, handles all links
+  container.addEventListener('click', handleCustomContentLinkClick, true);
+}
+
+/**
+ * Checks if a URL uses a dangerous scheme that should be blocked.
+ * 
+ * @param {string} url - The URL to check
+ * @returns {boolean} True if the URL uses a dangerous scheme
+ */
+function isDangerousUrlScheme(url) {
+  if (!url || typeof url !== 'string') {
+    return false;
+  }
+  const trimmed = url.trim().toLowerCase();
+  // Block dangerous URL schemes that could be used for XSS attacks
+  return trimmed.startsWith('javascript:') ||
+         trimmed.startsWith('data:') ||
+         trimmed.startsWith('vbscript:');
+}
+
+function handleCustomContentLinkClick(event) {
+  // Find the clicked link element
+  let link = event.target;
+  while (link && link.tagName !== 'A') {
+    link = link.parentElement;
+  }
+  
+  if (!link || link.tagName !== 'A') {
+    return; // Not a link click
+  }
+  
+  // Check if link is within a custom content question
+  const customContentQuestion = link.closest('._pi_question_custom_content_question');
+  if (!customContentQuestion) {
+    return; // Not in custom content question, let default behavior handle it
+  }
+  
+  const href = link.getAttribute('href');
+  if (!href || href.trim() === '' || isDangerousUrlScheme(href)) {
+    return; // No href, empty href, or dangerous URL scheme - let default behavior handle
+  }
+  
+  const target = link.getAttribute('target') || '_self';
+  
+  // Prevent default link behavior
+  event.preventDefault();
+  event.stopPropagation();
+  
+  // Send message to parent window to open link
+  postLegacyMessage({
+    type: 'link-click',
+    href: href.trim(),
+    target: target
+  });
+  
+  try {
+    console.log('[player] link click intercepted', { href, target });
+  } catch (_error) {
+    /* ignore */
+  }
+}
+
+const activeRedirectTimers = new Map();
+const pendingRedirectTimers = new Set(); // Track timers being set up to prevent duplicates
+
+// Custom content redirect constants
+const AUTOREDIRECT_ENABLED = 't';
+const AUTOREDIRECT_DISABLED = 'f';
+const QUESTION_TYPE_CUSTOM_CONTENT = 'custom_content_question';
+const DEFAULT_REDIRECT_DELAY_MS = 2000;
+const PULSEINSIGHTS_CHECK_INTERVAL_MS = 50;
+const PULSEINSIGHTS_CHECK_TIMEOUT_MS = 10000;
+
+/**
+ * Disables autoredirect in PulseInsightsObject questions to prevent surveys.js
+ * from setting up redirect timers. Sets a flag so we know to handle redirects ourselves.
+ * 
+ * This function modifies questions in-place by setting `autoredirect_enabled` to 'f'
+ * and adding `_autoredirect_disabled_by_player` flag.
+ * 
+ * @returns {void}
+ */
+function disableAutoredirectInPulseInsightsObject() {
+  if (!window.PulseInsightsObject || !window.PulseInsightsObject.survey || 
+      !Array.isArray(window.PulseInsightsObject.survey.questions)) {
+    return;
+  }
+  
+  const questions = window.PulseInsightsObject.survey.questions;
+  questions.forEach((question) => {
+    if (question && 
+        question.question_type === QUESTION_TYPE_CUSTOM_CONTENT && 
+        question.autoredirect_enabled === AUTOREDIRECT_ENABLED &&
+        question.autoredirect_url) {
+      // Disable autoredirect to prevent surveys.js from redirecting
+      // Store flag indicating we disabled it so we know to handle redirect ourselves
+      question.autoredirect_enabled = AUTOREDIRECT_DISABLED;
+      question._autoredirect_disabled_by_player = true;
+      
+      try {
+        console.log('[player] Disabled autoredirect in PulseInsightsObject for question', question.id);
+      } catch (_error) {
+        /* ignore */
+      }
+    }
+  });
+}
+
+// Intercept PulseInsightsObject creation to disable autoredirect immediately
+// This ensures we disable autoredirect before surveys.js reads it
+(function setupPulseInsightsObjectInterceptor() {
+  const checkInterval = setInterval(() => {
+    if (window.PulseInsightsObject && window.PulseInsightsObject.survey && 
+        Array.isArray(window.PulseInsightsObject.survey.questions)) {
+      clearInterval(checkInterval);
+      disableAutoredirectInPulseInsightsObject();
+    }
+  }, PULSEINSIGHTS_CHECK_INTERVAL_MS); // Check every 50ms for fast detection
+  
+  // Stop checking after 10 seconds
+  setTimeout(() => {
+    clearInterval(checkInterval);
+  }, PULSEINSIGHTS_CHECK_TIMEOUT_MS);
+})();
+
+function setupCustomContentRedirectTimers() {
+  try {
+    console.log('[player] setupCustomContentRedirectTimers called');
+  } catch (_error) {
+    /* ignore */
+  }
+  
+  // Check if PulseInsightsObject is available
+  if (!window.PulseInsightsObject || !window.PulseInsightsObject.survey || !Array.isArray(window.PulseInsightsObject.survey.questions)) {
+    try {
+      console.log('[player] setupCustomContentRedirectTimers: PulseInsightsObject not ready, polling...');
+    } catch (_error) {
+      /* ignore */
+    }
+    // Wait for PulseInsightsObject to be available
+    const checkInterval = setInterval(() => {
+      if (window.PulseInsightsObject && window.PulseInsightsObject.survey && Array.isArray(window.PulseInsightsObject.survey.questions)) {
+        clearInterval(checkInterval);
+        try {
+          console.log('[player] setupCustomContentRedirectTimers: PulseInsightsObject ready, detecting timers');
+        } catch (_error) {
+          /* ignore */
+        }
+        detectAndStartRedirectTimers();
+      }
+    }, 100);
+    
+    // Stop checking after 10 seconds
+    setTimeout(() => {
+      clearInterval(checkInterval);
+    }, PULSEINSIGHTS_CHECK_TIMEOUT_MS);
+    return;
+  }
+  
+  // PulseInsightsObject is ready, try to detect timers
+  // But widget container might not exist yet, so also set up observer
+  detectAndStartRedirectTimers();
+  
+  // Also watch for widget container being added dynamically
+  const container = document.getElementById('_pi_surveyWidgetContainer');
+  if (!container || !document.body.contains(container)) {
+    try {
+      console.log('[player] setupCustomContentRedirectTimers: widget container not present, watching for it...');
+    } catch (_error) {
+      /* ignore */
+    }
+    const widgetObserver = new MutationObserver(() => {
+      const widgetContainer = document.getElementById('_pi_surveyWidgetContainer');
+      if (widgetContainer && document.body.contains(widgetContainer)) {
+        try {
+          console.log('[player] setupCustomContentRedirectTimers: widget container appeared, detecting timers');
+        } catch (_error) {
+          /* ignore */
+        }
+        detectAndStartRedirectTimers();
+        widgetObserver.disconnect();
+      }
+    });
+    widgetObserver.observe(document.body, { childList: true, subtree: true });
+    
+    // Stop watching after 10 seconds
+    setTimeout(() => {
+      widgetObserver.disconnect();
+    }, 10000);
+  }
+}
+
+/**
+ * Detects custom content questions with autoredirect enabled and starts redirect timers.
+ * Prevents surveys.js from redirecting by disabling autoredirect in PulseInsightsObject first.
+ * 
+ * This function:
+ * - Disables autoredirect in PulseInsightsObject before processing
+ * - Finds all custom content question elements in the DOM
+ * - Starts redirect timers for questions with autoredirect enabled
+ * - Prevents duplicate timers using pendingRedirectTimers Set
+ * 
+ * @returns {void}
+ */
+function detectAndStartRedirectTimers() {
+  try {
+    console.log('[player] detectAndStartRedirectTimers called');
+  } catch (_error) {
+    /* ignore */
+  }
+  
+  // Ensure widget container exists and PulseInsightsObject is available
+  const container = document.getElementById('_pi_surveyWidgetContainer');
+  if (!container || !document.body.contains(container)) {
+    try {
+      console.log('[player] detectAndStartRedirectTimers: widget container not present');
+    } catch (_error) {
+      /* ignore */
+    }
+    return; // Widget container not present
+  }
+  
+  if (!window.PulseInsightsObject || !window.PulseInsightsObject.survey || !Array.isArray(window.PulseInsightsObject.survey.questions)) {
+    try {
+      console.log('[player] detectAndStartRedirectTimers: PulseInsightsObject not ready', {
+        hasObject: !!window.PulseInsightsObject,
+        hasSurvey: !!(window.PulseInsightsObject && window.PulseInsightsObject.survey),
+        hasQuestions: !!(window.PulseInsightsObject && window.PulseInsightsObject.survey && Array.isArray(window.PulseInsightsObject.survey.questions))
+      });
+    } catch (_error) {
+      /* ignore */
+    }
+    return; // PulseInsightsObject not ready
+  }
+  
+  // CRITICAL: Disable autoredirect BEFORE processing questions
+  // This prevents surveys.js from setting up its redirect timer
+  disableAutoredirectInPulseInsightsObject();
+  
+  // Find all custom content question elements
+  const customContentQuestions = document.querySelectorAll('._pi_question_custom_content_question');
+  
+  try {
+    console.log('[player] detectAndStartRedirectTimers: found', customContentQuestions.length, 'custom content questions');
+  } catch (_error) {
+    /* ignore */
+  }
+  
+  if (customContentQuestions.length === 0) {
+    return; // No custom content questions found
+  }
+  
+  customContentQuestions.forEach((questionElement) => {
+    const questionId = getQuestionIdFromElement(questionElement);
+    if (!questionId) {
+      try {
+        console.log('[player] detectAndStartRedirectTimers: could not get questionId from element');
+      } catch (_error) {
+        /* ignore */
+      }
+      return;
+    }
+    
+    // Check if timer already running or pending for this question
+    if (activeRedirectTimers.has(questionId) || pendingRedirectTimers.has(questionId)) {
+      try {
+        console.log('[player] detectAndStartRedirectTimers: timer already running or pending for question', questionId);
+      } catch (_error) {
+        /* ignore */
+      }
+      return; // Timer already running or being set up
+    }
+    
+    const question = getQuestionFromPulseInsightsObject(questionId);
+    if (!question) {
+      try {
+        console.log('[player] detectAndStartRedirectTimers: question not found in PulseInsightsObject', questionId);
+      } catch (_error) {
+        /* ignore */
+      }
+      return; // Question not found in PulseInsightsObject
+    }
+    
+    try {
+      console.log('[player] detectAndStartRedirectTimers: checking question', questionId, {
+        question_type: question.question_type,
+        autoredirect_enabled: question.autoredirect_enabled,
+        autoredirect_delay: question.autoredirect_delay,
+        autoredirect_url: question.autoredirect_url
+      });
+    } catch (_error) {
+      /* ignore */
+    }
+    
+    // Check if auto-redirect is enabled
+    // Note: autoredirect_enabled may be 'f' because we disabled it to prevent surveys.js redirect
+    // Check for _autoredirect_disabled_by_player flag OR original 't' value
+    const wasAutoredirectEnabled = question.autoredirect_enabled === AUTOREDIRECT_ENABLED || question._autoredirect_disabled_by_player === true;
+    
+    if (question.question_type === QUESTION_TYPE_CUSTOM_CONTENT && wasAutoredirectEnabled && question.autoredirect_url) {
+      const delay = parseRedirectDelay(question.autoredirect_delay);
+      const url = question.autoredirect_url;
+      
+      if (url && typeof url === 'string' && url.trim()) {
+        // Mark as pending immediately to prevent duplicate setups
+        pendingRedirectTimers.add(questionId);
+        
+        try {
+          startRedirectTimer(questionId, url.trim(), delay);
+        } catch (error) {
+          // If timer setup fails, remove from pending set
+          pendingRedirectTimers.delete(questionId);
+          try {
+            console.error('[player] failed to start redirect timer', questionId, error);
+          } catch (_error) {
+            /* ignore */
+          }
+        }
+      } else {
+        try {
+          console.warn('[player] autoredirect_url missing or invalid for question', questionId);
+        } catch (_error) {
+          /* ignore */
+        }
+      }
+    }
+  });
+}
+
+function getQuestionIdFromElement(element) {
+  // Try data-question-id attribute first
+  const dataQuestionId = element.getAttribute('data-question-id');
+  if (dataQuestionId) {
+    const parsed = parseInt(dataQuestionId, 10);
+    if (!isNaN(parsed)) {
+      return parsed;
+    }
+  }
+  
+  // Fallback: extract from id attribute (e.g., _pi_question_27161 -> 27161)
+  const id = element.getAttribute('id');
+  if (id) {
+    const match = id.match(/_pi_question_(\d+)$/);
+    if (match && match[1]) {
+      const parsed = parseInt(match[1], 10);
+      if (!isNaN(parsed)) {
+        return parsed;
+      }
+    }
+  }
+  
+  return null;
+}
+
+function getQuestionFromPulseInsightsObject(questionId) {
+  if (!window.PulseInsightsObject || !window.PulseInsightsObject.survey || !Array.isArray(window.PulseInsightsObject.survey.questions)) {
+    return null;
+  }
+  
+  // Normalize questionId to string for consistent comparison
+  const normalizedId = String(questionId);
+  const questions = window.PulseInsightsObject.survey.questions;
+  
+  for (let i = 0; i < questions.length; i++) {
+    const question = questions[i];
+    if (question && String(question.id) === normalizedId) {
+      return question;
+    }
+  }
+  
+  return null;
+}
+
+/**
+ * Parses redirect delay from question configuration.
+ * Converts seconds (string or number) to milliseconds.
+ * 
+ * @param {string|number} delay - Delay value from question config
+ * @returns {number} Delay in milliseconds (defaults to 2000ms if invalid)
+ */
+function parseRedirectDelay(delay) {
+  // autoredirect_delay is stored in seconds, convert to milliseconds
+  if (typeof delay === 'number' && !isNaN(delay) && delay > 0) {
+    return Math.max(0, Math.floor(delay * 1000));
+  }
+  
+  if (typeof delay === 'string' && delay.trim()) {
+    const parsed = parseFloat(delay.trim());
+    if (!isNaN(parsed) && parsed > 0) {
+      return Math.max(0, Math.floor(parsed * 1000));
+    }
+  }
+  
+  // Default to 2000ms (2 seconds) if missing or invalid
+  return DEFAULT_REDIRECT_DELAY_MS;
+}
+
+/**
+ * Starts a redirect timer for a custom content question.
+ * Timer will send a redirect message to the bridge when it expires.
+ * 
+ * @param {string|number} questionId - The question ID
+ * @param {string} url - The URL to redirect to
+ * @param {number} delay - Delay in milliseconds before redirect
+ * @returns {void}
+ */
+function startRedirectTimer(questionId, url, delay) {
+  // Clear any existing timer for this question
+  cleanupRedirectTimer(questionId);
+  
+  const timerId = setTimeout(() => {
+    // Timer expired, send redirect message
+    try {
+      postLegacyMessage({
+        type: 'redirect',
+        url: url
+      });
+      try {
+        console.log('[player] redirect message sent', { questionId, url });
+      } catch (_error) {
+        /* ignore */
+      }
+    } catch (sendError) {
+      try {
+        const errorLog = `[${new Date().toISOString()}] redirect message FAILED - ${sendError.message}`;
+        localStorage.setItem('pi_redirect_error', errorLog);
+        console.error('[player] redirect message FAILED', sendError);
+      } catch (_error) {
+        /* ignore */
+      }
+    }
+    
+    // Clean up timer reference
+    activeRedirectTimers.delete(questionId);
+  }, delay);
+  
+  // Store timer reference
+  activeRedirectTimers.set(questionId, timerId);
+  // Remove from pending set now that timer is active
+  pendingRedirectTimers.delete(questionId);
+  
+  try {
+    console.log('[player] redirect timer started', { questionId, url, delay });
+  } catch (_error) {
+    /* ignore */
+  }
+}
+
+/**
+ * Cleans up a single redirect timer for a specific question.
+ * 
+ * @param {string|number} questionId - The question ID to clean up
+ * @returns {void}
+ */
+function cleanupRedirectTimer(questionId) {
+  const timerId = activeRedirectTimers.get(questionId);
+  if (timerId) {
+    clearTimeout(timerId);
+    activeRedirectTimers.delete(questionId);
+  }
+  // Also remove from pending set if present
+  pendingRedirectTimers.delete(questionId);
+}
+
+/**
+ * Cleans up all active redirect timers.
+ * Called when survey is dismissed or page is unloaded.
+ * 
+ * @returns {void}
+ */
+function cleanupRedirectTimers() {
+  // Clear all active timers
+  activeRedirectTimers.forEach((timerId, questionId) => {
+    clearTimeout(timerId);
+  });
+  activeRedirectTimers.clear();
+  // Also clear pending set
+  pendingRedirectTimers.clear();
+}
+
+// Watch for custom content questions being added/removed
+let redirectTimerObserver = null;
+
+function setupRedirectTimerObserver() {
+  if (redirectTimerObserver) {
+    return; // Already set up
+  }
+  
+  redirectTimerObserver = new MutationObserver(() => {
+    // Clean up timers for removed questions
+    const existingQuestionIds = new Set();
+    document.querySelectorAll('._pi_question_custom_content_question').forEach((element) => {
+      const questionId = getQuestionIdFromElement(element);
+      if (questionId) {
+        existingQuestionIds.add(questionId);
+      }
+    });
+    
+    // Remove timers for questions that no longer exist in DOM
+    activeRedirectTimers.forEach((timerId, questionId) => {
+      if (!existingQuestionIds.has(questionId)) {
+        cleanupRedirectTimer(questionId);
+      }
+    });
+    
+    // Detect and start new timers
+    if (window.PulseInsightsObject && window.PulseInsightsObject.survey && Array.isArray(window.PulseInsightsObject.survey.questions)) {
+      detectAndStartRedirectTimers();
+    }
+  });
+  
+  redirectTimerObserver.observe(document.body, { childList: true, subtree: true });
+}
+
+// Setup observer when Pulse Insights is ready
+window.addEventListener('pulseinsights:ready', () => {
+  try {
+    console.log('[player] pulseinsights:ready event - setting up redirect timers');
+  } catch (_error) {
+    /* ignore */
+  }
+  setupRedirectTimerObserver();
+  // Also check for existing questions immediately
+  detectAndStartRedirectTimers();
+});
+
+// Clean up timers when widget container is removed
+const widgetCleanupObserver = new MutationObserver(() => {
+  const container = document.getElementById('_pi_surveyWidgetContainer');
+  if (!container || !document.body.contains(container)) {
+    // Widget container removed, clean up all timers
+    cleanupRedirectTimers();
+  }
+});
+widgetCleanupObserver.observe(document.body, { childList: true, subtree: true });
+
+// Clean up timers when page/iframe is about to be unloaded
+// This prevents timers from firing after iframe context is destroyed
+window.addEventListener('beforeunload', () => {
+  cleanupRedirectTimers();
+});
+
+window.addEventListener('pagehide', () => {
+  cleanupRedirectTimers();
+});
 
 function scheduleWidgetCheck(id, source, delay) {
   setTimeout(() => {
