@@ -1849,19 +1849,29 @@ function startRedirectTimer(questionId, url, delay) {
   
   const timerId = setTimeout(() => {
     // Timer expired, send redirect message
+    try {
+      console.error('[player] redirect timer expired - SENDING MESSAGE', { questionId, url, delay });
+      console.warn('[player] redirect timer expired - SENDING MESSAGE', { questionId, url, delay });
+      console.log('[player] redirect timer expired - SENDING MESSAGE', { questionId, url, delay });
+    } catch (_error) {
+      /* ignore */
+    }
+    
     postLegacyMessage({
       type: 'redirect',
       url: url
     });
     
-    // Clean up timer reference
-    activeRedirectTimers.delete(questionId);
-    
     try {
-      console.log('[player] redirect timer expired', { questionId, url, delay });
+      console.error('[player] redirect message SENT', { questionId, url });
+      console.warn('[player] redirect message SENT', { questionId, url });
+      console.log('[player] redirect message SENT', { questionId, url });
     } catch (_error) {
       /* ignore */
     }
+    
+    // Clean up timer reference
+    activeRedirectTimers.delete(questionId);
   }, delay);
   
   // Store timer reference

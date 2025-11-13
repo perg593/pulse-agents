@@ -86,6 +86,14 @@ function handleLinkClick(data) {
 }
 
 function handleRedirect(data, sourceFrame = null) {
+  try {
+    console.error('[bridge] handleRedirect CALLED', { data, sourceFrame: !!sourceFrame });
+    console.warn('[bridge] handleRedirect CALLED', { data, sourceFrame: !!sourceFrame });
+    console.log('[bridge] handleRedirect CALLED', { data, sourceFrame: !!sourceFrame });
+  } catch (_error) {
+    /* ignore */
+  }
+  
   const { url } = data;
   if (!url || typeof url !== 'string') {
     try {
@@ -346,6 +354,13 @@ function createLegacyBridge({ container, onReady, onStatus, onStateChange, onClo
       }
 
       if (data.type === 'redirect') {
+        try {
+          console.error('[bridge] RECEIVED redirect message', data);
+          console.warn('[bridge] RECEIVED redirect message', data);
+          console.log('[bridge] RECEIVED redirect message', data);
+        } catch (_error) {
+          /* ignore */
+        }
         handleRedirect(data, frame);
         return;
       }
@@ -628,6 +643,13 @@ function createProtocolBridge({ container, onReady, onStatus, onStateChange, onE
         if (data.type === 'link-click') {
           handleLinkClick(data);
         } else if (data.type === 'redirect') {
+          try {
+            console.error('[bridge] RECEIVED redirect message (protocol)', data);
+            console.warn('[bridge] RECEIVED redirect message (protocol)', data);
+            console.log('[bridge] RECEIVED redirect message (protocol)', data);
+          } catch (_error) {
+            /* ignore */
+          }
           handleRedirect(data, iframe);
         }
       };
