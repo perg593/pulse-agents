@@ -163,6 +163,8 @@ window.addEventListener('pulseinsights:ready', (event) => {
     applyManualStylesheet(pendingManualCss).catch(() => {});
   }
   flushPendingPresents();
+  // Setup location.href interceptor to catch redirects from surveys.js
+  setupLocationHrefInterceptor();
   // Setup link handling when Pulse Insights is ready (widgets may be rendered)
   setupCustomContentLinkHandling();
   // Setup timer-based redirect handling when Pulse Insights is ready
@@ -1612,6 +1614,151 @@ function handleCustomContentLinkClick(event) {
 }
 
 const activeRedirectTimers = new Map();
+
+// Intercept window.location methods to catch redirects from surveys.js
+let locationInterceptor = null;
+
+function setupLocationHrefInterceptor() {
+  if (locationInterceptor) return; // Already set up
+  
+  try {
+    const originalLocation = window.location;
+    const originalReplace = originalLocation.replace.bind(originalLocation);
+    const originalAssign = originalLocation.assign.bind(originalLocation);
+    
+    // Override replace method (most common for redirects)
+    originalLocation.replace = function(url) {
+      try {
+        const currentOrigin = window.location.origin;
+        const targetUrl = new URL(url, window.location.href);
+        
+        // If redirecting to different origin, intercept it
+        if (targetUrl.origin !== currentOrigin) {
+          try {
+            console.error('[player] INTERCEPTED location.replace redirect', { from: window.location.href, to: url });
+            console.warn('[player] INTERCEPTED location.replace redirect', { from: window.location.href, to: url });
+            console.log('[player] INTERCEPTED location.replace redirect', { from: window.location.href, to: url });
+            
+            // Send redirect message to bridge instead
+            postLegacyMessage({
+              type: 'redirect',
+              url: url
+            });
+            
+            // Don't actually navigate the iframe
+            return;
+          } catch (error) {
+            console.error('[player] Error intercepting replace redirect', error);
+            // Fall through to original behavior
+          }
+        }
+      } catch (_error) {
+        // Invalid URL, let it through
+      }
+      
+      // For same-origin URLs, call original
+      return originalReplace(url);
+    };
+    
+    // Override assign method
+    originalLocation.assign = function(url) {
+      try {
+        const currentOrigin = window.location.origin;
+        const targetUrl = new URL(url, window.location.href);
+        
+        // If redirecting to different origin, intercept it
+        if (targetUrl.origin !== currentOrigin) {
+          try {
+            console.error('[player] INTERCEPTED location.assign redirect', { from: window.location.href, to: url });
+            console.warn('[player] INTERCEPTED location.assign redirect', { from: window.location.href, to: url });
+            console.log('[player] INTERCEPTED location.assign redirect', { from: window.location.href, to: url });
+            
+            // Send redirect message to bridge instead
+            postLegacyMessage({
+              type: 'redirect',
+              url: url
+            });
+            
+            // Don't actually navigate the iframe
+            return;
+          } catch (error) {
+            console.error('[player] Error intercepting assign redirect', error);
+            // Fall through to original behavior
+          }
+        }
+      } catch (_error) {
+        // Invalid URL, let it through
+      }
+      
+      // For same-origin URLs, call original
+      return originalAssign(url);
+    };
+    
+    // Intercept location.href setter using Object.defineProperty on Location prototype
+    // This is the most common way scripts navigate
+    try {
+      const Location = window.Location || window.location.constructor;
+      if (Location && Location.prototype) {
+        const originalHrefDescriptor = Object.getOwnPropertyDescriptor(Location.prototype, 'href');
+        if (originalHrefDescriptor && originalHrefDescriptor.set) {
+          const originalHrefSetter = originalHrefDescriptor.set;
+          
+          Object.defineProperty(Location.prototype, 'href', {
+            get: originalHrefDescriptor.get,
+            set: function(value) {
+              try {
+                const currentOrigin = this.origin;
+                const targetUrl = new URL(value, this.href);
+                
+                // If redirecting to different origin, intercept it
+                if (targetUrl.origin !== currentOrigin) {
+                  try {
+                    console.error('[player] INTERCEPTED location.href setter redirect', { from: this.href, to: value });
+                    console.warn('[player] INTERCEPTED location.href setter redirect', { from: this.href, to: value });
+                    console.log('[player] INTERCEPTED location.href setter redirect', { from: this.href, to: value });
+                    
+                    // Send redirect message to bridge instead
+                    postLegacyMessage({
+                      type: 'redirect',
+                      url: value
+                    });
+                    
+                    // Don't actually navigate the iframe
+                    return;
+                  } catch (error) {
+                    console.error('[player] Error intercepting href setter redirect', error);
+                    // Fall through to original behavior
+                  }
+                }
+              } catch (_error) {
+                // Invalid URL, let it through
+              }
+              
+              // For same-origin URLs, call original setter
+              return originalHrefSetter.call(this, value);
+            },
+            configurable: true,
+            enumerable: originalHrefDescriptor.enumerable
+          });
+        }
+      }
+    } catch (hrefError) {
+      try {
+        console.warn('[player] Could not intercept location.href setter', hrefError);
+      } catch (_error) {
+        /* ignore */
+      }
+    }
+    
+    locationInterceptor = true;
+  } catch (error) {
+    try {
+      console.warn('[player] Could not set up location interceptor', error);
+    } catch (_error) {
+      /* ignore */
+    }
+  }
+}
 
 function setupCustomContentRedirectTimers() {
   try {
