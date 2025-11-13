@@ -112,20 +112,36 @@ function handleRedirect(data, sourceFrame = null) {
   const redirectUrl = url.trim();
   
   try {
-    // Check if same origin to use window.location, otherwise use window.open
+    // Always redirect the top-level window, not any iframe
+    // Use window.top to ensure we're targeting the main window
+    let targetWindow = window;
     try {
-      const currentOrigin = window.location.origin;
-      const targetUrl = new URL(redirectUrl, window.location.href);
-      if (targetUrl.origin === currentOrigin) {
-        window.location.href = redirectUrl;
-      } else {
-        // Cross-origin: must use window.open even for same-window navigation
-        window.open(redirectUrl, '_self');
+      // Try to use top-level window if accessible
+      if (window.top && window.top !== window) {
+        // Test if we can access top window location (will throw if cross-origin)
+        void window.top.location;
+        targetWindow = window.top;
       }
     } catch (_error) {
-      // Invalid URL or relative URL - try window.location
+      // Can't access top window (cross-origin restriction), use current window
+      targetWindow = window;
+    }
+    
+    // Navigate the target window
+    try {
+      const currentOrigin = targetWindow.location.origin;
+      const targetUrl = new URL(redirectUrl, targetWindow.location.href);
+      if (targetUrl.origin === currentOrigin) {
+        // Same origin: use location.href
+        targetWindow.location.href = redirectUrl;
+      } else {
+        // Cross-origin: use location.replace (works for cross-origin navigation)
+        targetWindow.location.replace(redirectUrl);
+      }
+    } catch (_error) {
+      // Invalid URL or relative URL - try window.location.href
       try {
-        window.location.href = redirectUrl;
+        targetWindow.location.href = redirectUrl;
       } catch (__error) {
         try {
           console.error('[bridge] failed to redirect', redirectUrl, __error);
