@@ -167,13 +167,25 @@ window.addEventListener('pulseinsights:ready', (event) => {
   setupCustomContentLinkHandling();
   // Setup timer-based redirect handling when Pulse Insights is ready
   try {
-    console.warn('[player] ABOUT TO CALL setupCustomContentRedirectTimers');
+    console.error('[player] DEBUG: ABOUT TO CALL setupCustomContentRedirectTimers');
+    console.warn('[player] DEBUG: ABOUT TO CALL setupCustomContentRedirectTimers');
+    console.log('[player] DEBUG: ABOUT TO CALL setupCustomContentRedirectTimers');
   } catch (_error) {
     /* ignore */
   }
-  setupCustomContentRedirectTimers();
   try {
-    console.warn('[player] FINISHED CALLING setupCustomContentRedirectTimers');
+    setupCustomContentRedirectTimers();
+  } catch (error) {
+    try {
+      console.error('[player] ERROR calling setupCustomContentRedirectTimers', error);
+    } catch (_error) {
+      /* ignore */
+    }
+  }
+  try {
+    console.error('[player] DEBUG: FINISHED CALLING setupCustomContentRedirectTimers');
+    console.warn('[player] DEBUG: FINISHED CALLING setupCustomContentRedirectTimers');
+    console.log('[player] DEBUG: FINISHED CALLING setupCustomContentRedirectTimers');
   } catch (_error) {
     /* ignore */
   }
