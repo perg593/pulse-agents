@@ -27,6 +27,83 @@ try {
   /* ignore */
 }
 
+// Set up location interceptor IMMEDIATELY, before surveys.js loads
+// This must happen before any other scripts can redirect the iframe
+(function setupLocationInterceptorEarly() {
+  try {
+    const originalLocation = window.location;
+    const originalReplace = originalLocation.replace.bind(originalLocation);
+    const originalAssign = originalLocation.assign.bind(originalLocation);
+    
+    // Override replace method
+    originalLocation.replace = function(url) {
+      try {
+        const currentOrigin = window.location.origin;
+        const targetUrl = new URL(url, window.location.href);
+        
+        if (targetUrl.origin !== currentOrigin) {
+          console.error('[player] EARLY INTERCEPT location.replace', { from: window.location.href, to: url });
+          console.warn('[player] EARLY INTERCEPT location.replace', { from: window.location.href, to: url });
+          console.log('[player] EARLY INTERCEPT location.replace', { from: window.location.href, to: url });
+          
+          // Send message to parent (bridge might not be ready yet, but try anyway)
+          if (window.parent && window.parent !== window) {
+            try {
+              window.parent.postMessage({
+                type: 'redirect',
+                url: url
+              }, '*');
+            } catch (_error) {
+              /* ignore */
+            }
+          }
+          
+          return; // Don't navigate
+        }
+      } catch (_error) {
+        /* ignore */
+      }
+      return originalReplace(url);
+    };
+    
+    // Override assign method
+    originalLocation.assign = function(url) {
+      try {
+        const currentOrigin = window.location.origin;
+        const targetUrl = new URL(url, window.location.href);
+        
+        if (targetUrl.origin !== currentOrigin) {
+          console.error('[player] EARLY INTERCEPT location.assign', { from: window.location.href, to: url });
+          console.warn('[player] EARLY INTERCEPT location.assign', { from: window.location.href, to: url });
+          console.log('[player] EARLY INTERCEPT location.assign', { from: window.location.href, to: url });
+          
+          if (window.parent && window.parent !== window) {
+            try {
+              window.parent.postMessage({
+                type: 'redirect',
+                url: url
+              }, '*');
+            } catch (_error) {
+              /* ignore */
+            }
+          }
+          
+          return; // Don't navigate
+        }
+      } catch (_error) {
+        /* ignore */
+      }
+      return originalAssign(url);
+    };
+  } catch (error) {
+    try {
+      console.warn('[player] Could not set up early location interceptor', error);
+    } catch (_error) {
+      /* ignore */
+    }
+  }
+})();
+
 const account = params.get('account') || 'PI-81598442';
 const host = params.get('host') || 'survey.pulseinsights.com';
 const presentIds = params.getAll('present');
@@ -1617,6 +1694,7 @@ const activeRedirectTimers = new Map();
 
 // Intercept window.location methods to catch redirects from surveys.js
 let locationInterceptor = null;
+let pendingRedirectUrl = null;
 
 function setupLocationHrefInterceptor() {
   if (locationInterceptor) return; // Already set up
@@ -1694,61 +1772,64 @@ function setupLocationHrefInterceptor() {
       return originalAssign(url);
     };
     
-    // Intercept location.href setter using Object.defineProperty on Location prototype
-    // This is the most common way scripts navigate
-    try {
-      const Location = window.Location || window.location.constructor;
-      if (Location && Location.prototype) {
-        const originalHrefDescriptor = Object.getOwnPropertyDescriptor(Location.prototype, 'href');
-        if (originalHrefDescriptor && originalHrefDescriptor.set) {
-          const originalHrefSetter = originalHrefDescriptor.set;
-          
-          Object.defineProperty(Location.prototype, 'href', {
-            get: originalHrefDescriptor.get,
-            set: function(value) {
-              try {
-                const currentOrigin = this.origin;
-                const targetUrl = new URL(value, this.href);
-                
-                // If redirecting to different origin, intercept it
-                if (targetUrl.origin !== currentOrigin) {
-                  try {
-                    console.error('[player] INTERCEPTED location.href setter redirect', { from: this.href, to: value });
-                    console.warn('[player] INTERCEPTED location.href setter redirect', { from: this.href, to: value });
-                    console.log('[player] INTERCEPTED location.href setter redirect', { from: this.href, to: value });
-                    
-                    // Send redirect message to bridge instead
-                    postLegacyMessage({
-                      type: 'redirect',
-                      url: value
-                    });
-                    
-                    // Don't actually navigate the iframe
-                    return;
-                  } catch (error) {
-                    console.error('[player] Error intercepting href setter redirect', error);
-                    // Fall through to original behavior
-                  }
-                }
-              } catch (_error) {
-                // Invalid URL, let it through
-              }
-              
-              // For same-origin URLs, call original setter
-              return originalHrefSetter.call(this, value);
-            },
-            configurable: true,
-            enumerable: originalHrefDescriptor.enumerable
-          });
-        }
-      }
-    } catch (hrefError) {
+    // Use beforeunload to catch navigation attempts
+    window.addEventListener('beforeunload', function(event) {
       try {
-        console.warn('[player] Could not intercept location.href setter', hrefError);
+        const currentHref = window.location.href;
+        // Check if we're about to navigate to a different origin
+        // This catches location.href = url assignments
+        const currentOrigin = new URL(currentHref).origin;
+        
+        // Store pending redirect URL if we detect cross-origin navigation
+        // Note: We can't prevent navigation here, but we can detect it
+        console.error('[player] beforeunload triggered', { currentHref });
+        console.warn('[player] beforeunload triggered', { currentHref });
+        console.log('[player] beforeunload triggered', { currentHref });
       } catch (_error) {
         /* ignore */
       }
-    }
+    }, { capture: true });
+    
+    // Monitor location.href changes using a polling approach
+    let lastHref = window.location.href;
+    const hrefWatcher = setInterval(() => {
+      try {
+        const currentHref = window.location.href;
+        if (currentHref !== lastHref) {
+          const currentOrigin = new URL(lastHref).origin;
+          const targetOrigin = new URL(currentHref).origin;
+          
+          if (targetOrigin !== currentOrigin) {
+            console.error('[player] DETECTED cross-origin navigation', { from: lastHref, to: currentHref });
+            console.warn('[player] DETECTED cross-origin navigation', { from: lastHref, to: currentHref });
+            console.log('[player] DETECTED cross-origin navigation', { from: lastHref, to: currentHref });
+            
+            // Try to prevent navigation and send message instead
+            try {
+              // Navigate back immediately
+              window.stop();
+              window.location.href = lastHref;
+              
+              // Send redirect message
+              postLegacyMessage({
+                type: 'redirect',
+                url: currentHref
+              });
+            } catch (preventError) {
+              console.error('[player] Could not prevent navigation', preventError);
+            }
+          }
+          lastHref = currentHref;
+        }
+      } catch (_error) {
+        /* ignore */
+      }
+    }, 50); // Check every 50ms for faster detection
+    
+    // Clean up watcher after 60 seconds
+    setTimeout(() => {
+      clearInterval(hrefWatcher);
+    }, 60000);
     
     locationInterceptor = true;
   } catch (error) {
