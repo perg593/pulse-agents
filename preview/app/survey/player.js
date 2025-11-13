@@ -165,6 +165,8 @@ window.addEventListener('pulseinsights:ready', (event) => {
   flushPendingPresents();
   // Setup link handling when Pulse Insights is ready (widgets may be rendered)
   setupCustomContentLinkHandling();
+  // Setup timer-based redirect handling when Pulse Insights is ready
+  setupCustomContentRedirectTimers();
   postLegacyMessage({
     type: 'player-ready',
     account,
@@ -1579,6 +1581,223 @@ function handleCustomContentLinkClick(event) {
     /* ignore */
   }
 }
+
+const activeRedirectTimers = new Map();
+
+function setupCustomContentRedirectTimers() {
+  // Check if PulseInsightsObject is available
+  if (!window.PulseInsightsObject || !window.PulseInsightsObject.survey || !Array.isArray(window.PulseInsightsObject.survey.questions)) {
+    // Wait for PulseInsightsObject to be available
+    const checkInterval = setInterval(() => {
+      if (window.PulseInsightsObject && window.PulseInsightsObject.survey && Array.isArray(window.PulseInsightsObject.survey.questions)) {
+        clearInterval(checkInterval);
+        detectAndStartRedirectTimers();
+      }
+    }, 100);
+    
+    // Stop checking after 10 seconds
+    setTimeout(() => {
+      clearInterval(checkInterval);
+    }, 10000);
+    return;
+  }
+  
+  detectAndStartRedirectTimers();
+}
+
+function detectAndStartRedirectTimers() {
+  // Find all custom content question elements
+  const customContentQuestions = document.querySelectorAll('._pi_question_custom_content_question');
+  
+  customContentQuestions.forEach((questionElement) => {
+    const questionId = getQuestionIdFromElement(questionElement);
+    if (!questionId) {
+      return;
+    }
+    
+    // Check if timer already running for this question
+    if (activeRedirectTimers.has(questionId)) {
+      return; // Timer already running
+    }
+    
+    const question = getQuestionFromPulseInsightsObject(questionId);
+    if (!question) {
+      return; // Question not found in PulseInsightsObject
+    }
+    
+    // Check if auto-redirect is enabled
+    if (question.question_type === 'custom_content_question' && question.autoredirect_enabled === 't') {
+      const delay = parseRedirectDelay(question.autoredirect_delay);
+      const url = question.autoredirect_url;
+      
+      if (url && typeof url === 'string' && url.trim()) {
+        startRedirectTimer(questionId, url.trim(), delay);
+      } else {
+        try {
+          console.warn('[player] autoredirect_url missing or invalid for question', questionId);
+        } catch (_error) {
+          /* ignore */
+        }
+      }
+    }
+  });
+}
+
+function getQuestionIdFromElement(element) {
+  // Try data-question-id attribute first
+  const dataQuestionId = element.getAttribute('data-question-id');
+  if (dataQuestionId) {
+    const parsed = parseInt(dataQuestionId, 10);
+    if (!isNaN(parsed)) {
+      return parsed;
+    }
+  }
+  
+  // Fallback: extract from id attribute (e.g., _pi_question_27161 -> 27161)
+  const id = element.getAttribute('id');
+  if (id) {
+    const match = id.match(/_pi_question_(\d+)$/);
+    if (match && match[1]) {
+      const parsed = parseInt(match[1], 10);
+      if (!isNaN(parsed)) {
+        return parsed;
+      }
+    }
+  }
+  
+  return null;
+}
+
+function getQuestionFromPulseInsightsObject(questionId) {
+  if (!window.PulseInsightsObject || !window.PulseInsightsObject.survey || !Array.isArray(window.PulseInsightsObject.survey.questions)) {
+    return null;
+  }
+  
+  const questions = window.PulseInsightsObject.survey.questions;
+  for (let i = 0; i < questions.length; i++) {
+    const question = questions[i];
+    // Handle both string and number IDs
+    if (question && (question.id === questionId || question.id === String(questionId) || String(question.id) === String(questionId))) {
+      return question;
+    }
+  }
+  
+  return null;
+}
+
+function parseRedirectDelay(delay) {
+  if (typeof delay === 'number' && !isNaN(delay) && delay > 0) {
+    return Math.max(0, Math.floor(delay));
+  }
+  
+  if (typeof delay === 'string' && delay.trim()) {
+    const parsed = parseInt(delay.trim(), 10);
+    if (!isNaN(parsed) && parsed > 0) {
+      return Math.max(0, Math.floor(parsed));
+    }
+  }
+  
+  // Default to 2000ms if missing or invalid
+  return 2000;
+}
+
+function startRedirectTimer(questionId, url, delay) {
+  // Clear any existing timer for this question
+  cleanupRedirectTimer(questionId);
+  
+  const timerId = setTimeout(() => {
+    // Timer expired, send redirect message
+    postLegacyMessage({
+      type: 'redirect',
+      url: url
+    });
+    
+    // Clean up timer reference
+    activeRedirectTimers.delete(questionId);
+    
+    try {
+      console.log('[player] redirect timer expired', { questionId, url, delay });
+    } catch (_error) {
+      /* ignore */
+    }
+  }, delay);
+  
+  // Store timer reference
+  activeRedirectTimers.set(questionId, timerId);
+  
+  try {
+    console.log('[player] redirect timer started', { questionId, url, delay });
+  } catch (_error) {
+    /* ignore */
+  }
+}
+
+function cleanupRedirectTimer(questionId) {
+  const timerId = activeRedirectTimers.get(questionId);
+  if (timerId) {
+    clearTimeout(timerId);
+    activeRedirectTimers.delete(questionId);
+  }
+}
+
+function cleanupRedirectTimers() {
+  // Clear all active timers
+  activeRedirectTimers.forEach((timerId, questionId) => {
+    clearTimeout(timerId);
+  });
+  activeRedirectTimers.clear();
+}
+
+// Watch for custom content questions being added/removed
+let redirectTimerObserver = null;
+
+function setupRedirectTimerObserver() {
+  if (redirectTimerObserver) {
+    return; // Already set up
+  }
+  
+  redirectTimerObserver = new MutationObserver(() => {
+    // Clean up timers for removed questions
+    const existingQuestionIds = new Set();
+    document.querySelectorAll('._pi_question_custom_content_question').forEach((element) => {
+      const questionId = getQuestionIdFromElement(element);
+      if (questionId) {
+        existingQuestionIds.add(questionId);
+      }
+    });
+    
+    // Remove timers for questions that no longer exist in DOM
+    activeRedirectTimers.forEach((timerId, questionId) => {
+      if (!existingQuestionIds.has(questionId)) {
+        cleanupRedirectTimer(questionId);
+      }
+    });
+    
+    // Detect and start new timers
+    if (window.PulseInsightsObject && window.PulseInsightsObject.survey && Array.isArray(window.PulseInsightsObject.survey.questions)) {
+      detectAndStartRedirectTimers();
+    }
+  });
+  
+  redirectTimerObserver.observe(document.body, { childList: true, subtree: true });
+}
+
+// Setup observer when Pulse Insights is ready
+window.addEventListener('pulseinsights:ready', () => {
+  setupRedirectTimerObserver();
+  // Also check for existing questions immediately
+  detectAndStartRedirectTimers();
+});
+
+// Clean up timers when widget container is removed
+const widgetCleanupObserver = new MutationObserver(() => {
+  const container = document.getElementById('_pi_surveyWidgetContainer');
+  if (!container || !document.body.contains(container)) {
+    // Widget container removed, clean up all timers
+    cleanupRedirectTimers();
+  }
+});
+widgetCleanupObserver.observe(document.body, { childList: true, subtree: true });
 
 function scheduleWidgetCheck(id, source, delay) {
   setTimeout(() => {

@@ -85,6 +85,57 @@ function handleLinkClick(data) {
   }
 }
 
+function handleRedirect(data) {
+  const { url } = data;
+  if (!url || typeof url !== 'string') {
+    try {
+      console.warn('[bridge] redirect missing or invalid url', data);
+    } catch (_error) {
+      /* ignore */
+    }
+    return;
+  }
+
+  const redirectUrl = url.trim();
+  
+  try {
+    // Check if same origin to use window.location, otherwise use window.open
+    try {
+      const currentOrigin = window.location.origin;
+      const targetUrl = new URL(redirectUrl, window.location.href);
+      if (targetUrl.origin === currentOrigin) {
+        window.location.href = redirectUrl;
+      } else {
+        // Cross-origin: must use window.open even for same-window navigation
+        window.open(redirectUrl, '_self');
+      }
+    } catch (_error) {
+      // Invalid URL or relative URL - try window.location
+      try {
+        window.location.href = redirectUrl;
+      } catch (__error) {
+        try {
+          console.error('[bridge] failed to redirect', redirectUrl, __error);
+        } catch (___error) {
+          /* ignore */
+        }
+      }
+    }
+    
+    try {
+      console.log('[bridge] redirect executed', redirectUrl);
+    } catch (_error) {
+      /* ignore */
+    }
+  } catch (error) {
+    try {
+      console.error('[bridge] error handling redirect', { url: redirectUrl, error });
+    } catch (_error) {
+      /* ignore */
+    }
+  }
+}
+
 export function createSurveyBridge(
   {
     container,
@@ -246,6 +297,11 @@ function createLegacyBridge({ container, onReady, onStatus, onStateChange, onClo
 
       if (data.type === 'link-click') {
         handleLinkClick(data);
+        return;
+      }
+
+      if (data.type === 'redirect') {
+        handleRedirect(data);
         return;
       }
 
@@ -505,7 +561,7 @@ function createProtocolBridge({ container, onReady, onStatus, onStateChange, onE
         }
       });
 
-      // Handle legacy messages like link-click
+      // Handle legacy messages like link-click and redirect
       legacyMessageHandler = (event) => {
         if (!iframe || event.source !== iframe.contentWindow) return;
         if (event.origin && event.origin !== playerOrigin) return;
@@ -514,6 +570,8 @@ function createProtocolBridge({ container, onReady, onStatus, onStateChange, onE
         
         if (data.type === 'link-click') {
           handleLinkClick(data);
+        } else if (data.type === 'redirect') {
+          handleRedirect(data);
         }
       };
       window.addEventListener('message', legacyMessageHandler);
