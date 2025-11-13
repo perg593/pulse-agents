@@ -85,7 +85,7 @@ function handleLinkClick(data) {
   }
 }
 
-function handleRedirect(data) {
+function handleRedirect(data, sourceFrame = null) {
   const { url } = data;
   if (!url || typeof url !== 'string') {
     try {
@@ -94,6 +94,19 @@ function handleRedirect(data) {
       /* ignore */
     }
     return;
+  }
+
+  // Validate that redirect comes from active iframe
+  if (sourceFrame) {
+    // Check if iframe still exists and is attached to DOM
+    if (!sourceFrame.parentNode || !document.body.contains(sourceFrame)) {
+      try {
+        console.warn('[bridge] redirect ignored - iframe has been removed', url);
+      } catch (_error) {
+        /* ignore */
+      }
+      return;
+    }
   }
 
   const redirectUrl = url.trim();
@@ -212,6 +225,16 @@ function createLegacyBridge({ container, onReady, onStatus, onStateChange, onClo
 
   function teardown() {
     const hadFrame = Boolean(frame);
+    
+    // Send cleanup message to player before removing iframe
+    if (frame && frame.contentWindow && ready) {
+      try {
+        frame.contentWindow.postMessage({ type: 'cleanup-timers' }, playerOrigin);
+      } catch (_error) {
+        /* ignore */
+      }
+    }
+    
     if (messageHandler) {
       try {
         window.removeEventListener('message', messageHandler);
@@ -301,7 +324,7 @@ function createLegacyBridge({ container, onReady, onStatus, onStateChange, onClo
       }
 
       if (data.type === 'redirect') {
-        handleRedirect(data);
+        handleRedirect(data, frame);
         return;
       }
 
@@ -412,6 +435,18 @@ function createProtocolBridge({ container, onReady, onStatus, onStateChange, onE
   function teardown() {
     bridgeReady = false;
     failPending({ code: 'bridge_destroyed', message: 'Bridge destroyed' });
+    
+    // Send cleanup message to player before removing iframe
+    if (iframe && iframe.contentWindow) {
+      try {
+        const originOverride = flags.playerOrigin;
+        const playerOrigin = originOverride || derivePlayerOrigin(iframe);
+        iframe.contentWindow.postMessage({ type: 'cleanup-timers' }, playerOrigin);
+      } catch (_error) {
+        /* ignore */
+      }
+    }
+    
     if (legacyMessageHandler) {
       window.removeEventListener('message', legacyMessageHandler);
       legacyMessageHandler = null;
@@ -571,7 +606,7 @@ function createProtocolBridge({ container, onReady, onStatus, onStateChange, onE
         if (data.type === 'link-click') {
           handleLinkClick(data);
         } else if (data.type === 'redirect') {
-          handleRedirect(data);
+          handleRedirect(data, iframe);
         }
       };
       window.addEventListener('message', legacyMessageHandler);

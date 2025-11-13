@@ -309,6 +309,10 @@ function handleLegacyMessage(data) {
         }
       }
       break;
+    case 'cleanup-timers':
+      // Clean up redirect timers when requested by bridge
+      cleanupRedirectTimers();
+      break;
     default:
       break;
   }
@@ -360,6 +364,9 @@ function handleProtocolPresent(id, payload = {}) {
 
 function handleProtocolDismiss(id) {
   if (!id) return;
+  // Clean up redirect timers when survey is dismissed
+  cleanupRedirectTimers();
+  
   let dismissed = false;
   if (typeof window.pi === 'function') {
     try {
@@ -1606,8 +1613,22 @@ function setupCustomContentRedirectTimers() {
 }
 
 function detectAndStartRedirectTimers() {
+  // Ensure widget container exists and PulseInsightsObject is available
+  const container = document.getElementById('_pi_surveyWidgetContainer');
+  if (!container || !document.body.contains(container)) {
+    return; // Widget container not present
+  }
+  
+  if (!window.PulseInsightsObject || !window.PulseInsightsObject.survey || !Array.isArray(window.PulseInsightsObject.survey.questions)) {
+    return; // PulseInsightsObject not ready
+  }
+  
   // Find all custom content question elements
   const customContentQuestions = document.querySelectorAll('._pi_question_custom_content_question');
+  
+  if (customContentQuestions.length === 0) {
+    return; // No custom content questions found
+  }
   
   customContentQuestions.forEach((questionElement) => {
     const questionId = getQuestionIdFromElement(questionElement);
@@ -1798,6 +1819,16 @@ const widgetCleanupObserver = new MutationObserver(() => {
   }
 });
 widgetCleanupObserver.observe(document.body, { childList: true, subtree: true });
+
+// Clean up timers when page/iframe is about to be unloaded
+// This prevents timers from firing after iframe context is destroyed
+window.addEventListener('beforeunload', () => {
+  cleanupRedirectTimers();
+});
+
+window.addEventListener('pagehide', () => {
+  cleanupRedirectTimers();
+});
 
 function scheduleWidgetCheck(id, source, delay) {
   setTimeout(() => {
