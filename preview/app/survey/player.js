@@ -1850,24 +1850,36 @@ function startRedirectTimer(questionId, url, delay) {
   const timerId = setTimeout(() => {
     // Timer expired, send redirect message
     try {
+      // Use localStorage to persist log across navigation
+      const logEntry = `[${new Date().toISOString()}] redirect timer expired - questionId: ${questionId}, url: ${url}, delay: ${delay}`;
+      localStorage.setItem('pi_redirect_log', logEntry);
       console.error('[player] redirect timer expired - SENDING MESSAGE', { questionId, url, delay });
       console.warn('[player] redirect timer expired - SENDING MESSAGE', { questionId, url, delay });
       console.log('[player] redirect timer expired - SENDING MESSAGE', { questionId, url, delay });
+      // Also alert to ensure we see it
+      alert('REDIRECT TIMER EXPIRED - CHECK CONSOLE');
     } catch (_error) {
       /* ignore */
     }
     
-    postLegacyMessage({
-      type: 'redirect',
-      url: url
-    });
-    
     try {
+      postLegacyMessage({
+        type: 'redirect',
+        url: url
+      });
+      const sentLog = `[${new Date().toISOString()}] redirect message SENT - questionId: ${questionId}, url: ${url}`;
+      localStorage.setItem('pi_redirect_sent', sentLog);
       console.error('[player] redirect message SENT', { questionId, url });
       console.warn('[player] redirect message SENT', { questionId, url });
       console.log('[player] redirect message SENT', { questionId, url });
-    } catch (_error) {
-      /* ignore */
+    } catch (sendError) {
+      try {
+        const errorLog = `[${new Date().toISOString()}] redirect message FAILED - ${sendError.message}`;
+        localStorage.setItem('pi_redirect_error', errorLog);
+        console.error('[player] redirect message FAILED', sendError);
+      } catch (_error) {
+        /* ignore */
+      }
     }
     
     // Clean up timer reference
