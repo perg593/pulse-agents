@@ -1707,18 +1707,19 @@ function getQuestionFromPulseInsightsObject(questionId) {
 }
 
 function parseRedirectDelay(delay) {
+  // autoredirect_delay is stored in seconds, convert to milliseconds
   if (typeof delay === 'number' && !isNaN(delay) && delay > 0) {
-    return Math.max(0, Math.floor(delay));
+    return Math.max(0, Math.floor(delay * 1000));
   }
   
   if (typeof delay === 'string' && delay.trim()) {
-    const parsed = parseInt(delay.trim(), 10);
+    const parsed = parseFloat(delay.trim());
     if (!isNaN(parsed) && parsed > 0) {
-      return Math.max(0, Math.floor(parsed));
+      return Math.max(0, Math.floor(parsed * 1000));
     }
   }
   
-  // Default to 2000ms if missing or invalid
+  // Default to 2000ms (2 seconds) if missing or invalid
   return 2000;
 }
 
