@@ -5,7 +5,7 @@
  * event history viewing, and presentation timeline viewing.
  */
 
-const { log } = require('../../lib/logger');
+const { log } = require('../../../lib/logger');
 const { getEventBus } = require('./eventBus');
 const { getPerformanceMonitor } = require('./performanceMonitor');
 
