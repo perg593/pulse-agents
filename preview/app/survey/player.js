@@ -27,194 +27,6 @@ try {
   /* ignore */
 }
 
-// Set up location interceptor IMMEDIATELY, before surveys.js loads
-// This must happen before any other scripts can redirect the iframe
-// surveys.js uses: window.location = redirect_url
-(function setupLocationInterceptorEarly() {
-  try {
-    const originalLocation = window.location;
-    const originalReplace = originalLocation.replace.bind(originalLocation);
-    const originalAssign = originalLocation.assign.bind(originalLocation);
-    
-    // Override replace method
-    originalLocation.replace = function(url) {
-      try {
-        const currentOrigin = window.location.origin;
-        const targetUrl = new URL(url, window.location.href);
-        
-        if (targetUrl.origin !== currentOrigin) {
-          console.error('[player] EARLY INTERCEPT location.replace', { from: window.location.href, to: url });
-          console.warn('[player] EARLY INTERCEPT location.replace', { from: window.location.href, to: url });
-          console.log('[player] EARLY INTERCEPT location.replace', { from: window.location.href, to: url });
-          
-          // Send message to parent (bridge might not be ready yet, but try anyway)
-          if (window.parent && window.parent !== window) {
-            try {
-              // Use current origin - bridge should accept messages from player origin
-              const currentOrigin = window.location.origin;
-              window.parent.postMessage({
-                type: 'redirect',
-                url: url
-              }, currentOrigin);
-            } catch (_error) {
-              /* ignore */
-            }
-          }
-          
-          return; // Don't navigate
-        }
-      } catch (_error) {
-        /* ignore */
-      }
-      return originalReplace(url);
-    };
-    
-    // Override assign method
-    originalLocation.assign = function(url) {
-      try {
-        const currentOrigin = window.location.origin;
-        const targetUrl = new URL(url, window.location.href);
-        
-        if (targetUrl.origin !== currentOrigin) {
-          console.error('[player] EARLY INTERCEPT location.assign', { from: window.location.href, to: url });
-          console.warn('[player] EARLY INTERCEPT location.assign', { from: window.location.href, to: url });
-          console.log('[player] EARLY INTERCEPT location.assign', { from: window.location.href, to: url });
-          
-          if (window.parent && window.parent !== window) {
-            try {
-              window.parent.postMessage({
-                type: 'redirect',
-                url: url
-              }, '*');
-            } catch (_error) {
-              /* ignore */
-            }
-          }
-          
-          return; // Don't navigate
-        }
-      } catch (_error) {
-        /* ignore */
-      }
-      return originalAssign(url);
-    };
-    
-    // Intercept window.location = url assignments (what surveys.js uses)
-    // This is tricky because window.location is a special object
-    // We'll use Object.defineProperty to override window.location
-    try {
-      // Store the original location descriptor
-      const locationDescriptor = Object.getOwnPropertyDescriptor(window, 'location') || 
-                                  Object.getOwnPropertyDescriptor(Object.getPrototypeOf(window), 'location');
-      
-      if (locationDescriptor && locationDescriptor.configurable) {
-        // Override window.location getter/setter
-        Object.defineProperty(window, 'location', {
-          get: function() {
-            return originalLocation;
-          },
-          set: function(value) {
-            // surveys.js does: window.location = redirect_url
-            try {
-              const currentOrigin = window.location.origin;
-              const targetUrl = new URL(value, window.location.href);
-              
-              if (targetUrl.origin !== currentOrigin) {
-                console.error('[player] EARLY INTERCEPT window.location =', { from: window.location.href, to: value });
-                console.warn('[player] EARLY INTERCEPT window.location =', { from: window.location.href, to: value });
-                console.log('[player] EARLY INTERCEPT window.location =', { from: window.location.href, to: value });
-                
-                // Send message to parent
-                if (window.parent && window.parent !== window) {
-                  try {
-                    window.parent.postMessage({
-                      type: 'redirect',
-                      url: value
-                    }, '*');
-                  } catch (_error) {
-                    /* ignore */
-                  }
-                }
-                
-                return; // Don't navigate
-              }
-            } catch (_error) {
-              // Invalid URL, let it through
-            }
-            
-            // For same-origin or invalid URLs, allow navigation
-            originalLocation.href = value;
-          },
-          configurable: true,
-          enumerable: locationDescriptor.enumerable
-        });
-      } else {
-        // Fallback: try to override Location.prototype.href setter
-        try {
-          const Location = window.Location || window.location.constructor;
-          if (Location && Location.prototype) {
-            const hrefDescriptor = Object.getOwnPropertyDescriptor(Location.prototype, 'href');
-            if (hrefDescriptor && hrefDescriptor.set && hrefDescriptor.configurable) {
-              const originalHrefSetter = hrefDescriptor.set;
-              
-              Object.defineProperty(Location.prototype, 'href', {
-                get: hrefDescriptor.get,
-                set: function(value) {
-                  try {
-                    const currentOrigin = this.origin;
-                    const targetUrl = new URL(value, this.href);
-                    
-                    if (targetUrl.origin !== currentOrigin) {
-                      console.error('[player] EARLY INTERCEPT Location.prototype.href =', { from: this.href, to: value });
-                      console.warn('[player] EARLY INTERCEPT Location.prototype.href =', { from: this.href, to: value });
-                      console.log('[player] EARLY INTERCEPT Location.prototype.href =', { from: this.href, to: value });
-                      
-                      // Send message to parent
-                      if (window.parent && window.parent !== window) {
-                        try {
-                          window.parent.postMessage({
-                            type: 'redirect',
-                            url: value
-                          }, '*');
-                        } catch (_error) {
-                          /* ignore */
-                        }
-                      }
-                      
-                      return; // Don't navigate
-                    }
-                  } catch (_error) {
-                    // Invalid URL, let it through
-                  }
-                  
-                  // For same-origin URLs, call original setter
-                  return originalHrefSetter.call(this, value);
-                },
-                configurable: true,
-                enumerable: hrefDescriptor.enumerable
-              });
-            }
-          }
-        } catch (hrefError) {
-          console.warn('[player] Could not intercept Location.prototype.href', hrefError);
-        }
-      }
-    } catch (locationError) {
-      try {
-        console.warn('[player] Could not intercept window.location assignment', locationError);
-      } catch (_error) {
-        /* ignore */
-      }
-    }
-  } catch (error) {
-    try {
-      console.warn('[player] Could not set up early location interceptor', error);
-    } catch (_error) {
-      /* ignore */
-    }
-  }
-})();
-
 const account = params.get('account') || 'PI-81598442';
 const host = params.get('host') || 'survey.pulseinsights.com';
 const presentIds = params.getAll('present');
@@ -351,18 +163,9 @@ window.addEventListener('pulseinsights:ready', (event) => {
     applyManualStylesheet(pendingManualCss).catch(() => {});
   }
   flushPendingPresents();
-  // Setup location.href interceptor to catch redirects from surveys.js
-  setupLocationHrefInterceptor();
   // Setup link handling when Pulse Insights is ready (widgets may be rendered)
   setupCustomContentLinkHandling();
   // Setup timer-based redirect handling when Pulse Insights is ready
-  try {
-    console.error('[player] DEBUG: ABOUT TO CALL setupCustomContentRedirectTimers');
-    console.warn('[player] DEBUG: ABOUT TO CALL setupCustomContentRedirectTimers');
-    console.log('[player] DEBUG: ABOUT TO CALL setupCustomContentRedirectTimers');
-  } catch (_error) {
-    /* ignore */
-  }
   try {
     setupCustomContentRedirectTimers();
   } catch (error) {
@@ -371,13 +174,6 @@ window.addEventListener('pulseinsights:ready', (event) => {
     } catch (_error) {
       /* ignore */
     }
-  }
-  try {
-    console.error('[player] DEBUG: FINISHED CALLING setupCustomContentRedirectTimers');
-    console.warn('[player] DEBUG: FINISHED CALLING setupCustomContentRedirectTimers');
-    console.log('[player] DEBUG: FINISHED CALLING setupCustomContentRedirectTimers');
-  } catch (_error) {
-    /* ignore */
   }
   postLegacyMessage({
     type: 'player-ready',
@@ -1802,155 +1598,67 @@ function handleCustomContentLinkClick(event) {
 }
 
 const activeRedirectTimers = new Map();
+const pendingRedirectTimers = new Set(); // Track timers being set up to prevent duplicates
 
-// Intercept window.location methods to catch redirects from surveys.js
-let locationInterceptor = null;
-let pendingRedirectUrl = null;
+// Custom content redirect constants
+const AUTOREDIRECT_ENABLED = 't';
+const AUTOREDIRECT_DISABLED = 'f';
+const QUESTION_TYPE_CUSTOM_CONTENT = 'custom_content_question';
+const DEFAULT_REDIRECT_DELAY_MS = 2000;
+const PULSEINSIGHTS_CHECK_INTERVAL_MS = 50;
+const PULSEINSIGHTS_CHECK_TIMEOUT_MS = 10000;
 
-function setupLocationHrefInterceptor() {
-  if (locationInterceptor) return; // Already set up
-  
-  try {
-    const originalLocation = window.location;
-    const originalReplace = originalLocation.replace.bind(originalLocation);
-    const originalAssign = originalLocation.assign.bind(originalLocation);
-    
-    // Override replace method (most common for redirects)
-    originalLocation.replace = function(url) {
-      try {
-        const currentOrigin = window.location.origin;
-        const targetUrl = new URL(url, window.location.href);
-        
-        // If redirecting to different origin, intercept it
-        if (targetUrl.origin !== currentOrigin) {
-          try {
-            console.error('[player] INTERCEPTED location.replace redirect', { from: window.location.href, to: url });
-            console.warn('[player] INTERCEPTED location.replace redirect', { from: window.location.href, to: url });
-            console.log('[player] INTERCEPTED location.replace redirect', { from: window.location.href, to: url });
-            
-            // Send redirect message to bridge instead
-            postLegacyMessage({
-              type: 'redirect',
-              url: url
-            });
-            
-            // Don't actually navigate the iframe
-            return;
-          } catch (error) {
-            console.error('[player] Error intercepting replace redirect', error);
-            // Fall through to original behavior
-          }
-        }
-      } catch (_error) {
-        // Invalid URL, let it through
-      }
-      
-      // For same-origin URLs, call original
-      return originalReplace(url);
-    };
-    
-    // Override assign method
-    originalLocation.assign = function(url) {
-      try {
-        const currentOrigin = window.location.origin;
-        const targetUrl = new URL(url, window.location.href);
-        
-        // If redirecting to different origin, intercept it
-        if (targetUrl.origin !== currentOrigin) {
-          try {
-            console.error('[player] INTERCEPTED location.assign redirect', { from: window.location.href, to: url });
-            console.warn('[player] INTERCEPTED location.assign redirect', { from: window.location.href, to: url });
-            console.log('[player] INTERCEPTED location.assign redirect', { from: window.location.href, to: url });
-            
-            // Send redirect message to bridge instead
-            postLegacyMessage({
-              type: 'redirect',
-              url: url
-            });
-            
-            // Don't actually navigate the iframe
-            return;
-          } catch (error) {
-            console.error('[player] Error intercepting assign redirect', error);
-            // Fall through to original behavior
-          }
-        }
-      } catch (_error) {
-        // Invalid URL, let it through
-      }
-      
-      // For same-origin URLs, call original
-      return originalAssign(url);
-    };
-    
-    // Use beforeunload to catch navigation attempts
-    window.addEventListener('beforeunload', function(event) {
-      try {
-        const currentHref = window.location.href;
-        // Check if we're about to navigate to a different origin
-        // This catches location.href = url assignments
-        const currentOrigin = new URL(currentHref).origin;
-        
-        // Store pending redirect URL if we detect cross-origin navigation
-        // Note: We can't prevent navigation here, but we can detect it
-        console.error('[player] beforeunload triggered', { currentHref });
-        console.warn('[player] beforeunload triggered', { currentHref });
-        console.log('[player] beforeunload triggered', { currentHref });
-      } catch (_error) {
-        /* ignore */
-      }
-    }, { capture: true });
-    
-    // Monitor location.href changes using a polling approach
-    let lastHref = window.location.href;
-    const hrefWatcher = setInterval(() => {
-      try {
-        const currentHref = window.location.href;
-        if (currentHref !== lastHref) {
-          const currentOrigin = new URL(lastHref).origin;
-          const targetOrigin = new URL(currentHref).origin;
-          
-          if (targetOrigin !== currentOrigin) {
-            console.error('[player] DETECTED cross-origin navigation', { from: lastHref, to: currentHref });
-            console.warn('[player] DETECTED cross-origin navigation', { from: lastHref, to: currentHref });
-            console.log('[player] DETECTED cross-origin navigation', { from: lastHref, to: currentHref });
-            
-            // Try to prevent navigation and send message instead
-            try {
-              // Navigate back immediately
-              window.stop();
-              window.location.href = lastHref;
-              
-              // Send redirect message
-              postLegacyMessage({
-                type: 'redirect',
-                url: currentHref
-              });
-            } catch (preventError) {
-              console.error('[player] Could not prevent navigation', preventError);
-            }
-          }
-          lastHref = currentHref;
-        }
-      } catch (_error) {
-        /* ignore */
-      }
-    }, 50); // Check every 50ms for faster detection
-    
-    // Clean up watcher after 60 seconds
-    setTimeout(() => {
-      clearInterval(hrefWatcher);
-    }, 60000);
-    
-    locationInterceptor = true;
-  } catch (error) {
-    try {
-      console.warn('[player] Could not set up location interceptor', error);
-    } catch (_error) {
-      /* ignore */
-    }
+/**
+ * Disables autoredirect in PulseInsightsObject questions to prevent surveys.js
+ * from setting up redirect timers. Sets a flag so we know to handle redirects ourselves.
+ * 
+ * This function modifies questions in-place by setting `autoredirect_enabled` to 'f'
+ * and adding `_autoredirect_disabled_by_player` flag.
+ * 
+ * @returns {void}
+ */
+function disableAutoredirectInPulseInsightsObject() {
+  if (!window.PulseInsightsObject || !window.PulseInsightsObject.survey || 
+      !Array.isArray(window.PulseInsightsObject.survey.questions)) {
+    return;
   }
+  
+  const questions = window.PulseInsightsObject.survey.questions;
+  questions.forEach((question) => {
+    if (question && 
+        question.question_type === QUESTION_TYPE_CUSTOM_CONTENT && 
+        question.autoredirect_enabled === AUTOREDIRECT_ENABLED &&
+        question.autoredirect_url) {
+      // Disable autoredirect to prevent surveys.js from redirecting
+      // Store flag indicating we disabled it so we know to handle redirect ourselves
+      question.autoredirect_enabled = AUTOREDIRECT_DISABLED;
+      question._autoredirect_disabled_by_player = true;
+      
+      try {
+        console.log('[player] Disabled autoredirect in PulseInsightsObject for question', question.id);
+      } catch (_error) {
+        /* ignore */
+      }
+    }
+  });
 }
+
+// Intercept PulseInsightsObject creation to disable autoredirect immediately
+// This ensures we disable autoredirect before surveys.js reads it
+(function setupPulseInsightsObjectInterceptor() {
+  const checkInterval = setInterval(() => {
+    if (window.PulseInsightsObject && window.PulseInsightsObject.survey && 
+        Array.isArray(window.PulseInsightsObject.survey.questions)) {
+      clearInterval(checkInterval);
+      disableAutoredirectInPulseInsightsObject();
+    }
+  }, PULSEINSIGHTS_CHECK_INTERVAL_MS); // Check every 50ms for fast detection
+  
+  // Stop checking after 10 seconds
+  setTimeout(() => {
+    clearInterval(checkInterval);
+  }, PULSEINSIGHTS_CHECK_TIMEOUT_MS);
+})();
 
 function setupCustomContentRedirectTimers() {
   try {
@@ -1982,7 +1690,7 @@ function setupCustomContentRedirectTimers() {
     // Stop checking after 10 seconds
     setTimeout(() => {
       clearInterval(checkInterval);
-    }, 10000);
+    }, PULSEINSIGHTS_CHECK_TIMEOUT_MS);
     return;
   }
   
@@ -2019,6 +1727,18 @@ function setupCustomContentRedirectTimers() {
   }
 }
 
+/**
+ * Detects custom content questions with autoredirect enabled and starts redirect timers.
+ * Prevents surveys.js from redirecting by disabling autoredirect in PulseInsightsObject first.
+ * 
+ * This function:
+ * - Disables autoredirect in PulseInsightsObject before processing
+ * - Finds all custom content question elements in the DOM
+ * - Starts redirect timers for questions with autoredirect enabled
+ * - Prevents duplicate timers using pendingRedirectTimers Set
+ * 
+ * @returns {void}
+ */
 function detectAndStartRedirectTimers() {
   try {
     console.log('[player] detectAndStartRedirectTimers called');
@@ -2050,6 +1770,10 @@ function detectAndStartRedirectTimers() {
     return; // PulseInsightsObject not ready
   }
   
+  // CRITICAL: Disable autoredirect BEFORE processing questions
+  // This prevents surveys.js from setting up its redirect timer
+  disableAutoredirectInPulseInsightsObject();
+  
   // Find all custom content question elements
   const customContentQuestions = document.querySelectorAll('._pi_question_custom_content_question');
   
@@ -2074,14 +1798,14 @@ function detectAndStartRedirectTimers() {
       return;
     }
     
-    // Check if timer already running for this question
-    if (activeRedirectTimers.has(questionId)) {
+    // Check if timer already running or pending for this question
+    if (activeRedirectTimers.has(questionId) || pendingRedirectTimers.has(questionId)) {
       try {
-        console.log('[player] detectAndStartRedirectTimers: timer already running for question', questionId);
+        console.log('[player] detectAndStartRedirectTimers: timer already running or pending for question', questionId);
       } catch (_error) {
         /* ignore */
       }
-      return; // Timer already running
+      return; // Timer already running or being set up
     }
     
     const question = getQuestionFromPulseInsightsObject(questionId);
@@ -2106,12 +1830,29 @@ function detectAndStartRedirectTimers() {
     }
     
     // Check if auto-redirect is enabled
-    if (question.question_type === 'custom_content_question' && question.autoredirect_enabled === 't') {
+    // Note: autoredirect_enabled may be 'f' because we disabled it to prevent surveys.js redirect
+    // Check for _autoredirect_disabled_by_player flag OR original 't' value
+    const wasAutoredirectEnabled = question.autoredirect_enabled === AUTOREDIRECT_ENABLED || question._autoredirect_disabled_by_player === true;
+    
+    if (question.question_type === QUESTION_TYPE_CUSTOM_CONTENT && wasAutoredirectEnabled && question.autoredirect_url) {
       const delay = parseRedirectDelay(question.autoredirect_delay);
       const url = question.autoredirect_url;
       
       if (url && typeof url === 'string' && url.trim()) {
-        startRedirectTimer(questionId, url.trim(), delay);
+        // Mark as pending immediately to prevent duplicate setups
+        pendingRedirectTimers.add(questionId);
+        
+        try {
+          startRedirectTimer(questionId, url.trim(), delay);
+        } catch (error) {
+          // If timer setup fails, remove from pending set
+          pendingRedirectTimers.delete(questionId);
+          try {
+            console.error('[player] failed to start redirect timer', questionId, error);
+          } catch (_error) {
+            /* ignore */
+          }
+        }
       } else {
         try {
           console.warn('[player] autoredirect_url missing or invalid for question', questionId);
@@ -2153,11 +1894,13 @@ function getQuestionFromPulseInsightsObject(questionId) {
     return null;
   }
   
+  // Normalize questionId to string for consistent comparison
+  const normalizedId = String(questionId);
   const questions = window.PulseInsightsObject.survey.questions;
+  
   for (let i = 0; i < questions.length; i++) {
     const question = questions[i];
-    // Handle both string and number IDs
-    if (question && (question.id === questionId || question.id === String(questionId) || String(question.id) === String(questionId))) {
+    if (question && String(question.id) === normalizedId) {
       return question;
     }
   }
@@ -2165,6 +1908,13 @@ function getQuestionFromPulseInsightsObject(questionId) {
   return null;
 }
 
+/**
+ * Parses redirect delay from question configuration.
+ * Converts seconds (string or number) to milliseconds.
+ * 
+ * @param {string|number} delay - Delay value from question config
+ * @returns {number} Delay in milliseconds (defaults to 2000ms if invalid)
+ */
 function parseRedirectDelay(delay) {
   // autoredirect_delay is stored in seconds, convert to milliseconds
   if (typeof delay === 'number' && !isNaN(delay) && delay > 0) {
@@ -2179,9 +1929,18 @@ function parseRedirectDelay(delay) {
   }
   
   // Default to 2000ms (2 seconds) if missing or invalid
-  return 2000;
+  return DEFAULT_REDIRECT_DELAY_MS;
 }
 
+/**
+ * Starts a redirect timer for a custom content question.
+ * Timer will send a redirect message to the bridge when it expires.
+ * 
+ * @param {string|number} questionId - The question ID
+ * @param {string} url - The URL to redirect to
+ * @param {number} delay - Delay in milliseconds before redirect
+ * @returns {void}
+ */
 function startRedirectTimer(questionId, url, delay) {
   // Clear any existing timer for this question
   cleanupRedirectTimer(questionId);
@@ -2189,28 +1948,15 @@ function startRedirectTimer(questionId, url, delay) {
   const timerId = setTimeout(() => {
     // Timer expired, send redirect message
     try {
-      // Use localStorage to persist log across navigation
-      const logEntry = `[${new Date().toISOString()}] redirect timer expired - questionId: ${questionId}, url: ${url}, delay: ${delay}`;
-      localStorage.setItem('pi_redirect_log', logEntry);
-      console.error('[player] redirect timer expired - SENDING MESSAGE', { questionId, url, delay });
-      console.warn('[player] redirect timer expired - SENDING MESSAGE', { questionId, url, delay });
-      console.log('[player] redirect timer expired - SENDING MESSAGE', { questionId, url, delay });
-      // Also alert to ensure we see it
-      alert('REDIRECT TIMER EXPIRED - CHECK CONSOLE');
-    } catch (_error) {
-      /* ignore */
-    }
-    
-    try {
       postLegacyMessage({
         type: 'redirect',
         url: url
       });
-      const sentLog = `[${new Date().toISOString()}] redirect message SENT - questionId: ${questionId}, url: ${url}`;
-      localStorage.setItem('pi_redirect_sent', sentLog);
-      console.error('[player] redirect message SENT', { questionId, url });
-      console.warn('[player] redirect message SENT', { questionId, url });
-      console.log('[player] redirect message SENT', { questionId, url });
+      try {
+        console.log('[player] redirect message sent', { questionId, url });
+      } catch (_error) {
+        /* ignore */
+      }
     } catch (sendError) {
       try {
         const errorLog = `[${new Date().toISOString()}] redirect message FAILED - ${sendError.message}`;
@@ -2227,6 +1973,8 @@ function startRedirectTimer(questionId, url, delay) {
   
   // Store timer reference
   activeRedirectTimers.set(questionId, timerId);
+  // Remove from pending set now that timer is active
+  pendingRedirectTimers.delete(questionId);
   
   try {
     console.log('[player] redirect timer started', { questionId, url, delay });
@@ -2235,20 +1983,36 @@ function startRedirectTimer(questionId, url, delay) {
   }
 }
 
+/**
+ * Cleans up a single redirect timer for a specific question.
+ * 
+ * @param {string|number} questionId - The question ID to clean up
+ * @returns {void}
+ */
 function cleanupRedirectTimer(questionId) {
   const timerId = activeRedirectTimers.get(questionId);
   if (timerId) {
     clearTimeout(timerId);
     activeRedirectTimers.delete(questionId);
   }
+  // Also remove from pending set if present
+  pendingRedirectTimers.delete(questionId);
 }
 
+/**
+ * Cleans up all active redirect timers.
+ * Called when survey is dismissed or page is unloaded.
+ * 
+ * @returns {void}
+ */
 function cleanupRedirectTimers() {
   // Clear all active timers
   activeRedirectTimers.forEach((timerId, questionId) => {
     clearTimeout(timerId);
   });
   activeRedirectTimers.clear();
+  // Also clear pending set
+  pendingRedirectTimers.clear();
 }
 
 // Watch for custom content questions being added/removed
