@@ -2544,6 +2544,7 @@ function setRailOpen(open) {
 /**
  * Hides the control rail completely when present parameter is active
  * This provides a cleaner presentation view without controls
+ * Note: The rail may already be hidden by inline script in HTML head to prevent flash
  */
 function hideControlRail() {
   if (controlRail) {
@@ -2552,6 +2553,8 @@ function hideControlRail() {
   }
   // Ensure rail-open class is removed so layout calculations don't account for rail width
   document.body.classList.remove('rail-open');
+  // Set data attribute for CSS targeting (may already be set by inline script)
+  document.documentElement.setAttribute('data-present-mode', 'true');
 }
 
 function timestamp() {
