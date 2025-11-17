@@ -220,11 +220,13 @@ function createLegacyBridge({ container, onReady, onStatus, onStateChange, onClo
   let legacyState = 'UNMOUNTED';
   let playerOrigin = (() => {
     try {
+      // Security: Never use '*' as fallback - it's insecure
+      // Return null if we can't determine origin, which will cause rejection until origin is set
       return typeof window !== 'undefined' && window.location
-        ? window.location.origin || '*'
-        : '*';
+        ? window.location.origin || null
+        : null;
     } catch (_error) {
-      return '*';
+      return null;
     }
   })();
   let messageHandler = null;
@@ -324,8 +326,30 @@ function createLegacyBridge({ container, onReady, onStatus, onStateChange, onClo
     }
     messageHandler = (event) => {
       if (!frame || event.source !== frame.contentWindow) return;
-      // Accept messages from player origin or if playerOrigin not set yet
-      if (event.origin && playerOrigin && event.origin !== playerOrigin) return;
+      // Security: Validate origin - reject messages if origin doesn't match expected playerOrigin
+      // Never accept messages when playerOrigin is null or '*' - these are insecure fallbacks
+      if (!playerOrigin || playerOrigin === '*') {
+        // Reject messages until we can determine the actual origin from iframe src
+        try {
+          console.warn('[bridge] rejecting message - playerOrigin not set', { playerOrigin, eventOrigin: event.origin });
+        } catch (_error) {
+          /* ignore */
+        }
+        return;
+      }
+      // Strict origin check: must match exactly
+      if (!event.origin || event.origin !== playerOrigin) {
+        try {
+          console.warn('[bridge] rejecting message - origin mismatch', { 
+            expected: playerOrigin, 
+            received: event.origin,
+            iframeSrc: frame?.src 
+          });
+        } catch (_error) {
+          /* ignore */
+        }
+        return;
+      }
       const { data } = event;
       if (!data || typeof data !== 'object') return;
 
@@ -380,23 +404,48 @@ function createLegacyBridge({ container, onReady, onStatus, onStateChange, onClo
       iframe.setAttribute('title', 'Pulse Survey Player');
       iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
       iframe.setAttribute('referrerpolicy', 'no-referrer');
+      
+      // Security: Set playerOrigin BEFORE attaching listeners to prevent race condition
+      // Determine origin from iframe src first, fallback to window.location.origin
+      try {
+        const iframeSrc = iframe.getAttribute('src') || '';
+        const baseUrl = typeof window !== 'undefined' && window.location ? window.location.href : 'http://localhost';
+        playerOrigin = new URL(iframeSrc, baseUrl).origin;
+        try {
+          console.log('[bridge] Legacy Bridge: playerOrigin set from iframe src', { 
+            iframeSrc, 
+            baseUrl, 
+            playerOrigin 
+          });
+        } catch (_error) {
+          /* ignore */
+        }
+      } catch (_error) {
+        try {
+          // Fallback to window.location.origin (should always be available in browser)
+          playerOrigin = window.location.origin;
+          try {
+            console.log('[bridge] Legacy Bridge: playerOrigin set from window.location.origin fallback', { playerOrigin });
+          } catch (__error) {
+            /* ignore */
+          }
+        } catch (__error) {
+          // Security: Never use '*' as fallback - reject messages until we can determine origin
+          // This prevents accepting messages from any origin
+          playerOrigin = null;
+          try {
+            console.warn('[bridge] Legacy Bridge: playerOrigin set to null - messages will be rejected', { error: __error });
+          } catch (___error) {
+            /* ignore */
+          }
+        }
+      }
+      
       container.appendChild(iframe);
       frame = iframe;
       ready = false;
       pendingMessages = [];
       attachListeners();
-      try {
-        playerOrigin = new URL(
-          iframe.getAttribute('src') || '',
-          typeof window !== 'undefined' && window.location ? window.location.href : 'http://localhost'
-        ).origin;
-      } catch (_error) {
-        try {
-          playerOrigin = window.location.origin;
-        } catch (__error) {
-          playerOrigin = '*';
-        }
-      }
       setLegacyState('BOOTING', 'init-start', { config });
       return iframe;
     },
@@ -455,16 +504,15 @@ function createProtocolBridge({ container, onReady, onStatus, onStateChange, onE
   let bridgeReady = false;
   const pendingActions = []; // queued entries: { run, reject }
   let legacyMessageHandler = null;
+  let playerOrigin = null; // Store playerOrigin in closure for legacy message handler
 
   function teardown() {
     bridgeReady = false;
     failPending({ code: 'bridge_destroyed', message: 'Bridge destroyed' });
     
     // Send cleanup message to player before removing iframe
-    if (iframe && iframe.contentWindow) {
+    if (iframe && iframe.contentWindow && playerOrigin) {
       try {
-        const originOverride = flags.playerOrigin;
-        const playerOrigin = originOverride || derivePlayerOrigin(iframe);
         iframe.contentWindow.postMessage({ type: 'cleanup-timers' }, playerOrigin);
       } catch (_error) {
         /* ignore */
@@ -563,8 +611,58 @@ function createProtocolBridge({ container, onReady, onStatus, onStateChange, onE
       iframe.setAttribute('referrerpolicy', 'no-referrer');
       container.appendChild(iframe);
 
+      // Security: Set playerOrigin BEFORE creating handlers to prevent race condition
       const originOverride = flags.playerOrigin;
-      const playerOrigin = originOverride || derivePlayerOrigin(iframe);
+      try {
+        playerOrigin = originOverride || derivePlayerOrigin(iframe);
+        // Validate playerOrigin - should never be null or '*' in normal operation
+        if (!playerOrigin || playerOrigin === '*') {
+          // Fallback to window.location.origin if derivePlayerOrigin fails
+          try {
+            playerOrigin = window.location.origin;
+            try {
+              console.log('[bridge] Protocol Bridge: playerOrigin set from window.location.origin fallback', { playerOrigin });
+            } catch (_logError) {
+              /* ignore */
+            }
+          } catch (_error) {
+            // Last resort: this should rarely happen
+            playerOrigin = null;
+            try {
+              console.warn('[bridge] Protocol Bridge: playerOrigin set to null - messages will be rejected', { error: _error });
+            } catch (__logError) {
+              /* ignore */
+            }
+          }
+        } else {
+          try {
+            console.log('[bridge] Protocol Bridge: playerOrigin set', { 
+              playerOrigin, 
+              source: originOverride ? 'override' : 'derivePlayerOrigin',
+              iframeSrc: iframe?.src 
+            });
+          } catch (_logError) {
+            /* ignore */
+          }
+        }
+      } catch (_error) {
+        // If derivePlayerOrigin throws, fallback to window.location.origin
+        try {
+          playerOrigin = window.location.origin;
+          try {
+            console.log('[bridge] Protocol Bridge: playerOrigin set from window.location.origin (exception fallback)', { playerOrigin, error: _error });
+          } catch (__logError) {
+            /* ignore */
+          }
+        } catch (__error) {
+          playerOrigin = null;
+          try {
+            console.warn('[bridge] Protocol Bridge: playerOrigin set to null (exception) - messages will be rejected', { error: __error });
+          } catch (___logError) {
+            /* ignore */
+          }
+        }
+      }
 
       bridgeInstance = new BridgeV1({
         iframe,
@@ -623,8 +721,30 @@ function createProtocolBridge({ container, onReady, onStatus, onStateChange, onE
       // Handle legacy messages like link-click and redirect
       legacyMessageHandler = (event) => {
         if (!iframe || event.source !== iframe.contentWindow) return;
-        // Accept messages from player origin or if playerOrigin not set yet
-        if (event.origin && playerOrigin && event.origin !== playerOrigin) return;
+        // Security: Validate origin - reject messages if origin doesn't match expected playerOrigin
+        // Never accept messages when playerOrigin is null or '*' - these are insecure fallbacks
+        if (!playerOrigin || playerOrigin === '*') {
+          // Reject messages until we can determine the actual origin from iframe src
+          try {
+            console.warn('[bridge] rejecting legacy message - playerOrigin not set', { playerOrigin, eventOrigin: event.origin });
+          } catch (_error) {
+            /* ignore */
+          }
+          return;
+        }
+        // Strict origin check: must match exactly
+        if (!event.origin || event.origin !== playerOrigin) {
+          try {
+            console.warn('[bridge] rejecting legacy message - origin mismatch', { 
+              expected: playerOrigin, 
+              received: event.origin,
+              iframeSrc: iframe?.src 
+            });
+          } catch (_error) {
+            /* ignore */
+          }
+          return;
+        }
         const { data } = event;
         if (!data || typeof data !== 'object') return;
         
