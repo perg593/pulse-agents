@@ -18,6 +18,25 @@
       window.__PI_PROXY_ORIGIN__ = origin || '/';
     })();
   </script>
+  <script>
+    // Hide control rail immediately if present parameter is detected (prevents flash)
+    (function() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const presentParam = (params.get('present') || '').trim();
+        if (presentParam && /^\d{4}$/.test(presentParam)) {
+          // Add inline style to hide control rail before DOM is ready
+          const style = document.createElement('style');
+          style.textContent = '#control-rail { display: none !important; }';
+          document.head.appendChild(style);
+          // Also set data attribute for CSS targeting
+          document.documentElement.setAttribute('data-present-mode', 'true');
+        }
+      } catch (e) {
+        // Silently fail if URL parsing fails
+      }
+    })();
+  </script>
 </head>
 <body>
   <aside id="control-rail" class="control-rail" aria-label="Preview controls">

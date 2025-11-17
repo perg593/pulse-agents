@@ -61,8 +61,11 @@ async function runLegacySuite() {
       'legacy bridge queues present until player-ready arrives'
     );
 
+    // Security: Include origin in test message to match security validation requirements
+    const playerOrigin = new URL(iframeSrc, window.location.href).origin;
     window.dispatchEvent(
       new window.MessageEvent('message', {
+        origin: playerOrigin,
         data: { type: 'player-ready', account: 'PI-TEST', host: 'survey.pulseinsights.com' },
         source: frameWindow
       })

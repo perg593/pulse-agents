@@ -14,6 +14,7 @@ This document provides Entity Relationship Diagrams (ERDs) for all data models u
 3. [UI Data Models](#ui-data-models)
 4. [Theme Generator Models](#theme-generator-models)
 5. [Protocol Message Models](#protocol-message-models)
+6. [Player Runtime Data Models](#player-runtime-data-models)
 
 ---
 
@@ -765,6 +766,156 @@ interface ErrorPayload {
 
 ---
 
+## Player Runtime Data Models
+
+Player runtime data models represent JavaScript objects and data structures used within the survey player iframe context.
+
+### PulseInsightsObject
+
+The `PulseInsightsObject` is a global JavaScript object that contains survey configuration and question data. It is populated by the surveys.js script and accessed by the player iframe.
+
+```typescript
+interface PulseInsightsObject {
+  survey: {
+    id: string | number;
+    questions: Question[];
+    // ... other survey properties
+  };
+  // ... other survey-level properties
+}
+```
+
+### Question Types
+
+#### Custom Content Question
+
+Custom content questions allow HTML content to be displayed within the survey widget, including support for links and auto-redirect functionality.
+
+```typescript
+interface CustomContentQuestion {
+  question_id: string | number;
+  question_type: 'custom_content_question';
+  
+  // Auto-redirect configuration (when enabled)
+  autoredirect_enabled?: 't' | 'f';        // 't' = enabled, 'f' = disabled
+  autoredirect_delay?: string;              // Delay in seconds (e.g., '5')
+  autoredirect_url?: string;                // URL to redirect to (e.g., 'https://www.njtransit.com')
+  
+  // Question content
+  question_text?: string;                   // HTML content of the question
+  // ... other question properties
+}
+```
+
+**Example:**
+```javascript
+window.PulseInsightsObject = {
+  survey: {
+    questions: [
+      {
+        question_id: 27161,
+        question_type: 'custom_content_question',
+        autoredirect_enabled: 't',
+        autoredirect_delay: '5',
+        autoredirect_url: 'https://www.njtransit.com',
+        question_text: '<p><strong>This will redirect to the homepage after 5 seconds</strong></p>'
+      }
+    ]
+  }
+};
+```
+
+### Custom Content Link Handling
+
+**Status**: ✅ **Fully Functional**
+
+Custom content questions can contain HTML links (`<a>` tags) that need to be handled specially due to iframe sandbox restrictions.
+
+**Link Configuration:**
+- Links can have `target="_blank"` (opens in new tab) or default/`_self` (opens in same window)
+- Links are intercepted in the player iframe and sent to the bridge via `postMessage`
+- Bridge handles navigation of the parent window
+
+**Message Flow:**
+```
+Player iframe → postLegacyMessage({ type: 'link-click', href, target })
+→ Bridge receives → handleLinkClick() → Navigates parent window
+```
+
+**Implementation:**
+- **Player**: `preview/app/survey/player.js` - Link click interception via event delegation
+- **Bridge**: `preview/app/survey/bridge.js` - `handleLinkClick()` function handles navigation
+
+### Custom Content Auto-Redirect
+
+**Status**: ⚠️ **Partially Implemented - Not Fully Functional**
+
+Auto-redirect functionality allows custom content questions to automatically redirect the user to a specified URL after a delay.
+
+**Expected Behavior:**
+- After `autoredirect_delay` seconds, redirect the main browser window to `autoredirect_url`
+- Timer should start when the custom content question is displayed
+- Timer should be cleaned up when the survey is dismissed or the question is removed
+
+**Current Implementation Status:**
+
+✅ **Working:**
+- Timer detection and initialization
+- Timer cleanup on survey dismissal
+- Timer cleanup on page unload
+- Configuration reading from `PulseInsightsObject`
+
+❌ **Not Working:**
+- Timer callback execution (timer starts but callback never fires)
+- Location interception (attempts to intercept `surveys.js` redirects are not catching them)
+- Redirect navigation (redirects open in iframe instead of main browser window)
+
+**Technical Challenges:**
+1. The external `surveys.js` script performs redirects using `window.location = redirect_url` before our timer callback executes
+2. `window.location` property is not configurable in browsers, preventing interception
+3. Attempts to override `Location.prototype.href` setter are blocked by browser security restrictions
+
+**Implementation Attempts:**
+- Timer-based redirect with message passing (timer callback never executes)
+- Intercept `location.replace()`, `location.assign()`, and `location.href` setter (not catching redirects)
+- Early interceptor setup (runs immediately but still not catching redirects)
+- Message origin fixes (bridge accepts messages but redirect still fails)
+
+**Files Modified:**
+- `preview/app/survey/player.js`: Timer setup, location interception attempts
+- `preview/app/survey/bridge.js`: `handleRedirect()` function (receives messages but redirect fails)
+
+**See Also:**
+- `docs/custom-content-redirect-debugging-summary.md` - Comprehensive debugging documentation
+
+### Bridge Message Types
+
+Additional message types used for custom content functionality:
+
+```typescript
+// Link click message (Player → Bridge)
+interface LinkClickMessage {
+  type: 'link-click';
+  href: string;
+  target?: '_blank' | '_self' | string;
+}
+
+// Redirect message (Player → Bridge)
+interface RedirectMessage {
+  type: 'redirect';
+  url: string;
+}
+
+// Cleanup message (Bridge → Player)
+interface CleanupTimersMessage {
+  type: 'cleanup-timers';
+}
+```
+
+**Note:** These messages are sent via the legacy bridge protocol (`postLegacyMessage`) and are separate from the Protocol v1 message structure documented above.
+
+---
+
 ## Relationships Summary
 
 ### Database Relationships
@@ -786,6 +937,10 @@ interface ErrorPayload {
 ### Protocol Relationships
 - **MessageEnvelope** → **Payload** (1:1, polymorphic)
 
+### Player Runtime Relationships
+- **PulseInsightsObject** → **Question[]** (1:N)
+- **CustomContentQuestion** → **AutoRedirectConfig** (1:1, optional)
+
 ---
 
 ## Notes
@@ -800,6 +955,8 @@ interface ErrorPayload {
 
 5. **Protocol Models**: Protocol models enforce strict typing for inter-component communication via `window.postMessage`.
 
+6. **Player Runtime Models**: Player runtime models represent JavaScript objects used within the survey player iframe context, including `PulseInsightsObject` and question configurations. These are populated by external scripts (surveys.js) and accessed by the player iframe.
+
 ---
 
 ## References
@@ -809,4 +966,5 @@ interface ErrorPayload {
 - UI Models: `preview/v3-prototype/v3.js`, `preview/app/main.js`
 - Theme Generator: `theme-generator/v2/src/types.ts`
 - Protocol: `docs/protocols/protocol-v1.md`
+- Custom Content Redirect Debugging: `docs/custom-content-redirect-debugging-summary.md`
 

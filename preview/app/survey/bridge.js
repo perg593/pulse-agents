@@ -21,6 +21,157 @@ const globalFlags = (() => {
   }
 })();
 
+function handleLinkClick(data) {
+  const { href, target } = data;
+  if (!href || typeof href !== 'string') {
+    try {
+      console.warn('[bridge] link-click missing or invalid href', data);
+    } catch (_error) {
+      /* ignore */
+    }
+    return;
+  }
+
+  // Block dangerous URL schemes
+  if (isDangerousUrlScheme(href)) {
+    try {
+      console.warn('[bridge] link-click blocked - dangerous URL scheme', href);
+    } catch (_error) {
+      /* ignore */
+    }
+    return;
+  }
+
+  const linkTarget = target || '_self';
+  
+  try {
+    if (linkTarget === '_blank') {
+      // Open in new tab/window
+      const opened = window.open(href, '_blank', 'noopener');
+      if (!opened) {
+        try {
+          console.warn('[bridge] popup blocked for link', href);
+        } catch (_error) {
+          /* ignore */
+        }
+      } else {
+        try {
+          console.log('[bridge] link opened in new tab', href);
+        } catch (_error) {
+          /* ignore */
+        }
+      }
+    } else {
+      // Default behavior: navigate in same window
+      // Check if same origin to use window.location, otherwise use window.open
+      try {
+        const currentOrigin = window.location.origin;
+        const linkUrl = new URL(href, window.location.href);
+        if (linkUrl.origin === currentOrigin) {
+          window.location.href = href;
+        } else {
+          // Cross-origin: must use window.open even for _self
+          window.open(href, '_self');
+        }
+      } catch (_error) {
+        // Invalid URL or relative URL - try window.location
+        try {
+          window.location.href = href;
+        } catch (__error) {
+          try {
+            console.error('[bridge] failed to open link', href, __error);
+          } catch (___error) {
+            /* ignore */
+          }
+        }
+      }
+    }
+  } catch (error) {
+    try {
+      console.error('[bridge] error handling link click', { href, target, error });
+    } catch (_error) {
+      /* ignore */
+    }
+  }
+}
+
+/**
+ * Checks if a URL uses a dangerous scheme that should be blocked.
+ * 
+ * @param {string} url - The URL to check
+ * @returns {boolean} True if the URL uses a dangerous scheme
+ */
+function isDangerousUrlScheme(url) {
+  if (!url || typeof url !== 'string') {
+    return false;
+  }
+  const trimmed = url.trim().toLowerCase();
+  // Block dangerous URL schemes that could be used for XSS attacks
+  return trimmed.startsWith('javascript:') ||
+         trimmed.startsWith('data:') ||
+         trimmed.startsWith('vbscript:');
+}
+
+function handleRedirect(data, sourceFrame = null) {
+  const { url } = data;
+  if (!url || typeof url !== 'string') {
+    try {
+      console.warn('[bridge] redirect missing or invalid url', data);
+    } catch (_error) {
+      /* ignore */
+    }
+    return;
+  }
+
+  // Validate that redirect comes from active iframe
+  if (sourceFrame) {
+    if (!sourceFrame.parentNode || !document.body.contains(sourceFrame)) {
+      try {
+        console.warn('[bridge] redirect ignored - iframe has been removed', url);
+      } catch (_error) {
+        /* ignore */
+      }
+      return;
+    }
+  }
+
+  const redirectUrl = url.trim();
+  
+  // Block dangerous URL schemes
+  if (isDangerousUrlScheme(redirectUrl)) {
+    try {
+      console.warn('[bridge] redirect blocked - dangerous URL scheme', redirectUrl);
+    } catch (_error) {
+      /* ignore */
+    }
+    return;
+  }
+  
+  try {
+    // Use same logic as handleLinkClick - navigate current window
+    const currentOrigin = window.location.origin;
+    const targetUrl = new URL(redirectUrl, window.location.href);
+    if (targetUrl.origin === currentOrigin) {
+      // Same origin: use location.href
+      window.location.href = redirectUrl;
+    } else {
+      // Cross-origin: use window.open with _self (same as link handler)
+      window.open(redirectUrl, '_self');
+    }
+  } catch (_error) {
+    // Invalid URL or relative URL - try window.location.href
+    try {
+      window.location.href = redirectUrl;
+    } catch (__error) {
+      try {
+        console.error('[bridge] failed to redirect', redirectUrl, __error);
+      } catch (___error) {
+        /* ignore */
+      }
+    }
+  }
+}
+
 export function createSurveyBridge(
   {
     container,
@@ -69,11 +220,13 @@ function createLegacyBridge({ container, onReady, onStatus, onStateChange, onClo
   let legacyState = 'UNMOUNTED';
   let playerOrigin = (() => {
     try {
+      // Security: Never use '*' as fallback - it's insecure
+      // Return null if we can't determine origin, which will cause rejection until origin is set
       return typeof window !== 'undefined' && window.location
-        ? window.location.origin || '*'
-        : '*';
+        ? window.location.origin || null
+        : null;
     } catch (_error) {
-      return '*';
+      return null;
     }
   })();
   let messageHandler = null;
@@ -97,6 +250,16 @@ function createLegacyBridge({ container, onReady, onStatus, onStateChange, onClo
 
   function teardown() {
     const hadFrame = Boolean(frame);
+    
+    // Send cleanup message to player before removing iframe
+    if (frame && frame.contentWindow && ready) {
+      try {
+        frame.contentWindow.postMessage({ type: 'cleanup-timers' }, playerOrigin);
+      } catch (_error) {
+        /* ignore */
+      }
+    }
+    
     if (messageHandler) {
       try {
         window.removeEventListener('message', messageHandler);
@@ -163,7 +326,30 @@ function createLegacyBridge({ container, onReady, onStatus, onStateChange, onClo
     }
     messageHandler = (event) => {
       if (!frame || event.source !== frame.contentWindow) return;
-      if (event.origin && event.origin !== playerOrigin) return;
+      // Security: Validate origin - reject messages if origin doesn't match expected playerOrigin
+      // Never accept messages when playerOrigin is null or '*' - these are insecure fallbacks
+      if (!playerOrigin || playerOrigin === '*') {
+        // Reject messages until we can determine the actual origin from iframe src
+        try {
+          console.warn('[bridge] rejecting message - playerOrigin not set', { playerOrigin, eventOrigin: event.origin });
+        } catch (_error) {
+          /* ignore */
+        }
+        return;
+      }
+      // Strict origin check: must match exactly
+      if (!event.origin || event.origin !== playerOrigin) {
+        try {
+          console.warn('[bridge] rejecting message - origin mismatch', { 
+            expected: playerOrigin, 
+            received: event.origin,
+            iframeSrc: frame?.src 
+          });
+        } catch (_error) {
+          /* ignore */
+        }
+        return;
+      }
       const { data } = event;
       if (!data || typeof data !== 'object') return;
 
@@ -177,6 +363,16 @@ function createLegacyBridge({ container, onReady, onStatus, onStateChange, onClo
         }
         setLegacyState('IDLE', 'ready', data);
         onReady(data);
+        return;
+      }
+
+      if (data.type === 'link-click') {
+        handleLinkClick(data);
+        return;
+      }
+
+      if (data.type === 'redirect') {
+        handleRedirect(data, frame);
         return;
       }
 
@@ -208,23 +404,48 @@ function createLegacyBridge({ container, onReady, onStatus, onStateChange, onClo
       iframe.setAttribute('title', 'Pulse Survey Player');
       iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
       iframe.setAttribute('referrerpolicy', 'no-referrer');
+      
+      // Security: Set playerOrigin BEFORE attaching listeners to prevent race condition
+      // Determine origin from iframe src first, fallback to window.location.origin
+      try {
+        const iframeSrc = iframe.getAttribute('src') || '';
+        const baseUrl = typeof window !== 'undefined' && window.location ? window.location.href : 'http://localhost';
+        playerOrigin = new URL(iframeSrc, baseUrl).origin;
+        try {
+          console.log('[bridge] Legacy Bridge: playerOrigin set from iframe src', { 
+            iframeSrc, 
+            baseUrl, 
+            playerOrigin 
+          });
+        } catch (_error) {
+          /* ignore */
+        }
+      } catch (_error) {
+        try {
+          // Fallback to window.location.origin (should always be available in browser)
+          playerOrigin = window.location.origin;
+          try {
+            console.log('[bridge] Legacy Bridge: playerOrigin set from window.location.origin fallback', { playerOrigin });
+          } catch (__error) {
+            /* ignore */
+          }
+        } catch (__error) {
+          // Security: Never use '*' as fallback - reject messages until we can determine origin
+          // This prevents accepting messages from any origin
+          playerOrigin = null;
+          try {
+            console.warn('[bridge] Legacy Bridge: playerOrigin set to null - messages will be rejected', { error: __error });
+          } catch (___error) {
+            /* ignore */
+          }
+        }
+      }
+      
       container.appendChild(iframe);
       frame = iframe;
       ready = false;
       pendingMessages = [];
       attachListeners();
-      try {
-        playerOrigin = new URL(
-          iframe.getAttribute('src') || '',
-          typeof window !== 'undefined' && window.location ? window.location.href : 'http://localhost'
-        ).origin;
-      } catch (_error) {
-        try {
-          playerOrigin = window.location.origin;
-        } catch (__error) {
-          playerOrigin = '*';
-        }
-      }
       setLegacyState('BOOTING', 'init-start', { config });
       return iframe;
     },
@@ -282,10 +503,26 @@ function createProtocolBridge({ container, onReady, onStatus, onStateChange, onE
   let bridgeInstance = null;
   let bridgeReady = false;
   const pendingActions = []; // queued entries: { run, reject }
+  let legacyMessageHandler = null;
+  let playerOrigin = null; // Store playerOrigin in closure for legacy message handler
 
   function teardown() {
     bridgeReady = false;
     failPending({ code: 'bridge_destroyed', message: 'Bridge destroyed' });
+    
+    // Send cleanup message to player before removing iframe
+    if (iframe && iframe.contentWindow && playerOrigin) {
+      try {
+        iframe.contentWindow.postMessage({ type: 'cleanup-timers' }, playerOrigin);
+      } catch (_error) {
+        /* ignore */
+      }
+    }
+    
+    if (legacyMessageHandler) {
+      window.removeEventListener('message', legacyMessageHandler);
+      legacyMessageHandler = null;
+    }
     if (bridgeInstance) {
       bridgeInstance.destroy();
       bridgeInstance = null;
@@ -374,8 +611,58 @@ function createProtocolBridge({ container, onReady, onStatus, onStateChange, onE
       iframe.setAttribute('referrerpolicy', 'no-referrer');
       container.appendChild(iframe);
 
+      // Security: Set playerOrigin BEFORE creating handlers to prevent race condition
       const originOverride = flags.playerOrigin;
-      const playerOrigin = originOverride || derivePlayerOrigin(iframe);
+      try {
+        playerOrigin = originOverride || derivePlayerOrigin(iframe);
+        // Validate playerOrigin - should never be null or '*' in normal operation
+        if (!playerOrigin || playerOrigin === '*') {
+          // Fallback to window.location.origin if derivePlayerOrigin fails
+          try {
+            playerOrigin = window.location.origin;
+            try {
+              console.log('[bridge] Protocol Bridge: playerOrigin set from window.location.origin fallback', { playerOrigin });
+            } catch (_logError) {
+              /* ignore */
+            }
+          } catch (_error) {
+            // Last resort: this should rarely happen
+            playerOrigin = null;
+            try {
+              console.warn('[bridge] Protocol Bridge: playerOrigin set to null - messages will be rejected', { error: _error });
+            } catch (__logError) {
+              /* ignore */
+            }
+          }
+        } else {
+          try {
+            console.log('[bridge] Protocol Bridge: playerOrigin set', { 
+              playerOrigin, 
+              source: originOverride ? 'override' : 'derivePlayerOrigin',
+              iframeSrc: iframe?.src 
+            });
+          } catch (_logError) {
+            /* ignore */
+          }
+        }
+      } catch (_error) {
+        // If derivePlayerOrigin throws, fallback to window.location.origin
+        try {
+          playerOrigin = window.location.origin;
+          try {
+            console.log('[bridge] Protocol Bridge: playerOrigin set from window.location.origin (exception fallback)', { playerOrigin, error: _error });
+          } catch (__logError) {
+            /* ignore */
+          }
+        } catch (__error) {
+          playerOrigin = null;
+          try {
+            console.warn('[bridge] Protocol Bridge: playerOrigin set to null (exception) - messages will be rejected', { error: __error });
+          } catch (___logError) {
+            /* ignore */
+          }
+        }
+      }
 
       bridgeInstance = new BridgeV1({
         iframe,
@@ -430,6 +717,44 @@ function createProtocolBridge({ container, onReady, onStatus, onStateChange, onE
           /* ignore */
         }
       });
+
+      // Handle legacy messages like link-click and redirect
+      legacyMessageHandler = (event) => {
+        if (!iframe || event.source !== iframe.contentWindow) return;
+        // Security: Validate origin - reject messages if origin doesn't match expected playerOrigin
+        // Never accept messages when playerOrigin is null or '*' - these are insecure fallbacks
+        if (!playerOrigin || playerOrigin === '*') {
+          // Reject messages until we can determine the actual origin from iframe src
+          try {
+            console.warn('[bridge] rejecting legacy message - playerOrigin not set', { playerOrigin, eventOrigin: event.origin });
+          } catch (_error) {
+            /* ignore */
+          }
+          return;
+        }
+        // Strict origin check: must match exactly
+        if (!event.origin || event.origin !== playerOrigin) {
+          try {
+            console.warn('[bridge] rejecting legacy message - origin mismatch', { 
+              expected: playerOrigin, 
+              received: event.origin,
+              iframeSrc: iframe?.src 
+            });
+          } catch (_error) {
+            /* ignore */
+          }
+          return;
+        }
+        const { data } = event;
+        if (!data || typeof data !== 'object') return;
+        
+        if (data.type === 'link-click') {
+          handleLinkClick(data);
+        } else if (data.type === 'redirect') {
+          handleRedirect(data, iframe);
+        }
+      };
+      window.addEventListener('message', legacyMessageHandler);
 
       bridgeInstance.init().catch((error) => {
         try {
