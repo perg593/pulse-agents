@@ -534,6 +534,11 @@ async function init() {
   setRailOpen(false);
   setLogVisibility(false);
 
+  // Hide control rail if present parameter is active
+  if (presentSurveyId) {
+    hideControlRail();
+  }
+
   const initialOptionId = surveyInfo?.initialOptionId || surveySelect.value;
   if (initialOptionId) {
     surveySelect.value = initialOptionId;
@@ -2534,6 +2539,19 @@ function setRailOpen(open) {
   }
   refreshAccordionHeights();
   scheduleOverlayLayoutUpdate({ immediate: true, trailing: true });
+}
+
+/**
+ * Hides the control rail completely when present parameter is active
+ * This provides a cleaner presentation view without controls
+ */
+function hideControlRail() {
+  if (controlRail) {
+    controlRail.style.display = 'none';
+    controlRail.setAttribute('aria-hidden', 'true');
+  }
+  // Ensure rail-open class is removed so layout calculations don't account for rail width
+  document.body.classList.remove('rail-open');
 }
 
 function timestamp() {
