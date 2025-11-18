@@ -177,7 +177,7 @@ ensure_node_modules() {
 }
 
 ensure_node_modules "${ROOT_DIR}" "root"
-ensure_node_modules "${ROOT_DIR}/theme-generator/v1" "theme-generator"
+# Theme generator moved to separate repository: https://github.com/perg593/theme-generator
 ensure_node_modules "${ROOT_DIR}/pi-master" "pi-master"
 
 run_step() {
@@ -201,17 +201,19 @@ if [[ "${RUN_DEMO_DATA}" == "1" ]]; then
   run_step "Building demo survey dataset..." node scripts/build/demo-data.js
 fi
 
-if [[ "${RUN_EXAMPLES}" == "1" ]]; then
-  run_step "Exporting latest example themes..." bash -lc 'cd theme-generator/v1 && npm run examples:export'
-fi
-
-if [[ "${RUN_PREVIEW_BUILD}" == "1" ]]; then
-  run_step "Rebuilding preview manifest and default CSS..." bash -lc 'cd theme-generator/v1 && npm run preview:build'
-fi
-
-if [[ "${RUN_TESTS}" == "1" ]]; then
-  run_step "Running theme-generator unit tests..." bash -lc 'cd theme-generator/v1 && npm run test:unit'
-fi
+# Theme generator moved to separate repository: https://github.com/perg593/theme-generator
+# These steps are no longer available:
+# if [[ "${RUN_EXAMPLES}" == "1" ]]; then
+#   run_step "Exporting latest example themes..." bash -lc 'cd theme-generator/v1 && npm run examples:export'
+# fi
+#
+# if [[ "${RUN_PREVIEW_BUILD}" == "1" ]]; then
+#   run_step "Rebuilding preview manifest and default CSS..." bash -lc 'cd theme-generator/v1 && npm run preview:build'
+# fi
+#
+# if [[ "${RUN_TESTS}" == "1" ]]; then
+#   run_step "Running theme-generator unit tests..." bash -lc 'cd theme-generator/v1 && npm run test:unit'
+# fi
 
 # Function to wait for service readiness with exponential backoff
 wait_for_service() {
@@ -314,7 +316,8 @@ if ! wait_for_service "Preview Server" "http://localhost:${SERVER_PORT}/" 30 2; 
   exit 1
 fi
 
-MANIFEST_URL="http://localhost:${SERVER_PORT}/theme-generator/output/preview-manifest.json"
+# Theme generator manifest no longer available - using browser-based theme generator instead
+MANIFEST_URL=""
 DEFAULT_CSS_URL="http://localhost:${SERVER_PORT}/preview/dist/default.css"
 BASIC_HTML_URL="http://localhost:${SERVER_PORT}/preview/basic/index.html"
 STRIPE_BACKGROUND_URL="http://localhost:${SERVER_PORT}/preview/backgrounds/stripe-checkout/index.html"
