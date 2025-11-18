@@ -326,10 +326,15 @@ STRIPE_HEALTH_URL="http://localhost:${STRIPE_DEMO_PORT}/stripe-demo/health"
 echo "➡️  Performing final health checks..."
 
 # Check preview assets
-echo "  Checking preview assets..."
-if ! wait_for_service "Preview Assets" "${MANIFEST_URL}" 20 1; then
-  echo "❌ Preview assets not accessible"
-  exit 1
+# Theme generator manifest no longer available - skip manifest check
+if [[ -n "${MANIFEST_URL}" ]]; then
+  echo "  Checking preview assets..."
+  if ! wait_for_service "Preview Assets" "${MANIFEST_URL}" 20 1; then
+    echo "❌ Preview assets not accessible"
+    exit 1
+  fi
+else
+  echo "  ⚠️  Skipping manifest check (theme generator moved to separate repository)"
 fi
 
 # Check additional assets
