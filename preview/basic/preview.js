@@ -62,20 +62,13 @@ const FALLBACK_SURVEYS = [
 const siteRoot = document.getElementById('site-root');
 const logPanel = document.getElementById('log-panel');
 const logList = document.getElementById('log-list');
-const toggleLogBtn = document.getElementById('toggle-log-btn');
 const closeLogBtn = document.getElementById('close-log-btn');
-const tagStatusEl = document.getElementById('tag-status');
-const surveyStatusEl = document.getElementById('survey-status');
 const surveySelect = document.getElementById('survey-select');
 const presentBtn = document.getElementById('present-btn');
 const controlRail = document.getElementById('control-rail');
 const railToggle = document.getElementById('rail-toggle');
 const demoSubtitle = document.getElementById('demo-subtitle');
-const industrySelect = document.getElementById('industry-select');
-const themeSelect = document.getElementById('theme-select');
-const triggerButtons = document.getElementById('trigger-buttons');
 const accordionRoot = document.getElementById('rail-accordion');
-const appliedCssList = document.getElementById('applied-css-list');
 const backgroundInput = document.getElementById('background-input');
 const behaviorSurveyLabel = document.getElementById('behavior-survey-label');
 const behaviorPresentBtn = document.getElementById('behavior-present-btn');
@@ -88,7 +81,6 @@ const behaviorToggle = document.getElementById('behavior-toggle');
 const behaviorCloseBtn = document.getElementById('behavior-close-btn');
 const behaviorListenerList = document.getElementById('behavior-listener-list');
 const behaviorBanner = document.getElementById('behavior-banner');
-const demoDirectoryButton = document.getElementById('demo-directory-button');
 const demoDirectory = document.getElementById('demo-directory');
 const demoDirectoryBackdrop = document.getElementById('demo-directory-backdrop');
 const demoDirectoryList = document.getElementById('demo-directory-list');
@@ -160,7 +152,6 @@ attachResponses({
   getPercent: () => scrollDepthEngine.getPercent()
 });
 
-const LATEST_THEME_MANIFEST_URL = '/preview/styles/examples/generated/themes.json';
 const TRIGGER_CONFIG = [
   { id: 'present-selected', label: 'Present Selected Survey' },
   { id: 'exit-intent', label: 'Simulate Exit Intent' },
@@ -183,9 +174,6 @@ function baseBehaviorLog(message, level = 'info') {
   addLog(`[behavior] ${message}`, level);
 }
 const logBehavior = installBehaviorLogProxy({ logBehavior: baseBehaviorLog });
-let latestThemes = [];
-let currentIndustry = '__all';
-let themeEntryById = new Map();
 /**
  * Flag to prevent simulation events from being processed by behavior detectors.
  * When true, behavior detector handlers (handlePointerLeave, handleRagePointer, handleScroll, noteBehaviorActivity)
@@ -519,8 +507,6 @@ async function init() {
     }
   }
 
-  await initializeThemeSelect();
-  
   // Skip loading Pulse Insights tag in main document when present parameter is active
   // The tag should only be loaded inside the player iframe, not in the main document
   // This prevents duplicate survey widgets from being created in the main document
@@ -648,42 +634,9 @@ function wireUi() {
     });
   }
 
-  if (toggleLogBtn) {
-    toggleLogBtn.addEventListener('click', () => {
-      if (!railOpen) {
-        setRailOpen(true);
-      }
-      setLogVisibility(!logVisible);
-    });
-  }
-
   if (closeLogBtn) {
     closeLogBtn.addEventListener('click', () => {
       setLogVisibility(false);
-    });
-  }
-
-  if (industrySelect) {
-    industrySelect.addEventListener('change', () => {
-      currentIndustry = industrySelect.value || '__all';
-      renderThemeOptions();
-      const activeTheme = themeSelect?.value;
-      if (activeTheme) {
-        applyThemeById(activeTheme);
-      }
-    });
-  }
-
-  if (themeSelect) {
-    themeSelect.addEventListener('change', () => {
-      applyThemeById(themeSelect.value);
-    });
-  }
-
-  if (demoDirectoryButton) {
-    demoDirectoryButton.addEventListener('click', (event) => {
-      event.preventDefault();
-      openDemoDirectory();
     });
   }
 
@@ -707,9 +660,7 @@ function wireUi() {
   document.addEventListener('keydown', handleRailToggleShortcut);
 
   initializeAccordion();
-  initializeTriggers();
   initializeBehaviorLab();
-  updateCssManifest();
   refreshAccordionHeights();
 }
 
@@ -2039,9 +1990,6 @@ function refreshDemoDirectory() {
 function renderDemoDirectory() {
   if (!demoDirectoryList) return;
   demoDirectoryList.innerHTML = '';
-  if (demoDirectoryButton) {
-    demoDirectoryButton.hidden = demoDirectoryOptions.length === 0;
-  }
 
   const activeKey = (demoForFilter || demoSubtitleText || '').trim().toLowerCase();
   const totalRecords = allSurveyRecords.length;
@@ -2509,12 +2457,12 @@ function addProgressLog(step, total, message, context = {}) {
 }
 
 function setTagStatus(text) {
-  tagStatusEl.textContent = text;
+  // Status elements removed from UI - function kept for compatibility but does nothing
   refreshAccordionHeights();
 }
 
 function setSurveyStatus(text) {
-  surveyStatusEl.textContent = text;
+  // Status elements removed from UI - function kept for compatibility but does nothing
   refreshAccordionHeights();
 }
 
@@ -2522,9 +2470,6 @@ function setLogVisibility(visible) {
   logVisible = Boolean(visible);
   if (!logPanel) return;
   logPanel.classList.toggle('visible', logVisible);
-  if (toggleLogBtn) {
-    toggleLogBtn.textContent = logVisible ? 'Hide Status Log' : 'Show Status Log';
-  }
   refreshAccordionHeights();
 }
 
@@ -2562,184 +2507,6 @@ function timestamp() {
   return now.toLocaleTimeString();
 }
 
-async function initializeThemeSelect() {
-  if (!themeSelect) return;
-  latestThemes = [];
-  currentIndustry = '__all';
-  populateIndustrySelect([]);
-  renderThemeOptions();
-  refreshAccordionHeights();
-
-  try {
-    latestThemes = await fetchLatestThemes();
-    populateIndustrySelect(latestThemes);
-    if (latestThemes.length) {
-      renderThemeOptions(currentThemeId || null);
-      refreshAccordionHeights();
-      addLog(`Loaded ${latestThemes.length} latest example themes.`);
-    }
-  } catch (error) {
-    addLog(`Failed to load latest themes: ${error.message}`, 'warn');
-  }
-}
-
-function renderThemeOptions(selectedId) {
-  if (!themeSelect) return;
-  const previousValue = selectedId !== undefined ? selectedId : themeSelect.value;
-  const entries = new Map();
-  themeSelect.innerHTML = '';
-
-  const placeholderOption = document.createElement('option');
-  placeholderOption.value = '';
-  placeholderOption.textContent = '-- Select theme --';
-  placeholderOption.disabled = true;
-  placeholderOption.selected = true;
-  themeSelect.appendChild(placeholderOption);
-
-  const appendThemeOption = (container, item) => {
-    if (!item || !item.id) return;
-    const option = document.createElement('option');
-    option.value = item.id;
-    option.textContent = item.label;
-    container.appendChild(option);
-    entries.set(item.id, item);
-  };
-
-  appendThemeOption(themeSelect, {
-    id: 'none',
-    label: 'No theme override (widget default)',
-    href: null,
-    source: 'default',
-    manifestLabel: 'Widget defaults (no override)'
-  });
-
-  const filteredThemes =
-    currentIndustry === '__all'
-      ? latestThemes
-      : latestThemes.filter((theme) => (theme.industry || 'Other') === currentIndustry);
-
-  const accountGroups = buildAccountGroups(filteredThemes);
-  accountGroups.forEach((group) => {
-    if (!group.items.length) return;
-    const groupEl = document.createElement('optgroup');
-    groupEl.label = group.label;
-    group.items.forEach((item) => appendThemeOption(groupEl, item));
-    themeSelect.appendChild(groupEl);
-  });
-
-  themeEntryById = entries;
-
-  const hasPrevious = previousValue && entries.has(previousValue);
-  if (hasPrevious) {
-    themeSelect.value = previousValue;
-    placeholderOption.selected = false;
-  } else {
-    themeSelect.selectedIndex = 0;
-    placeholderOption.selected = true;
-  }
-  refreshAccordionHeights();
-}
-
-async function fetchLatestThemes() {
-  const response = await fetch(LATEST_THEME_MANIFEST_URL, { cache: 'no-cache' });
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}`);
-  }
-  const data = await response.json();
-  if (!data || !Array.isArray(data.themes)) return [];
-
-  return data.themes.map((theme) => {
-    return {
-      id: `latest-${theme.id}`,
-      label: theme.name || theme.id,
-      href: theme.cssPath,
-      account: theme.account || null,
-      accountGroup: theme.accountGroup || null,
-      industry: theme.industry || null,
-      identifier: theme.identifier || null
-    };
-  });
-}
-
-function applyThemeById(themeId) {
-  if (!themeSelect) return;
-  const entry = themeEntryById.get(themeId);
-  const normalizedId = entry ? entry.id : 'none';
-  if (currentThemeId === normalizedId) return;
-
-  if (!entry || !entry.href) {
-    setThemeStylesheet(null, 'default');
-    currentThemeId = 'none';
-    addLog('Cleared theme override; using widget defaults.');
-    return;
-  }
-
-  currentThemeId = entry.id;
-  setThemeStylesheet(entry.href, entry.source || 'examples', entry.manifestLabel || entry.label || entry.href);
-  addLog(`Applied theme override: ${entry.label}`);
-}
-
-function populateIndustrySelect(themes) {
-  if (!industrySelect) return;
-  const previousValue = currentIndustry;
-  industrySelect.innerHTML = '';
-
-  const allOption = document.createElement('option');
-  allOption.value = '__all';
-  allOption.textContent = 'All industries';
-  industrySelect.appendChild(allOption);
-
-  const uniqueIndustries = Array.from(
-    new Set(
-      themes
-        .map((theme) => theme.industry || 'Other')
-        .filter(Boolean)
-    )
-  ).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
-
-  uniqueIndustries.forEach((industry) => {
-    const option = document.createElement('option');
-    option.value = industry;
-    option.textContent = industry;
-    industrySelect.appendChild(option);
-  });
-
-  if (previousValue && (previousValue === '__all' || uniqueIndustries.includes(previousValue))) {
-    currentIndustry = previousValue;
-  } else {
-    currentIndustry = '__all';
-  }
-
-  industrySelect.value = currentIndustry;
-  refreshAccordionHeights();
-}
-
-function buildAccountGroups(themes) {
-  const groupMap = new Map();
-
-  themes.forEach((theme) => {
-    if (!theme || !theme.id) return;
-    const groupLabel = theme.accountGroup || theme.account || theme.identifier || 'Other Accounts';
-    if (!groupMap.has(groupLabel)) {
-      groupMap.set(groupLabel, []);
-    }
-    const displayLabel = theme.account ? `${theme.account} — ${theme.label}` : theme.label;
-    groupMap.get(groupLabel).push({
-      id: theme.id,
-      label: displayLabel,
-      href: theme.href,
-      source: 'examples',
-      manifestLabel: displayLabel
-    });
-  });
-
-  return Array.from(groupMap.entries())
-    .map(([label, items]) => ({
-      label,
-      items: items.sort((a, b) => (a.label || '').localeCompare(b.label || '', undefined, { sensitivity: 'base' }))
-    }))
-    .sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: 'base' }));
-}
 
 function initializeBehaviorLab() {
   if (!behaviorButtonList) return;
@@ -2849,6 +2616,47 @@ function updateBehaviorSurveyLabel() {
   }
   const selectedOption = surveySelect.options[surveySelect.selectedIndex];
   behaviorSurveyLabel.textContent = selectedOption ? selectedOption.textContent : 'Selected survey';
+}
+
+/**
+ * Handle a trigger action (used by Behavior Lab)
+ * @param {string} triggerId - The ID of the trigger to handle
+ * @returns {boolean} True if survey was presented, false otherwise
+ */
+function handleTrigger(triggerId) {
+  switch (triggerId) {
+    case 'present-selected':
+      if (!surveySelect || !surveySelect.value) {
+        addLog('Trigger cancelled: no survey selected.', 'warn');
+        return false;
+      }
+      addLog('Trigger: Present selected survey');
+      presentSurvey(surveySelect.value, { force: true });
+      return true;
+    case 'exit-intent':
+      simulateExitIntent();
+      addLog('Trigger: Simulated exit intent');
+      return false;
+    case 'rage-click':
+      simulateRageClick();
+      addLog('Trigger: Simulated rage clicks');
+      return false;
+    case 'scroll-depth':
+      simulateScrollDepth();
+      addLog('Trigger: Simulated scroll depth');
+      return false;
+    case 'time-delay':
+      simulateTimer();
+      addLog('Trigger: Started timer');
+      return false;
+    case 'pageview':
+      simulatePageview();
+      addLog('Trigger: Incremented pageview');
+      return false;
+    default:
+      addLog(`Unknown trigger "${triggerId}"`, 'warn');
+      return false;
+  }
 }
 
 /**
@@ -3121,61 +2929,6 @@ function resetBehaviorIdleTimer() {
   }, BEHAVIOR_IDLE_MS);
 }
 
-function initializeTriggers() {
-  if (!triggerButtons) return;
-  triggerButtons.innerHTML = '';
-  TRIGGER_CONFIG.forEach((trigger) => {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'button-secondary';
-    button.textContent = trigger.label;
-    button.dataset.triggerId = trigger.id;
-    button.addEventListener('click', () => handleTrigger(trigger.id));
-    triggerButtons.appendChild(button);
-  });
-  refreshAccordionHeights();
-}
-
-/**
- * Handle a trigger action
- * @param {string} triggerId - The ID of the trigger to handle
- * @returns {boolean} True if survey was presented, false otherwise
- */
-function handleTrigger(triggerId) {
-  switch (triggerId) {
-    case 'present-selected':
-      if (!surveySelect.value) {
-        addLog('Trigger cancelled: no survey selected.', 'warn');
-        return false;
-      }
-      addLog('Trigger: Present selected survey');
-      presentSurvey(surveySelect.value, { force: true });
-      return true;
-    case 'exit-intent':
-      simulateExitIntent();
-      addLog('Trigger: Simulated exit intent');
-      return false;
-    case 'rage-click':
-      simulateRageClick();
-      addLog('Trigger: Simulated rage clicks');
-      return false;
-    case 'scroll-depth':
-      simulateScrollDepth();
-      addLog('Trigger: Simulated scroll depth');
-      return false;
-    case 'time-delay':
-      simulateTimer();
-      addLog('Trigger: Started timer');
-      return false;
-    case 'pageview':
-      simulatePageview();
-      addLog('Trigger: Incremented pageview');
-      return false;
-    default:
-      addLog(`Unknown trigger "${triggerId}"`, 'warn');
-      return false;
-  }
-}
 
 /**
  * Simulate exit intent behavior by dispatching a mouseout event
@@ -3301,8 +3054,8 @@ function setThemeStylesheet(href, source = 'generated', label) {
 }
 
 function updateCssManifest() {
-  if (!appliedCssList) return;
-  appliedCssList.innerHTML = '';
+  // Applied CSS Files section removed from UI - function kept for compatibility but does nothing
+  return;
 
   // Remove entries that no longer exist in the DOM
   Array.from(stylesheetRegistry.keys()).forEach((node) => {
