@@ -103,7 +103,6 @@ function run() {
     console.warn('   This is OK for Cloudflare Pages deployment.');
     process.exit(0);
   }
-  }
   if (!fs.existsSync(DEFAULT_THEME_JSON)) {
     throw new Error('preview/themes/default.json missing.');
   }
