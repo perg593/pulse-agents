@@ -3392,8 +3392,7 @@ function detectStylesheetSource(node) {
   if (lower.includes('/preview/styles/examples/generated/')) return 'generated';
   if (lower.includes('/preview/styles/examples/curated/')) return 'examples';
   if (lower.includes('/preview/styles/generator/')) return 'generator';
-  if (lower.includes('/theme-generator/output/examples/')) return 'examples';
-  if (lower.includes('/theme-generator/output/client-themes/')) return 'examples';
+  // Theme generator moved to separate repository - paths no longer available
   if (lower.includes('/lipsum_local/')) return 'host';
   if (lower.includes('/preview/dist/')) return 'default';
   if (lower.includes('/preview/themes/')) return 'default';

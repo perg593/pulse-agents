@@ -259,7 +259,8 @@ export function initThemeManager({ onThemesChanged = noop, notify = noop } = {})
 
       setStatus(`Deleted ${themeEntry.name}.`, 'success');
       renderClientList();
-      const cssPath = `/theme-generator/output/client-themes/${clientId}/${themeEntry.file}`;
+      // Theme generator moved to separate repository - CSS path no longer available
+      const cssPath = null;
       await onThemesChanged({
         clientId,
         themeId,

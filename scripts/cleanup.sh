@@ -114,8 +114,6 @@ if [[ "${CLEAN_BUILD}" == "1" ]]; then
   echo "🏗️  Cleaning build artifacts..."
   
   BUILD_DIRS=(
-    "theme-generator/v1/output"
-    "theme-generator/v2/output"
     "preview/dist"
   )
   
@@ -140,8 +138,6 @@ if [[ "${CLEAN_NODE_MODULES}" == "1" ]]; then
   
   NODE_MODULES_DIRS=(
     "node_modules"
-    "theme-generator/v1/node_modules"
-    "theme-generator/v2/node_modules"
     "pi-master/node_modules"
   )
   

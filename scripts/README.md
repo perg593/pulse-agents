@@ -78,15 +78,6 @@ npm run build
 
 Runs `preview-data.js` and `demo-data.js` together.
 
-## Development Scripts (`dev/`)
-
-### Theme Generator v2
-```bash
-npm run dev:theme-v2
-```
-
-Starts the development server for theme-generator/v2 (TypeScript web UI version).
-
 ## Usage
 
 All scripts should be run from the project root directory. Scripts automatically resolve paths relative to the project root.

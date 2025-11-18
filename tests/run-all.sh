@@ -28,10 +28,6 @@ node tests/unit/lib/logger.test.js
 echo "Testing lib/validators..."
 node tests/unit/lib/validators.test.js
 
-echo ""
-echo "Testing theme-generator/v1..."
-(cd theme-generator/v1 && npm run test:unit)
-
 # Integration tests
 echo ""
 echo "🔗 Integration Tests"
@@ -42,14 +38,6 @@ node tests/integration/preview/bridge.contract.test.mjs
 
 echo "Testing preview survey bridge integration..."
 node tests/integration/preview/surveyBridge.integration.test.mjs
-
-echo ""
-echo "Testing theme-generator/v2..."
-if [ ! -d "theme-generator/v2/node_modules" ]; then
-  echo "➡️  Installing theme-generator/v2 dependencies..."
-  (cd theme-generator/v2 && npm install)
-fi
-(cd theme-generator/v2 && npm test)
 
 echo ""
 echo "✅ All tests completed"

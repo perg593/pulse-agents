@@ -30,7 +30,8 @@ const stage = document.querySelector('.preview-stage');
 const inlineNote = document.getElementById('inline-note');
 const overlayContainer = document.getElementById('overlay-container');
 
-const MANIFEST_PATH = '/theme-generator/output/preview-manifest.json';
+// Theme generator moved to separate repository - manifest no longer available
+const MANIFEST_PATH = null;
 const THEME_PLACEHOLDER = '/* CLIENT_THEME_CSS */';
 const PREVIEW_PAYLOAD_PARAM = 'previewWidget';
 

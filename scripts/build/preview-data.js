@@ -95,9 +95,13 @@ function buildManifest(clientIndex) {
 }
 
 function run() {
+  // Theme generator moved to separate repository - skip if not available
   const generateThemePath = path.join(rootDir, 'theme-generator', 'v1', 'generate-theme-v2.mjs');
   if (!fs.existsSync(generateThemePath)) {
-    throw new Error('generate-theme-v2.mjs not found.');
+    console.warn('⚠️  Theme generator not found (moved to separate repository). Skipping theme generation.');
+    console.warn('   Theme generator: https://github.com/perg593/theme-generator');
+    console.warn('   This is OK for Cloudflare Pages deployment.');
+    process.exit(0);
   }
   if (!fs.existsSync(DEFAULT_THEME_JSON)) {
     throw new Error('preview/themes/default.json missing.');

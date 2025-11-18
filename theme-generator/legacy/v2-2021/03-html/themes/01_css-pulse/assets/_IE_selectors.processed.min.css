@@ -1,2 +1,0 @@
-#_pi_surveyWidget:before{content:'NOT IE';display:inline-block;font-size:20px;color:#fff;text-align:center;width:100%;font-weight:700;background-color:green}_:-ms-fullscreen,:root #_pi_surveyWidget:before{content:'IE 11 (and above?)';display:inline-block;font-size:20px;color:#fff;text-align:center;width:100%;font-weight:700;background-color:red}_:-ms-fullscreen,:root #_pi_surveyWidget{display:none!important}
-/*# sourceMappingURL=_IE_selectors.processed.min.css.map */

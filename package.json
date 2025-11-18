@@ -5,12 +5,10 @@
     "start:lite": "bash scripts/launch/preview-lite.sh",
     "build": "node scripts/build/preview-data.js && node scripts/build/demo-data.js",
     "build:widgets": "node scripts/build/generate-widgets.js",
-    "dev:theme-v2": "cd theme-generator/v2 && npm run dev",
     "test": "bash tests/run-all.sh",
     "test:unit": "node tests/unit/config/config.test.js && node tests/unit/lib/errors.test.js && node tests/unit/lib/logger.test.js && node tests/unit/lib/validators.test.js",
     "test:integration": "node tests/integration/preview/bridge.contract.test.mjs && node tests/integration/preview/surveyBridge.integration.test.mjs",
     "test:preview": "node tests/integration/preview/*.test.mjs",
-    "test:generators": "cd theme-generator/v1 && npm run test:unit && cd ../v2 && ([ -d node_modules ] || npm install) && npm test",
     "clean": "bash scripts/cleanup.sh",
     "clean:all": "CLEAN_BUILD=1 CLEAN_NODE_MODULES=1 bash scripts/cleanup.sh"
   },
