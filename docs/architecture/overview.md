@@ -1,14 +1,13 @@
-# Pulse Widgets Theme Toolkit - Architecture Overview
+# Pulse Agents Demo - Architecture Overview
 
 **Last Updated:** 2025-02-15  
 **Version:** 2.0
 
 ## Purpose
 
-The Pulse Widgets Theme Toolkit is a comprehensive system for generating branded themes from websites and previewing Pulse Insights survey widgets. It consists of two main subsystems:
+The Pulse Agents Demo is a preview dashboard for testing Pulse Insights survey widgets with themes and simulating behavioral triggers.
 
-1. **Theme Generator** - Analyzes websites to extract brand colors, fonts, and design patterns, then generates multiple theme variations
-2. **Preview Dashboard** - Provides a testing environment for previewing surveys with generated themes and simulating behavioral triggers
+**Note:** The theme generator has been moved to a separate repository: https://github.com/perg593/theme-generator
 
 ---
 
@@ -16,17 +15,16 @@ The Pulse Widgets Theme Toolkit is a comprehensive system for generating branded
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    Pulse Widgets Theme Toolkit                  │
+│                    Pulse Agents Preview Dashboard                │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
-│  ┌──────────────────────┐      ┌──────────────────────┐     │
-│  │  Theme Generator     │      │   Preview Dashboard    │     │
-│  │                      │      │                       │     │
-│  │  • Website Analyzer │      │  • Preview App        │     │
-│  │  • Theme Generator  │      │  • Survey Bridge      │     │
-│  │  • Token Mapper     │      │  • Player Iframe      │     │
-│  │  • CSS Builder      │      │  • Presentation Service│     │
-│  └──────────────────────┘      └──────────────────────┘     │
+│  ┌──────────────────────────────────────────────────────┐     │
+│  │              Preview Dashboard                        │     │
+│  │                                                       │     │
+│  │  • Preview App        │  • Survey Bridge            │     │
+│  │  • Player Iframe      │  • Presentation Service     │     │
+│  │  • Theme Manager      │  • Browser Theme Generator  │     │
+│  └──────────────────────────────────────────────────────┘     │
 │                                                                 │
 │  ┌──────────────────────────────────────────────────────┐   │
 │  │           Shared Infrastructure                        │   │
@@ -49,41 +47,7 @@ The Pulse Widgets Theme Toolkit is a comprehensive system for generating branded
 
 ## Component Overview
 
-### 1. Theme Generator System
-
-**Location:** `theme-generator/`
-
-#### Theme Generator v1 (`theme-generator/v1/`)
-- **Technology:** Node.js + Puppeteer
-- **Purpose:** Production-ready theme generation
-- **Components:**
-  - `main.js` - Orchestrates analysis → generation pipeline
-  - `analyze-site.js` - Website analyzer using Puppeteer
-  - `theme-generator.js` - Generates 4 theme variations
-- **Output:** CSS files in `output/client-themes/[client-name]/`
-
-#### Theme Generator v2 (`theme-generator/v2/`)
-- **Technology:** TypeScript + Puppeteer
-- **Purpose:** Advanced token-based theme generation
-- **Components:**
-  - Token extraction and mapping
-  - Evidence-based confidence scoring
-  - JSON token → CSS pipeline
-- **Output:** JSON tokens + CSS files
-
-**Theme Generation Flow:**
-```
-Website URL → Analyzer → Color/Font Extraction → Theme Generator → 4 CSS Variants
-                                                      ↓
-                                              Brand Faithful
-                                              High Contrast
-                                              Modern
-                                              Minimalist
-```
-
----
-
-### 2. Preview Dashboard System
+### Preview Dashboard System
 
 **Location:** `preview/`
 
@@ -196,10 +160,10 @@ User Action → Presentation Service → Queue → Deduplicator → Bridge → P
 ### Theme Generation Flow
 
 ```
-1. User runs: node theme-generator/v1/main.js https://example.com client-name
-2. Analyzer launches Puppeteer browser
-3. Extracts colors, fonts, logo colors from website
-4. Generator creates 4 theme variations
+1. User launches preview dashboard
+2. Preview dashboard loads surveys and themes
+3. User selects survey and theme
+4. Survey presents in iframe
 5. CSS files saved to output/client-themes/[client-name]/
 6. Manifest updated with new client/themes
 ```
@@ -292,7 +256,7 @@ Bridge (parent) ←→ Player (iframe)
 - Hostname validation
 - Protocol validation (http/https only)
 
-### Theme Generator
+### Preview Dashboard
 - URL validation before fetching
 - Path validation to prevent directory traversal
 - File operation error handling
@@ -307,7 +271,7 @@ Bridge (parent) ←→ Player (iframe)
 - Queue management to prevent resource exhaustion
 - State machine prevents invalid transitions
 
-### Theme Generator
+### Preview Dashboard
 - Browser reuse for multiple pages
 - Timeout management for slow-loading sites
 - Graceful degradation for problematic sites
@@ -338,9 +302,6 @@ pulse_widgets/
 │   ├── basic/             # Streamlined preview
 │   ├── scripts/           # Node.js helpers
 │   └── widgets/           # HTML fixtures
-├── theme-generator/        # Theme generation system
-│   ├── v1/               # Puppeteer-based generator
-│   └── v2/               # TypeScript token-based generator
 ├── scripts/               # Build and launch scripts
 ├── tests/                 # Test suite
 └── docs/                  # Documentation

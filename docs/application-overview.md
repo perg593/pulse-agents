@@ -47,24 +47,7 @@ The Pulse Widgets Theme Toolkit is a comprehensive system for generating branded
 
 ## Key Features
 
-### Theme Generator
-
-✅ **Automated Website Analysis**
-- Puppeteer-based browser automation
-- Color extraction from computed styles
-- Font detection from DOM elements
-- Logo color extraction from images
-- CSS variable detection
-
-✅ **Multiple Theme Variations**
-- 4 styles per client (Brand Faithful, High Contrast, Modern, Minimalist)
-- Confidence scoring (v2 generator)
-- Evidence-based mapping
-
-✅ **Client Management**
-- Organized folder structure per client
-- Manifest generation for preview dashboard
-- Theme indexing and discovery
+**Note:** The theme generator has been moved to a separate repository: https://github.com/perg593/theme-generator
 
 ### Preview Dashboard
 
@@ -183,9 +166,6 @@ pulse_widgets/
 │   ├── basic/             # Streamlined preview
 │   ├── scripts/           # Node.js helpers
 │   └── widgets/           # HTML fixtures
-├── theme-generator/        # Theme generation system
-│   ├── v1/               # Puppeteer-based generator
-│   └── v2/               # TypeScript token-based generator
 ├── scripts/               # Build and launch scripts
 ├── tests/                 # Test suite
 └── docs/                  # Documentation
@@ -194,19 +174,6 @@ pulse_widgets/
 ---
 
 ## Common Workflows
-
-### Generate Themes from a Website
-
-```bash
-cd theme-generator/v1
-node main.js https://example.com client-name
-```
-
-This will:
-1. Analyze the website for colors and fonts
-2. Generate 4 theme variations
-3. Save CSS files to `output/client-themes/[client-name]/`
-4. Update the preview manifest
 
 ### Launch Preview Dashboard
 
@@ -326,7 +293,7 @@ Comprehensive documentation is available in `docs/`:
 - **[Getting Started](docs/getting-started/)** - Setup and quick start guides
 - **[Guides](docs/guides/)** - How-to guides
 - **[Protocols](docs/protocols/)** - Communication protocols
-- **[Theme Generator](docs/theme-generator/)** - Theme generator documentation
+**Theme Generator**: Moved to https://github.com/perg593/theme-generator
 
 ---
 

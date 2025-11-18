@@ -1,6 +1,8 @@
-# Pulse Widgets Theme Toolkit
+# Pulse Agents Demo
 
-This repository contains the current theme-generation pipeline (`theme-generator/`), a lightweight preview dashboard (`preview/`), and supporting assets. The codebase has been standardized with centralized configuration, improved error handling, and comprehensive validation.
+This repository contains the Pulse Agents preview dashboard (`preview/`) and supporting assets. The codebase has been standardized with centralized configuration, improved error handling, and comprehensive validation.
+
+**Note:** The theme generator has been moved to a separate repository: https://github.com/perg593/theme-generator
 
 ## 📦 Current Structure
 
@@ -10,10 +12,9 @@ This repository contains the current theme-generation pipeline (`theme-generator
 ├── lib/                    # Shared utilities (errors, logging, validation, paths)
 ├── tests/                  # Centralized test suite (unit + integration)
 ├── docs/                   # Centralized documentation
-├── theme-generator/        # Active theme generator (analysis + JSON pipelines)
 ├── preview/                # Demo studio (modular UI, production tag bridge, fixtures)
 ├── fonts/                  # Local font assets used during theme testing
-└── legacy/                 # Archived interfaces and v1 generator (no longer maintained)
+└── legacy/                 # Archived interfaces (no longer maintained)
 ```
 
 Key preview assets:
@@ -27,10 +28,6 @@ Key preview assets:
 ### 1. Install Dependencies
 ```bash
 # Install root dependencies
-npm install
-
-# Install theme generator dependencies
-cd theme-generator
 npm install
 ```
 
@@ -49,20 +46,7 @@ npm run test:integration
 node tests/unit/lib/errors.test.js
 ```
 
-### 3. Generate Themes from a Live Site
-Runs analysis + produces four CSS variants (Brand Faithful, High Contrast, Modern, Minimalist).
-```bash
-cd theme-generator
-node main.js https://example.com client-name
-```
-
-### 4. Convert a JSON Token File into CSS
-```bash
-cd theme-generator
-npm run generate:v2 -- ../preview/themes/default.json preview/dist/default.css
-```
-
-### 5. Launch the Demo Studio (production tag + triggers)
+### 3. Launch the Demo Studio (production tag + triggers)
 ```bash
 npm start                              # or: ./scripts/launch/preview.sh
 open http://localhost:8000/preview/index.html
@@ -229,23 +213,9 @@ so Stripe Elements continues to run same-origin.
 - **[API Reference](docs/api/)** - API documentation
 - **[Guides](docs/guides/)** - How-to guides
 
-## 🧰 npm Scripts (theme-generator)
-
-| Script | Description |
-| --- | --- |
-| `npm start` | Run the main generator (`main.js`) |
-| `npm run analyze` | Produce only the site analysis JSON |
-| `npm run generate` | Generate themes from an existing analysis file |
-| `npm run test` | Smoke-test against `example.com` |
-| `npm run generate:v2` | Convert a JSON token file into CSS |
-| `npm run preview:build` | Rebuild preview manifest + default CSS |
-| `npm run preview:theme` | Compile any JSON token into `preview/dist/` |
-
-## 🗂️ Legacy Assets
-
-Older dashboards and the v1 generator now live under `legacy/` for historical reference. They are no longer supported—stick with `theme-generator/` and the preview dashboard for current development.
-
 ---
 
 **Maintained by**: Pulse Insights  
-**Status**: Active development on theme-generator + preview dashboard  
+**Status**: Active development on preview dashboard
+
+**Theme Generator**: Moved to https://github.com/perg593/theme-generator  

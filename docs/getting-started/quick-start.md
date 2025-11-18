@@ -2,7 +2,9 @@
 
 **Last Updated:** 2025-02-15
 
-Get up and running with the Pulse Widgets Theme Toolkit in minutes.
+Get up and running with the Pulse Agents Preview Dashboard in minutes.
+
+**Note:** The theme generator has been moved to a separate repository: https://github.com/perg593/theme-generator
 
 ---
 
@@ -22,32 +24,9 @@ Get up and running with the Pulse Widgets Theme Toolkit in minutes.
 npm install
 ```
 
-### 2. Install Theme Generator Dependencies
-
-```bash
-cd theme-generator/v1
-npm install
-cd ../..
-```
-
 ---
 
-## Quick Start: Generate Your First Theme
-
-### Step 1: Generate a Theme
-
-```bash
-cd theme-generator/v1
-node main.js https://example.com my-client
-```
-
-This will:
-- Analyze the website for colors and fonts
-- Generate 4 theme variations
-- Save CSS files to `output/client-themes/my-client/`
-- Update the preview manifest
-
-### Step 2: Launch Preview Dashboard
+## Quick Start: Launch Preview Dashboard
 
 ```bash
 npm start
