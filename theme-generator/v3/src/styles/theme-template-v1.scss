@@ -1,0 +1,130 @@
+// Theme Template v1 - Preview Only
+// This template is scoped to the preview markup used in SurveyPreview component
+
+// Base styles
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: $pi-font-base;
+  background: #f5f5f5;
+  padding: 20px;
+}
+
+// Widget Container
+#_pi_surveyWidgetContainer {
+  max-width: 100%;
+  margin: 0 auto;
+  font-family: $pi-font-base;
+}
+
+// Widget
+#_pi_surveyWidget {
+  background-color: $pi-widget-body-bg;
+  border-radius: $pi-border-radius;
+  color: $pi-widget-body-text;
+  padding: 30px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid $pi-widget-border-color;
+}
+
+// Question
+._pi_question {
+  color: $pi-text-primary;
+  font-family: $pi-font-heading;
+  font-size: $pi-font-size-heading;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+// Answers Container
+ul._pi_answers_container {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: $pi-spacing-md;
+  margin-bottom: 20px;
+}
+
+// Single Choice Options (Phase 3.95: Use widget component tokens)
+ul._pi_answers_container li {
+  background-color: $pi-single-choice-bg-default;
+  border: 2px solid $pi-single-choice-border-default;
+  border-radius: $pi-border-radius;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  
+  &:hover,
+  &.active {
+    background-color: $pi-single-choice-bg-active;
+    border-color: $pi-single-choice-border-active;
+    color: $pi-single-choice-text-active;
+  }
+  
+  a {
+    color: $pi-single-choice-text-default;
+    text-decoration: none;
+    display: block;
+    font-size: $pi-font-size-body;
+    
+    &:hover {
+      color: $pi-single-choice-text-active;
+    }
+  }
+  
+  &:hover a,
+  &.active a {
+    color: $pi-single-choice-text-active;
+  }
+}
+
+// Free Text Input
+input._pi_free_text_question_field {
+  width: 100%;
+  padding: $pi-spacing-md;
+  margin-bottom: 20px;
+  border: none;
+  border-bottom: 2px solid $pi-brand-primary;
+  background: transparent;
+  color: $pi-text-primary;
+  font-family: $pi-font-base;
+  font-size: $pi-font-size-body;
+  outline: none;
+  
+  &:focus {
+    border-bottom-color: $pi-brand-secondary;
+  }
+  
+  &::placeholder {
+    color: $pi-text-secondary;
+  }
+}
+
+// Submit Button (Phase 3.95: Use CTA button component tokens)
+input._pi_all_questions_submit_button {
+  background-color: $pi-cta-button-bg;
+  color: $pi-cta-button-text;
+  border-radius: $pi-border-radius;
+  font-family: $pi-font-base;
+  font-size: $pi-font-size-button;
+  font-weight: 600;
+  padding: 12px 24px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+  
+  &:hover {
+    background-color: $pi-cta-button-bg-hover;
+    color: $pi-cta-button-text-hover;
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+

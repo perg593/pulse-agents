@@ -222,7 +222,12 @@ so Stripe Elements continues to run same-origin.
 - The proxy strips `X-Frame-Options` / `frame-ancestors` and injects a small script that hides
   common cookie-consent banners (Osano, OneTrust, TrustArc, etc.) so demos start clean.
 
-📚 **Need a deeper walkthrough?** See [`docs/`](docs/) for centralized documentation, including [Getting Started](docs/getting-started/), [Architecture](docs/architecture/), and [Guides](docs/guides/).
+📚 **Need a deeper walkthrough?** See [`docs/`](docs/) for centralized documentation:
+- **[Application Overview](docs/application-overview.md)** - Complete application overview
+- **[Getting Started](docs/getting-started/)** - Installation and quick start
+- **[Architecture](docs/architecture/)** - System architecture and design
+- **[API Reference](docs/api/)** - API documentation
+- **[Guides](docs/guides/)** - How-to guides
 
 ## 🧰 npm Scripts (theme-generator)
 
