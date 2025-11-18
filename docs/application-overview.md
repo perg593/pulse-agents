@@ -1,6 +1,6 @@
 # Pulse Widgets Theme Toolkit - Application Overview
 
-**Last Updated:** 2025-02-15  
+**Last Updated:** 2025-02-15
 **Version:** 2.0
 
 ## What is Pulse Widgets Theme Toolkit?
@@ -307,7 +307,6 @@ For issues, questions, or contributions:
 
 ---
 
-**Maintained by:** Pulse Insights  
-**Status:** Active development  
+**Maintained by:** Pulse Insights
+**Status:** Active development
 **Version:** 2.0
-

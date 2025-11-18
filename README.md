@@ -218,4 +218,4 @@ so Stripe Elements continues to run same-origin.
 **Maintained by**: Pulse Insights  
 **Status**: Active development on preview dashboard
 
-**Theme Generator**: Moved to https://github.com/perg593/theme-generator  
+**Theme Generator**: Moved to https://github.com/perg593/theme-generator

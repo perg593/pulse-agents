@@ -1,6 +1,6 @@
 # Configuration API Reference
 
-**Location:** `config/`  
+**Location:** `config/`
 **Purpose:** Centralized configuration for ports, constants, and paths
 
 ---
@@ -222,4 +222,3 @@ Configuration can be overridden via environment variables:
 - [Error Handling API](../api/lib.md#error-handling) - Error classes
 - [Validation API](../api/lib.md#validation) - Input validation
 - [Path Utilities API](../api/lib.md#path-utilities) - Path utilities
-

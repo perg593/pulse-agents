@@ -1,6 +1,6 @@
 # Utility Library API Reference
 
-**Location:** `lib/`  
+**Location:** `lib/`
 **Purpose:** Shared utilities for error handling, logging, validation, and path operations
 
 ---
@@ -466,4 +466,3 @@ console.log(normalized); // theme-generator/output
 - [Configuration API](config.md) - Configuration utilities
 - [Error Handling Guide](../guides/error-handling.md) - Error handling best practices
 - [Validation Guide](../guides/validation.md) - Validation best practices
-

@@ -1,6 +1,6 @@
 # Pulse Agents Demo - Architecture Overview
 
-**Last Updated:** 2025-02-15  
+**Last Updated:** 2025-02-15
 **Version:** 2.0
 
 ## Purpose
@@ -325,6 +325,6 @@ See [Implementation Summary](../improvements/implementation-summary.md) for deta
 
 ---
 
-**Maintained by:** Pulse Insights  
+**Maintained by:** Pulse Insights
 **Status:** Active development
 
