@@ -2619,6 +2619,47 @@ function updateBehaviorSurveyLabel() {
 }
 
 /**
+ * Handle a trigger action (used by Behavior Lab)
+ * @param {string} triggerId - The ID of the trigger to handle
+ * @returns {boolean} True if survey was presented, false otherwise
+ */
+function handleTrigger(triggerId) {
+  switch (triggerId) {
+    case 'present-selected':
+      if (!surveySelect || !surveySelect.value) {
+        addLog('Trigger cancelled: no survey selected.', 'warn');
+        return false;
+      }
+      addLog('Trigger: Present selected survey');
+      presentSurvey(surveySelect.value, { force: true });
+      return true;
+    case 'exit-intent':
+      simulateExitIntent();
+      addLog('Trigger: Simulated exit intent');
+      return false;
+    case 'rage-click':
+      simulateRageClick();
+      addLog('Trigger: Simulated rage clicks');
+      return false;
+    case 'scroll-depth':
+      simulateScrollDepth();
+      addLog('Trigger: Simulated scroll depth');
+      return false;
+    case 'time-delay':
+      simulateTimer();
+      addLog('Trigger: Started timer');
+      return false;
+    case 'pageview':
+      simulatePageview();
+      addLog('Trigger: Incremented pageview');
+      return false;
+    default:
+      addLog(`Unknown trigger "${triggerId}"`, 'warn');
+      return false;
+  }
+}
+
+/**
  * Trigger a behavior and optionally present survey
  * @param {string} triggerId - The ID of the trigger behavior
  * @param {Object} options - Trigger options
