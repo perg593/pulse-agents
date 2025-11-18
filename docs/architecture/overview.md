@@ -157,17 +157,6 @@ User Action → Presentation Service → Queue → Deduplicator → Bridge → P
 
 ## Data Flow
 
-### Theme Generation Flow
-
-```
-1. User launches preview dashboard
-2. Preview dashboard loads surveys and themes
-3. User selects survey and theme
-4. Survey presents in iframe
-5. CSS files saved to output/client-themes/[client-name]/
-6. Manifest updated with new client/themes
-```
-
 ### Preview Presentation Flow
 
 ```
