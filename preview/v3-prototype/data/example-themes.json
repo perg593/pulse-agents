@@ -6,7 +6,7 @@
       {
         "themeId": "brand-faithful",
         "themeName": "Brand Faithful",
-        "css": "/theme-generator/output/client-themes/cnn/brand-faithful.css",
+        "css": "",
         "widgets": [
           {
             "id": "docked-desktop",
@@ -63,7 +63,7 @@
       {
         "themeId": "high-contrast",
         "themeName": "High Contrast",
-        "css": "/theme-generator/output/client-themes/cnn/high-contrast.css",
+        "css": "",
         "widgets": [
           {
             "id": "docked-desktop",
@@ -120,7 +120,7 @@
       {
         "themeId": "modern",
         "themeName": "Modern",
-        "css": "/theme-generator/output/client-themes/cnn/modern.css",
+        "css": "",
         "widgets": [
           {
             "id": "docked-desktop",
@@ -177,7 +177,7 @@
       {
         "themeId": "minimalist",
         "themeName": "Minimalist",
-        "css": "/theme-generator/output/client-themes/cnn/minimalist.css",
+        "css": "",
         "widgets": [
           {
             "id": "docked-desktop",
@@ -240,7 +240,7 @@
       {
         "themeId": "brand-faithful",
         "themeName": "Brand Faithful",
-        "css": "/theme-generator/output/client-themes/pulseinsights/brand-faithful.css",
+        "css": "",
         "widgets": [
           {
             "id": "docked-desktop",
@@ -297,7 +297,7 @@
       {
         "themeId": "high-contrast",
         "themeName": "High Contrast",
-        "css": "/theme-generator/output/client-themes/pulseinsights/high-contrast.css",
+        "css": "",
         "widgets": [
           {
             "id": "docked-desktop",
@@ -354,7 +354,7 @@
       {
         "themeId": "modern",
         "themeName": "Modern",
-        "css": "/theme-generator/output/client-themes/pulseinsights/modern.css",
+        "css": "",
         "widgets": [
           {
             "id": "docked-desktop",
@@ -411,7 +411,7 @@
       {
         "themeId": "minimalist",
         "themeName": "Minimalist",
-        "css": "/theme-generator/output/client-themes/pulseinsights/minimalist.css",
+        "css": "",
         "widgets": [
           {
             "id": "docked-desktop",
@@ -474,7 +474,7 @@
       {
         "themeId": "brand-faithful",
         "themeName": "Brand Faithful",
-        "css": "/theme-generator/output/client-themes/test-font-fallbacks/brand-faithful.css",
+        "css": "",
         "widgets": [
           {
             "id": "docked-desktop",
@@ -531,7 +531,7 @@
       {
         "themeId": "high-contrast",
         "themeName": "High Contrast",
-        "css": "/theme-generator/output/client-themes/test-font-fallbacks/high-contrast.css",
+        "css": "",
         "widgets": [
           {
             "id": "docked-desktop",
@@ -588,7 +588,7 @@
       {
         "themeId": "modern",
         "themeName": "Modern",
-        "css": "/theme-generator/output/client-themes/test-font-fallbacks/modern.css",
+        "css": "",
         "widgets": [
           {
             "id": "docked-desktop",
@@ -645,7 +645,7 @@
       {
         "themeId": "minimalist",
         "themeName": "Minimalist",
-        "css": "/theme-generator/output/client-themes/test-font-fallbacks/minimalist.css",
+        "css": "",
         "widgets": [
           {
             "id": "docked-desktop",
@@ -708,7 +708,7 @@
       {
         "themeId": "brand-faithful",
         "themeName": "Brand Faithful",
-        "css": "/theme-generator/output/client-themes/airsuprahcp/brand-faithful.css",
+        "css": "",
         "widgets": [
           {
             "id": "docked-desktop",
@@ -765,7 +765,7 @@
       {
         "themeId": "high-contrast",
         "themeName": "High Contrast",
-        "css": "/theme-generator/output/client-themes/airsuprahcp/high-contrast.css",
+        "css": "",
         "widgets": [
           {
             "id": "docked-desktop",
@@ -822,7 +822,7 @@
       {
         "themeId": "modern",
         "themeName": "Modern",
-        "css": "/theme-generator/output/client-themes/airsuprahcp/modern.css",
+        "css": "",
         "widgets": [
           {
             "id": "docked-desktop",
@@ -879,7 +879,7 @@
       {
         "themeId": "minimalist",
         "themeName": "Minimalist",
-        "css": "/theme-generator/output/client-themes/airsuprahcp/minimalist.css",
+        "css": "",
         "widgets": [
           {
             "id": "docked-desktop",
@@ -942,7 +942,7 @@
       {
         "themeId": "brand-faithful",
         "themeName": "Brand Faithful",
-        "css": "/theme-generator/output/client-themes/nytimes/brand-faithful.css",
+        "css": "",
         "widgets": [
           {
             "id": "docked-desktop",
@@ -999,7 +999,7 @@
       {
         "themeId": "high-contrast",
         "themeName": "High Contrast",
-        "css": "/theme-generator/output/client-themes/nytimes/high-contrast.css",
+        "css": "",
         "widgets": [
           {
             "id": "docked-desktop",
@@ -1056,7 +1056,7 @@
       {
         "themeId": "modern",
         "themeName": "Modern",
-        "css": "/theme-generator/output/client-themes/nytimes/modern.css",
+        "css": "",
         "widgets": [
           {
             "id": "docked-desktop",
@@ -1113,7 +1113,7 @@
       {
         "themeId": "minimalist",
         "themeName": "Minimalist",
-        "css": "/theme-generator/output/client-themes/nytimes/minimalist.css",
+        "css": "",
         "widgets": [
           {
             "id": "docked-desktop",
@@ -1176,7 +1176,7 @@
       {
         "themeId": "brand-faithful",
         "themeName": "Brand Faithful",
-        "css": "/theme-generator/output/client-themes/npr/brand-faithful.css",
+        "css": "",
         "widgets": [
           {
             "id": "docked-desktop",
@@ -1233,7 +1233,7 @@
       {
         "themeId": "high-contrast",
         "themeName": "High Contrast",
-        "css": "/theme-generator/output/client-themes/npr/high-contrast.css",
+        "css": "",
         "widgets": [
           {
             "id": "docked-desktop",
@@ -1290,7 +1290,7 @@
       {
         "themeId": "modern",
         "themeName": "Modern",
-        "css": "/theme-generator/output/client-themes/npr/modern.css",
+        "css": "",
         "widgets": [
           {
             "id": "docked-desktop",
@@ -1347,7 +1347,7 @@
       {
         "themeId": "minimalist",
         "themeName": "Minimalist",
-        "css": "/theme-generator/output/client-themes/npr/minimalist.css",
+        "css": "",
         "widgets": [
           {
             "id": "docked-desktop",

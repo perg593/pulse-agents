@@ -1,10 +1,11 @@
 import { fetchJson } from './http.js';
 
-const MANIFEST_URL = '/theme-generator/output/preview-manifest.json';
+// Theme generator moved to separate repository - manifest no longer available
+const MANIFEST_URL = null;
 
 export async function loadManifest() {
-  const data = await fetchJson(MANIFEST_URL);
-  return Array.isArray(data) ? data : [];
+  // Return empty array since theme generator manifest is no longer available
+  return [];
 }
 
 export function listClients(manifest) {

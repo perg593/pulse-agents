@@ -16,21 +16,6 @@ const BASE_PATHS = {
   /** Lipsum index file path */
   LIPSUM_INDEX: '/lipsum_local/www.lipsum.com/index.html',
   
-  /** Theme generator v1 output directory */
-  THEME_OUTPUT_DIR: 'theme-generator/v1/output',
-  
-  /** Theme generator v2 output directory */
-  THEME_V2_OUTPUT_DIR: 'theme-generator/v2/output',
-  
-  /** Theme generator base directory */
-  THEME_GENERATOR_DIR: 'theme-generator',
-  
-  /** Theme generator v1 directory */
-  THEME_GENERATOR_V1_DIR: 'theme-generator/v1',
-  
-  /** Theme generator v2 directory */
-  THEME_GENERATOR_V2_DIR: 'theme-generator/v2',
-  
   /** Preview directory */
   PREVIEW_DIR: 'preview',
   
@@ -136,15 +121,6 @@ function resolveFromDir(baseDir, relativePath) {
 }
 
 /**
- * Get theme output path for a specific client
- * @param {string} clientName - Name of the client
- * @returns {string} Path to client theme directory
- */
-function getClientThemePath(clientName) {
-  return path.join(BASE_PATHS.THEME_OUTPUT_DIR, 'client-themes', clientName);
-}
-
-/**
  * Get preview asset path
  * @param {string} assetName - Name of the asset
  * @returns {string} Path to preview asset
@@ -192,7 +168,6 @@ module.exports = {
   FILE_PATTERNS,
   resolveFromRoot,
   resolveFromDir,
-  getClientThemePath,
   getPreviewAssetPath,
   getLegacyAssetPath,
   isValidPath,

@@ -40,9 +40,14 @@
     return;
   }
 
-  const themeUrl = `/theme-generator/output/client-themes/${clientId}/${themeId}.css`;
+  // Theme generator moved to separate repository - CSS files no longer available
+  // Use browser-based theme generator instead
+  const themeUrl = null;
 
   try {
+    if (!themeUrl) {
+      throw new Error('Theme generator moved to separate repository');
+    }
     const response = await fetch(themeUrl, {cache: 'no-cache'});
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);

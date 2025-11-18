@@ -18,7 +18,6 @@ const {
   FILE_PATTERNS, 
   resolveFromRoot, 
   resolveFromDir, 
-  getClientThemePath, 
   getPreviewAssetPath, 
   getLegacyAssetPath, 
   isValidPath, 
@@ -176,7 +175,6 @@ test.test('getAllConstants should return all constants', () => {
 test.test('BASE_PATHS should have correct values', () => {
   test.assertEqual(BASE_PATHS.LIPSUM_BASE, '/lipsum_local/www.lipsum.com/');
   test.assertEqual(BASE_PATHS.LIPSUM_INDEX, '/lipsum_local/www.lipsum.com/index.html');
-  test.assertEqual(BASE_PATHS.THEME_OUTPUT_DIR, 'theme-generator/v1/output');
   test.assertEqual(BASE_PATHS.PREVIEW_DIR, 'preview');
   test.assertEqual(BASE_PATHS.PREVIEW_BASIC_DIR, 'preview/basic');
   test.assertEqual(BASE_PATHS.PREVIEW_V3_DIR, 'preview/v3-prototype');
@@ -211,11 +209,6 @@ test.test('resolveFromRoot should resolve path from project root', () => {
 test.test('resolveFromDir should resolve path from specific directory', () => {
   const result = resolveFromDir('/base/dir', 'sub/file.js');
   test.assertEqual(result, '/base/dir/sub/file.js');
-});
-
-test.test('getClientThemePath should return correct path', () => {
-  const result = getClientThemePath('test-client');
-  test.assert(result.includes('theme-generator/v1/output/client-themes/test-client'));
 });
 
 test.test('getPreviewAssetPath should return correct path', () => {

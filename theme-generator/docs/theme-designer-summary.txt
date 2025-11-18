@@ -1,6 +1,0 @@
-Theme Designer – Snapshot Summary
-
-Latest completed: Phase 5.0a – Docked Desktop Single Choice + Thank You  
-Next in queue: Phase 5.0b – Free Text  
-Open topics: Finalize mobile layer mappings, confirm analyzer font detection  
-
