@@ -197,6 +197,42 @@ function buildBaseCss(tokens, options) {
   const radioAlign = tokens.answers.radioStyle === 'tile' ? tokens.answers.textAlignWhenRadioOff : tokens.answers.textAlignWhenRadioOn;
 
   parts.push(`
+/* CSS Isolation: Reset common properties to prevent host page CSS interference */
+#_pi_surveyWidgetContainer,
+#_pi_surveyWidgetContainer *,
+#_pi_surveyWidgetContainer *::before,
+#_pi_surveyWidgetContainer *::after {
+  box-sizing: border-box !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+}
+
+/* Reset list styles specifically - high specificity to override host page rules */
+#_pi_surveyWidgetContainer ul,
+#_pi_surveyWidgetContainer ol,
+#_pi_surveyWidgetContainer ul li,
+#_pi_surveyWidgetContainer ol li,
+#_pi_surveyWidgetContainer ._pi_answers_container,
+#_pi_surveyWidgetContainer ._pi_answers_container li {
+  list-style: none !important;
+  list-style-type: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Reset typography properties on li elements that commonly get overridden by host pages */
+/* Note: These are reset values - actual widget styles will override via more specific selectors */
+#_pi_surveyWidgetContainer li {
+  text-decoration: none !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  word-spacing: normal !important;
+}
+
+/* Base container styles */
 #_pi_surveyWidgetContainer,
 #_pi_surveyWidgetContainer * {
   box-sizing: border-box;
@@ -267,15 +303,19 @@ function buildBaseCss(tokens, options) {
 }
 
 #_pi_surveyWidget ._pi_answers_container li {
-  list-style: none;
-  display: flex;
-  align-items: center;
-  min-height: var(--pi-answers-tile-min-height);
-  border-radius: var(--pi-shape-control-radius);
-  border: 1px solid var(--pi-color-answer-border);
-  background-color: rgba(255, 255, 255, 0.9);
-  transition: background-color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
-  overflow: visible;
+  list-style: none !important;
+  list-style-type: none !important;
+  display: flex !important;
+  align-items: center !important;
+  min-height: var(--pi-answers-tile-min-height) !important;
+  border-radius: var(--pi-shape-control-radius) !important;
+  border: 1px solid var(--pi-color-answer-border) !important;
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  transition: background-color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease !important;
+  overflow: visible !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  position: relative !important;
 }
 
 #_pi_surveyWidget ._pi_answers_container li a {
@@ -284,17 +324,22 @@ function buildBaseCss(tokens, options) {
 }
 
 #_pi_surveyWidget ._pi_answers_container li label {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 18px;
-  border-radius: var(--pi-shape-control-radius);
-  font-size: var(--pi-typography-size-answer);
-  font-weight: var(--pi-typography-weight-answer);
-  line-height: var(--pi-typography-line-height-answer);
-  color: var(--pi-color-text);
-  cursor: pointer;
-  transition: color 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 14px 18px !important;
+  border-radius: var(--pi-shape-control-radius) !important;
+  font-size: var(--pi-typography-size-answer) !important;
+  font-weight: var(--pi-typography-weight-answer) !important;
+  line-height: var(--pi-typography-line-height-answer) !important;
+  color: var(--pi-color-text) !important;
+  cursor: pointer !important;
+  transition: color 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease !important;
+  margin: 0 !important;
+  text-align: left !important;
+  text-decoration: none !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
 }
 
 #_pi_surveyWidget ._pi_answers_container li ._pi_radio_button_outer {
