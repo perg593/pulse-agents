@@ -3440,62 +3440,110 @@ function applyOverlayFallbackRect() {
   if (!overlayContainer || !playerFrameEl) return;
 
   const viewport = resolveFallbackViewportSize();
-  const placement = resolveFallbackPlacement();
-  const metrics = computeOverlayFallbackMetrics({
-    viewportWidth: viewport.width,
-    viewportHeight: viewport.height,
-    placement
-  });
   
-  // Adjust left position to account for rail width when centering
-  if (viewport.railWidth > 0 && (placement === 'CENTER' || !metrics.left && !metrics.right)) {
-    // When rail is open and we're centering, add rail width to left position
-    // since overlay is position:fixed relative to viewport
-    if (metrics.left != null) {
-      metrics.left = metrics.left + viewport.railWidth;
-    } else if (metrics.right != null) {
-      // If using right, subtract rail width from right
-      metrics.right = metrics.right + viewport.railWidth;
+  // Check if widget is mobile-enabled - mobile widgets need full viewport overlay
+  const doc = getPlayerDocument();
+  const isMobileEnabled = doc?.getElementById('_pi_surveyWidgetContainer')?.classList.contains('mobile-enabled') || false;
+
+  let placement, metrics;
+  
+  if (isMobileEnabled) {
+    // Mobile widgets: overlay covers full viewport for transparent background
+    placement = 'MOBILE';
+    if (!overlayFallbackActive && !overlayFallbackLogged) {
+      addLog(
+        'Widget geometry unavailable; using full viewport overlay for mobile widget.',
+        'warn'
+      );
+      overlayFallbackLogged = true;
     }
-  }
+    overlayFallbackActive = true;
 
-  if (!overlayFallbackActive && !overlayFallbackLogged) {
-    addLog(
-      `Widget geometry unavailable; approximating overlay placement (${placement}).`,
-      'warn'
-    );
-    overlayFallbackLogged = true;
-  }
-  overlayFallbackActive = true;
+    overlayContainer.style.position = 'fixed';
+    overlayContainer.style.visibility = 'visible';
+    overlayContainer.style.opacity = '1';
+    overlayContainer.style.pointerEvents = 'auto';
+    overlayContainer.style.overflow = 'hidden';
+    overlayContainer.style.clipPath = '';
+    overlayContainer.style.webkitClipPath = '';
+    overlayContainer.style.width = `${viewport.width}px`;
+    overlayContainer.style.height = `${viewport.height}px`;
+    overlayContainer.style.top = '0';
+    overlayContainer.style.left = '0';
+    overlayContainer.style.right = '';
+    overlayContainer.style.bottom = '';
+    overlayContainer.dataset.fallbackPlacement = placement;
+  } else {
+    // Desktop widgets: use computed metrics for widget-sized overlay
+    placement = resolveFallbackPlacement();
+    metrics = computeOverlayFallbackMetrics({
+      viewportWidth: viewport.width,
+      viewportHeight: viewport.height,
+      placement
+    });
+    
+    // Adjust left position to account for rail width when centering
+    if (viewport.railWidth > 0 && (placement === 'CENTER' || !metrics.left && !metrics.right)) {
+      // When rail is open and we're centering, add rail width to left position
+      // since overlay is position:fixed relative to viewport
+      if (metrics.left != null) {
+        metrics.left = metrics.left + viewport.railWidth;
+      } else if (metrics.right != null) {
+        // If using right, subtract rail width from right
+        metrics.right = metrics.right + viewport.railWidth;
+      }
+    }
 
-  overlayContainer.style.position = 'fixed';
-  overlayContainer.style.visibility = 'visible';
-  overlayContainer.style.opacity = '1';
-  overlayContainer.style.pointerEvents = 'auto';
-  overlayContainer.style.overflow = 'hidden';
-  overlayContainer.style.clipPath = '';
-  overlayContainer.style.webkitClipPath = '';
-  overlayContainer.style.width = `${metrics.width}px`;
-  overlayContainer.style.height = `${metrics.height}px`;
-  overlayContainer.style.top = metrics.top != null ? `${metrics.top}px` : '';
-  overlayContainer.style.left = metrics.left != null ? `${metrics.left}px` : '';
-  overlayContainer.style.right = metrics.right != null ? `${metrics.right}px` : '';
-  overlayContainer.style.bottom = metrics.bottom != null ? `${metrics.bottom}px` : '';
-  overlayContainer.dataset.fallbackPlacement = placement;
+    if (!overlayFallbackActive && !overlayFallbackLogged) {
+      addLog(
+        `Widget geometry unavailable; approximating overlay placement (${placement}).`,
+        'warn'
+      );
+      overlayFallbackLogged = true;
+    }
+    overlayFallbackActive = true;
+
+    overlayContainer.style.position = 'fixed';
+    overlayContainer.style.visibility = 'visible';
+    overlayContainer.style.opacity = '1';
+    overlayContainer.style.pointerEvents = 'auto';
+    overlayContainer.style.overflow = 'hidden';
+    overlayContainer.style.clipPath = '';
+    overlayContainer.style.webkitClipPath = '';
+    overlayContainer.style.width = `${metrics.width}px`;
+    overlayContainer.style.height = `${metrics.height}px`;
+    overlayContainer.style.top = metrics.top != null ? `${metrics.top}px` : '';
+    overlayContainer.style.left = metrics.left != null ? `${metrics.left}px` : '';
+    overlayContainer.style.right = metrics.right != null ? `${metrics.right}px` : '';
+    overlayContainer.style.bottom = metrics.bottom != null ? `${metrics.bottom}px` : '';
+    overlayContainer.dataset.fallbackPlacement = placement;
+  }
 
   playerFrameEl.style.pointerEvents = 'auto';
   playerFrameEl.style.visibility = 'visible';
   playerFrameEl.style.position = 'absolute';
-  playerFrameEl.style.width = `${metrics.frameWidth}px`;
-  playerFrameEl.style.height = `${metrics.frameHeight}px`;
-  playerFrameEl.style.top = `${metrics.frameTop}px`;
-  playerFrameEl.style.left = `${metrics.frameLeft}px`;
+  
+  if (isMobileEnabled) {
+    // For mobile widgets, iframe should cover full viewport
+    playerFrameEl.style.width = `${viewport.width}px`;
+    playerFrameEl.style.height = `${viewport.height}px`;
+    playerFrameEl.style.top = '0';
+    playerFrameEl.style.left = '0';
+  } else {
+    // For desktop widgets, use computed metrics
+    playerFrameEl.style.width = `${metrics.frameWidth}px`;
+    playerFrameEl.style.height = `${metrics.frameHeight}px`;
+    playerFrameEl.style.top = `${metrics.frameTop}px`;
+    playerFrameEl.style.left = `${metrics.frameLeft}px`;
+  }
+  
   playerFrameEl.style.clipPath = '';
   playerFrameEl.style.webkitClipPath = '';
 
   // Only start widget fallback styles retry if not already in progress
   // This prevents resetting the retry counter on every layout update
-  if (!widgetFallbackTimer && !widgetFallbackApplied) {
+  // Skip for mobile-enabled widgets as they use CSS positioning
+  if (!widgetFallbackTimer && !widgetFallbackApplied && !isMobileEnabled && metrics) {
     applyWidgetFallbackStyles({ placement, metrics }, 0);
   }
 }
@@ -3915,6 +3963,23 @@ function applyWidgetFallbackStyles(context, attempt = 0) {
     return;
   }
 
+  // Check if mobile-enabled - skip fallback styles for mobile widgets
+  // Mobile widgets use CSS positioning (top: 0, left: 0, right: 0, bottom: 0)
+  // and should not have fallback styles applied that override their positioning
+  const isMobileEnabled = container.classList.contains('mobile-enabled');
+  if (isMobileEnabled) {
+    // Mobile widgets rely on CSS for full-viewport positioning
+    // Applying fallback styles would override the mobile-specific CSS
+    if (attempt === 0) {
+      try {
+        console.debug('[preview] skipping widget fallback styles for mobile-enabled container');
+      } catch (_error) {
+        /* ignore */
+      }
+    }
+    return;
+  }
+
   if (widgetFallbackTimer) {
     clearTimeout(widgetFallbackTimer);
     widgetFallbackTimer = null;
@@ -4203,21 +4268,44 @@ function updatePlayerOverlayLayout() {
     return;
   }
   
-  // playerWidgetRect contains coordinates relative to the iframe's content viewport (0,0 at top-left of iframe content)
-  // These coordinates come from getBoundingClientRect() called inside the iframe, which returns
-  // coordinates relative to the iframe's viewport (the content area)
-  // 
-  // To get widget position in main viewport:
-  // widget position in viewport = iframe position in viewport + widget position within iframe
-  // getBoundingClientRect() always returns coordinates relative to the viewport, accounting for
-  // all transforms and positioning contexts, so this calculation is correct.
-  const widgetTopViewport = iframeRect.top + playerWidgetRect.top;
-  const widgetLeftViewport = iframeRect.left + playerWidgetRect.left;
+  // Check if widget is mobile-enabled - mobile widgets need full viewport overlay
+  const doc = getPlayerDocument();
+  const isMobileEnabled = doc?.getElementById('_pi_surveyWidgetContainer')?.classList.contains('mobile-enabled') || false;
+
+  // For mobile-enabled widgets, overlay should cover full viewport
+  // For desktop widgets, overlay covers widget area with margins
+  let containerWidth, containerHeight, containerTop, containerLeft;
   
-  const clippedTop = widgetTopViewport - marginTop;
-  const clippedLeft = widgetLeftViewport - marginLeft;
-  const clippedWidth = playerWidgetRect.width + marginLeft + marginRight;
-  const clippedHeight = playerWidgetRect.height + marginTop + marginBottom;
+  if (isMobileEnabled) {
+    // Mobile widgets: overlay covers full viewport for transparent background
+    containerWidth = viewportWidth;
+    containerHeight = viewportHeight;
+    containerTop = 0;
+    containerLeft = 0;
+  } else {
+    // Desktop widgets: overlay covers widget area with margins
+    // playerWidgetRect contains coordinates relative to the iframe's content viewport (0,0 at top-left of iframe content)
+    // These coordinates come from getBoundingClientRect() called inside the iframe, which returns
+    // coordinates relative to the iframe's viewport (the content area)
+    // 
+    // To get widget position in main viewport:
+    // widget position in viewport = iframe position in viewport + widget position within iframe
+    // getBoundingClientRect() always returns coordinates relative to the viewport, accounting for
+    // all transforms and positioning contexts, so this calculation is correct.
+    const widgetTopViewport = iframeRect.top + playerWidgetRect.top;
+    const widgetLeftViewport = iframeRect.left + playerWidgetRect.left;
+    
+    const clippedTop = widgetTopViewport - marginTop;
+    const clippedLeft = widgetLeftViewport - marginLeft;
+    const clippedWidth = playerWidgetRect.width + marginLeft + marginRight;
+    const clippedHeight = playerWidgetRect.height + marginTop + marginBottom;
+
+    containerWidth = Math.max(1, Math.round(clippedWidth));
+    containerHeight = Math.max(1, Math.round(clippedHeight));
+    // overlayContainer is position:fixed, so positions are relative to viewport
+    containerTop = Math.round(clippedTop);
+    containerLeft = Math.round(clippedLeft);
+  }
 
   overlayContainer.style.visibility = 'visible';
   overlayContainer.style.opacity = '1';
@@ -4225,11 +4313,6 @@ function updatePlayerOverlayLayout() {
   overlayContainer.style.overflow = 'hidden';
   overlayContainer.style.clipPath = '';
   overlayContainer.style.webkitClipPath = '';
-  const containerWidth = Math.max(1, Math.round(clippedWidth));
-  const containerHeight = Math.max(1, Math.round(clippedHeight));
-  // overlayContainer is position:fixed, so positions are relative to viewport
-  const containerTop = Math.round(clippedTop);
-  const containerLeft = Math.round(clippedLeft);
 
   overlayContainer.style.width = `${containerWidth}px`;
   overlayContainer.style.height = `${containerHeight}px`;
