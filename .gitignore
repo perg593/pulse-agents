@@ -52,3 +52,6 @@ temp/
 legacy/*.zip
 legacy/**/*.zip
 
+# Debug artifacts (HAR files, network captures, etc.)
+debug-artifacts/
+
