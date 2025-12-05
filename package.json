@@ -6,7 +6,7 @@
     "build": "node scripts/build/preview-data.js && node scripts/build/demo-data.js",
     "build:widgets": "node scripts/build/generate-widgets.js",
     "test": "bash tests/run-all.sh",
-    "test:unit": "node tests/unit/config/config.test.js && node tests/unit/lib/errors.test.js && node tests/unit/lib/logger.test.js && node tests/unit/lib/validators.test.js && node tests/unit/proxy/url-rewriting.test.js",
+    "test:unit": "node tests/unit/config/config.test.js && node tests/unit/lib/errors.test.js && node tests/unit/lib/logger.test.js && node tests/unit/lib/validators.test.js && node tests/unit/proxy/url-rewriting.test.js && node tests/unit/proxy/race-condition.test.js",
     "test:integration": "node tests/integration/preview/bridge.contract.test.mjs && node tests/integration/preview/surveyBridge.integration.test.mjs",
     "test:preview": "node tests/integration/preview/*.test.mjs",
     "test:demo-proxy": "node tests/integration/preview/demo-proxy.test.mjs",
