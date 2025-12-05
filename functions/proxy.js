@@ -798,8 +798,10 @@ function injectUrlRewritingScript(html, target, proxyUrl) {
     };
     
     // Also intercept innerHTML/outerHTML for script tags (less common but possible)
-    const originalSetInnerHTML = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML')?.set;
-    if (originalSetInnerHTML) {
+    const innerHTMLDescriptor = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
+    if (innerHTMLDescriptor) {
+      const originalSetInnerHTML = innerHTMLDescriptor.set;
+      const originalGetInnerHTML = innerHTMLDescriptor.get;
       Object.defineProperty(Element.prototype, 'innerHTML', {
         set: function(value) {
           // Check if value contains script tags with src attributes
@@ -816,7 +818,8 @@ function injectUrlRewritingScript(html, target, proxyUrl) {
           return originalSetInnerHTML.call(this, value);
         },
         get: function() {
-          return originalSetInnerHTML ? this.innerHTML : '';
+          // Use the original getter to prevent infinite recursion
+          return originalGetInnerHTML ? originalGetInnerHTML.call(this) : '';
         },
         configurable: true
       });
