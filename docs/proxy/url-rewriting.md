@@ -170,9 +170,10 @@ The injected JavaScript:
 - Configurable via `PROXY_SENSITIVE_COOKIE_PATTERNS` environment variable (comma-separated)
 
 ### Secure Defaults
-- **Allowlist**: Default changed from `*` (all hosts) to empty (requires explicit configuration)
-- Users must set `BACKGROUND_PROXY_ALLOWLIST` environment variable
+- **Allowlist**: Default is `*` (all hosts) for ease of use
+- For production deployments, restrict by setting `BACKGROUND_PROXY_ALLOWLIST` environment variable
 - Example: `BACKGROUND_PROXY_ALLOWLIST=example.com,*.example.com`
+- Rate limiting and cookie sanitization provide additional security even with wildcard allowlist
 
 ### Production Logging
 - Debug logging is disabled in production by default

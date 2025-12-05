@@ -84,8 +84,9 @@
 - Configurable via `PROXY_SENSITIVE_COOKIE_PATTERNS` environment variable
 
 ### Secure Defaults
-- ✅ **Implemented**: Default allowlist changed from `*` (all) to empty (requires explicit configuration)
-- Users must set `BACKGROUND_PROXY_ALLOWLIST` environment variable
+- ✅ **Implemented**: Default allowlist remains `*` (all) for ease of use
+- Users can restrict by setting `BACKGROUND_PROXY_ALLOWLIST` environment variable for production
+- Rate limiting and cookie sanitization provide security even with wildcard allowlist
 
 ## Future Improvements
 

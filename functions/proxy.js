@@ -87,9 +87,9 @@ export async function onRequest(context) {
     return withCors(jsonResponse({ error: 'Missing url query parameter' }, { status: 400 }), request);
   }
 
-  // Require explicit allowlist configuration for security
-  // Default to empty array - users must set BACKGROUND_PROXY_ALLOWLIST environment variable
-  const allowlist = parseList(env.BACKGROUND_PROXY_ALLOWLIST, []);
+  // Default to wildcard (*) for ease of use - users can restrict via BACKGROUND_PROXY_ALLOWLIST
+  // For production deployments, consider setting BACKGROUND_PROXY_ALLOWLIST to specific domains
+  const allowlist = parseList(env.BACKGROUND_PROXY_ALLOWLIST, ['*']);
   const blocklist = parseList(env.BACKGROUND_PROXY_BLOCKLIST, ['localhost', '127.', '::1']);
 
   let target;
