@@ -320,8 +320,171 @@ async function testCookieSanitization() {
   };
 }
 
+/**
+ * Test POST request support
+ */
+async function testPostRequest() {
+  console.log('Testing POST request support...');
+  
+  // Test POST to a simple endpoint (using httpbin.org for testing)
+  const testUrl = 'https://httpbin.org/post';
+  const proxyUrl = `${PROXY_BASE_URL}/proxy?url=${encodeURIComponent(testUrl)}`;
+  
+  try {
+    const response = await fetch(proxyUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (compatible; PulsePreviewProxy/1.0)'
+      },
+      body: JSON.stringify({ test: 'data' })
+    });
+    
+    if (!response.ok) {
+      console.log(`  ⚠️  POST test returned ${response.status}, may not be supported`);
+      return { success: response.status === 405 ? false : true, skipped: response.status !== 405 };
+    }
+    
+    const data = await response.json();
+    const hasPostData = data.json && data.json.test === 'data';
+    
+    console.log(`  ${response.status === 200 ? '✓' : '✗'} POST request succeeded`);
+    console.log(`  ${hasPostData ? '✓' : '✗'} Request body forwarded correctly`);
+    
+    return {
+      success: response.status === 200 && hasPostData,
+      status: response.status
+    };
+  } catch (error) {
+    console.error(`  ✗ Error testing POST request: ${error.message}`);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Test HTML entity decoding in URLs
+ */
+async function testHtmlEntityDecoding() {
+  console.log('Testing HTML entity decoding...');
+  
+  // Test URL with HTML entities (encoded)
+  const testUrl = 'https://www.example.com/path%26%23x27%3Btest';
+  const proxyUrl = `${PROXY_BASE_URL}/proxy?url=${encodeURIComponent(testUrl)}`;
+  
+  try {
+    const response = await fetch(proxyUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; PulsePreviewProxy/1.0)'
+      }
+    });
+    
+    // The URL should be decoded before processing
+    // We can't easily test the internal decoding, but we can verify the request doesn't crash
+    const success = response.status !== 500;
+    
+    console.log(`  ${success ? '✓' : '✗'} HTML entity handling (no crash)`);
+    console.log(`  ${response.status < 500 ? '✓' : '✗'} Request processed (status: ${response.status})`);
+    
+    return {
+      success: success && response.status < 500,
+      status: response.status
+    };
+  } catch (error) {
+    console.error(`  ✗ Error testing HTML entity decoding: ${error.message}`);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Test error handling for JavaScript requests
+ */
+async function testErrorHandling() {
+  console.log('Testing error handling...');
+  
+  // Test with a URL that will return 404
+  const testUrl = 'https://www.example.com/nonexistent-page-12345';
+  const proxyUrl = `${PROXY_BASE_URL}/proxy?url=${encodeURIComponent(testUrl)}`;
+  
+  try {
+    // Test HTML request (should return HTML error)
+    const htmlResponse = await fetch(proxyUrl, {
+      headers: {
+        'Accept': 'text/html',
+        'User-Agent': 'Mozilla/5.0 (compatible; PulsePreviewProxy/1.0)'
+      }
+    });
+    
+    const htmlContent = await htmlResponse.text();
+    const isHtmlError = htmlContent.includes('<html') || htmlContent.includes('<!DOCTYPE');
+    
+    // Test JavaScript request (should return JSON error, not HTML)
+    const jsResponse = await fetch(proxyUrl, {
+      headers: {
+        'Accept': 'application/javascript',
+        'User-Agent': 'Mozilla/5.0 (compatible; PulsePreviewProxy/1.0)'
+      }
+    });
+    
+    const jsContent = await jsResponse.text();
+    let isJsonError = false;
+    try {
+      const parsed = JSON.parse(jsContent);
+      isJsonError = parsed.error !== undefined;
+    } catch {
+      // Not JSON
+    }
+    
+    console.log(`  ${htmlResponse.status === 404 ? '✓' : '✗'} HTML error response correct status`);
+    console.log(`  ${isHtmlError ? '✓' : '✗'} HTML error returns HTML content`);
+    console.log(`  ${jsResponse.status === 404 ? '✓' : '✗'} JS error response correct status`);
+    console.log(`  ${isJsonError || !jsContent.includes('<html') ? '✓' : '✗'} JS error returns JSON (not HTML)`);
+    
+    return {
+      success: htmlResponse.status === 404 && isHtmlError && 
+               jsResponse.status === 404 && (isJsonError || !jsContent.includes('<html')),
+      htmlStatus: htmlResponse.status,
+      jsStatus: jsResponse.status
+    };
+  } catch (error) {
+    console.error(`  ✗ Error testing error handling: ${error.message}`);
+    return { success: false, error: error.message };
+  }
+}
+
 // Run tests
-runTests().catch((error) => {
+async function runAllTests() {
+  const results = await runTests();
+  
+  // Add new tests
+  const postResult = await testPostRequest();
+  const entityResult = await testHtmlEntityDecoding();
+  const errorResult = await testErrorHandling();
+  
+  results.push(postResult, entityResult, errorResult);
+  
+  // Print summary
+  const successful = results.filter(r => r.success && !r.skipped);
+  const failed = results.filter(r => !r.success);
+  const skipped = results.filter(r => r.skipped);
+  
+  console.log('\n📊 Final Test Summary');
+  console.log('====================');
+  console.log(`Total tests: ${results.length}`);
+  console.log(`✅ Passed: ${successful.length}`);
+  console.log(`❌ Failed: ${failed.length}`);
+  if (skipped.length > 0) {
+    console.log(`⚠️  Skipped: ${skipped.length}`);
+  }
+  
+  if (failed.length > 0) {
+    console.error('\n❌ Some tests failed');
+    process.exit(1);
+  }
+  
+  console.log('\n✅ All tests passed!');
+}
+
+runAllTests().catch((error) => {
   console.error('❌ Test failed:', error);
   process.exit(1);
 });

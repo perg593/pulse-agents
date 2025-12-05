@@ -88,6 +88,40 @@
 - Users can restrict by setting `BACKGROUND_PROXY_ALLOWLIST` environment variable for production
 - Rate limiting and cookie sanitization provide security even with wildcard allowlist
 
+## HTTP Method Support
+
+### Supported Methods
+- ✅ **GET**: Fully supported (original implementation)
+- ✅ **POST**: Fully supported (added 2025-12-05)
+- ✅ **PUT**: Fully supported (added 2025-12-05)
+- ✅ **DELETE**: Fully supported (added 2025-12-05)
+- ✅ **OPTIONS**: Supported for CORS preflight requests
+
+### POST/PUT Request Body Handling
+- Request body is forwarded to upstream server
+- Content-Type header is preserved
+- Body is read as ArrayBuffer and forwarded as-is
+- Supports JSON, form data, and binary payloads
+
+### CORS Support
+- ✅ **Implemented**: Full CORS support for all HTTP methods
+- Preflight (OPTIONS) requests are handled automatically
+- CORS headers are forwarded from upstream when present
+- Credentials are allowed (`access-control-allow-credentials: true`)
+
+## Error Handling
+
+### Improved Error Responses
+- ✅ **Implemented**: JavaScript/JSON requests receive JSON error responses (not HTML)
+- ✅ **Implemented**: HTML requests receive HTML error pages
+- ✅ **Implemented**: Proper Content-Type detection for error responses
+- Prevents MIME type errors when JavaScript modules fail to load
+
+### HTML Entity Decoding
+- ✅ **Implemented**: HTML entities in URLs are decoded before processing
+- Supports common entities: `&#x27;`, `&#39;`, `&quot;`, `&amp;`, `&lt;`, `&gt;`, `&#x2F;`, `&#47;`
+- Prevents malformed URLs from causing 404 errors
+
 ## Future Improvements
 
 1. **Service Worker Interception**: Intercept `navigator.serviceWorker.register()` to proxy worker scripts

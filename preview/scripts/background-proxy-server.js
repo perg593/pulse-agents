@@ -17,6 +17,45 @@ try {
 }
 
 const app = express();
+
+// Cookie name for storing the target origin across navigations
+const PROXY_TARGET_COOKIE = '__pi_proxy_target';
+
+// Simple cookie parser middleware - needed to read proxy target cookie
+app.use((req, res, next) => {
+  const cookieHeader = req.headers.cookie || '';
+  req.cookies = {};
+  cookieHeader.split(';').forEach(cookie => {
+    const parts = cookie.split('=');
+    if (parts.length >= 2) {
+      const key = parts[0].trim();
+      const value = parts.slice(1).join('=').trim();
+      try {
+        req.cookies[key] = decodeURIComponent(value);
+      } catch (e) {
+        if (process.env.NODE_ENV !== 'production') {
+          console.warn('[Cookie Parser] Failed to decode cookie:', key, e.message);
+        }
+        req.cookies[key] = value;
+      }
+    }
+  });
+  next();
+});
+
+// Body parser middleware for POST/PUT requests
+// Order matters: more specific parsers first, then generic ones
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.text({ type: 'text/plain' })); // Fix: Handle text/plain content type
+// Use raw parser for other content types, but only if not already parsed
+app.use(express.raw({ type: (req) => {
+  const contentType = req.headers['content-type'] || '';
+  return !contentType.includes('application/json') && 
+         !contentType.includes('application/x-www-form-urlencoded') &&
+         !contentType.includes('text/plain');
+}, limit: '10mb' }));
+
 // Default to wildcard (*) for ease of use - users can restrict via BACKGROUND_PROXY_ALLOWLIST
 // For production deployments, consider setting BACKGROUND_PROXY_ALLOWLIST to specific domains
 const ALLOWLIST = (process.env.BACKGROUND_PROXY_ALLOWLIST || '*')
@@ -32,12 +71,18 @@ const DEFAULT_USER_AGENT =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 PulsePreviewProxy/1.0';
 
 // Rate limiting configuration
+// Increased for local development - modern SPAs make many requests for code-split chunks
 const proxyLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
-  max: Number.parseInt(process.env.PROXY_RATE_LIMIT_MAX || '100', 10), // Limit each IP to 100 requests per windowMs
+  max: Number.parseInt(process.env.PROXY_RATE_LIMIT_MAX || '500', 10), // Limit each IP to 500 requests per windowMs
   message: { error: 'Too many requests, please try again later.' },
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  skip: (req) => {
+    // Skip rate limiting for localhost requests in development
+    const isLocalhost = req.ip === '127.0.0.1' || req.ip === '::1' || req.ip === '::ffff:127.0.0.1';
+    return isLocalhost && process.env.NODE_ENV !== 'production';
+  }
 });
 
 const CONSENT_BANNER_SELECTORS = [
@@ -115,14 +160,7 @@ function resolveTarget(raw) {
   return url;
 }
 
-app.options('/proxy', (req, res) => {
-  const allowHeaders = req.headers['access-control-request-headers'] || 'Accept,Content-Type,User-Agent';
-  res.setHeader('access-control-allow-origin', '*');
-  res.setHeader('access-control-allow-headers', allowHeaders);
-  res.setHeader('access-control-allow-methods', 'GET,HEAD,OPTIONS');
-  res.setHeader('access-control-max-age', '86400');
-  res.status(204).end();
-});
+// Handle OPTIONS for CORS preflight (already handled above, but keeping for compatibility)
 
 app.get('/background-proxy/health', (req, res) => {
   res.json({
@@ -132,7 +170,21 @@ app.get('/background-proxy/health', (req, res) => {
   });
 });
 
-app.get('/proxy', proxyLimiter, async (req, res) => {
+// Handle OPTIONS for CORS preflight
+app.options('/proxy', (req, res) => {
+  const allowHeaders = req.headers['access-control-request-headers'] || 'Accept,Content-Type,User-Agent,Authorization';
+  res.setHeader('access-control-allow-origin', '*');
+  res.setHeader('access-control-allow-credentials', 'true');
+  res.setHeader('access-control-allow-headers', allowHeaders);
+  res.setHeader('access-control-allow-methods', 'GET,POST,PUT,DELETE,HEAD,OPTIONS');
+  res.setHeader('access-control-max-age', '86400');
+  res.setHeader('access-control-expose-headers', 'content-type,content-length,content-encoding');
+  res.status(204).send();
+});
+
+// Handle all HTTP methods for proxy
+['get', 'post', 'put', 'delete'].forEach(httpMethod => {
+  app[httpMethod]('/proxy', proxyLimiter, async (req, res) => {
   const targetRaw = req.query.url;
   if (!targetRaw || typeof targetRaw !== 'string') {
     res.status(400).json({ error: 'Missing url query parameter' });
@@ -149,6 +201,7 @@ app.get('/proxy', proxyLimiter, async (req, res) => {
 
   try {
     const incomingHeaders = req.headers;
+    const method = req.method.toUpperCase();
     const upstreamHeaders = {
       'User-Agent': incomingHeaders['user-agent'] || DEFAULT_USER_AGENT,
       Accept: incomingHeaders['accept'] || '*/*',
@@ -157,10 +210,21 @@ app.get('/proxy', proxyLimiter, async (req, res) => {
       Referer: incomingHeaders['referer'] || target.origin,
       Origin: target.origin,
       Cookie: sanitizeCookies(incomingHeaders.cookie),
-      'Sec-Fetch-Dest': incomingHeaders['sec-fetch-dest'] || 'document',
-      'Sec-Fetch-Mode': incomingHeaders['sec-fetch-mode'] || 'navigate',
+      'Sec-Fetch-Dest': incomingHeaders['sec-fetch-dest'] || (method === 'GET' ? 'document' : 'empty'),
+      'Sec-Fetch-Mode': incomingHeaders['sec-fetch-mode'] || (method === 'GET' ? 'navigate' : 'cors'),
       'Sec-Fetch-Site': incomingHeaders['sec-fetch-site'] || 'none'
     };
+    
+    // NOTE: Cookie for target origin is set ONLY for HTML responses (see below)
+    // to avoid third-party scripts (like js.pulseinsights.com) overwriting the correct target
+    
+    // Forward Content-Type for POST/PUT requests
+    if (['POST', 'PUT'].includes(method)) {
+      const contentType = incomingHeaders['content-type'];
+      if (contentType) {
+        upstreamHeaders['Content-Type'] = contentType;
+      }
+    }
 
     Object.keys(upstreamHeaders).forEach((key) => {
       if (upstreamHeaders[key] === undefined) {
@@ -168,18 +232,71 @@ app.get('/proxy', proxyLimiter, async (req, res) => {
       }
     });
 
-    const response = await fetch(target.toString(), {
+    const fetchOptions = {
+      method: method,
       headers: upstreamHeaders,
       redirect: 'follow'
-    });
+    };
+    
+    // Forward request body for POST/PUT requests
+    if (['POST', 'PUT'].includes(method)) {
+      const contentType = incomingHeaders['content-type'] || '';
+      
+      if (req.body !== undefined && req.body !== null) {
+        // Handle different body types based on Content-Type
+        if (contentType.includes('application/json')) {
+          // JSON body - stringify the parsed object
+          fetchOptions.body = JSON.stringify(req.body);
+        } else if (contentType.includes('application/x-www-form-urlencoded')) {
+          // Form data - convert back to URL-encoded string
+          if (typeof req.body === 'object') {
+            const params = new URLSearchParams();
+            Object.keys(req.body).forEach(key => {
+              params.append(key, req.body[key]);
+            });
+            fetchOptions.body = params.toString();
+          } else {
+            fetchOptions.body = req.body;
+          }
+        } else if (Buffer.isBuffer(req.body)) {
+          // Raw body (Buffer) - use directly
+          fetchOptions.body = req.body;
+        } else if (typeof req.body === 'string') {
+          // String body - use directly
+          fetchOptions.body = req.body;
+        } else {
+          // Fallback: try to stringify
+          fetchOptions.body = JSON.stringify(req.body);
+        }
+      }
+    }
+
+    const response = await fetch(target.toString(), fetchOptions);
 
     const contentType = response.headers.get('content-type') || '';
     res.status(response.status);
-    const allowHeaders = req.headers['access-control-request-headers'] || 'Accept,Content-Type,User-Agent';
+    const allowHeaders = req.headers['access-control-request-headers'] || 'Accept,Content-Type,User-Agent,Authorization';
     res.setHeader('access-control-allow-origin', '*');
+    res.setHeader('access-control-allow-credentials', 'true');
     res.setHeader('access-control-allow-headers', allowHeaders);
-    res.setHeader('access-control-allow-methods', 'GET,HEAD,OPTIONS');
-    res.setHeader('access-control-expose-headers', 'cache-control,expires,pragma,content-type');
+    res.setHeader('access-control-allow-methods', 'GET,POST,PUT,DELETE,HEAD,OPTIONS');
+    res.setHeader('access-control-expose-headers', 'content-type,content-length,content-encoding');
+    
+    // Forward CORS headers from upstream if present
+    const corsHeaders = [
+      'access-control-allow-origin',
+      'access-control-allow-credentials',
+      'access-control-expose-headers',
+      'access-control-allow-methods',
+      'access-control-allow-headers'
+    ];
+    corsHeaders.forEach(header => {
+      const value = response.headers.get(header);
+      if (value) {
+        res.setHeader(header, value);
+      }
+    });
+    
     if (contentType) {
       res.setHeader('content-type', contentType);
     }
@@ -194,12 +311,47 @@ app.get('/proxy', proxyLimiter, async (req, res) => {
         res.setHeader(header, value);
       }
     });
+    
+    // Handle error responses - don't return HTML for non-HTML requests
+    if (response.status >= 400) {
+      const isHtmlRequest = contentType.includes('text/html') || 
+                           req.headers.accept?.includes('text/html');
+      const isJsRequest = contentType.includes('application/javascript') ||
+                         contentType.includes('text/javascript') ||
+                         contentType.includes('application/json') ||
+                         req.headers.accept?.includes('application/javascript');
+      
+      // For non-HTML error responses, return JSON error instead of HTML
+      if (!isHtmlRequest && response.status >= 400) {
+        const errorBody = await response.text().catch(() => '');
+        // If upstream returned HTML error page for JS/JSON request, return JSON instead
+        if (errorBody.trim().startsWith('<!') || errorBody.trim().startsWith('<html')) {
+          res.status(response.status).json({
+            error: `Upstream error: ${response.status}`,
+            status: response.status,
+            url: target.toString()
+          });
+          return;
+        }
+        // Otherwise return the original error response
+        res.send(errorBody);
+        return;
+      }
+    }
 
     if (contentType.includes('text/html')) {
+      // Store the target origin in a cookie ONLY for HTML responses
+      // This prevents third-party scripts (like js.pulseinsights.com) from overwriting the correct target
+      const cookieValue = `${PROXY_TARGET_COOKIE}=${encodeURIComponent(target.origin)}; Path=/; Max-Age=3600; SameSite=Lax`;
+      res.setHeader('Set-Cookie', cookieValue);
+      console.log(`[Proxy] Setting target origin cookie for HTML response: ${target.origin}`);
+      
       let body = await response.text();
       body = ensureBaseHref(body, target);
       // Rewrite resource URLs to go through proxy
       body = rewriteResourceUrls(body, target, req);
+      // Inject framework error handler FIRST (before URL rewriting script)
+      body = injectFrameworkErrorHandler(body);
       body = injectUrlRewritingScript(body, target, req);
       body = injectConsentCleanup(body);
       
@@ -217,6 +369,252 @@ app.get('/proxy', proxyLimiter, async (req, res) => {
     console.error('Proxy error', target.toString(), error.message);
     res.status(502).json({
       error: `Failed to fetch ${target.toString()}: ${error.message}`
+    });
+  }
+  });
+});
+
+/**
+ * Catch-all handler for requests that don't go through /proxy?url=
+ * This handles dynamic imports and other relative resource requests.
+ * Attempts to infer the target origin from:
+ * 1. The Referer header (proxy URL pattern)
+ * 2. The __pi_proxy_target cookie (set by initial proxy request)
+ */
+app.use(async (req, res, next) => {
+  // Skip if this is already a proxy request or a known route
+  if (req.path === '/proxy' || req.path === '/background-proxy/health') {
+    return next();
+  }
+  
+  // Skip if path looks like a local file request (for development)
+  if (req.path.startsWith('/preview/') || req.path.startsWith('/node_modules/')) {
+    return next();
+  }
+  
+  // Try to extract target origin from Referer header
+  const referer = req.headers.referer || req.headers.referrer || '';
+  let targetOrigin = null;
+  let originSource = null;
+  
+  // Method 1: Try to extract from proxy URL in referer
+  const proxyUrlMatch = referer.match(/\/proxy\?url=([^&]+)/);
+  if (proxyUrlMatch) {
+    try {
+      const decodedUrl = decodeURIComponent(proxyUrlMatch[1]);
+      const refererUrl = new URL(decodedUrl);
+      targetOrigin = refererUrl.origin;
+      originSource = 'referer-proxy-url';
+    } catch (e) {
+      // Ignore parsing errors
+    }
+  }
+  
+  // Method 2: Try URL-encoded format in referer
+  if (!targetOrigin) {
+    const encodedMatch = referer.match(/proxy%3Furl%3D([^&]+)/i);
+    if (encodedMatch) {
+      try {
+        const decoded = decodeURIComponent(decodeURIComponent(encodedMatch[1]));
+        const refererUrl = new URL(decoded);
+        targetOrigin = refererUrl.origin;
+        originSource = 'referer-encoded-proxy-url';
+      } catch (e) {
+        // Ignore parsing errors
+      }
+    }
+  }
+  
+  // Method 3: Check the __pi_proxy_target cookie (set by initial proxy request)
+  // This handles the case where client-side navigation changed the URL
+  if (!targetOrigin && req.cookies && req.cookies[PROXY_TARGET_COOKIE]) {
+    try {
+      const cookieOrigin = req.cookies[PROXY_TARGET_COOKIE];
+      // Validate it's a proper URL
+      new URL(cookieOrigin);
+      targetOrigin = cookieOrigin;
+      originSource = 'cookie';
+      console.log(`[Catch-all] Using target origin from cookie: ${targetOrigin}`);
+    } catch (e) {
+      console.log(`[Catch-all] Invalid origin in cookie: ${req.cookies[PROXY_TARGET_COOKIE]}`);
+    }
+  }
+  
+  // If we couldn't determine the target origin, return 404
+  if (!targetOrigin) {
+    console.log(`[Catch-all] No target origin for ${req.method} ${req.path} (referer: ${referer.substring(0, 100)})`);
+    res.status(404).json({ 
+      error: 'Resource not found',
+      path: req.path,
+      hint: 'Could not determine target origin from referer or cookie'
+    });
+    return;
+  }
+  
+  console.log(`[Catch-all] Target origin: ${targetOrigin} (source: ${originSource}) for ${req.path}`);
+  
+  // Construct the full target URL
+  // Special handling for Nuxt.js chunks: files like /DFAEgFtp.js should be /_nuxt/DFAEgFtp.js
+  let targetPath = req.path;
+  
+  // Detect Nuxt.js chunk paths (short hash filenames at root level)
+  // These are typically 8-12 character alphanumeric strings with optional underscore/dash
+  const nuxtChunkPattern = /^\/[A-Za-z0-9_-]{6,16}\.(js|css|json)$/;
+  const nuxtPathPattern = /^\/_nuxt\//;
+  
+  if (nuxtChunkPattern.test(targetPath) && !nuxtPathPattern.test(targetPath)) {
+    // This looks like a Nuxt chunk at root - prepend /_nuxt/
+    targetPath = '/_nuxt' + targetPath;
+    console.log(`[Catch-all] Detected Nuxt chunk, rewriting path: ${req.path} -> ${targetPath}`);
+  }
+  
+  // Also handle CSS files that might be chunks
+  const cssChunkPattern = /^\/[A-Za-z0-9_.-]+\.(css)$/;
+  if (cssChunkPattern.test(req.path) && !req.path.startsWith('/_nuxt/')) {
+    // Try /_nuxt/ path first for CSS
+    targetPath = '/_nuxt' + req.path;
+    console.log(`[Catch-all] Detected CSS chunk, rewriting path: ${req.path} -> ${targetPath}`);
+  }
+  
+  // Handle other common paths
+  if (req.path.startsWith('/builds/')) {
+    // Nuxt builds should be under /_nuxt/
+    targetPath = '/_nuxt' + req.path;
+    console.log(`[Catch-all] Detected Nuxt builds path, rewriting: ${req.path} -> ${targetPath}`);
+  }
+  
+  // Handle CDN-cgi paths (Cloudflare)
+  if (req.path.startsWith('/cdn-cgi/')) {
+    // These stay at root - no rewriting needed
+    console.log(`[Catch-all] Detected Cloudflare CDN path: ${req.path}`);
+  }
+  
+  // Handle API paths - keep as-is (at root)
+  if (req.path.startsWith('/api/')) {
+    console.log(`[Catch-all] Detected API path: ${req.path}`);
+  }
+  
+  const targetUrl = new URL(targetPath, targetOrigin);
+  // Preserve query string
+  if (req.query && Object.keys(req.query).length > 0) {
+    Object.keys(req.query).forEach(key => {
+      targetUrl.searchParams.set(key, req.query[key]);
+    });
+  }
+  
+  console.log(`[Catch-all] Proxying ${req.method} ${req.path} -> ${targetUrl.toString()}`);
+  
+  try {
+    // Check if target is allowed
+    if (!isHostAllowed(targetUrl.hostname)) {
+      res.status(403).json({ error: `Host not allowed: ${targetUrl.hostname}` });
+      return;
+    }
+    
+    const upstreamHeaders = {
+      'User-Agent': req.headers['user-agent'] || DEFAULT_USER_AGENT,
+      Accept: req.headers['accept'] || '*/*',
+      'Accept-Language': req.headers['accept-language'] || 'en-US,en;q=0.9',
+      'Accept-Encoding': req.headers['accept-encoding'] || 'gzip, deflate, br',
+      Referer: targetOrigin,
+      Origin: targetOrigin,
+      Cookie: sanitizeCookies(req.headers.cookie)
+    };
+    
+    // Forward Content-Type for POST/PUT requests
+    if (['POST', 'PUT'].includes(req.method)) {
+      if (req.headers['content-type']) {
+        upstreamHeaders['Content-Type'] = req.headers['content-type'];
+      }
+    }
+    
+    Object.keys(upstreamHeaders).forEach((key) => {
+      if (upstreamHeaders[key] === undefined) {
+        delete upstreamHeaders[key];
+      }
+    });
+    
+    const fetchOptions = {
+      method: req.method,
+      headers: upstreamHeaders,
+      redirect: 'follow'
+    };
+    
+    // Forward body for POST/PUT
+    if (['POST', 'PUT'].includes(req.method) && req.body) {
+      const contentType = req.headers['content-type'] || '';
+      if (contentType.includes('application/json')) {
+        fetchOptions.body = JSON.stringify(req.body);
+      } else if (contentType.includes('application/x-www-form-urlencoded')) {
+        // Fix: Handle form-urlencoded data (was missing from catch-all route)
+        if (typeof req.body === 'object') {
+          const params = new URLSearchParams();
+          Object.keys(req.body).forEach(key => {
+            params.append(key, req.body[key]);
+          });
+          fetchOptions.body = params.toString();
+        } else {
+          fetchOptions.body = req.body;
+        }
+      } else if (Buffer.isBuffer(req.body)) {
+        fetchOptions.body = req.body;
+      } else if (typeof req.body === 'string') {
+        fetchOptions.body = req.body;
+      }
+    }
+    
+    const response = await fetch(targetUrl.toString(), fetchOptions);
+    
+    const contentType = response.headers.get('content-type') || '';
+    res.status(response.status);
+    
+    // Set CORS headers
+    res.setHeader('access-control-allow-origin', '*');
+    res.setHeader('access-control-allow-credentials', 'true');
+    res.setHeader('access-control-allow-methods', 'GET,POST,PUT,DELETE,HEAD,OPTIONS');
+    
+    // Forward content type
+    if (contentType) {
+      res.setHeader('content-type', contentType);
+    }
+    
+    // Remove frame-blocking headers
+    removeFrameBlockingHeaders(response, res);
+    
+    // Handle based on content type
+    if (contentType.includes('text/html')) {
+      let body = await response.text();
+      body = ensureBaseHref(body, targetUrl);
+      body = rewriteResourceUrls(body, targetUrl, req);
+      // Inject framework error handler FIRST (before URL rewriting script)
+      body = injectFrameworkErrorHandler(body);
+      body = injectUrlRewritingScript(body, targetUrl, req);
+      body = injectConsentCleanup(body);
+      res.send(body);
+    } else if (contentType.includes('javascript') || contentType.includes('text/css')) {
+      // For JS and CSS, we might need to rewrite URLs inside them
+      let body = await response.text();
+      // Simple URL rewriting for JS/CSS - replace absolute URLs to target origin
+      // This is a best-effort approach for dynamic imports
+      const protocol = req.protocol || 'http';
+      const host = req.get('host') || 'localhost:3100';
+      const proxyBase = `${protocol}://${host}`;
+      
+      // Rewrite absolute URLs in the file
+      body = body.replace(
+        new RegExp(`(["'\`])${targetOrigin.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(/[^"'\`\\s]*)`, 'g'),
+        (match, quote, path) => `${quote}${proxyBase}/proxy?url=${encodeURIComponent(targetOrigin + path)}`
+      );
+      
+      res.send(body);
+    } else {
+      const buffer = Buffer.from(await response.arrayBuffer());
+      res.send(buffer);
+    }
+  } catch (error) {
+    console.error('[Catch-all] Error:', error.message);
+    res.status(502).json({
+      error: `Failed to fetch ${targetUrl.toString()}: ${error.message}`
     });
   }
 });
@@ -379,10 +777,30 @@ function rewriteResourceUrls(html, target, req) {
  * @param {string} proxyBase - The base URL of the proxy
  * @returns {string} The rewritten URL (or original if no rewrite needed)
  */
+/**
+ * Decodes HTML entities in a string
+ * @param {string} str - String potentially containing HTML entities
+ * @returns {string} Decoded string
+ */
+function decodeHtmlEntities(str) {
+  if (typeof str !== 'string') return str;
+  return str
+    .replace(/&#x27;/g, "'")
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&#x2F;/g, '/')
+    .replace(/&#47;/g, '/');
+}
+
 function rewriteUrl(url, targetOrigin, proxyBase) {
   if (!url || typeof url !== 'string') return url;
 
-  const trimmed = url.trim();
+  // Decode HTML entities before processing
+  const decoded = decodeHtmlEntities(url);
+  const trimmed = decoded.trim();
   if (!trimmed) return url;
 
   // Skip data URLs, blob URLs, and javascript: URLs
@@ -469,41 +887,63 @@ function injectUrlRewritingScript(html, target, req) {
 (function() {
   'use strict';
   
+  // Prevent multiple installations - guard against race conditions
+  // MUST be checked FIRST, before ANY code execution, including try block
+  // Use atomic check-and-set to prevent race conditions
+  if (window.__PI_PROXY_URL_REWRITING_INSTALLED) {
+    console.log('[PI-Proxy] URL rewriting script already installed, skipping duplicate');
+    return;
+  }
+  // Set guard immediately to prevent concurrent execution
+  window.__PI_PROXY_URL_REWRITING_INSTALLED = true;
+  
+  try {
   // Conditional logging based on environment
   const DEBUG = ${JSON.stringify(isDebug)};
   function log(...args) {
     if (DEBUG) console.log('[PI-Proxy]', ...args);
   }
   
-  // Prevent multiple installations - guard against race conditions
-  if (window.__PI_PROXY_URL_REWRITING_INSTALLED) {
-    log('URL rewriting script already installed, skipping');
-    return;
-  }
-  window.__PI_PROXY_URL_REWRITING_INSTALLED = true;
-  
   // Debug logging
   log('URL rewriting script starting...');
   
-  const PROXY_BASE = ${JSON.stringify(proxyBase)};
-  const TARGET_ORIGIN = ${JSON.stringify(targetOrigin)};
+  // Validate URLs before using them
+  const PROXY_BASE_RAW = ${JSON.stringify(proxyBase)};
+  const TARGET_ORIGIN_RAW = ${JSON.stringify(targetOrigin)};
+  
+  if (!PROXY_BASE_RAW || !TARGET_ORIGIN_RAW) {
+    console.error('[PI-Proxy] Missing required URLs for script injection');
+    return;
+  }
+  
+  // Validate URLs are valid before using
+  try {
+    new URL(PROXY_BASE_RAW);
+    new URL(TARGET_ORIGIN_RAW);
+  } catch (e) {
+    console.error('[PI-Proxy] Invalid URLs in script injection:', e);
+    return;
+  }
+  
+  const PROXY_BASE = PROXY_BASE_RAW;
+  const TARGET_ORIGIN = TARGET_ORIGIN_RAW;
   
   // Check if we're on a proxied page - use multiple detection methods
   const currentHref = (document.location && document.location.href) || (window.location && window.location.href) || '';
   const referrer = document.referrer || '';
   const proxyOrigin = PROXY_BASE.replace(/\\/$/, '');
-  const currentPageOrigin = (document.location && document.location.origin) || (window.location && window.location.origin) || '';
+  const detectedPageOrigin = (document.location && document.location.origin) || (window.location && window.location.origin) || '';
   
   const isProxied = currentHref.includes('/proxy?url=') ||
                     currentHref.includes('proxy%3Furl%3D') ||
                     referrer.includes('/proxy?url=') ||
-                    currentPageOrigin === proxyOrigin ||
-                    (currentPageOrigin && proxyOrigin && currentPageOrigin.includes(proxyOrigin.split('://')[1]?.split(':')[0]));
+                    detectedPageOrigin === proxyOrigin ||
+                    (detectedPageOrigin && proxyOrigin && detectedPageOrigin.includes(proxyOrigin.split('://')[1]?.split(':')[0]));
   
   log('Detection check:', {
     currentHref: currentHref.substring(0, 100),
     referrer: referrer.substring(0, 100),
-    currentPageOrigin,
+    detectedPageOrigin,
     proxyOrigin,
     isProxied
   });
@@ -517,11 +957,27 @@ function injectUrlRewritingScript(html, target, req) {
   
   log('URL rewriting script active');
   
+  // HTML entity decoding function
+  function decodeHtmlEntities(str) {
+    if (typeof str !== 'string') return str;
+    return str
+      .replace(/&#x27;/g, "'")
+      .replace(/&#39;/g, "'")
+      .replace(/&quot;/g, '"')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&#x2F;/g, '/')
+      .replace(/&#47;/g, '/');
+  }
+  
   // URL rewriting function (matches server-side rewriteUrl logic)
   function rewriteUrlForJs(url, baseOrigin) {
     if (!url || typeof url !== 'string') return url;
     
-    const trimmed = url.trim();
+    // Decode HTML entities before processing
+    const decoded = decodeHtmlEntities(url);
+    const trimmed = decoded.trim();
     if (!trimmed) return url;
     
     // Skip data URLs, blob URLs, and javascript: URLs
@@ -576,7 +1032,7 @@ function injectUrlRewritingScript(html, target, req) {
       // Try multiple methods to get the original target URL
       const locationHref = (document.location && document.location.href) || (window.location && window.location.href) || '';
       
-      // Method 1: Extract from proxy URL parameter
+      // Method 1: Extract from proxy URL parameter in current URL
       let match = locationHref.match(/proxy[?&]url=([^&]+)/);
       if (!match) {
         // Try URL-encoded version
@@ -585,34 +1041,57 @@ function injectUrlRewritingScript(html, target, req) {
       if (match) {
         const decoded = decodeURIComponent(match[1]);
         const url = new URL(decoded);
-        const pathname = url.pathname.replace(/\\/[^/]*$/, '');
-        const baseOrigin = url.origin + (pathname || '/');
+        const baseOrigin = url.origin;
         log('Extracted origin from proxy URL:', baseOrigin);
+        console.log('[PI-Proxy] getCurrentOrigin: Method 1 (proxy URL) ->', baseOrigin);
+        // Store in cookie for future requests
+        document.cookie = '__pi_proxy_target=' + encodeURIComponent(baseOrigin) + '; path=/; max-age=3600; SameSite=Lax';
         return baseOrigin;
       }
       
-      // Method 2: Use document.baseURI if available
-      if (document.baseURI) {
+      // Method 2: Check cookie (set by proxy server or previous page load)
+      // This is crucial for pages after client-side navigation
+      const cookieMatch = document.cookie.match(/(?:^|;)\\s*__pi_proxy_target=([^;]+)/);
+      if (cookieMatch) {
         try {
-          const baseUrl = new URL(document.baseURI);
-          const baseOrigin = baseUrl.origin + baseUrl.pathname.replace(/\\/[^/]*$/, '');
-          log('Using document.baseURI:', baseOrigin);
-          return baseOrigin;
+          const cookieOrigin = decodeURIComponent(cookieMatch[1]);
+          // Validate it's a proper URL
+          new URL(cookieOrigin);
+          log('Using target origin from cookie:', cookieOrigin);
+          console.log('[PI-Proxy] getCurrentOrigin: Method 2 (cookie) ->', cookieOrigin);
+          return cookieOrigin;
         } catch (e) {
-          // Ignore
+          log('Invalid origin in cookie');
         }
       }
       
       // Method 3: Use referrer if it contains the target origin
       if (document.referrer) {
         try {
-          const referrerUrl = new URL(document.referrer);
-          const match = referrerUrl.searchParams.get('url');
-          if (match) {
-            const decoded = decodeURIComponent(match);
+          // Check if referrer is a proxy URL
+          const referrerMatch = document.referrer.match(/proxy[?&]url=([^&]+)/);
+          if (referrerMatch) {
+            const decoded = decodeURIComponent(referrerMatch[1]);
             const url = new URL(decoded);
-            const baseOrigin = url.origin + url.pathname.replace(/\\/[^/]*$/, '');
-            log('Extracted origin from referrer:', baseOrigin);
+            const baseOrigin = url.origin;
+            log('Extracted origin from referrer proxy URL:', baseOrigin);
+            console.log('[PI-Proxy] getCurrentOrigin: Method 3a (referrer proxy URL) ->', baseOrigin);
+            // Store in cookie for future requests
+            document.cookie = '__pi_proxy_target=' + encodeURIComponent(baseOrigin) + '; path=/; max-age=3600; SameSite=Lax';
+            return baseOrigin;
+          }
+          
+          // Also try using searchParams
+          const referrerUrl = new URL(document.referrer);
+          const urlParam = referrerUrl.searchParams.get('url');
+          if (urlParam) {
+            const decoded = decodeURIComponent(urlParam);
+            const url = new URL(decoded);
+            const baseOrigin = url.origin;
+            log('Extracted origin from referrer searchParams:', baseOrigin);
+            console.log('[PI-Proxy] getCurrentOrigin: Method 3b (referrer searchParams) ->', baseOrigin);
+            // Store in cookie for future requests
+            document.cookie = '__pi_proxy_target=' + encodeURIComponent(baseOrigin) + '; path=/; max-age=3600; SameSite=Lax';
             return baseOrigin;
           }
         } catch (e) {
@@ -620,20 +1099,38 @@ function injectUrlRewritingScript(html, target, req) {
         }
       }
       
-      // Fallback: Use TARGET_ORIGIN (injected constant) instead of current origin
+      // Method 4: Use document.baseURI if it's set to the target origin (not proxy origin)
+      if (document.baseURI) {
+        try {
+          const baseUrl = new URL(document.baseURI);
+          // Only use baseURI if it's NOT the proxy origin
+          if (baseUrl.origin !== proxyOrigin && baseUrl.origin !== detectedPageOrigin) {
+            const baseOrigin = baseUrl.origin;
+            log('Using document.baseURI (non-proxy origin):', baseOrigin);
+            console.log('[PI-Proxy] getCurrentOrigin: Method 4 (baseURI) ->', baseOrigin);
+            return baseOrigin;
+          }
+        } catch (e) {
+          // Ignore
+        }
+      }
+      
+      // Method 5: Use TARGET_ORIGIN (injected constant) instead of current origin
       // Current origin would be the proxy origin, which is wrong for relative URL resolution
       if (TARGET_ORIGIN) {
-        const baseOrigin = TARGET_ORIGIN.endsWith('/') ? TARGET_ORIGIN : TARGET_ORIGIN + '/';
+        const baseOrigin = TARGET_ORIGIN;
         log('Using TARGET_ORIGIN fallback:', baseOrigin);
+        console.log('[PI-Proxy] getCurrentOrigin: Method 5 (TARGET_ORIGIN constant) ->', baseOrigin);
+        // Store in cookie for future requests
+        document.cookie = '__pi_proxy_target=' + encodeURIComponent(baseOrigin) + '; path=/; max-age=3600; SameSite=Lax';
         return baseOrigin;
       }
       
-      // Last resort: Use current page origin (should rarely happen)
+      // Last resort: Use current page origin (should rarely happen and may not work correctly)
       const currentPageOrigin = (document.location && document.location.origin) || (window.location && window.location.origin) || '';
-      const currentPath = (document.location && document.location.pathname) || (window.location && window.location.pathname) || '';
-      const baseOrigin = currentPageOrigin + currentPath.replace(/\\/[^/]*$/, '');
-      log('Using current page origin fallback (may be incorrect):', baseOrigin);
-      return baseOrigin;
+      log('Using current page origin fallback (may be incorrect):', currentPageOrigin);
+      console.log('[PI-Proxy] getCurrentOrigin: Method 6 (current page fallback - WARNING) ->', currentPageOrigin);
+      return currentPageOrigin;
     } catch (e) {
       console.error('[PI-Proxy] Error getting current origin:', e);
       // Final fallback
@@ -641,25 +1138,40 @@ function injectUrlRewritingScript(html, target, req) {
     }
   }
   
-  const currentOrigin = getCurrentOrigin();
-  log('Current origin for URL resolution:', currentOrigin);
+  // Get current origin for URL resolution
+  // Store in window object to avoid any variable declaration conflicts
+  window.__PI_PROXY_CURRENT_ORIGIN = getCurrentOrigin();
+  log('Current origin for URL resolution:', window.__PI_PROXY_CURRENT_ORIGIN);
+  console.log('[PI-Proxy] getCurrentOrigin() returned:', window.__PI_PROXY_CURRENT_ORIGIN);
+  
+  // Verify origin is set correctly
+  if (!window.__PI_PROXY_CURRENT_ORIGIN) {
+    console.error('[PI-Proxy] Failed to get current origin, URL rewriting may not work correctly');
+  }
+  
+  // Helper to get the stored origin (avoids closure issues)
+  function getStoredOrigin() {
+    return window.__PI_PROXY_CURRENT_ORIGIN;
+  }
   
   // Intercept fetch()
   if (typeof window.fetch !== 'undefined') {
     const originalFetch = window.fetch;
     window.fetch = function(input, init) {
+      const origin = getStoredOrigin();
       // Handle string URL
       if (typeof input === 'string') {
-        const rewritten = rewriteUrlForJs(input, currentOrigin);
+        const rewritten = rewriteUrlForJs(input, origin);
         if (rewritten !== input) {
           log('fetch() rewritten:', input, '->', rewritten);
+          console.log('[PI-Proxy] fetch() URL rewritten:', input, '->', rewritten);
         }
         return originalFetch.call(this, rewritten, init);
       }
       // Handle Request object
       if (input && typeof input === 'object') {
         if (input instanceof Request) {
-          const rewritten = rewriteUrlForJs(input.url, currentOrigin);
+          const rewritten = rewriteUrlForJs(input.url, origin);
           if (rewritten !== input.url) {
             log('fetch(Request) rewritten:', input.url, '->', rewritten);
             // Clone the Request with the new URL to preserve headers, body, method, etc.
@@ -669,7 +1181,7 @@ function injectUrlRewritingScript(html, target, req) {
           return originalFetch.call(this, input, init);
         } else if (input.url) {
           // Object with url property
-          const rewritten = rewriteUrlForJs(input.url, currentOrigin);
+          const rewritten = rewriteUrlForJs(input.url, origin);
           if (rewritten !== input.url) {
             log('fetch(object) rewritten:', input.url, '->', rewritten);
           }
@@ -687,9 +1199,11 @@ function injectUrlRewritingScript(html, target, req) {
     // Save the original open method BEFORE overwriting it to prevent infinite recursion
     const originalOpen = XMLHttpRequest.prototype.open;
     XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
-      const rewritten = rewriteUrlForJs(url, currentOrigin);
+      const origin = getStoredOrigin();
+      const rewritten = rewriteUrlForJs(url, origin);
       if (rewritten !== url) {
         log('XHR.open() rewritten:', url, '->', rewritten);
+        console.log('[PI-Proxy] XHR.open() URL rewritten:', url, '->', rewritten);
       }
       return originalOpen.call(this, method, rewritten, async, user, password);
     };
@@ -703,7 +1217,8 @@ function injectUrlRewritingScript(html, target, req) {
     if (originalSrcDescriptor && originalSrcDescriptor.set) {
       Object.defineProperty(HTMLScriptElement.prototype, 'src', {
         set: function(value) {
-          const rewritten = rewriteUrlForJs(value, currentOrigin);
+          const origin = getStoredOrigin();
+          const rewritten = rewriteUrlForJs(value, origin);
           if (rewritten !== value) {
             log('HTMLScriptElement.prototype.src rewritten:', value, '->', rewritten);
           }
@@ -722,7 +1237,8 @@ function injectUrlRewritingScript(html, target, req) {
     const originalSetAttribute = HTMLScriptElement.prototype.setAttribute;
     HTMLScriptElement.prototype.setAttribute = function(name, value) {
       if (name.toLowerCase() === 'src' && typeof value === 'string') {
-        const rewritten = rewriteUrlForJs(value, currentOrigin);
+        const origin = getStoredOrigin();
+        const rewritten = rewriteUrlForJs(value, origin);
         if (rewritten !== value) {
           log('HTMLScriptElement.prototype.setAttribute("src") rewritten:', value, '->', rewritten);
         }
@@ -739,7 +1255,8 @@ function injectUrlRewritingScript(html, target, req) {
     if (originalHrefDescriptor && originalHrefDescriptor.set) {
       Object.defineProperty(HTMLLinkElement.prototype, 'href', {
         set: function(value) {
-          const rewritten = rewriteUrlForJs(value, currentOrigin);
+          const origin = getStoredOrigin();
+          const rewritten = rewriteUrlForJs(value, origin);
           if (rewritten !== value) {
             log('HTMLLinkElement.prototype.href rewritten:', value, '->', rewritten);
           }
@@ -761,7 +1278,8 @@ function injectUrlRewritingScript(html, target, req) {
     if (originalSrcDescriptor && originalSrcDescriptor.set) {
       Object.defineProperty(HTMLIFrameElement.prototype, 'src', {
         set: function(value) {
-          const rewritten = rewriteUrlForJs(value, currentOrigin);
+          const origin = getStoredOrigin();
+          const rewritten = rewriteUrlForJs(value, origin);
           if (rewritten !== value) {
             log('HTMLIFrameElement.prototype.src rewritten:', value, '->', rewritten);
           }
@@ -783,7 +1301,8 @@ function injectUrlRewritingScript(html, target, req) {
     if (originalSrcDescriptor && originalSrcDescriptor.set) {
       Object.defineProperty(HTMLImageElement.prototype, 'src', {
         set: function(value) {
-          const rewritten = rewriteUrlForJs(value, currentOrigin);
+          const origin = getStoredOrigin();
+          const rewritten = rewriteUrlForJs(value, origin);
           if (rewritten !== value) {
             log('HTMLImageElement.prototype.src rewritten:', value, '->', rewritten);
           }
@@ -814,7 +1333,8 @@ function injectUrlRewritingScript(html, target, req) {
         const originalSetSrc = originalSrcDescriptor.set;
         Object.defineProperty(img, 'src', {
           set: function(value) {
-            const rewritten = rewriteUrlForJs(value, currentOrigin);
+            const origin = getStoredOrigin();
+            const rewritten = rewriteUrlForJs(value, origin);
             if (rewritten !== value) {
               log('Image() constructor src rewritten:', value, '->', rewritten);
             }
@@ -839,8 +1359,9 @@ function injectUrlRewritingScript(html, target, req) {
   if (typeof window !== 'undefined' && window.Audio) {
     const OriginalAudio = window.Audio;
     window.Audio = function(...args) {
+      const origin = getStoredOrigin();
       const audio = args.length > 0 && typeof args[0] === 'string' 
-        ? new OriginalAudio(rewriteUrlForJs(args[0], currentOrigin))
+        ? new OriginalAudio(rewriteUrlForJs(args[0], origin))
         : new OriginalAudio(...args);
       // Intercept src property after construction
       const originalSrcDescriptor = Object.getOwnPropertyDescriptor(HTMLAudioElement.prototype, 'src');
@@ -848,7 +1369,8 @@ function injectUrlRewritingScript(html, target, req) {
         const originalSetSrc = originalSrcDescriptor.set;
         Object.defineProperty(audio, 'src', {
           set: function(value) {
-            const rewritten = rewriteUrlForJs(value, currentOrigin);
+            const innerOrigin = getStoredOrigin();
+            const rewritten = rewriteUrlForJs(value, innerOrigin);
             if (rewritten !== value) {
               log('Audio() constructor src rewritten:', value, '->', rewritten);
             }
@@ -889,7 +1411,8 @@ function injectUrlRewritingScript(html, target, req) {
       // Check both src property and src attribute
       const srcValue = scriptElement.src || scriptElement.getAttribute('src');
       if (srcValue && typeof srcValue === 'string') {
-        const rewritten = rewriteUrlForJs(srcValue, currentOrigin);
+        const origin = getStoredOrigin();
+        const rewritten = rewriteUrlForJs(srcValue, origin);
         if (rewritten !== srcValue) {
           log('Rewriting script src:', srcValue, '->', rewritten);
           // Set both property and attribute to be safe
@@ -926,8 +1449,9 @@ function injectUrlRewritingScript(html, target, req) {
         set: function(value) {
           // Check if value contains script tags with src attributes
           if (typeof value === 'string' && /<script[^>]*src=["']([^"']+)["']/i.test(value)) {
+            const origin = getStoredOrigin();
             const rewritten = value.replace(/<script([^>]*)src=["']([^"']+)["']/gi, (match, attrs, src) => {
-              const rewrittenSrc = rewriteUrlForJs(src, currentOrigin);
+              const rewrittenSrc = rewriteUrlForJs(src, origin);
               if (rewrittenSrc !== src) {
                 log('innerHTML script src rewritten:', src, '->', rewrittenSrc);
               }
@@ -954,8 +1478,9 @@ function injectUrlRewritingScript(html, target, req) {
         set: function(value) {
           // Check if value contains script tags with src attributes
           if (typeof value === 'string' && /<script[^>]*src=["']([^"']+)["']/i.test(value)) {
+            const origin = getStoredOrigin();
             const rewritten = value.replace(/<script([^>]*)src=["']([^"']+)["']/gi, (match, attrs, src) => {
-              const rewrittenSrc = rewriteUrlForJs(src, currentOrigin);
+              const rewrittenSrc = rewriteUrlForJs(src, origin);
               if (rewrittenSrc !== src) {
                 log('outerHTML script src rewritten:', src, '->', rewrittenSrc);
               }
@@ -977,12 +1502,32 @@ function injectUrlRewritingScript(html, target, req) {
   }
   
   log('URL rewriting script initialization complete');
+  } catch (e) {
+    console.error('[PI-Proxy] Error in URL rewriting script:', e);
+  }
 })();
 `;
 
   // Check if script is already injected to prevent duplicates
-  if (html.includes('data-pi-proxy="url-rewriting"') || html.includes('__PI_PROXY_URL_REWRITING_INSTALLED')) {
-    console.log('[PI-Proxy] URL rewriting script already present in HTML, skipping injection');
+  // Check for script tag with data attribute (more specific check)
+  const scriptTagRegex = /<script[^>]*data-pi-proxy=["']url-rewriting["'][^>]*>[\s\S]*?<\/script>/i;
+  if (scriptTagRegex.test(html)) {
+    console.log('[PI-Proxy] URL rewriting script tag already present in HTML, skipping injection');
+    return html;
+  }
+  // Also check for just the opening tag
+  if (/<script[^>]*data-pi-proxy=["']url-rewriting["'][^>]*>/i.test(html)) {
+    console.log('[PI-Proxy] URL rewriting script opening tag found, skipping injection');
+    return html;
+  }
+  // Check for runtime guard marker (in case script is already running)
+  if (html.includes('__PI_PROXY_URL_REWRITING_INSTALLED')) {
+    console.log('[PI-Proxy] URL rewriting script runtime guard detected, skipping injection');
+    return html;
+  }
+  // Check for the guard variable name in the script content itself
+  if (html.includes('window.__PI_PROXY_URL_REWRITING_INSTALLED')) {
+    console.log('[PI-Proxy] URL rewriting script guard variable found in HTML, skipping injection');
     return html;
   }
 
@@ -997,12 +1542,15 @@ function injectUrlRewritingScript(html, target, req) {
     if (headMatch) {
       const afterHead = output.indexOf('>', headMatch.index) + 1;
       output = output.slice(0, afterHead) + scriptTag + output.slice(afterHead);
+      console.log('[PI-Proxy] Injected URL rewriting script after <head> tag');
     } else {
       output = output.replace(/<head([^>]*)>/i, `<head$1>${scriptTag}`);
+      console.log('[PI-Proxy] Injected URL rewriting script in <head> tag');
     }
   } else {
     // If no head tag, inject at the very beginning
     output = scriptTag + output;
+    console.log('[PI-Proxy] Injected URL rewriting script at document start (no <head> tag)');
   }
 
   return output;
@@ -1165,6 +1713,366 @@ function inject403Message(html, target) {
     output = output.replace(/<\/body>/i, `${protectionScript}</body>`);
   } else {
     output = `${output}${protectionScript}`;
+  }
+
+  return output;
+}
+
+/**
+ * Injects error handling script to catch Vue/Nuxt framework errors
+ * that would otherwise cause the page to render blank.
+ * This preserves the server-side rendered HTML even when client-side hydration fails.
+ *
+ * @param {string} html - The HTML content
+ * @returns {string} HTML with framework error handling injected
+ */
+function injectFrameworkErrorHandler(html) {
+  // Skip if already injected
+  if (html.includes('data-pi-proxy="framework-error-handler"')) {
+    return html;
+  }
+
+  const errorHandlerScript = `
+<script data-pi-proxy="framework-error-handler">
+(function() {
+  'use strict';
+  
+  // Prevent multiple installations
+  if (window.__PI_FRAMEWORK_ERROR_HANDLER_INSTALLED) return;
+  window.__PI_FRAMEWORK_ERROR_HANDLER_INSTALLED = true;
+  
+  console.log('[PI-Proxy] Framework error handler installing...');
+  
+  // Store the original SSR content before any framework tries to manipulate it
+  var ssrContentBackup = null;
+  var appRoot = null;
+  var isNuked = false; // Track if we've entered "nuke mode"
+  var restoreCount = 0;
+  
+  // Common Nuxt/Vue app root selectors
+  var appRootSelectors = ['#__nuxt', '#app', '#__layout', '[data-v-app]', '.nuxt-app'];
+  
+  function backupSSRContent() {
+    if (ssrContentBackup) return; // Already backed up
+    
+    for (var i = 0; i < appRootSelectors.length; i++) {
+      var root = document.querySelector(appRootSelectors[i]);
+      if (root && root.innerHTML && root.innerHTML.trim().length > 100) {
+        appRoot = root;
+        ssrContentBackup = root.innerHTML;
+        console.log('[PI-Proxy] Backed up SSR content from:', appRootSelectors[i]);
+        break;
+      }
+    }
+    
+    // Also backup body content as fallback
+    if (!ssrContentBackup && document.body && document.body.innerHTML) {
+      ssrContentBackup = document.body.innerHTML;
+      appRoot = document.body;
+      console.log('[PI-Proxy] Backed up body content as fallback');
+    }
+  }
+  
+  // NUCLEAR OPTION: Stop all JavaScript from running
+  function nukeAllScripts() {
+    if (isNuked) return;
+    isNuked = true;
+    console.log('[PI-Proxy] NUKE MODE: Stopping all JavaScript execution');
+    
+    // 1. Remove all non-essential script tags
+    var scripts = document.querySelectorAll('script:not([data-pi-proxy])');
+    scripts.forEach(function(script) {
+      if (script.src && !script.src.includes('pi-proxy')) {
+        script.remove();
+      }
+    });
+    
+    // 2. Clear all intervals and timeouts (up to a high ID)
+    var highestId = setTimeout(function(){}, 0);
+    for (var i = 0; i < highestId; i++) {
+      clearTimeout(i);
+      clearInterval(i);
+    }
+    
+    // 3. Stop any pending animations
+    if (window.cancelAnimationFrame) {
+      for (var j = 0; j < 1000; j++) {
+        cancelAnimationFrame(j);
+      }
+    }
+    
+    // 4. Block future script injections
+    var originalCreateElement = document.createElement.bind(document);
+    document.createElement = function(tagName) {
+      var el = originalCreateElement(tagName);
+      if (tagName.toLowerCase() === 'script') {
+        // Return a neutered script element
+        Object.defineProperty(el, 'src', {
+          set: function() { 
+            console.log('[PI-Proxy] Blocked script injection');
+            return ''; 
+          },
+          get: function() { return ''; }
+        });
+      }
+      return el;
+    };
+    
+    // 5. Override common framework entry points
+    window.Vue = { createApp: function() { return { mount: function() {}, use: function() { return this; } }; } };
+    window.__NUXT__ = null;
+    window.__NUXT_DATA__ = null;
+    
+    // 6. Suppress all errors
+    window.onerror = function() { return true; };
+    window.addEventListener('error', function(e) { e.preventDefault(); e.stopPropagation(); }, true);
+    window.addEventListener('unhandledrejection', function(e) { e.preventDefault(); }, true);
+    
+    console.log('[PI-Proxy] NUKE MODE: All scripts disabled');
+  }
+  
+  function restoreSSRContent(force) {
+    if (!ssrContentBackup || !appRoot) {
+      console.log('[PI-Proxy] No SSR content to restore');
+      return false;
+    }
+    
+    // Check if current content is empty or very small (indicating failed hydration)
+    var currentContent = appRoot.innerHTML || '';
+    var needsRestore = force || currentContent.trim().length < 50;
+    
+    if (needsRestore) {
+      restoreCount++;
+      console.log('[PI-Proxy] Restoring SSR content (attempt ' + restoreCount + ')');
+      
+      // IMPORTANT: Nuke all scripts BEFORE restoring to prevent re-wiping
+      nukeAllScripts();
+      
+      // Restore the content
+      appRoot.innerHTML = ssrContentBackup;
+      
+      // Add indicator only once
+      if (!document.querySelector('[data-pi-proxy="ssr-fallback-notice"]')) {
+        var indicator = document.createElement('div');
+        indicator.setAttribute('data-pi-proxy', 'ssr-fallback-notice');
+        indicator.style.cssText = 'position:fixed;bottom:10px;right:10px;background:rgba(0,0,0,0.7);color:white;padding:8px 12px;border-radius:4px;font-size:12px;z-index:999999;font-family:system-ui,sans-serif;';
+        indicator.textContent = 'Showing static preview (interactive features disabled)';
+        document.body.appendChild(indicator);
+        
+        // Auto-hide after 5 seconds using a fresh timeout
+        var hideTimeout = setTimeout(function() {
+          if (indicator.parentNode) {
+            indicator.style.opacity = '0';
+            indicator.style.transition = 'opacity 0.5s';
+            setTimeout(function() {
+              if (indicator.parentNode) indicator.parentNode.removeChild(indicator);
+            }, 500);
+          }
+        }, 5000);
+      }
+      
+      // Set up continuous monitoring to ensure content stays restored
+      if (restoreCount === 1) {
+        setInterval(function() {
+          if (appRoot && ssrContentBackup) {
+            var content = appRoot.innerHTML || '';
+            if (content.trim().length < 100) {
+              console.log('[PI-Proxy] Content wiped again, re-restoring');
+              appRoot.innerHTML = ssrContentBackup;
+            }
+          }
+        }, 500);
+      }
+      
+      return true;
+    }
+    return false;
+  }
+  
+  // Backup SSR content IMMEDIATELY when this script runs
+  // Don't wait for DOMContentLoaded - do it synchronously if possible
+  if (document.body) {
+    backupSSRContent();
+  }
+  
+  // Also backup on DOMContentLoaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+      backupSSRContent();
+      setupMutationObserver();
+    }, { once: true });
+  } else {
+    setTimeout(backupSSRContent, 0);
+    setTimeout(setupMutationObserver, 0);
+  }
+  
+  // Track framework errors
+  var frameworkErrorCount = 0;
+  var criticalErrorPatterns = [
+    /Context conflict/i,
+    /Cannot read properties of (undefined|null)/i,
+    /Hydration.*mismatch/i,
+    /beforeEach/i,
+    /Vue.*error/i,
+    /Nuxt.*error/i,
+    /app.*initialization/i,
+    /reading 'ce'/i
+  ];
+  
+  // Global error handler - more aggressive
+  var originalOnError = window.onerror;
+  window.onerror = function(message, source, lineno, colno, error) {
+    var messageStr = String(message || '');
+    var isCriticalFrameworkError = criticalErrorPatterns.some(function(pattern) {
+      return pattern.test(messageStr);
+    });
+    
+    if (isCriticalFrameworkError) {
+      frameworkErrorCount++;
+      console.warn('[PI-Proxy] Caught framework error #' + frameworkErrorCount + ':', messageStr.substring(0, 100));
+      
+      // Immediately restore on first critical error
+      if (frameworkErrorCount >= 1) {
+        setTimeout(function() {
+          restoreSSRContent(true);
+        }, 100);
+      }
+      
+      // Prevent error from propagating
+      return true;
+    }
+    
+    if (originalOnError) {
+      return originalOnError.apply(this, arguments);
+    }
+    return false;
+  };
+  
+  // Unhandled rejection handler
+  window.addEventListener('unhandledrejection', function(event) {
+    var reason = event.reason || {};
+    var message = reason.message || String(reason);
+    
+    var isCriticalFrameworkError = criticalErrorPatterns.some(function(pattern) {
+      return pattern.test(message);
+    });
+    
+    if (isCriticalFrameworkError) {
+      frameworkErrorCount++;
+      console.warn('[PI-Proxy] Caught unhandled rejection #' + frameworkErrorCount + ':', message.substring(0, 100));
+      event.preventDefault();
+      
+      setTimeout(function() {
+        restoreSSRContent(true);
+      }, 100);
+    }
+  });
+  
+  // Monitor for empty app root using MutationObserver
+  function setupMutationObserver() {
+    if (isNuked) return; // Don't set up observer if already nuked
+    
+    for (var i = 0; i < appRootSelectors.length; i++) {
+      var root = document.querySelector(appRootSelectors[i]);
+      if (root) {
+        var observer = new MutationObserver(function(mutations) {
+          if (isNuked) {
+            observer.disconnect();
+            return;
+          }
+          
+          // Check if content was wiped
+          var currentContent = root.innerHTML || '';
+          var textContent = root.textContent || '';
+          
+          if (currentContent.length < 100 || textContent.trim().length < 30) {
+            console.log('[PI-Proxy] MutationObserver detected empty app root');
+            observer.disconnect();
+            restoreSSRContent(true);
+          }
+        });
+        
+        observer.observe(root, { childList: true, subtree: true });
+        console.log('[PI-Proxy] MutationObserver watching:', appRootSelectors[i]);
+        break;
+      }
+    }
+  }
+  
+  // Quick check - 500ms after page starts loading
+  setTimeout(function() {
+    backupSSRContent();
+  }, 500);
+  
+  // Check at 1.5 seconds - this is when Nuxt usually starts hydrating
+  setTimeout(function() {
+    backupSSRContent();
+    
+    // Check if app appears empty
+    for (var i = 0; i < appRootSelectors.length; i++) {
+      var root = document.querySelector(appRootSelectors[i]);
+      if (root) {
+        var content = root.innerHTML || '';
+        var textContent = root.textContent || '';
+        
+        if (content.length < 100 || textContent.trim().length < 30) {
+          console.log('[PI-Proxy] Detected empty app root at 1.5s');
+          restoreSSRContent(true);
+          break;
+        }
+      }
+    }
+  }, 1500);
+  
+  // Check at 2.5 seconds - if errors have occurred, restore
+  setTimeout(function() {
+    if (frameworkErrorCount > 0) {
+      console.log('[PI-Proxy] Framework errors detected at 2.5s, forcing restore');
+      restoreSSRContent(true);
+    }
+  }, 2500);
+  
+  // Final aggressive check at 3.5 seconds
+  setTimeout(function() {
+    var bodyText = document.body ? (document.body.textContent || '').trim() : '';
+    var visibleElements = document.querySelectorAll('body *:not(script):not(style):not(noscript)');
+    var hasVisibleContent = false;
+    
+    for (var i = 0; i < Math.min(visibleElements.length, 50); i++) {
+      var el = visibleElements[i];
+      try {
+        var rect = el.getBoundingClientRect();
+        var style = window.getComputedStyle(el);
+        if (rect.width > 10 && rect.height > 10 && 
+            style.display !== 'none' && 
+            style.visibility !== 'hidden' &&
+            style.opacity !== '0') {
+          hasVisibleContent = true;
+          break;
+        }
+      } catch(e) {}
+    }
+    
+    if (!hasVisibleContent || bodyText.length < 50 || frameworkErrorCount > 0) {
+      console.log('[PI-Proxy] Page appears blank at 3.5s, forcing restore');
+      restoreSSRContent(true);
+    }
+  }, 3500);
+  
+  console.log('[PI-Proxy] Framework error handler installed');
+})();
+</script>`;
+
+  let output = html;
+
+  // Inject VERY early - right after opening <head> or at document start
+  // This must run before any framework scripts
+  if (/<head[^>]*>/i.test(output)) {
+    output = output.replace(/<head([^>]*)>/i, `<head$1>${errorHandlerScript}`);
+  } else if (/<html[^>]*>/i.test(output)) {
+    output = output.replace(/<html([^>]*)>/i, `<html$1>${errorHandlerScript}`);
+  } else {
+    output = errorHandlerScript + output;
   }
 
   return output;
