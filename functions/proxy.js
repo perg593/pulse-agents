@@ -556,10 +556,12 @@ function injectUrlRewritingScript(html, target, proxyUrl) {
     
     // Handle protocol-relative URLs (//example.com)
     let absoluteUrl = trimmed;
+    const isRelative = !/^https?:\\/\\//i.test(trimmed) && !trimmed.startsWith('//');
+    
     if (trimmed.startsWith('//')) {
       absoluteUrl = 'https:' + trimmed;
-    } else if (!/^https?:\\/\\//i.test(trimmed)) {
-      // Relative URL - resolve against base origin
+    } else if (isRelative) {
+      // Relative URL - resolve against base origin (target origin, not proxy origin)
       try {
         const baseUrl = baseOrigin.endsWith('/') ? baseOrigin : baseOrigin + '/';
         absoluteUrl = new URL(trimmed, baseUrl).toString();
@@ -568,11 +570,15 @@ function injectUrlRewritingScript(html, target, proxyUrl) {
       }
     }
     
-    // Skip same-origin URLs (relative to proxy origin)
+    // Skip same-origin URLs ONLY if they're NOT relative URLs that resolved to proxy origin
+    // Relative URLs should always be proxied, even if they resolve to the proxy origin
+    // (because they should resolve to the target origin instead)
     try {
       const parsed = new URL(absoluteUrl);
       const proxyParsed = new URL(PROXY_BASE);
-      if (parsed.origin === proxyParsed.origin) {
+      // Only skip if it's an absolute URL that's already on the proxy origin
+      // Don't skip relative URLs that happened to resolve to proxy origin
+      if (!isRelative && parsed.origin === proxyParsed.origin) {
         return url;
       }
     } catch (e) {
@@ -634,11 +640,19 @@ function injectUrlRewritingScript(html, target, proxyUrl) {
         }
       }
       
-      // Fallback: Use current origin
+      // Fallback: Use TARGET_ORIGIN (injected constant) instead of current origin
+      // Current origin would be the proxy origin, which is wrong for relative URL resolution
+      if (TARGET_ORIGIN) {
+        const baseOrigin = TARGET_ORIGIN.endsWith('/') ? TARGET_ORIGIN : TARGET_ORIGIN + '/';
+        console.log('[PI-Proxy] Using TARGET_ORIGIN fallback:', baseOrigin);
+        return baseOrigin;
+      }
+      
+      // Last resort: Use current origin (should rarely happen)
       const currentOrigin = (document.location && document.location.origin) || (window.location && window.location.origin) || '';
       const currentPath = (document.location && document.location.pathname) || (window.location && window.location.pathname) || '';
       const baseOrigin = currentOrigin + currentPath.replace(/\\/[^/]*$/, '');
-      console.log('[PI-Proxy] Using fallback origin:', baseOrigin);
+      console.log('[PI-Proxy] Using current origin fallback (may be incorrect):', baseOrigin);
       return baseOrigin;
     } catch (e) {
       console.error('[PI-Proxy] Error getting current origin:', e);
