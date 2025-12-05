@@ -95,6 +95,8 @@ const scrollDepthEngine = createScrollDepthEngine({
 });
 scrollDepthEngine.start();
 const stylesheetRegistry = new Map();
+// Track if the background page returned a 403 error
+let backgroundPage403 = false;
 const overlayContainer = (() => {
   const container = document.createElement('div');
   container.className = 'survey-overlay-container';
@@ -678,10 +680,47 @@ async function loadHostPage(url, { skipBridgeLoad = false } = {}) {
 
   const target = (url || '').trim();
   if (!target) {
+    backgroundPage403 = false;
     return await loadLipsumSite();
   }
 
   addLog(`Loading host page ${target}`);
+  
+  // Reset 403 flag
+  backgroundPage403 = false;
+  
+  // If we're using a proxy, check the response status first
+  const frameSrc = buildProxySrc(target);
+  if (frameSrc !== target) {
+    addLog(`Proxying background via ${frameSrc}`);
+    try {
+      // Fetch the page first to check for 403 errors
+      // Use a timeout to avoid blocking too long
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
+      try {
+        const response = await fetch(frameSrc, { 
+          signal: controller.signal,
+          method: 'GET'
+        });
+        if (response.status === 403) {
+          backgroundPage403 = true;
+          addLog(`Background page returned 403 Forbidden: ${target}`, 'warn');
+        }
+      } catch (err) {
+        // If fetch fails (CORS, network error, timeout), we'll rely on DOM detection
+        if (err.name !== 'AbortError') {
+          addLog(`Could not check response status, will rely on DOM detection: ${err.message}`, 'debug');
+        }
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    } catch (err) {
+      // If status check fails, we'll rely on DOM detection in has403Error()
+      addLog(`Could not check response status, will rely on DOM detection: ${err.message}`, 'debug');
+    }
+  }
+  
   if (overlayContainer && overlayContainer.parentNode === siteRoot) {
     siteRoot.removeChild(overlayContainer);
   }
@@ -703,7 +742,6 @@ async function loadHostPage(url, { skipBridgeLoad = false } = {}) {
 
   const frame = document.createElement('iframe');
   frame.className = 'background-frame';
-  const frameSrc = buildProxySrc(target);
   if (frameSrc !== target) {
     addLog(`Proxying background via ${frameSrc}`);
   }
@@ -729,7 +767,22 @@ async function loadHostPage(url, { skipBridgeLoad = false } = {}) {
         resolve(success);
       }, 0);
     };
-    frame.addEventListener('load', () => finish(true), { once: true });
+    frame.addEventListener('load', () => {
+      // Double-check for 403 banner after iframe loads
+      // Check multiple times with increasing delays to catch banners injected asynchronously
+      const check403 = () => {
+        if (has403Error()) {
+          backgroundPage403 = true;
+          addLog(`403 error detected in background frame: ${target}`, 'warn');
+        }
+      };
+      // Check immediately, then after delays
+      check403();
+      setTimeout(check403, 200);
+      setTimeout(check403, 500);
+      setTimeout(check403, 1000);
+      finish(true);
+    }, { once: true });
     frame.addEventListener('error', () => finish(false), { once: true });
     setTimeout(() => finish(true), 2000);
   });
@@ -743,6 +796,48 @@ function getBackgroundDocument() {
   } catch (error) {
     console.warn('[preview] Background document not accessible', error);
     return null;
+  }
+}
+
+/**
+ * Checks if the background frame has a 403 error banner.
+ * Returns true if a 403 error is detected, false otherwise.
+ *
+ * @returns {boolean} True if 403 error detected
+ */
+function has403Error() {
+  // First check the stored flag (set during loadHostPage)
+  if (backgroundPage403) {
+    return true;
+  }
+  
+  try {
+    const doc = getBackgroundDocument();
+    if (!doc) return false;
+    
+    // Check for the 403 banner element
+    const banner = doc.querySelector('.pi-proxy-403-banner[data-pi-proxy="403-message"]');
+    if (banner) {
+      backgroundPage403 = true; // Cache the result
+      return true;
+    }
+    
+    // Also check for common 403 error indicators in the page content
+    const bodyText = doc.body?.innerText || doc.body?.textContent || '';
+    const hasAccessDenied = /access\s+denied|403|forbidden/i.test(bodyText);
+    const hasErrorReference = /reference\s+#/i.test(bodyText);
+    
+    // If we see both "Access Denied" and a reference number, it's likely a 403 page
+    if (hasAccessDenied && hasErrorReference) {
+      backgroundPage403 = true; // Cache the result
+      return true;
+    }
+    
+    return false;
+  } catch (error) {
+    // If we can't access the document, check the stored flag
+    // (might be cross-origin, but we may have detected 403 during fetch)
+    return backgroundPage403;
   }
 }
 
@@ -1140,6 +1235,26 @@ async function handlePresentParameter() {
     }
   }
   
+  // Wait a bit for iframe to load and check for 403 errors
+  // This ensures we detect 403 banners that are injected by the proxy
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  
+  // Check for 403 error before presenting
+  if (has403Error()) {
+    addLog(
+      `Cannot present survey ${presentSurveyId} because the background page is blocked (403 Forbidden).`,
+      'warn',
+      { surveyId: presentSurveyId, backgroundUrl: currentBackgroundUrl }
+    );
+    setSurveyStatus('Survey: Blocked (403 error)');
+    // Reset flag so user can try again if they fix the URL
+    setTimeout(() => {
+      isSettingSurveyProgrammatically = false;
+      presentTriggered = false;
+    }, 0);
+    return;
+  }
+  
   // Present the survey
   addLog(`Auto-presenting survey ${presentSurveyId} from present parameter.`, 'info', {
     optionId,
@@ -1340,6 +1455,21 @@ async function presentSurvey(optionId, options = {}) {
   const operationKey = `present-${operationId}`;
   
   try {
+    // Check if background page has a 403 error - don't present surveys on blocked pages
+    if (has403Error()) {
+      addLog(
+        'Survey presentation blocked: The background page returned a 403 Forbidden error. Surveys cannot be displayed on blocked pages.',
+        'warn',
+        {
+          operationId: operationKey,
+          reason: '403-forbidden',
+          backgroundUrl: currentBackgroundUrl
+        }
+      );
+      setSurveyStatus('Survey: blocked (403 error)');
+      return;
+    }
+    
     const key = String(optionId || '').trim();
     if (!key) {
       addLog('No survey id selected.', 'warn', { operationId: operationKey });
@@ -2630,6 +2760,11 @@ function handleTrigger(triggerId) {
         addLog('Trigger cancelled: no survey selected.', 'warn');
         return false;
       }
+      // Check for 403 error before presenting
+      if (has403Error()) {
+        addLog('Trigger cancelled: Background page has 403 error. Surveys cannot be displayed on blocked pages.', 'warn');
+        return false;
+      }
       addLog('Trigger: Present selected survey');
       presentSurvey(surveySelect.value, { force: true });
       return true;
@@ -2690,8 +2825,11 @@ function triggerBehavior(triggerId, { source = 'button', detail } = {}) {
   }
   // Only present survey if handleTrigger didn't already do it
   // For detected behaviors, always present survey if not already presented
-  if (!surveyPresented && surveySelect && surveySelect.value) {
+  // But skip if background page has 403 error
+  if (!surveyPresented && surveySelect && surveySelect.value && !has403Error()) {
     presentSurvey(surveySelect.value, { allowDuplicate: true });
+  } else if (has403Error() && !surveyPresented) {
+    addLog('Behavior trigger cancelled: Background page has 403 error. Surveys cannot be displayed on blocked pages.', 'warn');
   }
   resetBehaviorIdleTimer();
 }

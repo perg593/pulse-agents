@@ -1,0 +1,214 @@
+/**
+ * Unit tests for URL rewriting functionality
+ * Tests the rewriteUrl() logic used in proxy functions
+ */
+
+// Extract rewriteUrl logic for testing
+function rewriteUrl(url, targetOrigin, proxyBase) {
+  if (!url || typeof url !== 'string') return url;
+
+  const trimmed = url.trim();
+  if (!trimmed) return url;
+
+  // Skip data URLs, blob URLs, and javascript: URLs
+  if (
+    /^(data:|blob:|javascript:|mailto:|tel:|#)/i.test(trimmed) ||
+    trimmed.startsWith('about:')
+  ) {
+    return url;
+  }
+
+  // Skip URLs that are already proxied
+  if (trimmed.includes('/proxy?url=')) {
+    return url;
+  }
+
+  // Handle protocol-relative URLs (//example.com)
+  let absoluteUrl = trimmed;
+  if (trimmed.startsWith('//')) {
+    absoluteUrl = `https:${trimmed}`;
+  } else if (!/^https?:\/\//i.test(trimmed)) {
+    // Relative URL - resolve against target origin
+    try {
+      const baseUrl = targetOrigin.endsWith('/') ? targetOrigin : `${targetOrigin}/`;
+      absoluteUrl = new URL(trimmed, baseUrl).toString();
+    } catch (_error) {
+      return url;
+    }
+  }
+
+  // Skip same-origin URLs (relative to proxy origin)
+  try {
+    const parsed = new URL(absoluteUrl);
+    const proxyParsed = new URL(proxyBase);
+    if (parsed.origin === proxyParsed.origin) {
+      return url;
+    }
+    
+    // Also skip if the URL is a fragment/anchor (starts with #)
+    if (parsed.hash && parsed.pathname === parsed.pathname.split('#')[0] && trimmed.startsWith('#')) {
+      return url;
+    }
+  } catch (_error) {
+    // If parsing fails, proceed with proxying
+  }
+
+  // Rewrite to proxy URL
+  const encoded = encodeURIComponent(absoluteUrl);
+  return `${proxyBase}/proxy?url=${encoded}`;
+}
+
+// Test framework
+function assert(condition, message) {
+  if (!condition) {
+    throw new Error(`Assertion failed: ${message}`);
+  }
+}
+
+function test(name, fn) {
+  try {
+    fn();
+    console.log(`✓ ${name}`);
+  } catch (error) {
+    console.error(`✗ ${name}`);
+    console.error(`  ${error.message}`);
+    throw error;
+  }
+}
+
+// Test cases
+const PROXY_BASE = 'http://localhost:3100';
+const TARGET_ORIGIN = 'https://www.example.com';
+
+console.log('Testing URL rewriting functionality...\n');
+
+// Test 1: Absolute URLs
+test('Absolute HTTPS URL should be rewritten', () => {
+  const result = rewriteUrl('https://cdn.example.com/file.js', TARGET_ORIGIN, PROXY_BASE);
+  assert(result.includes('/proxy?url='), 'Should contain proxy URL');
+  assert(result.includes('cdn.example.com'), 'Should contain original domain');
+});
+
+test('Absolute HTTP URL should be rewritten', () => {
+  const result = rewriteUrl('http://cdn.example.com/file.js', TARGET_ORIGIN, PROXY_BASE);
+  assert(result.includes('/proxy?url='), 'Should contain proxy URL');
+});
+
+// Test 2: Protocol-relative URLs
+test('Protocol-relative URL should be rewritten with https:', () => {
+  const result = rewriteUrl('//cdn.example.com/file.js', TARGET_ORIGIN, PROXY_BASE);
+  assert(result.includes('/proxy?url='), 'Should contain proxy URL');
+  assert(result.includes('https%3A%2F%2Fcdn.example.com'), 'Should use https:');
+});
+
+// Test 3: Root-relative paths
+test('Root-relative path should be resolved and rewritten', () => {
+  const result = rewriteUrl('/js/file.js', TARGET_ORIGIN, PROXY_BASE);
+  assert(result.includes('/proxy?url='), 'Should contain proxy URL');
+  assert(result.includes('www.example.com'), 'Should resolve against target origin');
+  assert(result.includes('js%2Ffile.js'), 'Should contain path');
+});
+
+test('Root-relative path with subdirectory should work', () => {
+  const result = rewriteUrl('/js/20251203154408-374/ug-spa/dist/file.js', TARGET_ORIGIN, PROXY_BASE);
+  assert(result.includes('/proxy?url='), 'Should contain proxy URL');
+  assert(result.includes('www.example.com'), 'Should resolve against target origin');
+});
+
+// Test 4: Relative paths
+test('Relative path should be resolved and rewritten', () => {
+  const result = rewriteUrl('./file.js', TARGET_ORIGIN, PROXY_BASE);
+  assert(result.includes('/proxy?url='), 'Should contain proxy URL');
+  assert(result.includes('www.example.com'), 'Should resolve against target origin');
+});
+
+test('Relative path without ./ should work', () => {
+  const result = rewriteUrl('file.js', TARGET_ORIGIN, PROXY_BASE);
+  assert(result.includes('/proxy?url='), 'Should contain proxy URL');
+});
+
+test('Parent directory relative path should work', () => {
+  const result = rewriteUrl('../file.js', TARGET_ORIGIN, PROXY_BASE);
+  assert(result.includes('/proxy?url='), 'Should contain proxy URL');
+});
+
+// Test 5: Special URLs should not be rewritten
+test('Data URL should not be rewritten', () => {
+  const result = rewriteUrl('data:image/png;base64,iVBORw0KGgo=', TARGET_ORIGIN, PROXY_BASE);
+  assert(result === 'data:image/png;base64,iVBORw0KGgo=', 'Should return original');
+});
+
+test('Blob URL should not be rewritten', () => {
+  const result = rewriteUrl('blob:http://localhost/uuid', TARGET_ORIGIN, PROXY_BASE);
+  assert(result === 'blob:http://localhost/uuid', 'Should return original');
+});
+
+test('JavaScript URL should not be rewritten', () => {
+  const result = rewriteUrl('javascript:void(0)', TARGET_ORIGIN, PROXY_BASE);
+  assert(result === 'javascript:void(0)', 'Should return original');
+});
+
+test('Mailto URL should not be rewritten', () => {
+  const result = rewriteUrl('mailto:test@example.com', TARGET_ORIGIN, PROXY_BASE);
+  assert(result === 'mailto:test@example.com', 'Should return original');
+});
+
+test('Anchor/fragment should not be rewritten', () => {
+  const result = rewriteUrl('#section', TARGET_ORIGIN, PROXY_BASE);
+  assert(result === '#section', 'Should return original');
+});
+
+// Test 6: Already proxied URLs
+test('Already proxied URL should not be rewritten again', () => {
+  const proxied = `${PROXY_BASE}/proxy?url=https%3A%2F%2Fexample.com`;
+  const result = rewriteUrl(proxied, TARGET_ORIGIN, PROXY_BASE);
+  assert(result === proxied, 'Should return original proxied URL');
+});
+
+// Test 7: Same-origin URLs
+test('URL on proxy origin should not be rewritten', () => {
+  const result = rewriteUrl('http://localhost:3100/some/path', TARGET_ORIGIN, PROXY_BASE);
+  assert(result === 'http://localhost:3100/some/path', 'Should return original');
+});
+
+// Test 8: Edge cases
+test('Empty string should return empty string', () => {
+  const result = rewriteUrl('', TARGET_ORIGIN, PROXY_BASE);
+  assert(result === '', 'Should return empty string');
+});
+
+test('Whitespace-only string should return original', () => {
+  const result = rewriteUrl('   ', TARGET_ORIGIN, PROXY_BASE);
+  assert(result === '   ', 'Should return original');
+});
+
+test('Null should return null', () => {
+  const result = rewriteUrl(null, TARGET_ORIGIN, PROXY_BASE);
+  assert(result === null, 'Should return null');
+});
+
+test('Undefined should return undefined', () => {
+  const result = rewriteUrl(undefined, TARGET_ORIGIN, PROXY_BASE);
+  assert(result === undefined, 'Should return undefined');
+});
+
+// Test 9: Query parameters and fragments
+test('URL with query parameters should be preserved', () => {
+  const result = rewriteUrl('https://example.com/file.js?v=1&t=123', TARGET_ORIGIN, PROXY_BASE);
+  assert(result.includes('file.js%3Fv%3D1%26t%3D123'), 'Should encode query params');
+});
+
+test('URL with fragment should be preserved', () => {
+  const result = rewriteUrl('https://example.com/file.js#section', TARGET_ORIGIN, PROXY_BASE);
+  assert(result.includes('file.js%23section'), 'Should encode fragment');
+});
+
+// Test 10: Complex relative paths
+test('Complex relative path should resolve correctly', () => {
+  const result = rewriteUrl('../../js/dist/file.js', TARGET_ORIGIN, PROXY_BASE);
+  assert(result.includes('/proxy?url='), 'Should contain proxy URL');
+  assert(result.includes('www.example.com'), 'Should resolve against target origin');
+});
+
+console.log('\nAll URL rewriting tests passed!');
+

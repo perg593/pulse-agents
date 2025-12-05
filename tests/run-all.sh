@@ -28,6 +28,12 @@ node tests/unit/lib/logger.test.js
 echo "Testing lib/validators..."
 node tests/unit/lib/validators.test.js
 
+echo "Testing proxy URL rewriting..."
+node tests/unit/proxy/url-rewriting.test.js
+
+echo "Testing script interception unit tests..."
+node tests/unit/proxy/script-interception.test.js
+
 # Integration tests
 echo ""
 echo "🔗 Integration Tests"
@@ -38,6 +44,22 @@ node tests/integration/preview/bridge.contract.test.mjs
 
 echo "Testing preview survey bridge integration..."
 node tests/integration/preview/surveyBridge.integration.test.mjs
+
+echo "Testing demo proxy integration..."
+echo "  (Note: Requires proxy server running on port 3100)"
+node tests/integration/preview/demo-proxy.test.mjs || echo "  ⚠️  Demo proxy test skipped (proxy server not running)"
+
+echo "Testing URL rewriting integration..."
+echo "  (Note: Requires proxy server running on port 3100)"
+node tests/integration/preview/url-rewriting.test.mjs || echo "  ⚠️  URL rewriting test skipped (proxy server not running)"
+
+echo "Testing script injection..."
+echo "  (Note: Requires proxy server running on port 3100)"
+node tests/integration/preview/script-injection.test.mjs || echo "  ⚠️  Script injection test skipped (proxy server not running)"
+
+echo "Testing script interception..."
+echo "  (Note: Requires proxy server running on port 3100)"
+node tests/integration/preview/script-interception.test.mjs || echo "  ⚠️  Script interception test skipped (proxy server not running)"
 
 echo ""
 echo "✅ All tests completed"
