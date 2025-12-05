@@ -428,18 +428,18 @@ function injectUrlRewritingScript(html, target, req) {
   const currentHref = (document.location && document.location.href) || (window.location && window.location.href) || '';
   const referrer = document.referrer || '';
   const proxyOrigin = PROXY_BASE.replace(/\\/$/, '');
-  const currentOrigin = (document.location && document.location.origin) || (window.location && window.location.origin) || '';
+  const currentPageOrigin = (document.location && document.location.origin) || (window.location && window.location.origin) || '';
   
   const isProxied = currentHref.includes('/proxy?url=') ||
                     currentHref.includes('proxy%3Furl%3D') ||
                     referrer.includes('/proxy?url=') ||
-                    currentOrigin === proxyOrigin ||
-                    (currentOrigin && proxyOrigin && currentOrigin.includes(proxyOrigin.split('://')[1]?.split(':')[0]));
+                    currentPageOrigin === proxyOrigin ||
+                    (currentPageOrigin && proxyOrigin && currentPageOrigin.includes(proxyOrigin.split('://')[1]?.split(':')[0]));
   
   console.log('[PI-Proxy] Detection check:', {
     currentHref: currentHref.substring(0, 100),
     referrer: referrer.substring(0, 100),
-    currentOrigin,
+    currentPageOrigin,
     proxyOrigin,
     isProxied
   });
@@ -564,11 +564,11 @@ function injectUrlRewritingScript(html, target, req) {
         return baseOrigin;
       }
       
-      // Last resort: Use current origin (should rarely happen)
-      const currentOrigin = (document.location && document.location.origin) || (window.location && window.location.origin) || '';
+      // Last resort: Use current page origin (should rarely happen)
+      const currentPageOrigin = (document.location && document.location.origin) || (window.location && window.location.origin) || '';
       const currentPath = (document.location && document.location.pathname) || (window.location && window.location.pathname) || '';
-      const baseOrigin = currentOrigin + currentPath.replace(/\\/[^/]*$/, '');
-      console.log('[PI-Proxy] Using current origin fallback (may be incorrect):', baseOrigin);
+      const baseOrigin = currentPageOrigin + currentPath.replace(/\\/[^/]*$/, '');
+      console.log('[PI-Proxy] Using current page origin fallback (may be incorrect):', baseOrigin);
       return baseOrigin;
     } catch (e) {
       console.error('[PI-Proxy] Error getting current origin:', e);
