@@ -100,7 +100,7 @@ export async function onRequest(context) {
   }
 
   try {
-    const upstreamHeaders = buildUpstreamHeaders(request.headers, target);
+    const upstreamHeaders = buildUpstreamHeaders(request.headers, target, env);
     const upstreamResponse = await fetch(target.toString(), {
       headers: upstreamHeaders,
       redirect: 'follow'
@@ -119,7 +119,7 @@ export async function onRequest(context) {
       let body = await upstreamResponse.text();
       body = ensureBaseHref(body, target);
       body = rewriteResourceUrls(body, target, incoming);
-      body = injectUrlRewritingScript(body, target, incoming);
+      body = injectUrlRewritingScript(body, target, incoming, env);
       body = injectConsentCleanup(body);
       
       // Add 403 error messaging if applicable
@@ -158,16 +158,15 @@ function parseList(value, fallback) {
 /**
  * Sanitizes cookies by removing sensitive cookie patterns
  * @param {string} cookieHeader - The Cookie header value
- * @param {string[]} sensitivePatterns - Patterns to filter (default: common sensitive cookie names)
+ * @param {string[]|null} sensitivePatterns - Patterns to filter (null uses defaults)
  * @returns {string|undefined} - Sanitized cookie header or undefined if empty
  */
 function sanitizeCookies(cookieHeader, sensitivePatterns = null) {
   if (!cookieHeader) return undefined;
   
-  const patterns = sensitivePatterns || parseList(
-    process.env.PROXY_SENSITIVE_COOKIE_PATTERNS,
-    ['session', 'auth', 'token', 'csrf', 'jwt', 'secret', 'password', 'credential']
-  );
+  // Default patterns if none provided
+  const defaultPatterns = ['session', 'auth', 'token', 'csrf', 'jwt', 'secret', 'password', 'credential'];
+  const patterns = sensitivePatterns || defaultPatterns;
   
   const cookies = cookieHeader.split(';').map(c => c.trim()).filter(Boolean);
   const filtered = cookies.filter(cookie => {
@@ -210,8 +209,9 @@ function isHostAllowed(hostname, allowlist, blocklist) {
   });
 }
 
-function buildUpstreamHeaders(headers, target) {
+function buildUpstreamHeaders(headers, target, env) {
   const upstream = new Headers();
+  const sensitiveCookiePatterns = env ? parseList(env.PROXY_SENSITIVE_COOKIE_PATTERNS, null) : null;
   const headerPairs = [
     ['user-agent', headers.get('user-agent') || DEFAULT_USER_AGENT],
     ['accept', headers.get('accept') || '*/*'],
@@ -219,7 +219,7 @@ function buildUpstreamHeaders(headers, target) {
     ['accept-encoding', headers.get('accept-encoding') || 'gzip, deflate, br'],
     ['referer', headers.get('referer') || target.origin],
     ['origin', headers.get('origin') || target.origin],
-    ['cookie', sanitizeCookies(headers.get('cookie'))]
+    ['cookie', sanitizeCookies(headers.get('cookie'), sensitiveCookiePatterns)]
   ];
 
   headerPairs.forEach(([key, value]) => {
@@ -560,9 +560,10 @@ function rewriteUrl(url, targetOrigin, proxyBase) {
  * @param {string} html - The HTML content
  * @param {URL} target - The target URL being proxied
  * @param {URL} proxyUrl - The proxy request URL (to determine proxy origin)
+ * @param {object} env - Cloudflare Workers environment variables
  * @returns {string} HTML with URL rewriting script injected
  */
-function injectUrlRewritingScript(html, target, proxyUrl) {
+function injectUrlRewritingScript(html, target, proxyUrl, env) {
   const proxyOrigin = `${proxyUrl.protocol}//${proxyUrl.host}`;
   const proxyBase = proxyOrigin.replace(/\/$/, '');
   const targetOrigin = target.origin;
@@ -572,7 +573,8 @@ function injectUrlRewritingScript(html, target, proxyUrl) {
   // Create URL rewriting function for JavaScript
   // This matches the logic in rewriteUrl() but runs in the browser context
   // Determine if debug logging should be enabled (default: true for development)
-  const isDebug = env.NODE_ENV !== 'production' || env.PROXY_DEBUG === 'true';
+  // In Cloudflare Workers, NODE_ENV is not available, so default to false unless PROXY_DEBUG is set
+  const isDebug = env && (env.PROXY_DEBUG === 'true' || env.PROXY_DEBUG === '1');
   
   const scriptContent = `
 (function() {
