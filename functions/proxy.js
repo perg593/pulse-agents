@@ -148,30 +148,77 @@ export async function onRequest(context) {
     });
 
     const contentType = upstreamResponse.headers.get('content-type') || '';
+    
+    // Detect expected content type from request
+    const accept = request.headers.get('accept') || '';
+    const pathname = target.pathname || '';
+    const extension = pathname.split('.').pop()?.toLowerCase() || '';
+    
+    let expectedContentType = { type: 'html', mimeType: 'text/html' };
+    if (accept.includes('application/javascript') || accept.includes('text/javascript') || accept.includes('application/json')) {
+      expectedContentType = { type: 'javascript', mimeType: 'application/javascript' };
+    } else if (accept.includes('text/css')) {
+      expectedContentType = { type: 'css', mimeType: 'text/css' };
+    } else if (accept.includes('text/html')) {
+      expectedContentType = { type: 'html', mimeType: 'text/html' };
+    } else {
+      // Fallback to file extension
+      const jsExtensions = ['js', 'mjs', 'jsx', 'ts', 'tsx'];
+      const cssExtensions = ['css', 'scss', 'sass', 'less'];
+      if (jsExtensions.includes(extension)) {
+        expectedContentType = { type: 'javascript', mimeType: 'application/javascript' };
+      } else if (cssExtensions.includes(extension)) {
+        expectedContentType = { type: 'css', mimeType: 'text/css' };
+      }
+    }
+    
     if (contentType) {
       responseHeaders.set('content-type', contentType);
     }
 
-    // Handle error responses - don't return HTML for non-HTML requests
+    // Handle error responses - fix MIME type when upstream returns HTML error pages for JS/CSS requests
     if (upstreamResponse.status >= 400) {
-      const isHtmlRequest = contentType.includes('text/html') || 
-                           request.headers.get('accept')?.includes('text/html');
+      const errorBody = await upstreamResponse.text().catch(() => '');
+      const isHtmlErrorPage = errorBody.trim().startsWith('<!') || errorBody.trim().startsWith('<html') || contentType.includes('text/html');
       
-      // For non-HTML error responses, return JSON error instead of HTML
-      if (!isHtmlRequest && upstreamResponse.status >= 400) {
-        const errorBody = await upstreamResponse.text().catch(() => '');
-        // If upstream returned HTML error page for JS/JSON request, return JSON instead
-        if (errorBody.trim().startsWith('<!') || errorBody.trim().startsWith('<html')) {
-          return withCors(
-            jsonResponse({ 
-              error: `Upstream error: ${upstreamResponse.status}`,
-              status: upstreamResponse.status,
-              url: target.toString()
-            }, { status: upstreamResponse.status }),
-            request
+      // If upstream returned HTML error page but request expects JS/CSS, override Content-Type
+      if (isHtmlErrorPage && expectedContentType.type !== 'html') {
+        console.warn(`[Proxy] Upstream returned HTML error page (${upstreamResponse.status}) for ${expectedContentType.type} request: ${target.toString()}`);
+        
+        if (expectedContentType.type === 'javascript') {
+          responseHeaders.set('content-type', 'application/javascript');
+          return new Response(
+            `// Error ${upstreamResponse.status}: Failed to load module from ${target.toString()}\n// Upstream returned HTML error page`,
+            { status: upstreamResponse.status, headers: responseHeaders }
+          );
+        } else if (expectedContentType.type === 'css') {
+          responseHeaders.set('content-type', 'text/css');
+          return new Response(
+            `/* Error ${upstreamResponse.status}: Failed to load stylesheet from ${target.toString()} */`,
+            { status: upstreamResponse.status, headers: responseHeaders }
           );
         }
-        // Otherwise return the original error response
+      }
+      
+      // For HTML requests or when error body is not HTML, set Content-Type appropriately
+      if (expectedContentType.type === 'html' || !isHtmlErrorPage) {
+        if (contentType) {
+          responseHeaders.set('content-type', contentType);
+        }
+        // Return HTML error page for HTML requests
+        if (expectedContentType.type === 'html') {
+          return new Response(errorBody, {
+            status: upstreamResponse.status,
+            headers: responseHeaders
+          });
+        }
+      } else {
+        // Non-HTML request with non-HTML error - use expected type
+        responseHeaders.set('content-type', expectedContentType.mimeType);
+      }
+      
+      // For non-HTML error responses that aren't HTML error pages, return as-is
+      if (!isHtmlErrorPage) {
         return new Response(errorBody, {
           status: upstreamResponse.status,
           headers: responseHeaders
@@ -205,10 +252,48 @@ export async function onRequest(context) {
     });
   } catch (error) {
     console.error('Proxy fetch failed', targetRaw, error);
-    return withCors(
-      jsonResponse({ error: `Failed to fetch ${target.toString()}: ${error.message}` }, { status: 502 }),
-      request
-    );
+    
+    // Detect expected content type for error response
+    const accept = request.headers.get('accept') || '';
+    const pathname = target.pathname || '';
+    const extension = pathname.split('.').pop()?.toLowerCase() || '';
+    
+    let expectedContentType = { type: 'html', mimeType: 'text/html' };
+    if (accept.includes('application/javascript') || accept.includes('text/javascript')) {
+      expectedContentType = { type: 'javascript', mimeType: 'application/javascript' };
+    } else if (accept.includes('text/css')) {
+      expectedContentType = { type: 'css', mimeType: 'text/css' };
+    } else {
+      const jsExtensions = ['js', 'mjs', 'jsx', 'ts', 'tsx'];
+      const cssExtensions = ['css', 'scss', 'sass', 'less'];
+      if (jsExtensions.includes(extension)) {
+        expectedContentType = { type: 'javascript', mimeType: 'application/javascript' };
+      } else if (cssExtensions.includes(extension)) {
+        expectedContentType = { type: 'css', mimeType: 'text/css' };
+      }
+    }
+    
+    // Return appropriate Content-Type based on request type
+    if (expectedContentType.type === 'javascript') {
+      const headers = buildCorsHeaders(request.headers);
+      headers.set('content-type', 'application/javascript');
+      return new Response(
+        `// Error: Failed to fetch ${target.toString()}: ${error.message}\n`,
+        { status: 502, headers }
+      );
+    } else if (expectedContentType.type === 'css') {
+      const headers = buildCorsHeaders(request.headers);
+      headers.set('content-type', 'text/css');
+      return new Response(
+        `/* Error: Failed to fetch ${target.toString()}: ${error.message} */\n`,
+        { status: 502, headers }
+      );
+    } else {
+      return withCors(
+        jsonResponse({ error: `Failed to fetch ${target.toString()}: ${error.message}` }, { status: 502 }),
+        request
+      );
+    }
   }
 }
 
