@@ -259,7 +259,7 @@ export async function onRequest(context) {
     const extension = pathname.split('.').pop()?.toLowerCase() || '';
     
     let expectedContentType = { type: 'html', mimeType: 'text/html' };
-    if (accept.includes('application/javascript') || accept.includes('text/javascript')) {
+    if (accept.includes('application/javascript') || accept.includes('text/javascript') || accept.includes('application/json')) {
       expectedContentType = { type: 'javascript', mimeType: 'application/javascript' };
     } else if (accept.includes('text/css')) {
       expectedContentType = { type: 'css', mimeType: 'text/css' };

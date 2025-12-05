@@ -384,6 +384,11 @@ app.options('/proxy', (req, res) => {
         if (contentType) {
           res.setHeader('content-type', contentType);
         }
+        // Return HTML error page for HTML requests
+        if (expectedContentType.type === 'html') {
+          res.send(errorBody);
+          return;
+        }
       } else {
         // Non-HTML request with non-HTML error - use expected type
         res.setHeader('content-type', expectedContentType.mimeType);
@@ -394,11 +399,11 @@ app.options('/proxy', (req, res) => {
         res.send(errorBody);
         return;
       }
-    } else {
-      // Success response - forward Content-Type from upstream
-      if (contentType) {
-        res.setHeader('content-type', contentType);
-      }
+    }
+
+    // Success response - forward Content-Type from upstream
+    if (contentType) {
+      res.setHeader('content-type', contentType);
     }
 
     if (contentType.includes('text/html')) {
