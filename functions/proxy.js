@@ -502,6 +502,13 @@ function injectUrlRewritingScript(html, target, proxyUrl) {
 (function() {
   'use strict';
   
+  // Prevent multiple installations - guard against race conditions
+  if (window.__PI_PROXY_URL_REWRITING_INSTALLED) {
+    console.log('[PI-Proxy] URL rewriting script already installed, skipping');
+    return;
+  }
+  window.__PI_PROXY_URL_REWRITING_INSTALLED = true;
+  
   // Debug logging
   console.log('[PI-Proxy] URL rewriting script starting...');
   
@@ -832,6 +839,12 @@ function injectUrlRewritingScript(html, target, proxyUrl) {
   console.log('[PI-Proxy] URL rewriting script initialization complete');
 })();
 `;
+
+  // Check if script is already injected to prevent duplicates
+  if (html.includes('data-pi-proxy="url-rewriting"') || html.includes('__PI_PROXY_URL_REWRITING_INSTALLED')) {
+    console.log('[PI-Proxy] URL rewriting script already present in HTML, skipping injection');
+    return html;
+  }
 
   const scriptTag = `<script data-pi-proxy="url-rewriting">${scriptContent}</script>`;
 
