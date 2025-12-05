@@ -357,7 +357,15 @@ test('JSON-LD script block should be preserved', () => {
     matches.push(match[0]);
   }
   assert(matches.length === 1, 'Should find JSON-LD script');
-  assert(matches[0].includes('https://example.com'), 'Should preserve original URL in JSON-LD');
+  // Parse JSON to verify content is preserved exactly (avoids CodeQL URL substring sanitization warning)
+  try {
+    const jsonContent = matches[0].match(/<script[^>]*>([\s\S]*?)<\/script>/i)[1];
+    const parsed = JSON.parse(jsonContent);
+    assert(parsed.url === 'https://example.com', 'Should preserve original URL in JSON-LD');
+    assert(parsed['@context'] === 'https://schema.org', 'Should preserve JSON-LD context');
+  } catch (e) {
+    throw new Error('JSON-LD content should be valid JSON: ' + e.message);
+  }
 });
 
 // Test 17: srcset parsing with multiple URLs
