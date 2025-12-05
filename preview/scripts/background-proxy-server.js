@@ -714,8 +714,9 @@ function injectUrlRewritingScript(html, target, req) {
     };
     
     // Also intercept innerHTML/outerHTML for script tags (less common but possible)
+    // Only intercept if both getter and setter exist to avoid issues
     const innerHTMLDescriptor = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
-    if (innerHTMLDescriptor) {
+    if (innerHTMLDescriptor && innerHTMLDescriptor.set && innerHTMLDescriptor.get) {
       const originalSetInnerHTML = innerHTMLDescriptor.set;
       const originalGetInnerHTML = innerHTMLDescriptor.get;
       Object.defineProperty(Element.prototype, 'innerHTML', {
@@ -735,7 +736,7 @@ function injectUrlRewritingScript(html, target, req) {
         },
         get: function() {
           // Use the original getter to prevent infinite recursion
-          return originalGetInnerHTML ? originalGetInnerHTML.call(this) : '';
+          return originalGetInnerHTML.call(this);
         },
         configurable: true
       });
