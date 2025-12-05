@@ -81,45 +81,6 @@ function shouldBlockAnalyticsUrl(url, blocklist) {
   }
 }
 
-// Rate limiting: Simple in-memory store (for production, consider using Cloudflare KV or built-in rate limiting)
-const rateLimitStore = new Map();
-const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
-const RATE_LIMIT_MAX_REQUESTS = 100; // Max requests per window
-
-function checkRateLimit(request) {
-  const clientIP = request.headers.get('cf-connecting-ip') || 
-                   request.headers.get('x-forwarded-for')?.split(',')[0] || 
-                   'unknown';
-  
-  const now = Date.now();
-  const key = clientIP;
-  const record = rateLimitStore.get(key);
-  
-  // Clean up old entries periodically
-  if (rateLimitStore.size > 10000) {
-    const keysToDelete = [];
-    for (const [k, v] of rateLimitStore.entries()) {
-      if (now - v.windowStart > RATE_LIMIT_WINDOW_MS) {
-        keysToDelete.push(k);
-      }
-    }
-    keysToDelete.forEach(k => rateLimitStore.delete(k));
-  }
-  
-  if (!record || now - record.windowStart > RATE_LIMIT_WINDOW_MS) {
-    // New window
-    rateLimitStore.set(key, { count: 1, windowStart: now });
-    return { allowed: true, remaining: RATE_LIMIT_MAX_REQUESTS - 1 };
-  }
-  
-  if (record.count >= RATE_LIMIT_MAX_REQUESTS) {
-    return { allowed: false, remaining: 0, resetAt: record.windowStart + RATE_LIMIT_WINDOW_MS };
-  }
-  
-  record.count++;
-  return { allowed: true, remaining: RATE_LIMIT_MAX_REQUESTS - record.count };
-}
-
 const CONSENT_BANNER_SELECTORS = [
   '#onetrust-banner-sdk',
   '.onetrust-pc-dark-filter',
@@ -153,17 +114,6 @@ export async function onRequest(context) {
   const allowedMethods = ['GET', 'POST', 'PUT', 'DELETE'];
   if (!allowedMethods.includes(request.method)) {
     return withCors(jsonResponse({ error: 'Method not allowed' }, { status: 405 }), request);
-  }
-
-  // Rate limiting check
-  const rateLimitResult = checkRateLimit(request);
-  if (!rateLimitResult.allowed) {
-    const headers = buildCorsHeaders(request.headers);
-    headers.set('retry-after', Math.ceil((rateLimitResult.resetAt - Date.now()) / 1000).toString());
-    return withCors(
-      jsonResponse({ error: 'Too many requests, please try again later.' }, { status: 429 }),
-      request
-    );
   }
 
   const targetRaw = incoming.searchParams.get('url');
