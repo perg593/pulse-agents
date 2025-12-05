@@ -86,7 +86,10 @@ console.log('Testing URL rewriting functionality...\n');
 test('Absolute HTTPS URL should be rewritten', () => {
   const result = rewriteUrl('https://cdn.example.com/file.js', TARGET_ORIGIN, PROXY_BASE);
   assert(result.includes('/proxy?url='), 'Should contain proxy URL');
-  assert(result.includes('cdn.example.com'), 'Should contain original domain');
+  // Parse the rewritten proxy URL and check that the proxied URL's host is 'cdn.example.com'
+  const proxiedUrl = new URL(result, PROXY_BASE);
+  const targetUrl = new URL(decodeURIComponent(proxiedUrl.searchParams.get('url')));
+  assert(targetUrl.host === 'cdn.example.com', 'Should contain original domain');
 });
 
 test('Absolute HTTP URL should be rewritten', () => {
@@ -105,21 +108,30 @@ test('Protocol-relative URL should be rewritten with https:', () => {
 test('Root-relative path should be resolved and rewritten', () => {
   const result = rewriteUrl('/js/file.js', TARGET_ORIGIN, PROXY_BASE);
   assert(result.includes('/proxy?url='), 'Should contain proxy URL');
-  assert(result.includes('www.example.com'), 'Should resolve against target origin');
-  assert(result.includes('js%2Ffile.js'), 'Should contain path');
+  // Parse the rewritten proxy URL and check that the proxied URL's host is 'www.example.com'
+  const proxiedUrl = new URL(result, PROXY_BASE);
+  const targetUrl = new URL(decodeURIComponent(proxiedUrl.searchParams.get('url')));
+  assert(targetUrl.host === 'www.example.com', 'Should resolve against target origin');
+  assert(targetUrl.pathname.includes('/js/file.js'), 'Should contain path');
 });
 
 test('Root-relative path with subdirectory should work', () => {
   const result = rewriteUrl('/js/20251203154408-374/ug-spa/dist/file.js', TARGET_ORIGIN, PROXY_BASE);
   assert(result.includes('/proxy?url='), 'Should contain proxy URL');
-  assert(result.includes('www.example.com'), 'Should resolve against target origin');
+  // Parse the rewritten proxy URL and check that the proxied URL's host is 'www.example.com'
+  const proxiedUrl = new URL(result, PROXY_BASE);
+  const targetUrl = new URL(decodeURIComponent(proxiedUrl.searchParams.get('url')));
+  assert(targetUrl.host === 'www.example.com', 'Should resolve against target origin');
 });
 
 // Test 4: Relative paths
 test('Relative path should be resolved and rewritten', () => {
   const result = rewriteUrl('./file.js', TARGET_ORIGIN, PROXY_BASE);
   assert(result.includes('/proxy?url='), 'Should contain proxy URL');
-  assert(result.includes('www.example.com'), 'Should resolve against target origin');
+  // Parse the rewritten proxy URL and check that the proxied URL's host is 'www.example.com'
+  const proxiedUrl = new URL(result, PROXY_BASE);
+  const targetUrl = new URL(decodeURIComponent(proxiedUrl.searchParams.get('url')));
+  assert(targetUrl.host === 'www.example.com', 'Should resolve against target origin');
 });
 
 test('Relative path without ./ should work', () => {
@@ -207,7 +219,10 @@ test('URL with fragment should be preserved', () => {
 test('Complex relative path should resolve correctly', () => {
   const result = rewriteUrl('../../js/dist/file.js', TARGET_ORIGIN, PROXY_BASE);
   assert(result.includes('/proxy?url='), 'Should contain proxy URL');
-  assert(result.includes('www.example.com'), 'Should resolve against target origin');
+  // Extract the proxied URL from the result and assert its host is 'www.example.com'
+  const proxiedUrl = new URL(result, PROXY_BASE);
+  const targetUrl = new URL(decodeURIComponent(proxiedUrl.searchParams.get('url')));
+  assert(targetUrl.host === 'www.example.com', 'Should resolve against target origin host');
 });
 
 console.log('\nAll URL rewriting tests passed!');
