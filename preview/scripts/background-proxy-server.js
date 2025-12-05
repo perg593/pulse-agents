@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const { URL } = require('url');
 const path = require('path');
 
@@ -16,6 +17,8 @@ try {
 }
 
 const app = express();
+// Default to wildcard (*) for ease of use - users can restrict via BACKGROUND_PROXY_ALLOWLIST
+// For production deployments, consider setting BACKGROUND_PROXY_ALLOWLIST to specific domains
 const ALLOWLIST = (process.env.BACKGROUND_PROXY_ALLOWLIST || '*')
   .split(',')
   .map((entry) => entry.trim())
@@ -27,6 +30,15 @@ const BLOCKED_HOSTS = (process.env.BACKGROUND_PROXY_BLOCKLIST || 'localhost,127.
 
 const DEFAULT_USER_AGENT =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 PulsePreviewProxy/1.0';
+
+// Rate limiting configuration
+const proxyLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: Number.parseInt(process.env.PROXY_RATE_LIMIT_MAX || '100', 10), // Limit each IP to 100 requests per windowMs
+  message: { error: 'Too many requests, please try again later.' },
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
 
 const CONSENT_BANNER_SELECTORS = [
   '#onetrust-banner-sdk',
@@ -64,6 +76,29 @@ function isHostAllowed(hostname) {
   });
 }
 
+/**
+ * Sanitizes cookies by removing sensitive cookie patterns
+ * @param {string} cookieHeader - The Cookie header value
+ * @param {string[]} sensitivePatterns - Patterns to filter (default: common sensitive cookie names)
+ * @returns {string|undefined} - Sanitized cookie header or undefined if empty
+ */
+function sanitizeCookies(cookieHeader, sensitivePatterns = null) {
+  if (!cookieHeader) return undefined;
+  
+  const patterns = sensitivePatterns || (process.env.PROXY_SENSITIVE_COOKIE_PATTERNS || 'session,auth,token,csrf,jwt,secret,password,credential')
+    .split(',')
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+  
+  const cookies = cookieHeader.split(';').map(c => c.trim()).filter(Boolean);
+  const filtered = cookies.filter(cookie => {
+    const name = cookie.split('=')[0].toLowerCase();
+    return !patterns.some(pattern => name.includes(pattern.toLowerCase()));
+  });
+  
+  return filtered.length > 0 ? filtered.join('; ') : undefined;
+}
+
 function resolveTarget(raw) {
   let url;
   try {
@@ -97,7 +132,7 @@ app.get('/background-proxy/health', (req, res) => {
   });
 });
 
-app.get('/proxy', async (req, res) => {
+app.get('/proxy', proxyLimiter, async (req, res) => {
   const targetRaw = req.query.url;
   if (!targetRaw || typeof targetRaw !== 'string') {
     res.status(400).json({ error: 'Missing url query parameter' });
@@ -121,7 +156,7 @@ app.get('/proxy', async (req, res) => {
       'Accept-Encoding': incomingHeaders['accept-encoding'] || 'gzip, deflate, br',
       Referer: incomingHeaders['referer'] || target.origin,
       Origin: target.origin,
-      Cookie: incomingHeaders.cookie || undefined,
+      Cookie: sanitizeCookies(incomingHeaders.cookie),
       'Sec-Fetch-Dest': incomingHeaders['sec-fetch-dest'] || 'document',
       'Sec-Fetch-Mode': incomingHeaders['sec-fetch-mode'] || 'navigate',
       'Sec-Fetch-Site': incomingHeaders['sec-fetch-site'] || 'none'
@@ -162,40 +197,7 @@ app.get('/proxy', async (req, res) => {
 
     if (contentType.includes('text/html')) {
       let body = await response.text();
-      if (!/base\s+href=/i.test(body)) {
-        // Use the target URL's directory as base href
-        // Handle query params and fragments by removing them first
-        let baseHref = target.href;
-        try {
-          const url = new URL(baseHref);
-          // Remove query and fragment, keep pathname
-          url.search = '';
-          url.hash = '';
-          baseHref = url.toString();
-          // Ensure it ends with / if it's a directory
-          if (!baseHref.endsWith('/') && !baseHref.match(/\/[^/]*\.[^/]*$/)) {
-            baseHref += '/';
-          }
-        } catch (_error) {
-          // Fallback: simple string replacement
-          baseHref = target.href.replace(/[^/]*$/, '').replace(/[?#].*$/, '');
-          if (!baseHref.endsWith('/')) {
-            baseHref += '/';
-          }
-        }
-        
-        // Escape HTML entities in baseHref
-        const escapedBaseHref = baseHref
-          .replace(/&/g, '&amp;')
-          .replace(/"/g, '&quot;')
-          .replace(/'/g, '&#39;');
-        
-        if (/<head[^>]*>/i.test(body)) {
-          body = body.replace(/<head([^>]*)>/i, `<head$1><base href="${escapedBaseHref}">`);
-        } else {
-          body = `<base href="${escapedBaseHref}">${body}`;
-        }
-      }
+      body = ensureBaseHref(body, target);
       // Rewrite resource URLs to go through proxy
       body = rewriteResourceUrls(body, target, req);
       body = injectUrlRewritingScript(body, target, req);
@@ -222,6 +224,52 @@ app.get('/proxy', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Background proxy listening on http://localhost:${PORT}`);
 });
+
+/**
+ * Ensures a base href tag exists in HTML for proper relative URL resolution.
+ *
+ * @param {string} html - The HTML content
+ * @param {URL} target - The target URL being proxied
+ * @returns {string} HTML with base href tag if missing
+ */
+function ensureBaseHref(html, target) {
+  // Check if base tag already exists
+  if (/<base[^>]*>/i.test(html)) {
+    return html;
+  }
+  
+  // Use the target URL's directory as base href
+  // Handle query params and fragments by removing them first
+  let baseHref = target.href;
+  try {
+    const url = new URL(baseHref);
+    // Remove query and fragment, keep pathname
+    url.search = '';
+    url.hash = '';
+    baseHref = url.toString();
+    // Ensure it ends with / if it's a directory
+    if (!baseHref.endsWith('/') && !baseHref.match(/\/[^/]*\.[^/]*$/)) {
+      baseHref += '/';
+    }
+  } catch (_error) {
+    // Fallback: simple string replacement
+    baseHref = target.href.replace(/[^/]*$/, '').replace(/[?#].*$/, '');
+    if (!baseHref.endsWith('/')) {
+      baseHref += '/';
+    }
+  }
+  
+  // Escape HTML entities in baseHref
+  const escapedBaseHref = baseHref
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+  
+  if (/<head[^>]*>/i.test(html)) {
+    return html.replace(/<head([^>]*)>/i, `<head$1><base href="${escapedBaseHref}">`);
+  }
+  return `<base href="${escapedBaseHref}">${html}`;
+}
 
 /**
  * Rewrites resource URLs in HTML to go through the proxy.
@@ -412,21 +460,30 @@ function injectUrlRewritingScript(html, target, req) {
 
   if (!proxyBase) return html;
 
+  // Determine if debug logging should be enabled (default: true for development)
+  const isDebug = process.env.NODE_ENV !== 'production' || process.env.PROXY_DEBUG === 'true';
+  
   // Create URL rewriting function for JavaScript
   // This matches the logic in rewriteUrl() but runs in the browser context
   const scriptContent = `
 (function() {
   'use strict';
   
+  // Conditional logging based on environment
+  const DEBUG = ${JSON.stringify(isDebug)};
+  function log(...args) {
+    if (DEBUG) console.log('[PI-Proxy]', ...args);
+  }
+  
   // Prevent multiple installations - guard against race conditions
   if (window.__PI_PROXY_URL_REWRITING_INSTALLED) {
-    console.log('[PI-Proxy] URL rewriting script already installed, skipping');
+    log('URL rewriting script already installed, skipping');
     return;
   }
   window.__PI_PROXY_URL_REWRITING_INSTALLED = true;
   
   // Debug logging
-  console.log('[PI-Proxy] URL rewriting script starting...');
+  log('URL rewriting script starting...');
   
   const PROXY_BASE = ${JSON.stringify(proxyBase)};
   const TARGET_ORIGIN = ${JSON.stringify(targetOrigin)};
@@ -443,7 +500,7 @@ function injectUrlRewritingScript(html, target, req) {
                     currentPageOrigin === proxyOrigin ||
                     (currentPageOrigin && proxyOrigin && currentPageOrigin.includes(proxyOrigin.split('://')[1]?.split(':')[0]));
   
-  console.log('[PI-Proxy] Detection check:', {
+  log('Detection check:', {
     currentHref: currentHref.substring(0, 100),
     referrer: referrer.substring(0, 100),
     currentPageOrigin,
@@ -454,11 +511,11 @@ function injectUrlRewritingScript(html, target, req) {
   // Always run if we're on the proxy origin (even if URL pattern doesn't match)
   // This ensures the script runs for all pages served through the proxy
   if (!isProxied) {
-    console.log('[PI-Proxy] Not a proxied page, skipping URL rewriting');
+    log('Not a proxied page, skipping URL rewriting');
     return;
   }
   
-  console.log('[PI-Proxy] URL rewriting script active');
+  log('URL rewriting script active');
   
   // URL rewriting function (matches server-side rewriteUrl logic)
   function rewriteUrlForJs(url, baseOrigin) {
@@ -530,7 +587,7 @@ function injectUrlRewritingScript(html, target, req) {
         const url = new URL(decoded);
         const pathname = url.pathname.replace(/\\/[^/]*$/, '');
         const baseOrigin = url.origin + (pathname || '/');
-        console.log('[PI-Proxy] Extracted origin from proxy URL:', baseOrigin);
+        log('Extracted origin from proxy URL:', baseOrigin);
         return baseOrigin;
       }
       
@@ -539,7 +596,7 @@ function injectUrlRewritingScript(html, target, req) {
         try {
           const baseUrl = new URL(document.baseURI);
           const baseOrigin = baseUrl.origin + baseUrl.pathname.replace(/\\/[^/]*$/, '');
-          console.log('[PI-Proxy] Using document.baseURI:', baseOrigin);
+          log('Using document.baseURI:', baseOrigin);
           return baseOrigin;
         } catch (e) {
           // Ignore
@@ -555,7 +612,7 @@ function injectUrlRewritingScript(html, target, req) {
             const decoded = decodeURIComponent(match);
             const url = new URL(decoded);
             const baseOrigin = url.origin + url.pathname.replace(/\\/[^/]*$/, '');
-            console.log('[PI-Proxy] Extracted origin from referrer:', baseOrigin);
+            log('Extracted origin from referrer:', baseOrigin);
             return baseOrigin;
           }
         } catch (e) {
@@ -567,7 +624,7 @@ function injectUrlRewritingScript(html, target, req) {
       // Current origin would be the proxy origin, which is wrong for relative URL resolution
       if (TARGET_ORIGIN) {
         const baseOrigin = TARGET_ORIGIN.endsWith('/') ? TARGET_ORIGIN : TARGET_ORIGIN + '/';
-        console.log('[PI-Proxy] Using TARGET_ORIGIN fallback:', baseOrigin);
+        log('Using TARGET_ORIGIN fallback:', baseOrigin);
         return baseOrigin;
       }
       
@@ -575,7 +632,7 @@ function injectUrlRewritingScript(html, target, req) {
       const currentPageOrigin = (document.location && document.location.origin) || (window.location && window.location.origin) || '';
       const currentPath = (document.location && document.location.pathname) || (window.location && window.location.pathname) || '';
       const baseOrigin = currentPageOrigin + currentPath.replace(/\\/[^/]*$/, '');
-      console.log('[PI-Proxy] Using current page origin fallback (may be incorrect):', baseOrigin);
+      log('Using current page origin fallback (may be incorrect):', baseOrigin);
       return baseOrigin;
     } catch (e) {
       console.error('[PI-Proxy] Error getting current origin:', e);
@@ -585,7 +642,7 @@ function injectUrlRewritingScript(html, target, req) {
   }
   
   const currentOrigin = getCurrentOrigin();
-  console.log('[PI-Proxy] Current origin for URL resolution:', currentOrigin);
+  log('Current origin for URL resolution:', currentOrigin);
   
   // Intercept fetch()
   if (typeof window.fetch !== 'undefined') {
@@ -595,7 +652,7 @@ function injectUrlRewritingScript(html, target, req) {
       if (typeof input === 'string') {
         const rewritten = rewriteUrlForJs(input, currentOrigin);
         if (rewritten !== input) {
-          console.log('[PI-Proxy] fetch() rewritten:', input, '->', rewritten);
+          log('fetch() rewritten:', input, '->', rewritten);
         }
         return originalFetch.call(this, rewritten, init);
       }
@@ -604,14 +661,17 @@ function injectUrlRewritingScript(html, target, req) {
         if (input instanceof Request) {
           const rewritten = rewriteUrlForJs(input.url, currentOrigin);
           if (rewritten !== input.url) {
-            console.log('[PI-Proxy] fetch(Request) rewritten:', input.url, '->', rewritten);
+            log('fetch(Request) rewritten:', input.url, '->', rewritten);
+            // Clone the Request with the new URL to preserve headers, body, method, etc.
+            const newRequest = new Request(rewritten, input);
+            return originalFetch.call(this, newRequest, init);
           }
-          return originalFetch.call(this, rewritten, init || {});
+          return originalFetch.call(this, input, init);
         } else if (input.url) {
           // Object with url property
           const rewritten = rewriteUrlForJs(input.url, currentOrigin);
           if (rewritten !== input.url) {
-            console.log('[PI-Proxy] fetch(object) rewritten:', input.url, '->', rewritten);
+            log('fetch(object) rewritten:', input.url, '->', rewritten);
           }
           return originalFetch.call(this, rewritten, init);
         }
@@ -619,7 +679,7 @@ function injectUrlRewritingScript(html, target, req) {
       // Fallback to original
       return originalFetch.call(this, input, init);
     };
-    console.log('[PI-Proxy] fetch() interception installed');
+    log('fetch() interception installed');
   }
   
   // Intercept XMLHttpRequest.open()
@@ -629,11 +689,11 @@ function injectUrlRewritingScript(html, target, req) {
     XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
       const rewritten = rewriteUrlForJs(url, currentOrigin);
       if (rewritten !== url) {
-        console.log('[PI-Proxy] XHR.open() rewritten:', url, '->', rewritten);
+        log('XHR.open() rewritten:', url, '->', rewritten);
       }
       return originalOpen.call(this, method, rewritten, async, user, password);
     };
-    console.log('[PI-Proxy] XMLHttpRequest interception installed');
+    log('XMLHttpRequest interception installed');
   }
   
   // Intercept dynamic script tag creation (for webpack code splitting)
@@ -645,7 +705,7 @@ function injectUrlRewritingScript(html, target, req) {
         set: function(value) {
           const rewritten = rewriteUrlForJs(value, currentOrigin);
           if (rewritten !== value) {
-            console.log('[PI-Proxy] HTMLScriptElement.prototype.src rewritten:', value, '->', rewritten);
+            log('HTMLScriptElement.prototype.src rewritten:', value, '->', rewritten);
           }
           originalSrcDescriptor.set.call(this, rewritten);
         },
@@ -655,7 +715,7 @@ function injectUrlRewritingScript(html, target, req) {
         configurable: true,
         enumerable: true
       });
-      console.log('[PI-Proxy] HTMLScriptElement.prototype.src interception installed');
+      log('HTMLScriptElement.prototype.src interception installed');
     }
     
     // Also intercept setAttribute on the prototype
@@ -664,13 +724,149 @@ function injectUrlRewritingScript(html, target, req) {
       if (name.toLowerCase() === 'src' && typeof value === 'string') {
         const rewritten = rewriteUrlForJs(value, currentOrigin);
         if (rewritten !== value) {
-          console.log('[PI-Proxy] HTMLScriptElement.prototype.setAttribute("src") rewritten:', value, '->', rewritten);
+          log('HTMLScriptElement.prototype.setAttribute("src") rewritten:', value, '->', rewritten);
         }
         return originalSetAttribute.call(this, name, rewritten);
       }
       return originalSetAttribute.call(this, name, value);
     };
-    console.log('[PI-Proxy] HTMLScriptElement.prototype.setAttribute interception installed');
+    log('HTMLScriptElement.prototype.setAttribute interception installed');
+  }
+  
+  // Intercept HTMLLinkElement.prototype.href (stylesheets)
+  if (typeof HTMLLinkElement !== 'undefined' && HTMLLinkElement.prototype) {
+    const originalHrefDescriptor = Object.getOwnPropertyDescriptor(HTMLLinkElement.prototype, 'href');
+    if (originalHrefDescriptor && originalHrefDescriptor.set) {
+      Object.defineProperty(HTMLLinkElement.prototype, 'href', {
+        set: function(value) {
+          const rewritten = rewriteUrlForJs(value, currentOrigin);
+          if (rewritten !== value) {
+            log('HTMLLinkElement.prototype.href rewritten:', value, '->', rewritten);
+          }
+          originalHrefDescriptor.set.call(this, rewritten);
+        },
+        get: originalHrefDescriptor.get || function() {
+          return this.getAttribute('href');
+        },
+        configurable: true,
+        enumerable: true
+      });
+      log('HTMLLinkElement.prototype.href interception installed');
+    }
+  }
+  
+  // Intercept HTMLIFrameElement.prototype.src (nested iframes)
+  if (typeof HTMLIFrameElement !== 'undefined' && HTMLIFrameElement.prototype) {
+    const originalSrcDescriptor = Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype, 'src');
+    if (originalSrcDescriptor && originalSrcDescriptor.set) {
+      Object.defineProperty(HTMLIFrameElement.prototype, 'src', {
+        set: function(value) {
+          const rewritten = rewriteUrlForJs(value, currentOrigin);
+          if (rewritten !== value) {
+            log('HTMLIFrameElement.prototype.src rewritten:', value, '->', rewritten);
+          }
+          originalSrcDescriptor.set.call(this, rewritten);
+        },
+        get: originalSrcDescriptor.get || function() {
+          return this.getAttribute('src');
+        },
+        configurable: true,
+        enumerable: true
+      });
+      log('HTMLIFrameElement.prototype.src interception installed');
+    }
+  }
+  
+  // Intercept HTMLImageElement.prototype.src (images)
+  if (typeof HTMLImageElement !== 'undefined' && HTMLImageElement.prototype) {
+    const originalSrcDescriptor = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src');
+    if (originalSrcDescriptor && originalSrcDescriptor.set) {
+      Object.defineProperty(HTMLImageElement.prototype, 'src', {
+        set: function(value) {
+          const rewritten = rewriteUrlForJs(value, currentOrigin);
+          if (rewritten !== value) {
+            log('HTMLImageElement.prototype.src rewritten:', value, '->', rewritten);
+          }
+          originalSrcDescriptor.set.call(this, rewritten);
+        },
+        get: originalSrcDescriptor.get || function() {
+          return this.getAttribute('src');
+        },
+        configurable: true,
+        enumerable: true
+      });
+      log('HTMLImageElement.prototype.src interception installed');
+    }
+  }
+  
+  // Intercept Image() constructor
+  if (typeof window !== 'undefined' && window.Image) {
+    const OriginalImage = window.Image;
+    window.Image = function(...args) {
+      const img = new OriginalImage(...args);
+      if (args.length > 0 && typeof args[0] === 'number' && args.length > 1 && typeof args[1] === 'number') {
+        // Image(width, height) constructor - no src yet
+        return img;
+      }
+      // Intercept src property after construction
+      const originalSrcDescriptor = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src');
+      if (originalSrcDescriptor && originalSrcDescriptor.set) {
+        const originalSetSrc = originalSrcDescriptor.set;
+        Object.defineProperty(img, 'src', {
+          set: function(value) {
+            const rewritten = rewriteUrlForJs(value, currentOrigin);
+            if (rewritten !== value) {
+              log('Image() constructor src rewritten:', value, '->', rewritten);
+            }
+            return originalSetSrc.call(this, rewritten);
+          },
+          get: originalSrcDescriptor.get || function() {
+            return this.getAttribute('src');
+          },
+          configurable: true,
+          enumerable: true
+        });
+      }
+      return img;
+    };
+    // Copy static properties
+    Object.setPrototypeOf(window.Image, OriginalImage);
+    Object.setPrototypeOf(window.Image.prototype, OriginalImage.prototype);
+    log('Image() constructor interception installed');
+  }
+  
+  // Intercept Audio() constructor
+  if (typeof window !== 'undefined' && window.Audio) {
+    const OriginalAudio = window.Audio;
+    window.Audio = function(...args) {
+      const audio = args.length > 0 && typeof args[0] === 'string' 
+        ? new OriginalAudio(rewriteUrlForJs(args[0], currentOrigin))
+        : new OriginalAudio(...args);
+      // Intercept src property after construction
+      const originalSrcDescriptor = Object.getOwnPropertyDescriptor(HTMLAudioElement.prototype, 'src');
+      if (originalSrcDescriptor && originalSrcDescriptor.set) {
+        const originalSetSrc = originalSrcDescriptor.set;
+        Object.defineProperty(audio, 'src', {
+          set: function(value) {
+            const rewritten = rewriteUrlForJs(value, currentOrigin);
+            if (rewritten !== value) {
+              log('Audio() constructor src rewritten:', value, '->', rewritten);
+            }
+            return originalSetSrc.call(this, rewritten);
+          },
+          get: originalSrcDescriptor.get || function() {
+            return this.getAttribute('src');
+          },
+          configurable: true,
+          enumerable: true
+        });
+      }
+      return audio;
+    };
+    // Copy static properties
+    Object.setPrototypeOf(window.Audio, OriginalAudio);
+    Object.setPrototypeOf(window.Audio.prototype, OriginalAudio.prototype);
+    log('Audio() constructor interception installed');
   }
   
   if (document && document.createElement) {
@@ -695,7 +891,7 @@ function injectUrlRewritingScript(html, target, req) {
       if (srcValue && typeof srcValue === 'string') {
         const rewritten = rewriteUrlForJs(srcValue, currentOrigin);
         if (rewritten !== srcValue) {
-          console.log('[PI-Proxy] Rewriting script src:', srcValue, '->', rewritten);
+          log('Rewriting script src:', srcValue, '->', rewritten);
           // Set both property and attribute to be safe
           try {
             scriptElement.src = rewritten;
@@ -733,7 +929,7 @@ function injectUrlRewritingScript(html, target, req) {
             const rewritten = value.replace(/<script([^>]*)src=["']([^"']+)["']/gi, (match, attrs, src) => {
               const rewrittenSrc = rewriteUrlForJs(src, currentOrigin);
               if (rewrittenSrc !== src) {
-                console.log('[PI-Proxy] innerHTML script src rewritten:', src, '->', rewrittenSrc);
+                log('innerHTML script src rewritten:', src, '->', rewrittenSrc);
               }
               return '<script' + attrs + 'src="' + rewrittenSrc + '"';
             });
@@ -749,10 +945,38 @@ function injectUrlRewritingScript(html, target, req) {
       });
     }
     
-    console.log('[PI-Proxy] Script tag interception installed');
+    // Intercept outerHTML for script tags
+    const outerHTMLDescriptor = Object.getOwnPropertyDescriptor(Element.prototype, 'outerHTML');
+    if (outerHTMLDescriptor && outerHTMLDescriptor.set && outerHTMLDescriptor.get) {
+      const originalSetOuterHTML = outerHTMLDescriptor.set;
+      const originalGetOuterHTML = outerHTMLDescriptor.get;
+      Object.defineProperty(Element.prototype, 'outerHTML', {
+        set: function(value) {
+          // Check if value contains script tags with src attributes
+          if (typeof value === 'string' && /<script[^>]*src=["']([^"']+)["']/i.test(value)) {
+            const rewritten = value.replace(/<script([^>]*)src=["']([^"']+)["']/gi, (match, attrs, src) => {
+              const rewrittenSrc = rewriteUrlForJs(src, currentOrigin);
+              if (rewrittenSrc !== src) {
+                log('outerHTML script src rewritten:', src, '->', rewrittenSrc);
+              }
+              return '<script' + attrs + 'src="' + rewrittenSrc + '"';
+            });
+            return originalSetOuterHTML.call(this, rewritten);
+          }
+          return originalSetOuterHTML.call(this, value);
+        },
+        get: function() {
+          // Use the original getter to prevent infinite recursion
+          return originalGetOuterHTML.call(this);
+        },
+        configurable: true
+      });
+    }
+    
+    log('Script tag interception installed');
   }
   
-  console.log('[PI-Proxy] URL rewriting script initialization complete');
+  log('URL rewriting script initialization complete');
 })();
 `;
 
@@ -791,11 +1015,9 @@ function injectUrlRewritingScript(html, target, req) {
  * @param {object} res - Express response object
  */
 function removeFrameBlockingHeaders(upstreamResponse, res) {
-  // Remove X-Frame-Options to allow iframe embedding
-  const frameOptions = upstreamResponse.headers.get('x-frame-options');
-  if (frameOptions) {
-    // Don't set it - it will be omitted from response
-  }
+  // Explicitly remove X-Frame-Options to allow iframe embedding
+  // Remove it from response headers if present
+  res.removeHeader('x-frame-options');
 
   // Remove or modify Content-Security-Policy frame-ancestors directive
   const csp = upstreamResponse.headers.get('content-security-policy');
@@ -814,8 +1036,10 @@ function removeFrameBlockingHeaders(upstreamResponse, res) {
       .join('; ');
     if (modifiedCsp) {
       res.setHeader('content-security-policy', modifiedCsp);
+    } else {
+      // Explicitly remove CSP header if it becomes empty
+      res.removeHeader('content-security-policy');
     }
-    // If empty, don't set header
   }
 
   // Also handle Content-Security-Policy-Report-Only
@@ -836,8 +1060,10 @@ function removeFrameBlockingHeaders(upstreamResponse, res) {
       .join('; ');
     if (modifiedCsp) {
       res.setHeader('content-security-policy-report-only', modifiedCsp);
+    } else {
+      // Explicitly remove CSP-Report-Only header if it becomes empty
+      res.removeHeader('content-security-policy-report-only');
     }
-    // If empty, don't set header
   }
 }
 
