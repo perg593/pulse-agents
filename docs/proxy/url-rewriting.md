@@ -144,7 +144,38 @@ The injected JavaScript:
 
 5. **Content Security Policy**: Some CSP headers may conflict with the injected script. The proxy removes CSP headers that block iframe embedding.
 
-### Edge Cases Handled
+### Error Handling
+
+### Content-Type Aware Error Responses
+
+The proxy intelligently handles error responses based on the request type:
+
+- **HTML requests**: Return HTML error pages (for display in browser)
+- **JavaScript/JSON requests**: Return JSON error responses (prevents MIME type errors)
+- **Other requests**: Return original error response from upstream
+
+This prevents issues where JavaScript modules receive HTML error pages, which would cause:
+```
+Failed to load module script: Expected a JavaScript-or-Wasm module script 
+but the server responded with a MIME type of "text/html"
+```
+
+### HTML Entity Decoding
+
+URLs containing HTML entities are automatically decoded before processing:
+
+- `&#x27;` → `'`
+- `&#39;` → `'`
+- `&quot;` → `"`
+- `&amp;` → `&`
+- `&lt;` → `<`
+- `&gt;` → `>`
+- `&#x2F;` → `/`
+- `&#47;` → `/`
+
+This prevents malformed URLs that would cause 404 errors.
+
+## Edge Cases Handled
 
 - **Query Parameters**: Preserved in rewritten URLs
 - **Fragments/Hashes**: Preserved in rewritten URLs
@@ -155,6 +186,44 @@ The injected JavaScript:
 - **Request Objects**: Fetch Request objects are properly cloned with new URL while preserving headers/body
 - **srcset Attributes**: Multiple URLs in srcset are individually rewritten
 - **CSS url()**: URLs in CSS url() functions are rewritten
+
+## HTTP Method Support
+
+The proxy supports multiple HTTP methods for proxying requests:
+
+- **GET**: Standard page and resource requests
+- **POST**: Form submissions, API calls, analytics tracking
+- **PUT**: Resource updates
+- **DELETE**: Resource deletion
+- **OPTIONS**: CORS preflight requests (handled automatically)
+
+### POST/PUT Request Handling
+
+When proxying POST or PUT requests:
+
+1. The request method is forwarded to the upstream server
+2. The request body is read and forwarded as-is
+3. Content-Type header is preserved
+4. All other headers are forwarded normally
+
+Example:
+```javascript
+// POST request through proxy
+fetch('/proxy?url=https://api.example.com/endpoint', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ data: 'value' })
+});
+```
+
+### CORS Support
+
+The proxy includes full CORS support:
+
+- Preflight (OPTIONS) requests are handled automatically
+- CORS headers are set appropriately for all methods
+- Credentials are allowed (`access-control-allow-credentials: true`)
+- CORS headers from upstream are forwarded when present
 
 ## Security Features
 

@@ -17,11 +17,13 @@ function checkRateLimit(request) {
   
   // Clean up old entries periodically
   if (rateLimitStore.size > 10000) {
+    const keysToDelete = [];
     for (const [k, v] of rateLimitStore.entries()) {
       if (now - v.windowStart > RATE_LIMIT_WINDOW_MS) {
-        rateLimitStore.delete(k);
+        keysToDelete.push(k);
       }
     }
+    keysToDelete.forEach(k => rateLimitStore.delete(k));
   }
   
   if (!record || now - record.windowStart > RATE_LIMIT_WINDOW_MS) {
@@ -67,7 +69,9 @@ export async function onRequest(context) {
     return buildPreflightResponse(request);
   }
 
-  if (request.method !== 'GET') {
+  // Allow GET, POST, PUT, DELETE
+  const allowedMethods = ['GET', 'POST', 'PUT', 'DELETE'];
+  if (!allowedMethods.includes(request.method)) {
     return withCors(jsonResponse({ error: 'Method not allowed' }, { status: 405 }), request);
   }
 
@@ -100,25 +104,86 @@ export async function onRequest(context) {
   }
 
   try {
-    const upstreamHeaders = buildUpstreamHeaders(request.headers, target, env);
-    const upstreamResponse = await fetch(target.toString(), {
+    const upstreamHeaders = buildUpstreamHeaders(request.headers, target, env, request.method);
+    
+    // Prepare fetch options
+    const fetchOptions = {
+      method: request.method,
       headers: upstreamHeaders,
       redirect: 'follow'
-    });
+    };
+    
+    // Forward request body for POST/PUT requests
+    if (['POST', 'PUT'].includes(request.method)) {
+      // Clone request to read body (request body can only be read once)
+      const clonedRequest = request.clone();
+      try {
+        const body = await clonedRequest.arrayBuffer();
+        fetchOptions.body = body;
+      } catch (error) {
+        // If body reading fails, continue without body
+        console.error('[PI-Proxy] Failed to read request body:', error);
+      }
+    }
+    
+    const upstreamResponse = await fetch(target.toString(), fetchOptions);
 
     const responseHeaders = buildCorsHeaders(request.headers);
     copyPassthroughHeaders(upstreamResponse, responseHeaders);
     removeFrameBlockingHeaders(upstreamResponse, responseHeaders);
+    
+    // Forward CORS headers from upstream if present
+    const corsHeaders = [
+      'access-control-allow-origin',
+      'access-control-allow-credentials',
+      'access-control-expose-headers',
+      'access-control-allow-methods',
+      'access-control-allow-headers'
+    ];
+    corsHeaders.forEach(header => {
+      const value = upstreamResponse.headers.get(header);
+      if (value) {
+        responseHeaders.set(header, value);
+      }
+    });
 
     const contentType = upstreamResponse.headers.get('content-type') || '';
     if (contentType) {
       responseHeaders.set('content-type', contentType);
     }
 
+    // Handle error responses - don't return HTML for non-HTML requests
+    if (upstreamResponse.status >= 400) {
+      const isHtmlRequest = contentType.includes('text/html') || 
+                           request.headers.get('accept')?.includes('text/html');
+      
+      // For non-HTML error responses, return JSON error instead of HTML
+      if (!isHtmlRequest && upstreamResponse.status >= 400) {
+        const errorBody = await upstreamResponse.text().catch(() => '');
+        // If upstream returned HTML error page for JS/JSON request, return JSON instead
+        if (errorBody.trim().startsWith('<!') || errorBody.trim().startsWith('<html')) {
+          return withCors(
+            jsonResponse({ 
+              error: `Upstream error: ${upstreamResponse.status}`,
+              status: upstreamResponse.status,
+              url: target.toString()
+            }, { status: upstreamResponse.status }),
+            request
+          );
+        }
+        // Otherwise return the original error response
+        return new Response(errorBody, {
+          status: upstreamResponse.status,
+          headers: responseHeaders
+        });
+      }
+    }
+
     if (contentType.includes('text/html')) {
       let body = await upstreamResponse.text();
       body = ensureBaseHref(body, target);
       body = rewriteResourceUrls(body, target, incoming);
+      body = injectFrameworkErrorHandler(body);
       body = injectUrlRewritingScript(body, target, incoming, env);
       body = injectConsentCleanup(body);
       
@@ -153,6 +218,39 @@ function parseList(value, fallback) {
     .split(',')
     .map((entry) => entry.trim())
     .filter(Boolean);
+}
+
+/**
+ * Decodes HTML entities in a string
+ * @param {string} str - String potentially containing HTML entities
+ * @returns {string} Decoded string
+ */
+function decodeHtmlEntities(str) {
+  if (typeof str !== 'string') return str;
+  return str
+    .replace(/&#x27;/g, "'")
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&#x2F;/g, '/')
+    .replace(/&#47;/g, '/');
+}
+
+/**
+ * Validates that a string is a valid URL
+ * @param {string} url - URL to validate
+ * @returns {boolean} True if valid URL
+ */
+function validateUrl(url) {
+  if (!url || typeof url !== 'string') return false;
+  try {
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -209,7 +307,7 @@ function isHostAllowed(hostname, allowlist, blocklist) {
   });
 }
 
-function buildUpstreamHeaders(headers, target, env) {
+function buildUpstreamHeaders(headers, target, env, method = 'GET') {
   const upstream = new Headers();
   // If env var is not set, pass null to use defaults in sanitizeCookies
   // If env var is set, parse it (empty string becomes empty array = no filtering)
@@ -225,6 +323,14 @@ function buildUpstreamHeaders(headers, target, env) {
     ['origin', headers.get('origin') || target.origin],
     ['cookie', sanitizeCookies(headers.get('cookie'), sensitiveCookiePatterns)]
   ];
+  
+  // Forward Content-Type for POST/PUT requests
+  if (['POST', 'PUT'].includes(method)) {
+    const contentType = headers.get('content-type');
+    if (contentType) {
+      headerPairs.push(['content-type', contentType]);
+    }
+  }
 
   headerPairs.forEach(([key, value]) => {
     if (value) {
@@ -237,8 +343,8 @@ function buildUpstreamHeaders(headers, target, env) {
   });
 
   const secHeaders = [
-    ['sec-fetch-dest', headers.get('sec-fetch-dest') || 'document'],
-    ['sec-fetch-mode', headers.get('sec-fetch-mode') || 'navigate'],
+    ['sec-fetch-dest', headers.get('sec-fetch-dest') || (method === 'GET' ? 'document' : 'empty')],
+    ['sec-fetch-mode', headers.get('sec-fetch-mode') || (method === 'GET' ? 'navigate' : 'cors')],
     ['sec-fetch-site', headers.get('sec-fetch-site') || 'none']
   ];
 
@@ -260,11 +366,14 @@ function buildPreflightResponse(request) {
 function buildCorsHeaders(requestHeaders) {
   const headers = new Headers();
   headers.set('access-control-allow-origin', '*');
+  // Allow credentials for JSONP and other requests that need it
+  headers.set('access-control-allow-credentials', 'true');
   const allowHeaders =
-    requestHeaders.get('access-control-request-headers') || 'Accept,Content-Type,User-Agent';
+    requestHeaders.get('access-control-request-headers') || 'Accept,Content-Type,User-Agent,Authorization';
   headers.set('access-control-allow-headers', allowHeaders);
-  headers.set('access-control-allow-methods', 'GET,HEAD,OPTIONS');
-  headers.set('access-control-expose-headers', 'cache-control,expires,pragma,content-type');
+  headers.set('access-control-allow-methods', 'GET,POST,PUT,DELETE,HEAD,OPTIONS');
+  // Expose headers that might be needed by clients
+  headers.set('access-control-expose-headers', 'content-type,content-length,content-encoding,cache-control,expires,pragma');
   return headers;
 }
 
@@ -497,7 +606,9 @@ function rewriteResourceUrls(html, target, proxyUrl) {
 function rewriteUrl(url, targetOrigin, proxyBase) {
   if (!url || typeof url !== 'string') return url;
 
-  const trimmed = url.trim();
+  // Decode HTML entities before processing
+  const decoded = decodeHtmlEntities(url);
+  const trimmed = decoded.trim();
   if (!trimmed) return url;
 
   // Skip data URLs, blob URLs, and javascript: URLs
@@ -574,6 +685,12 @@ function injectUrlRewritingScript(html, target, proxyUrl, env) {
 
   if (!proxyBase) return html;
 
+  // Validate URLs before injection to prevent syntax errors
+  if (!validateUrl(proxyBase) || !validateUrl(targetOrigin)) {
+    console.error('[PI-Proxy] Invalid URLs for script injection:', { proxyBase, targetOrigin });
+    return html; // Don't inject script if URLs are invalid
+  }
+
   // Create URL rewriting function for JavaScript
   // This matches the logic in rewriteUrl() but runs in the browser context
   // Determine if debug logging should be enabled (default: true for development)
@@ -584,6 +701,7 @@ function injectUrlRewritingScript(html, target, proxyUrl, env) {
 (function() {
   'use strict';
   
+  try {
   // Conditional logging based on environment
   const DEBUG = ${JSON.stringify(isDebug)};
   function log(...args) {
@@ -600,8 +718,23 @@ function injectUrlRewritingScript(html, target, proxyUrl, env) {
   // Debug logging
   log('URL rewriting script starting...');
   
+  // Validate URLs before using them
   const PROXY_BASE = ${JSON.stringify(proxyBase)};
   const TARGET_ORIGIN = ${JSON.stringify(targetOrigin)};
+  
+  // Validate URLs before using
+  if (!PROXY_BASE || !TARGET_ORIGIN) {
+    console.error('[PI-Proxy] Missing required URLs for script injection');
+    return;
+  }
+  
+  try {
+    new URL(PROXY_BASE);
+    new URL(TARGET_ORIGIN);
+  } catch (e) {
+    console.error('[PI-Proxy] Invalid URLs in script injection:', e);
+    return;
+  }
   
   // Check if we're on a proxied page - use multiple detection methods
   const currentHref = (document.location && document.location.href) || (window.location && window.location.href) || '';
@@ -632,11 +765,27 @@ function injectUrlRewritingScript(html, target, proxyUrl, env) {
   
   log('URL rewriting script active');
   
+  // HTML entity decoding function
+  function decodeHtmlEntities(str) {
+    if (typeof str !== 'string') return str;
+    return str
+      .replace(/&#x27;/g, "'")
+      .replace(/&#39;/g, "'")
+      .replace(/&quot;/g, '"')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&#x2F;/g, '/')
+      .replace(/&#47;/g, '/');
+  }
+  
   // URL rewriting function (matches server-side rewriteUrl logic)
   function rewriteUrlForJs(url, baseOrigin) {
     if (!url || typeof url !== 'string') return url;
     
-    const trimmed = url.trim();
+    // Decode HTML entities before processing
+    const decoded = decodeHtmlEntities(url);
+    const trimmed = decoded.trim();
     if (!trimmed) return url;
     
     // Skip data URLs, blob URLs, and javascript: URLs
@@ -1092,6 +1241,9 @@ function injectUrlRewritingScript(html, target, proxyUrl, env) {
   }
   
   log('URL rewriting script initialization complete');
+  } catch (e) {
+    console.error('[PI-Proxy] Error in URL rewriting script:', e);
+  }
 })();
 `;
 
@@ -1221,6 +1373,334 @@ function inject403Message(html, target) {
     output = output.replace(/<\/body>/i, `${protectionScript}</body>`);
   } else {
     output = `${output}${protectionScript}`;
+  }
+
+  return output;
+}
+
+/**
+ * Injects JavaScript to catch Vue/Nuxt hydration errors and restore SSR content.
+ * This prevents blank pages when framework hydration fails due to proxy modifications.
+ *
+ * @param {string} html - The HTML content
+ * @returns {string} HTML with framework error handler injected
+ */
+function injectFrameworkErrorHandler(html) {
+  // Skip if already injected
+  if (html.includes('data-pi-proxy="framework-error-handler"')) {
+    return html;
+  }
+
+  const errorHandlerScript = `
+<script data-pi-proxy="framework-error-handler">
+(function() {
+  'use strict';
+  
+  // Prevent multiple installations
+  if (window.__PI_FRAMEWORK_ERROR_HANDLER_INSTALLED) return;
+  window.__PI_FRAMEWORK_ERROR_HANDLER_INSTALLED = true;
+  
+  console.log('[PI-Proxy] Framework error handler installing...');
+  
+  // Store the original SSR content before any framework tries to manipulate it
+  var ssrContentBackup = null;
+  var appRoot = null;
+  var isNuked = false;
+  var restoreCount = 0;
+  
+  // Common Nuxt/Vue app root selectors
+  var appRootSelectors = ['#__nuxt', '#app', '#__layout', '[data-v-app]', '.nuxt-app'];
+  
+  function backupSSRContent() {
+    if (ssrContentBackup) return;
+    
+    for (var i = 0; i < appRootSelectors.length; i++) {
+      var root = document.querySelector(appRootSelectors[i]);
+      if (root && root.innerHTML && root.innerHTML.trim().length > 100) {
+        appRoot = root;
+        ssrContentBackup = root.innerHTML;
+        console.log('[PI-Proxy] Backed up SSR content from:', appRootSelectors[i]);
+        break;
+      }
+    }
+    
+    if (!ssrContentBackup && document.body && document.body.innerHTML) {
+      ssrContentBackup = document.body.innerHTML;
+      appRoot = document.body;
+      console.log('[PI-Proxy] Backed up body content as fallback');
+    }
+  }
+  
+  function nukeAllScripts() {
+    if (isNuked) return;
+    isNuked = true;
+    console.log('[PI-Proxy] NUKE MODE: Stopping all JavaScript execution');
+    
+    var scripts = document.querySelectorAll('script:not([data-pi-proxy])');
+    scripts.forEach(function(script) {
+      if (script.src && !script.src.includes('pi-proxy')) {
+        script.remove();
+      }
+    });
+    
+    var highestId = setTimeout(function(){}, 0);
+    for (var i = 0; i < highestId; i++) {
+      clearTimeout(i);
+      clearInterval(i);
+    }
+    
+    if (window.cancelAnimationFrame) {
+      for (var j = 0; j < 1000; j++) {
+        cancelAnimationFrame(j);
+      }
+    }
+    
+    var originalCreateElement = document.createElement.bind(document);
+    document.createElement = function(tagName) {
+      var el = originalCreateElement(tagName);
+      if (tagName.toLowerCase() === 'script') {
+        Object.defineProperty(el, 'src', {
+          set: function() { 
+            console.log('[PI-Proxy] Blocked script injection');
+            return ''; 
+          },
+          get: function() { return ''; }
+        });
+      }
+      return el;
+    };
+    
+    window.Vue = { createApp: function() { return { mount: function() {}, use: function() { return this; } }; } };
+    window.__NUXT__ = null;
+    window.__NUXT_DATA__ = null;
+    
+    window.onerror = function() { return true; };
+    window.addEventListener('error', function(e) { e.preventDefault(); e.stopPropagation(); }, true);
+    window.addEventListener('unhandledrejection', function(e) { e.preventDefault(); }, true);
+    
+    console.log('[PI-Proxy] NUKE MODE: All scripts disabled');
+  }
+  
+  function restoreSSRContent(force) {
+    if (!ssrContentBackup || !appRoot) {
+      console.log('[PI-Proxy] No SSR content to restore');
+      return false;
+    }
+    
+    var currentContent = appRoot.innerHTML || '';
+    var needsRestore = force || currentContent.trim().length < 50;
+    
+    if (needsRestore) {
+      restoreCount++;
+      console.log('[PI-Proxy] Restoring SSR content (attempt ' + restoreCount + ')');
+      
+      nukeAllScripts();
+      appRoot.innerHTML = ssrContentBackup;
+      
+      if (!document.querySelector('[data-pi-proxy="ssr-fallback-notice"]')) {
+        var indicator = document.createElement('div');
+        indicator.setAttribute('data-pi-proxy', 'ssr-fallback-notice');
+        indicator.style.cssText = 'position:fixed;bottom:10px;right:10px;background:rgba(0,0,0,0.7);color:white;padding:8px 12px;border-radius:4px;font-size:12px;z-index:999999;font-family:system-ui,sans-serif;';
+        indicator.textContent = 'Showing static preview (interactive features disabled)';
+        document.body.appendChild(indicator);
+        
+        setTimeout(function() {
+          if (indicator.parentNode) {
+            indicator.style.opacity = '0';
+            indicator.style.transition = 'opacity 0.5s';
+            setTimeout(function() {
+              if (indicator.parentNode) indicator.parentNode.removeChild(indicator);
+            }, 500);
+          }
+        }, 5000);
+      }
+      
+      if (restoreCount === 1) {
+        setInterval(function() {
+          if (appRoot && ssrContentBackup) {
+            var content = appRoot.innerHTML || '';
+            if (content.trim().length < 100) {
+              console.log('[PI-Proxy] Content wiped again, re-restoring');
+              appRoot.innerHTML = ssrContentBackup;
+            }
+          }
+        }, 500);
+      }
+      
+      return true;
+    }
+    return false;
+  }
+  
+  if (document.body) {
+    backupSSRContent();
+  }
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+      backupSSRContent();
+      setupMutationObserver();
+    }, { once: true });
+  } else {
+    setTimeout(backupSSRContent, 0);
+    setTimeout(setupMutationObserver, 0);
+  }
+  
+  var frameworkErrorCount = 0;
+  var criticalErrorPatterns = [
+    /Context conflict/i,
+    /Cannot read properties of (undefined|null)/i,
+    /Hydration.*mismatch/i,
+    /beforeEach/i,
+    /Vue.*error/i,
+    /Nuxt.*error/i,
+    /app.*initialization/i,
+    /reading 'ce'/i
+  ];
+  
+  var originalOnError = window.onerror;
+  window.onerror = function(message, source, lineno, colno, error) {
+    var messageStr = String(message || '');
+    var isCriticalFrameworkError = criticalErrorPatterns.some(function(pattern) {
+      return pattern.test(messageStr);
+    });
+    
+    if (isCriticalFrameworkError) {
+      frameworkErrorCount++;
+      console.warn('[PI-Proxy] Caught framework error #' + frameworkErrorCount + ':', messageStr.substring(0, 100));
+      
+      if (frameworkErrorCount >= 1) {
+        setTimeout(function() {
+          restoreSSRContent(true);
+        }, 100);
+      }
+      
+      return true;
+    }
+    
+    if (originalOnError) {
+      return originalOnError.apply(this, arguments);
+    }
+    return false;
+  };
+  
+  window.addEventListener('unhandledrejection', function(event) {
+    var reason = event.reason || {};
+    var message = reason.message || String(reason);
+    
+    var isCriticalFrameworkError = criticalErrorPatterns.some(function(pattern) {
+      return pattern.test(message);
+    });
+    
+    if (isCriticalFrameworkError) {
+      frameworkErrorCount++;
+      console.warn('[PI-Proxy] Caught unhandled rejection #' + frameworkErrorCount + ':', message.substring(0, 100));
+      event.preventDefault();
+      
+      setTimeout(function() {
+        restoreSSRContent(true);
+      }, 100);
+    }
+  });
+  
+  function setupMutationObserver() {
+    if (isNuked) return;
+    
+    for (var i = 0; i < appRootSelectors.length; i++) {
+      var root = document.querySelector(appRootSelectors[i]);
+      if (root) {
+        var observer = new MutationObserver(function(mutations) {
+          if (isNuked) {
+            observer.disconnect();
+            return;
+          }
+          
+          var currentContent = root.innerHTML || '';
+          var textContent = root.textContent || '';
+          
+          if (currentContent.length < 100 || textContent.trim().length < 30) {
+            console.log('[PI-Proxy] MutationObserver detected empty app root');
+            observer.disconnect();
+            restoreSSRContent(true);
+          }
+        });
+        
+        observer.observe(root, { childList: true, subtree: true });
+        console.log('[PI-Proxy] MutationObserver watching:', appRootSelectors[i]);
+        break;
+      }
+    }
+  }
+  
+  setTimeout(function() {
+    backupSSRContent();
+  }, 500);
+  
+  setTimeout(function() {
+    backupSSRContent();
+    
+    for (var i = 0; i < appRootSelectors.length; i++) {
+      var root = document.querySelector(appRootSelectors[i]);
+      if (root) {
+        var content = root.innerHTML || '';
+        var textContent = root.textContent || '';
+        
+        if (content.length < 100 || textContent.trim().length < 30) {
+          console.log('[PI-Proxy] Detected empty app root at 1.5s');
+          restoreSSRContent(true);
+          break;
+        }
+      }
+    }
+  }, 1500);
+  
+  setTimeout(function() {
+    if (frameworkErrorCount > 0) {
+      console.log('[PI-Proxy] Framework errors detected at 2.5s, forcing restore');
+      restoreSSRContent(true);
+    }
+  }, 2500);
+  
+  setTimeout(function() {
+    var bodyText = document.body ? (document.body.textContent || '').trim() : '';
+    var visibleElements = document.querySelectorAll('body *:not(script):not(style):not(noscript)');
+    var hasVisibleContent = false;
+    
+    for (var i = 0; i < Math.min(visibleElements.length, 50); i++) {
+      var el = visibleElements[i];
+      try {
+        var rect = el.getBoundingClientRect();
+        var style = window.getComputedStyle(el);
+        if (rect.width > 10 && rect.height > 10 && 
+            style.display !== 'none' && 
+            style.visibility !== 'hidden' &&
+            style.opacity !== '0') {
+          hasVisibleContent = true;
+          break;
+        }
+      } catch(e) {}
+    }
+    
+    if (!hasVisibleContent || bodyText.length < 50 || frameworkErrorCount > 0) {
+      console.log('[PI-Proxy] Page appears blank at 3.5s, forcing restore');
+      restoreSSRContent(true);
+    }
+  }, 3500);
+  
+  console.log('[PI-Proxy] Framework error handler installed');
+})();
+</script>`;
+
+  let output = html;
+
+  // Inject VERY early - right after opening <head> or at document start
+  // This must run before any framework scripts
+  if (/<head[^>]*>/i.test(output)) {
+    output = output.replace(/<head([^>]*)>/i, `<head$1>${errorHandlerScript}`);
+  } else if (/<html[^>]*>/i.test(output)) {
+    output = output.replace(/<html([^>]*)>/i, `<html$1>${errorHandlerScript}`);
+  } else {
+    output = errorHandlerScript + output;
   }
 
   return output;
