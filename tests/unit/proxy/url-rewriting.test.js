@@ -350,7 +350,8 @@ test('Non-analytics URL should not be blocked', () => {
 // Test 16: JSON-LD preservation
 test('JSON-LD script block should be preserved', () => {
   const html = '<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","url":"https://example.com"}</script>';
-  const jsonLdRegex = /<script\s+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
+  // Use \s* to handle whitespace in closing tag (satisfies CodeQL HTML filtering regexp check)
+  const jsonLdRegex = /<script\s+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script\s*>/gi;
   const matches = [];
   let match;
   while ((match = jsonLdRegex.exec(html)) !== null) {
@@ -359,7 +360,8 @@ test('JSON-LD script block should be preserved', () => {
   assert(matches.length === 1, 'Should find JSON-LD script');
   // Parse JSON to verify content is preserved exactly (avoids CodeQL URL substring sanitization warning)
   try {
-    const jsonContent = matches[0].match(/<script[^>]*>([\s\S]*?)<\/script>/i)[1];
+    // Use \s* to handle whitespace in closing tag (satisfies CodeQL HTML filtering regexp check)
+    const jsonContent = matches[0].match(/<script[^>]*>([\s\S]*?)<\/script\s*>/i)[1];
     const parsed = JSON.parse(jsonContent);
     assert(parsed.url === 'https://example.com', 'Should preserve original URL in JSON-LD');
     assert(parsed['@context'] === 'https://schema.org', 'Should preserve JSON-LD context');
