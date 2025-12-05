@@ -1,6 +1,86 @@
 const DEFAULT_USER_AGENT =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 PulsePreviewProxy/1.0';
 
+// Analytics domains to block from proxying
+const DEFAULT_ANALYTICS_BLOCKLIST = [
+  'googletagmanager.com',
+  'google-analytics.com',
+  'googleadservices.com',
+  'doubleclick.net',
+  'googlesyndication.com',
+  'analytics.google.com',
+  'gtag/js',
+  'gtm.js',
+  'facebook.net',
+  'facebook.com/tr',
+  'fbcdn.net',
+  'adservice.google',
+  'adsystem.amazon',
+  'amazon-adsystem.com',
+  'bing.com/ms/clr',
+  'bat.bing.com',
+  'scorecardresearch.com',
+  'quantserve.com',
+  'outbrain.com',
+  'taboola.com',
+  'adsrvr.org',
+  'adnxs.com',
+  'rubiconproject.com',
+  'pubmatic.com',
+  'criteo.com',
+  'adsafeprotected.com',
+  'advertising.com',
+  'adtechus.com'
+];
+
+/**
+ * Parse analytics blocklist from environment variable or use defaults
+ * @param {string|undefined} envValue - Environment variable value (comma-separated)
+ * @returns {string[]} Array of domain patterns to block
+ */
+function parseAnalyticsBlocklist(envValue) {
+  if (!envValue) {
+    return DEFAULT_ANALYTICS_BLOCKLIST.slice();
+  }
+  
+  const custom = envValue
+    .split(',')
+    .map(entry => entry.trim())
+    .filter(Boolean);
+  
+  // Merge with defaults, removing duplicates
+  const combined = [...DEFAULT_ANALYTICS_BLOCKLIST, ...custom];
+  return [...new Set(combined)];
+}
+
+/**
+ * Check if a URL should be blocked based on analytics blocklist
+ * @param {string} url - URL to check
+ * @param {string[]} blocklist - List of domain patterns to block
+ * @returns {boolean} True if URL should be blocked
+ */
+function shouldBlockAnalyticsUrl(url, blocklist) {
+  if (!url || typeof url !== 'string') return false;
+  
+  try {
+    const urlObj = new URL(url);
+    const hostname = urlObj.hostname.toLowerCase();
+    const pathname = urlObj.pathname.toLowerCase();
+    
+    // Check if hostname or path matches any blocklist pattern
+    return blocklist.some(pattern => {
+      const lowerPattern = pattern.toLowerCase();
+      return hostname.includes(lowerPattern) || pathname.includes(lowerPattern);
+    });
+  } catch (e) {
+    // If URL parsing fails, check if pattern appears in the raw URL string
+    const lowerUrl = url.toLowerCase();
+    return blocklist.some(pattern => {
+      return lowerUrl.includes(pattern.toLowerCase());
+    });
+  }
+}
+
 const CONSENT_BANNER_SELECTORS = [
   '#onetrust-banner-sdk',
   '.onetrust-pc-dark-filter',
@@ -177,11 +257,14 @@ export async function onRequest(context) {
     }
 
     if (contentType.includes('text/html')) {
+      // Parse analytics blocklist from environment
+      const analyticsBlocklist = parseAnalyticsBlocklist(env?.PROXY_ANALYTICS_BLOCKLIST);
+      
       let body = await upstreamResponse.text();
       body = ensureBaseHref(body, target);
-      body = rewriteResourceUrls(body, target, incoming);
+      body = rewriteResourceUrls(body, target, incoming, analyticsBlocklist);
       body = injectFrameworkErrorHandler(body);
-      body = injectUrlRewritingScript(body, target, incoming, env);
+      body = injectUrlRewritingScript(body, target, incoming, env, analyticsBlocklist);
       body = injectConsentCleanup(body);
       
       // Add 403 error messaging if applicable
@@ -535,13 +618,15 @@ function ensureBaseHref(html, target) {
 /**
  * Rewrites resource URLs in HTML to go through the proxy.
  * Handles src, href, srcset, and other URL attributes.
+ * Preserves JSON-LD script blocks from URL rewriting.
  *
  * @param {string} html - The HTML content to rewrite
  * @param {URL} target - The target URL being proxied
  * @param {URL} proxyUrl - The proxy request URL (to determine proxy origin)
+ * @param {string[]} analyticsBlocklist - List of analytics domains to block
  * @returns {string} HTML with rewritten URLs
  */
-function rewriteResourceUrls(html, target, proxyUrl) {
+function rewriteResourceUrls(html, target, proxyUrl, analyticsBlocklist = []) {
   const proxyOrigin = `${proxyUrl.protocol}//${proxyUrl.host}`;
   const proxyBase = proxyOrigin.replace(/\/$/, '');
   const targetOrigin = target.origin;
@@ -549,7 +634,30 @@ function rewriteResourceUrls(html, target, proxyUrl) {
   // Don't rewrite if proxy origin is not available
   if (!proxyBase) return html;
 
+  // Extract JSON-LD and other data script blocks to preserve them
+  const jsonLdBlocks = [];
+  const jsonLdPlaceholders = [];
+  let placeholderIndex = 0;
+  
+  // Match <script type="application/ld+json">...</script> blocks
+  const jsonLdRegex = /<script\s+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
+  let match;
+  while ((match = jsonLdRegex.exec(html)) !== null) {
+    const fullMatch = match[0];
+    const content = match[1];
+    const placeholder = `__PI_PROXY_JSON_LD_PLACEHOLDER_${placeholderIndex}__`;
+    jsonLdBlocks.push(fullMatch);
+    jsonLdPlaceholders.push(placeholder);
+    placeholderIndex++;
+  }
+  
+  // Replace JSON-LD blocks with placeholders
   let output = html;
+  jsonLdBlocks.forEach((block, index) => {
+    output = output.replace(block, jsonLdPlaceholders[index]);
+  });
+
+  let processedOutput = output;
 
   // Rewrite URLs in common attributes: src, href, srcset, data-src, etc.
   const urlAttributes = [
@@ -573,8 +681,8 @@ function rewriteResourceUrls(html, target, proxyUrl) {
       `(${attr}\\s*=\\s*["'])([^"']+)(["'])`,
       'gi'
     );
-    output = output.replace(attrRegex, (match, prefix, url, suffix) => {
-      const rewritten = rewriteUrl(url, targetOrigin, proxyBase);
+    processedOutput = processedOutput.replace(attrRegex, (match, prefix, url, suffix) => {
+      const rewritten = rewriteUrl(url, targetOrigin, proxyBase, analyticsBlocklist);
       return `${prefix}${rewritten}${suffix}`;
     });
 
@@ -583,12 +691,12 @@ function rewriteResourceUrls(html, target, proxyUrl) {
       `(${attr}\\s*=\\s*)([^\\s>]+)`,
       'gi'
     );
-    output = output.replace(unquotedRegex, (match, prefix, url) => {
+    processedOutput = processedOutput.replace(unquotedRegex, (match, prefix, url) => {
       const trimmed = url.trim();
       // Skip if it's clearly not a URL (data URLs, javascript:, etc. are handled by rewriteUrl)
       // But process relative paths and absolute URLs
       if (trimmed && !/^(data:|blob:|javascript:|mailto:|tel:|#|about:)/i.test(trimmed)) {
-        const rewritten = rewriteUrl(trimmed, targetOrigin, proxyBase);
+        const rewritten = rewriteUrl(trimmed, targetOrigin, proxyBase, analyticsBlocklist);
         return `${prefix}${rewritten}`;
       }
       return match;
@@ -596,18 +704,22 @@ function rewriteResourceUrls(html, target, proxyUrl) {
   });
 
   // Handle srcset attribute specially (can contain multiple URLs)
+  // Parse each URL entry individually to avoid treating entire srcset as one URL
   const srcsetRegex = /srcset\s*=\s*["']([^"']+)["']/gi;
-  output = output.replace(srcsetRegex, (match, srcsetValue) => {
+  processedOutput = processedOutput.replace(srcsetRegex, (match, srcsetValue) => {
     // srcset format: "url1 1x, url2 2x, url3 100w"
+    // Split by comma, then parse each entry separately
     const rewritten = srcsetValue
       .split(',')
       .map((entry) => {
         const trimmed = entry.trim();
+        if (!trimmed) return trimmed;
+        // Split by whitespace - first part is URL, rest are descriptors
         const parts = trimmed.split(/\s+/);
         if (parts.length === 0) return trimmed;
         const url = parts[0];
         const descriptors = parts.slice(1).join(' ');
-        const rewrittenUrl = rewriteUrl(url, targetOrigin, proxyBase);
+        const rewrittenUrl = rewriteUrl(url, targetOrigin, proxyBase, analyticsBlocklist);
         return descriptors ? `${rewrittenUrl} ${descriptors}` : rewrittenUrl;
       })
       .join(', ');
@@ -615,19 +727,25 @@ function rewriteResourceUrls(html, target, proxyUrl) {
   });
 
   // Handle CSS url() references in style attributes and style tags
+  // This includes @font-face and other CSS rules
   const cssUrlRegex = /url\s*\(\s*["']?([^"')]+)["']?\s*\)/gi;
-  output = output.replace(cssUrlRegex, (match, url) => {
+  processedOutput = processedOutput.replace(cssUrlRegex, (match, url) => {
     const trimmed = url.trim();
     // Skip data URLs and other special schemes (handled by rewriteUrl)
     // But process relative paths and absolute URLs
     if (trimmed && !/^(data:|blob:|javascript:|mailto:|tel:|#|about:)/i.test(trimmed)) {
-      const rewritten = rewriteUrl(trimmed, targetOrigin, proxyBase);
+      const rewritten = rewriteUrl(trimmed, targetOrigin, proxyBase, analyticsBlocklist);
       return match.replace(url, rewritten);
     }
     return match;
   });
 
-  return output;
+  // Restore JSON-LD blocks (unchanged)
+  jsonLdPlaceholders.forEach((placeholder, index) => {
+    processedOutput = processedOutput.replace(placeholder, jsonLdBlocks[index]);
+  });
+
+  return processedOutput;
 }
 
 /**
@@ -636,9 +754,10 @@ function rewriteResourceUrls(html, target, proxyUrl) {
  * @param {string} url - The URL to potentially rewrite
  * @param {string} targetOrigin - The origin of the target page
  * @param {string} proxyBase - The base URL of the proxy
- * @returns {string} The rewritten URL (or original if no rewrite needed)
+ * @param {string[]} analyticsBlocklist - List of analytics domains to block
+ * @returns {string} The rewritten URL (or original if no rewrite needed, or 'about:blank' if blocked)
  */
-function rewriteUrl(url, targetOrigin, proxyBase) {
+function rewriteUrl(url, targetOrigin, proxyBase, analyticsBlocklist = []) {
   if (!url || typeof url !== 'string') return url;
 
   // Decode HTML entities before processing
@@ -657,6 +776,12 @@ function rewriteUrl(url, targetOrigin, proxyBase) {
   // Skip URLs that are already proxied
   if (trimmed.includes('/proxy?url=')) {
     return url;
+  }
+
+  // Block analytics/tracking URLs - return about:blank to prevent loading
+  if (analyticsBlocklist.length > 0 && shouldBlockAnalyticsUrl(trimmed, analyticsBlocklist)) {
+    console.log('[PI-Proxy] Blocked analytics URL:', trimmed);
+    return 'about:blank';
   }
 
   // Handle protocol-relative URLs (//example.com)
@@ -711,9 +836,10 @@ function rewriteUrl(url, targetOrigin, proxyBase) {
  * @param {URL} target - The target URL being proxied
  * @param {URL} proxyUrl - The proxy request URL (to determine proxy origin)
  * @param {object} env - Cloudflare Workers environment variables
+ * @param {string[]} analyticsBlocklist - List of analytics domains to block
  * @returns {string} HTML with URL rewriting script injected
  */
-function injectUrlRewritingScript(html, target, proxyUrl, env) {
+function injectUrlRewritingScript(html, target, proxyUrl, env, analyticsBlocklist = []) {
   const proxyOrigin = `${proxyUrl.protocol}//${proxyUrl.host}`;
   const proxyBase = proxyOrigin.replace(/\/$/, '');
   const targetOrigin = target.origin;
@@ -731,6 +857,9 @@ function injectUrlRewritingScript(html, target, proxyUrl, env) {
   // Determine if debug logging should be enabled (default: true for development)
   // In Cloudflare Workers, NODE_ENV is not available, so default to false unless PROXY_DEBUG is set
   const isDebug = env && (env.PROXY_DEBUG === 'true' || env.PROXY_DEBUG === '1');
+  
+  // Serialize analytics blocklist for injection into script
+  const analyticsBlocklistJson = JSON.stringify(analyticsBlocklist);
   
   const scriptContent = `
 (function() {
@@ -756,6 +885,28 @@ function injectUrlRewritingScript(html, target, proxyUrl, env) {
   // Validate URLs before using them
   const PROXY_BASE = ${JSON.stringify(proxyBase)};
   const TARGET_ORIGIN = ${JSON.stringify(targetOrigin)};
+  const ANALYTICS_BLOCKLIST = ${analyticsBlocklistJson};
+  
+  // Helper to check if URL should be blocked
+  function shouldBlockAnalyticsUrl(url, blocklist) {
+    if (!url || typeof url !== 'string' || !blocklist || blocklist.length === 0) return false;
+    
+    try {
+      const urlObj = new URL(url);
+      const hostname = urlObj.hostname.toLowerCase();
+      const pathname = urlObj.pathname.toLowerCase();
+      
+      return blocklist.some(function(pattern) {
+        const lowerPattern = pattern.toLowerCase();
+        return hostname.includes(lowerPattern) || pathname.includes(lowerPattern);
+      });
+    } catch (e) {
+      const lowerUrl = url.toLowerCase();
+      return blocklist.some(function(pattern) {
+        return lowerUrl.includes(pattern.toLowerCase());
+      });
+    }
+  }
   
   // Validate URLs before using
   if (!PROXY_BASE || !TARGET_ORIGIN) {
@@ -831,6 +982,12 @@ function injectUrlRewritingScript(html, target, proxyUrl, env) {
     // Skip URLs that are already proxied
     if (trimmed.includes('/proxy?url=')) {
       return url;
+    }
+    
+    // Block analytics/tracking URLs - return about:blank to prevent loading
+    if (ANALYTICS_BLOCKLIST && ANALYTICS_BLOCKLIST.length > 0 && shouldBlockAnalyticsUrl(trimmed, ANALYTICS_BLOCKLIST)) {
+      log('Blocked analytics URL:', trimmed);
+      return 'about:blank';
     }
     
     // Handle protocol-relative URLs (//example.com)
@@ -985,13 +1142,38 @@ function injectUrlRewritingScript(html, target, proxyUrl, env) {
   if (typeof XMLHttpRequest !== 'undefined') {
     // Save the original open method BEFORE overwriting it to prevent infinite recursion
     const originalOpen = XMLHttpRequest.prototype.open;
+    const originalSetTimeout = XMLHttpRequest.prototype.setTimeout;
+    
     XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
       const rewritten = rewriteUrlForJs(url, currentOrigin);
       if (rewritten !== url) {
         log('XHR.open() rewritten:', url, '->', rewritten);
       }
+      
+      // CRITICAL: For synchronous XHR (async === false), don't set timeout
+      // Synchronous requests must not have a timeout set (causes InvalidAccessError)
+      const isAsync = async !== false;
+      
+      // Store async flag for setTimeout interception
+      this.__pi_proxy_is_async = isAsync;
+      
       return originalOpen.call(this, method, rewritten, async, user, password);
     };
+    
+    // Intercept setTimeout to prevent setting timeout on synchronous XHR
+    if (originalSetTimeout) {
+      XMLHttpRequest.prototype.setTimeout = function(timeout) {
+        // Only set timeout if this is an async request
+        if (this.__pi_proxy_is_async !== false) {
+          return originalSetTimeout.call(this, timeout);
+        } else {
+          log('Skipping setTimeout for synchronous XHR');
+          // Don't set timeout for sync requests - just return
+          return;
+        }
+      };
+    }
+    
     log('XMLHttpRequest interception installed');
   }
   
@@ -1096,6 +1278,33 @@ function injectUrlRewritingScript(html, target, proxyUrl, env) {
       });
       log('HTMLImageElement.prototype.src interception installed');
     }
+    
+    // Also intercept srcset attribute (for responsive images)
+    const originalSetAttribute = HTMLImageElement.prototype.setAttribute;
+    HTMLImageElement.prototype.setAttribute = function(name, value) {
+      if (name.toLowerCase() === 'srcset' && typeof value === 'string') {
+        // Parse srcset: "url1 1x, url2 2x, url3 100w"
+        const origin = getStoredOrigin();
+        const rewritten = value
+          .split(',')
+          .map(function(entry) {
+            const trimmed = entry.trim();
+            if (!trimmed) return trimmed;
+            const parts = trimmed.split(/\s+/);
+            if (parts.length === 0) return trimmed;
+            const url = parts[0];
+            const descriptors = parts.slice(1).join(' ');
+            const rewrittenUrl = rewriteUrlForJs(url, origin);
+            return descriptors ? rewrittenUrl + ' ' + descriptors : rewrittenUrl;
+          })
+          .join(', ');
+        if (rewritten !== value) {
+          log('HTMLImageElement.prototype.srcset rewritten:', value.substring(0, 100), '->', rewritten.substring(0, 100));
+        }
+        return originalSetAttribute.call(this, name, rewritten);
+      }
+      return originalSetAttribute.call(this, name, value);
+    };
   }
   
   // Intercept Image() constructor
