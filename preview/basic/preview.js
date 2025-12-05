@@ -337,14 +337,17 @@ function setupGlobalErrorHandling() {
   // Handle unhandled errors that might come from surveys.js
   window.addEventListener('error', (event) => {
     const { message, filename, lineno, colno, error } = event;
-    // Check if error is related to PulseInsightsObject or surveys.js
+    // Check if error is related to PulseInsightsObject, surveys.js, or proxy issues
     if (
       filename &&
       (filename.includes('surveys.js') ||
         filename.includes('proxy') ||
+        filename.includes('pulse') ||
         message.includes('render') ||
         message.includes('PulseInsightsObject') ||
-        message.includes('survey'))
+        message.includes('survey') ||
+        message.includes('Pulse') ||
+        message.includes('bridge'))
     ) {
       try {
         console.error('[preview] Caught PulseInsights error', {
@@ -680,8 +683,10 @@ async function loadHostPage(url, { skipBridgeLoad = false } = {}) {
 
   const target = (url || '').trim();
   if (!target) {
+    // Keep the last background (or nothing) instead of falling back to default/lipsum.
     backgroundPage403 = false;
-    return await loadLipsumSite();
+    addLog('No background URL provided; skipping background load to preserve current page.', 'warn');
+    return false;
   }
 
   addLog(`Loading host page ${target}`);
@@ -2362,16 +2367,7 @@ async function ensureBackgroundForRecord(record, { force = false, skipBridgeLoad
   const normalized = normalizeBackgroundUrl(raw);
 
   if (!normalized) {
-    if (force && currentBackgroundUrl !== DEFAULT_HOST_URL) {
-      const success = await loadHostPage(DEFAULT_HOST_URL, { skipBridgeLoad });
-      if (success) {
-        currentBackgroundUrl = DEFAULT_HOST_URL;
-        if (backgroundInput) {
-          backgroundInput.value = DEFAULT_HOST_URL;
-        }
-        addLog(`Background ready: ${DEFAULT_HOST_URL}`);
-      }
-    }
+    addLog('No background URL resolved for record; keeping existing background.', 'warn');
     return;
   }
 
