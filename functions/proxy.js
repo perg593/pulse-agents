@@ -701,13 +701,14 @@ function injectUrlRewritingScript(html, target, proxyUrl) {
   
   // Intercept XMLHttpRequest.open()
   if (typeof XMLHttpRequest !== 'undefined') {
-    const OriginalXHR = XMLHttpRequest;
+    // Save the original open method BEFORE overwriting it to prevent infinite recursion
+    const originalOpen = XMLHttpRequest.prototype.open;
     XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
       const rewritten = rewriteUrlForJs(url, currentOrigin);
       if (rewritten !== url) {
         console.log('[PI-Proxy] XHR.open() rewritten:', url, '->', rewritten);
       }
-      return OriginalXHR.prototype.open.call(this, method, rewritten, async, user, password);
+      return originalOpen.call(this, method, rewritten, async, user, password);
     };
     console.log('[PI-Proxy] XMLHttpRequest interception installed');
   }

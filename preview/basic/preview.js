@@ -4413,6 +4413,9 @@ function updatePlayerOverlayLayout() {
   // For mobile-enabled widgets, overlay should cover full viewport
   // For desktop widgets, overlay covers widget area with margins
   let containerWidth, containerHeight, containerTop, containerLeft;
+  // Initialize widget viewport variables for use in debug logging
+  let widgetTopViewport = 0;
+  let widgetLeftViewport = 0;
   
   if (isMobileEnabled) {
     // Mobile widgets: overlay covers full viewport for transparent background
@@ -4430,8 +4433,8 @@ function updatePlayerOverlayLayout() {
     // widget position in viewport = iframe position in viewport + widget position within iframe
     // getBoundingClientRect() always returns coordinates relative to the viewport, accounting for
     // all transforms and positioning contexts, so this calculation is correct.
-    const widgetTopViewport = iframeRect.top + playerWidgetRect.top;
-    const widgetLeftViewport = iframeRect.left + playerWidgetRect.left;
+    widgetTopViewport = iframeRect.top + playerWidgetRect.top;
+    widgetLeftViewport = iframeRect.left + playerWidgetRect.left;
     
     const clippedTop = widgetTopViewport - marginTop;
     const clippedLeft = widgetLeftViewport - marginLeft;
