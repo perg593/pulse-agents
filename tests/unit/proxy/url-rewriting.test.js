@@ -3,8 +3,29 @@
  * Tests the rewriteUrl() logic used in proxy functions
  */
 
-// Extract rewriteUrl logic for testing
-function rewriteUrl(url, targetOrigin, proxyBase) {
+// Analytics blocking helper
+function shouldBlockAnalyticsUrl(url, blocklist) {
+  if (!url || typeof url !== 'string' || !blocklist || blocklist.length === 0) return false;
+  
+  try {
+    const urlObj = new URL(url);
+    const hostname = urlObj.hostname.toLowerCase();
+    const pathname = urlObj.pathname.toLowerCase();
+    
+    return blocklist.some(pattern => {
+      const lowerPattern = pattern.toLowerCase();
+      return hostname.includes(lowerPattern) || pathname.includes(lowerPattern);
+    });
+  } catch (e) {
+    const lowerUrl = url.toLowerCase();
+    return blocklist.some(pattern => {
+      return lowerUrl.includes(pattern.toLowerCase());
+    });
+  }
+}
+
+// Extract rewriteUrl logic for testing (updated with analytics blocking)
+function rewriteUrl(url, targetOrigin, proxyBase, analyticsBlocklist = []) {
   if (!url || typeof url !== 'string') return url;
 
   const trimmed = url.trim();
@@ -21,6 +42,11 @@ function rewriteUrl(url, targetOrigin, proxyBase) {
   // Skip URLs that are already proxied
   if (trimmed.includes('/proxy?url=')) {
     return url;
+  }
+
+  // Block analytics/tracking URLs
+  if (analyticsBlocklist.length > 0 && shouldBlockAnalyticsUrl(trimmed, analyticsBlocklist)) {
+    return 'about:blank';
   }
 
   // Handle protocol-relative URLs (//example.com)
@@ -294,6 +320,87 @@ test('outerHTML with script tag should rewrite script src', () => {
     const rewritten = outerHTML.replace(src, rewrittenSrc);
     assert(rewritten.includes('/proxy?url='), 'Should contain proxy URL');
   }
+});
+
+// Test 15: Analytics blocking
+test('Google Tag Manager URL should be blocked', () => {
+  const blocklist = ['googletagmanager.com'];
+  const result = rewriteUrl('https://www.googletagmanager.com/gtm.js?id=GTM-XXXXX', TARGET_ORIGIN, PROXY_BASE, blocklist);
+  assert(result === 'about:blank', 'Should return about:blank for blocked analytics URL');
+});
+
+test('Google Analytics URL should be blocked', () => {
+  const blocklist = ['google-analytics.com'];
+  const result = rewriteUrl('https://www.google-analytics.com/analytics.js', TARGET_ORIGIN, PROXY_BASE, blocklist);
+  assert(result === 'about:blank', 'Should return about:blank for blocked analytics URL');
+});
+
+test('GTM path pattern should be blocked', () => {
+  const blocklist = ['gtm.js'];
+  const result = rewriteUrl('https://example.com/gtm.js', TARGET_ORIGIN, PROXY_BASE, blocklist);
+  assert(result === 'about:blank', 'Should block URLs matching path pattern');
+});
+
+test('Non-analytics URL should not be blocked', () => {
+  const blocklist = ['googletagmanager.com'];
+  const result = rewriteUrl('https://cdn.example.com/app.js', TARGET_ORIGIN, PROXY_BASE, blocklist);
+  assert(result.includes('/proxy?url='), 'Should rewrite non-blocked URLs normally');
+});
+
+// Test 16: JSON-LD preservation
+test('JSON-LD script block should be preserved', () => {
+  const html = '<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","url":"https://example.com"}</script>';
+  const jsonLdRegex = /<script\s+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
+  const matches = [];
+  let match;
+  while ((match = jsonLdRegex.exec(html)) !== null) {
+    matches.push(match[0]);
+  }
+  assert(matches.length === 1, 'Should find JSON-LD script');
+  assert(matches[0].includes('https://example.com'), 'Should preserve original URL in JSON-LD');
+});
+
+// Test 17: srcset parsing with multiple URLs
+test('srcset with multiple URLs and descriptors should parse correctly', () => {
+  const srcset = '/image1.jpg 150w, /image2.jpg 512w, /image3.jpg 768w';
+  const parsed = srcset
+    .split(',')
+    .map((entry) => {
+      const trimmed = entry.trim();
+      const parts = trimmed.split(/\s+/);
+      if (parts.length === 0) return trimmed;
+      const url = parts[0];
+      const descriptors = parts.slice(1).join(' ');
+      return { url, descriptors };
+    });
+  
+  assert(parsed.length === 3, 'Should parse 3 entries');
+  assert(parsed[0].url === '/image1.jpg', 'First URL should be correct');
+  assert(parsed[0].descriptors === '150w', 'First descriptor should be correct');
+  assert(parsed[1].url === '/image2.jpg', 'Second URL should be correct');
+  assert(parsed[2].url === '/image3.jpg', 'Third URL should be correct');
+});
+
+test('srcset rewriting should handle each URL separately', () => {
+  const srcset = '/image1.jpg 150w, /image2.jpg 512w';
+  const rewritten = srcset
+    .split(',')
+    .map((entry) => {
+      const trimmed = entry.trim();
+      const parts = trimmed.split(/\s+/);
+      if (parts.length === 0) return trimmed;
+      const url = parts[0];
+      const descriptors = parts.slice(1).join(' ');
+      const rewrittenUrl = rewriteUrl(url, TARGET_ORIGIN, PROXY_BASE);
+      return descriptors ? `${rewrittenUrl} ${descriptors}` : rewrittenUrl;
+    })
+    .join(', ');
+  
+  // Should have two separate proxy URLs
+  const proxyMatches = rewritten.match(/\/proxy\?url=/g);
+  assert(proxyMatches && proxyMatches.length === 2, 'Should rewrite each URL separately');
+  assert(rewritten.includes('150w'), 'Should preserve first descriptor');
+  assert(rewritten.includes('512w'), 'Should preserve second descriptor');
 });
 
 console.log('\nAll URL rewriting tests passed!');
