@@ -115,7 +115,6 @@ const CLOUDFLARE_CHALLENGE_MARKERS = [
   'challenge-platform',
   'cf-browser-verification',
   'checking your browser',
-  'please wait',
   'ray id',
   'cf-ray'
 ];
@@ -128,14 +127,32 @@ const CLOUDFLARE_CHALLENGE_MARKERS = [
  * @returns {boolean} True if this appears to be a Cloudflare challenge/block
  */
 function isCloudflareChallenge(response, bodyText = '', url = '') {
-  // Check status codes
-  if (response.status === 403 || response.status === 503) {
-    // Check server header
-    const server = response.headers.get('server') || '';
-    if (server.toLowerCase().includes('cloudflare')) {
+  // Check server header first (works for any status code)
+  const server = response.headers.get('server') || '';
+  if (server.toLowerCase().includes('cloudflare')) {
+    // For Cloudflare servers, check if it's a challenge page
+    // Check URL for challenge markers
+    const urlLower = url.toLowerCase();
+    if (CLOUDFLARE_CHALLENGE_MARKERS.some(marker => urlLower.includes(marker.toLowerCase()))) {
       return true;
     }
     
+    // Check response body for challenge markers
+    if (bodyText) {
+      const bodyLower = bodyText.toLowerCase();
+      if (CLOUDFLARE_CHALLENGE_MARKERS.some(marker => bodyLower.includes(marker.toLowerCase()))) {
+        return true;
+      }
+    }
+    
+    // If Cloudflare server with 403/503, likely a challenge
+    if (response.status === 403 || response.status === 503) {
+      return true;
+    }
+  }
+  
+  // For non-Cloudflare servers, only check 403/503 with challenge markers
+  if (response.status === 403 || response.status === 503) {
     // Check URL for challenge markers
     const urlLower = url.toLowerCase();
     if (CLOUDFLARE_CHALLENGE_MARKERS.some(marker => urlLower.includes(marker.toLowerCase()))) {
@@ -544,6 +561,10 @@ export async function onRequest(context) {
         `/* Error: Failed to fetch ${target.toString()}: ${error.message} */\n`,
         { status: 502, headers }
       );
+    } else if (expectedContentType.type === 'font') {
+      const headers = buildCorsHeaders(request.headers);
+      headers.set('content-type', 'application/octet-stream');
+      return new Response('', { status: 502, headers });
     } else {
       return withCors(
         jsonResponse({ error: `Failed to fetch ${target.toString()}: ${error.message}` }, { status: 502 }),
