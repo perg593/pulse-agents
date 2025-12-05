@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 const express = require('express');
-const rateLimit = require('express-rate-limit');
 const { URL } = require('url');
 const path = require('path');
 
@@ -69,21 +68,6 @@ const BLOCKED_HOSTS = (process.env.BACKGROUND_PROXY_BLOCKLIST || 'localhost,127.
 
 const DEFAULT_USER_AGENT =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 PulsePreviewProxy/1.0';
-
-// Rate limiting configuration
-// Increased for local development - modern SPAs make many requests for code-split chunks
-const proxyLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  max: Number.parseInt(process.env.PROXY_RATE_LIMIT_MAX || '500', 10), // Limit each IP to 500 requests per windowMs
-  message: { error: 'Too many requests, please try again later.' },
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-  skip: (req) => {
-    // Skip rate limiting for localhost requests in development
-    const isLocalhost = req.ip === '127.0.0.1' || req.ip === '::1' || req.ip === '::ffff:127.0.0.1';
-    return isLocalhost && process.env.NODE_ENV !== 'production';
-  }
-});
 
 const CONSENT_BANNER_SELECTORS = [
   '#onetrust-banner-sdk',
@@ -184,7 +168,7 @@ app.options('/proxy', (req, res) => {
 
 // Handle all HTTP methods for proxy
 ['get', 'post', 'put', 'delete'].forEach(httpMethod => {
-  app[httpMethod]('/proxy', proxyLimiter, async (req, res) => {
+  app[httpMethod]('/proxy', async (req, res) => {
   const targetRaw = req.query.url;
   if (!targetRaw || typeof targetRaw !== 'string') {
     res.status(400).json({ error: 'Missing url query parameter' });
