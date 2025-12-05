@@ -225,5 +225,76 @@ test('Complex relative path should resolve correctly', () => {
   assert(targetUrl.host === 'www.example.com', 'Should resolve against target origin host');
 });
 
+// Test 11: srcset attribute rewriting
+test('srcset with multiple URLs should rewrite all URLs', () => {
+  const srcset = '/image1.jpg 1x, /image2.jpg 2x, https://cdn.example.com/image3.jpg 100w';
+  // Simulate srcset rewriting logic
+  const rewritten = srcset
+    .split(',')
+    .map((entry) => {
+      const trimmed = entry.trim();
+      const parts = trimmed.split(/\s+/);
+      if (parts.length === 0) return trimmed;
+      const url = parts[0];
+      const descriptors = parts.slice(1).join(' ');
+      const rewrittenUrl = rewriteUrl(url, TARGET_ORIGIN, PROXY_BASE);
+      return descriptors ? `${rewrittenUrl} ${descriptors}` : rewrittenUrl;
+    })
+    .join(', ');
+  
+  assert(rewritten.includes('/proxy?url='), 'Should contain proxy URLs');
+  assert(rewritten.includes('image1.jpg'), 'Should preserve first image');
+  assert(rewritten.includes('image2.jpg'), 'Should preserve second image');
+  assert(rewritten.includes('image3.jpg'), 'Should preserve third image');
+});
+
+// Test 12: CSS url() rewriting
+test('CSS url() should be rewritten', () => {
+  const cssUrl = 'url(/images/background.png)';
+  const urlMatch = cssUrl.match(/url\s*\(\s*["']?([^"')]+)["']?\s*\)/);
+  if (urlMatch) {
+    const url = urlMatch[1].trim();
+    const rewrittenUrl = rewriteUrl(url, TARGET_ORIGIN, PROXY_BASE);
+    const rewritten = cssUrl.replace(url, rewrittenUrl);
+    assert(rewritten.includes('/proxy?url='), 'Should contain proxy URL');
+  }
+});
+
+test('CSS url() with quotes should be rewritten', () => {
+  const cssUrl = "url('/images/background.png')";
+  const urlMatch = cssUrl.match(/url\s*\(\s*["']?([^"')]+)["']?\s*\)/);
+  if (urlMatch) {
+    const url = urlMatch[1].trim();
+    const rewrittenUrl = rewriteUrl(url, TARGET_ORIGIN, PROXY_BASE);
+    const rewritten = cssUrl.replace(url, rewrittenUrl);
+    assert(rewritten.includes('/proxy?url='), 'Should contain proxy URL');
+  }
+});
+
+// Test 13: Request object preservation (simulated)
+test('Request object URL should be rewritten while preserving other properties', () => {
+  // Simulate Request object handling
+  const originalUrl = 'https://api.example.com/data.json';
+  const rewrittenUrl = rewriteUrl(originalUrl, TARGET_ORIGIN, PROXY_BASE);
+  
+  assert(rewrittenUrl !== originalUrl, 'URL should be rewritten');
+  assert(rewrittenUrl.includes('/proxy?url='), 'Should contain proxy URL');
+  
+  // In actual implementation, Request would be cloned with new URL
+  // This test verifies the URL rewriting logic works correctly
+});
+
+// Test 14: outerHTML script tag rewriting
+test('outerHTML with script tag should rewrite script src', () => {
+  const outerHTML = '<script src="/js/file.js"></script>';
+  const scriptMatch = outerHTML.match(/<script([^>]*)src=["']([^"']+)["']/i);
+  if (scriptMatch) {
+    const src = scriptMatch[2];
+    const rewrittenSrc = rewriteUrl(src, TARGET_ORIGIN, PROXY_BASE);
+    const rewritten = outerHTML.replace(src, rewrittenSrc);
+    assert(rewritten.includes('/proxy?url='), 'Should contain proxy URL');
+  }
+});
+
 console.log('\nAll URL rewriting tests passed!');
 

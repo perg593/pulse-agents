@@ -1,6 +1,21 @@
 # Proxy Known Limitations
 
-## Date: 2025-12-04
+## Date: 2025-12-05
+
+## Fixed Issues
+
+### Race Conditions
+- ✅ **Fixed**: Multiple script installations now prevented with guard mechanism
+- ✅ **Fixed**: Server-side duplicate script tag detection
+- ✅ **Fixed**: Request object handling in fetch interception (now preserves headers/body)
+
+### Missing Interceptions
+- ✅ **Fixed**: Added `outerHTML` interception for script tags
+- ✅ **Fixed**: Added `HTMLLinkElement.prototype.href` interception (stylesheets)
+- ✅ **Fixed**: Added `HTMLIFrameElement.prototype.src` interception (nested iframes)
+- ✅ **Fixed**: Added `HTMLImageElement.prototype.src` interception (images)
+- ✅ **Fixed**: Added `Image()` constructor interception
+- ✅ **Fixed**: Added `Audio()` constructor interception
 
 ## Uncommongoods.com - Dynamic Script Loading
 
@@ -56,6 +71,22 @@
 - Scripts loaded synchronously before our interception may not be caught
 - We inject early in `<head>`, but some sites load scripts immediately
 
+## Security Features
+
+### Rate Limiting
+- ✅ **Implemented**: Express server uses `express-rate-limit` (100 requests/minute default)
+- ✅ **Implemented**: Cloudflare Workers uses in-memory rate limiting (100 requests/minute default)
+- Configurable via `PROXY_RATE_LIMIT_MAX` environment variable
+
+### Cookie Sanitization
+- ✅ **Implemented**: Sensitive cookies are filtered before forwarding
+- Default patterns: `session`, `auth`, `token`, `csrf`, `jwt`, `secret`, `password`, `credential`
+- Configurable via `PROXY_SENSITIVE_COOKIE_PATTERNS` environment variable
+
+### Secure Defaults
+- ✅ **Implemented**: Default allowlist changed from `*` (all) to empty (requires explicit configuration)
+- Users must set `BACKGROUND_PROXY_ALLOWLIST` environment variable
+
 ## Future Improvements
 
 1. **Service Worker Interception**: Intercept `navigator.serviceWorker.register()` to proxy worker scripts
@@ -63,4 +94,5 @@
 3. **CSP Bypass**: Detect and handle CSP violations more gracefully
 4. **Earlier Injection**: Use MutationObserver to catch scripts created before our script runs
 5. **Webpack-Specific Interception**: Detect webpack runtime and intercept `__webpack_require__.e()`
+6. **document.write() Interception**: Intercept `document.write()` and `document.writeln()` for script injection
 

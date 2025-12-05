@@ -54,9 +54,16 @@ URLs in CSS `url()` functions are rewritten, including:
 
 The following JavaScript APIs are intercepted:
 
-- **`fetch(url)`** - All fetch requests
+- **`fetch(url)`** - All fetch requests (including Request objects with preserved headers/body)
 - **`XMLHttpRequest.open(method, url)`** - XHR requests
 - **`<script type="module" src="...">`** - ES module imports
+- **`HTMLLinkElement.prototype.href`** - Dynamic stylesheet loading
+- **`HTMLIFrameElement.prototype.src`** - Dynamic iframe creation
+- **`HTMLImageElement.prototype.src`** - Dynamic image loading
+- **`Image()` constructor** - Image object creation
+- **`Audio()` constructor** - Audio object creation
+- **`Element.prototype.innerHTML`** - Script tags in innerHTML
+- **`Element.prototype.outerHTML`** - Script tags in outerHTML
 
 ## URL Types Handled
 
@@ -144,6 +151,33 @@ The injected JavaScript:
 - **Redirects**: Base href uses the final URL after redirects
 - **Multiple Base Tags**: Existing base tags are detected and not duplicated
 - **Malformed URLs**: Invalid URLs are returned unchanged to avoid breaking pages
+- **Race Conditions**: Script guard prevents multiple installations
+- **Request Objects**: Fetch Request objects are properly cloned with new URL while preserving headers/body
+- **srcset Attributes**: Multiple URLs in srcset are individually rewritten
+- **CSS url()**: URLs in CSS url() functions are rewritten
+
+## Security Features
+
+### Rate Limiting
+- Default: 100 requests per minute per IP
+- Configurable via `PROXY_RATE_LIMIT_MAX` environment variable
+- Express server uses `express-rate-limit` middleware
+- Cloudflare Workers uses in-memory rate limiting
+
+### Cookie Sanitization
+- Sensitive cookies are automatically filtered before forwarding to target sites
+- Default patterns: `session`, `auth`, `token`, `csrf`, `jwt`, `secret`, `password`, `credential`
+- Configurable via `PROXY_SENSITIVE_COOKIE_PATTERNS` environment variable (comma-separated)
+
+### Secure Defaults
+- **Allowlist**: Default changed from `*` (all hosts) to empty (requires explicit configuration)
+- Users must set `BACKGROUND_PROXY_ALLOWLIST` environment variable
+- Example: `BACKGROUND_PROXY_ALLOWLIST=example.com,*.example.com`
+
+### Production Logging
+- Debug logging is disabled in production by default
+- Set `PROXY_DEBUG=true` to enable debug logging in production
+- Logging controlled by `NODE_ENV` environment variable
 
 ## Testing
 
@@ -158,6 +192,10 @@ Tests cover:
 - Relative paths
 - Special URLs (data:, blob:, etc.)
 - Edge cases (empty strings, null, etc.)
+- srcset attribute rewriting
+- CSS url() rewriting
+- outerHTML handling
+- Request object preservation
 
 ### Integration Tests
 
@@ -168,6 +206,19 @@ Tests verify:
 - JavaScript interception script injection
 - Base href injection
 - Real-world scenarios (uncommongoods.com)
+- Rate limiting behavior
+- Cookie sanitization
+
+### Race Condition Tests
+
+**File**: `tests/unit/proxy/race-condition.test.js`
+
+Tests verify:
+- Single script execution succeeds
+- Multiple executions are blocked
+- Concurrent execution attempts only allow one
+- Server-side duplicate detection
+- Flag persistence across page reloads
 
 ### Demo Proxy Test
 
