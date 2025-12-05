@@ -1,0 +1,66 @@
+# Proxy Known Limitations
+
+## Date: 2025-12-04
+
+## Uncommongoods.com - Dynamic Script Loading
+
+**Status**: Known Issue - Site may be blocking proxy in ways we cannot intercept
+
+**Problem**: 
+- Dynamic webpack chunks (e.g., `/js/20251203154408-374/ug-spa/dist/4352.js`) are not being proxied
+- These chunks return 404 errors when accessed directly
+- Script interception is injected and running, but chunks are still not being rewritten
+
+**What We've Tried**:
+1. ✅ Script injection with URL rewriting
+2. ✅ Prototype-level interception (`HTMLScriptElement.prototype.src`)
+3. ✅ `setAttribute` interception
+4. ✅ `appendChild`/`insertBefore` interception
+5. ✅ Multiple detection methods for proxied pages
+6. ✅ Enhanced `getCurrentOrigin()` with fallbacks
+
+**Possible Causes**:
+- Webpack may be using a method we haven't intercepted (e.g., `document.write`, Service Workers, or native module loading)
+- Site may have Content Security Policy that blocks our interception
+- Site may be detecting proxy and blocking dynamically loaded resources
+- Timing issue - chunks may be loaded before our script executes
+
+**Workaround**:
+- Site may need to be added to a blocklist or handled specially
+- Consider contacting site owner if this is a critical demo URL
+
+**Impact**:
+- Low - Only affects uncommongoods.com specifically
+- Other sites with webpack code splitting work correctly
+- Static resources and initial page load work fine
+
+## Other Known Limitations
+
+### Service Workers
+- Service Workers may bypass our URL interception
+- Service Worker requests are not intercepted by our script
+
+### WebSockets
+- WebSocket connections are not proxied
+- This is intentional - WebSockets require persistent connections
+
+### Native Module Loading
+- Native ES module `import()` may bypass interception in some browsers
+- We intercept script tag creation, but native imports may use different mechanisms
+
+### Content Security Policy
+- Sites with strict CSP may block our injected script
+- CSP violations may prevent script execution
+
+### Timing Issues
+- Scripts loaded synchronously before our interception may not be caught
+- We inject early in `<head>`, but some sites load scripts immediately
+
+## Future Improvements
+
+1. **Service Worker Interception**: Intercept `navigator.serviceWorker.register()` to proxy worker scripts
+2. **Native Import Interception**: Better support for dynamic `import()` statements
+3. **CSP Bypass**: Detect and handle CSP violations more gracefully
+4. **Earlier Injection**: Use MutationObserver to catch scripts created before our script runs
+5. **Webpack-Specific Interception**: Detect webpack runtime and intercept `__webpack_require__.e()`
+
