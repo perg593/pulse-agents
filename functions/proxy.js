@@ -164,9 +164,9 @@ function parseList(value, fallback) {
 function sanitizeCookies(cookieHeader, sensitivePatterns = null) {
   if (!cookieHeader) return undefined;
   
-  // Default patterns if none provided
+  // Default patterns if none provided or empty array passed
   const defaultPatterns = ['session', 'auth', 'token', 'csrf', 'jwt', 'secret', 'password', 'credential'];
-  const patterns = sensitivePatterns || defaultPatterns;
+  const patterns = (sensitivePatterns && sensitivePatterns.length > 0) ? sensitivePatterns : defaultPatterns;
   
   const cookies = cookieHeader.split(';').map(c => c.trim()).filter(Boolean);
   const filtered = cookies.filter(cookie => {
@@ -211,7 +211,11 @@ function isHostAllowed(hostname, allowlist, blocklist) {
 
 function buildUpstreamHeaders(headers, target, env) {
   const upstream = new Headers();
-  const sensitiveCookiePatterns = env ? parseList(env.PROXY_SENSITIVE_COOKIE_PATTERNS, null) : null;
+  // If env var is not set, pass null to use defaults in sanitizeCookies
+  // If env var is set, parse it (empty string becomes empty array = no filtering)
+  const sensitiveCookiePatterns = env?.PROXY_SENSITIVE_COOKIE_PATTERNS 
+    ? parseList(env.PROXY_SENSITIVE_COOKIE_PATTERNS, [])
+    : null;
   const headerPairs = [
     ['user-agent', headers.get('user-agent') || DEFAULT_USER_AGENT],
     ['accept', headers.get('accept') || '*/*'],
