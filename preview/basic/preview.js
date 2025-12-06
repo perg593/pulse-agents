@@ -498,7 +498,25 @@ async function init() {
   // Preserve existing background URL if already loaded (prevent redirect away from current page)
   // Check if there's already a background iframe with a URL different from default
   const existingFrame = siteRoot?.querySelector('iframe.background-frame');
-  const existingFrameUrl = existingFrame?.dataset?.previewOriginalUrl || '';
+  const existingFrameUrlRaw = existingFrame?.dataset?.previewOriginalUrl || '';
+  
+  // Validate existing URL before using it (prevents CodeQL unvalidated redirect warning)
+  let existingFrameUrl = '';
+  if (existingFrameUrlRaw) {
+    try {
+      // Validate URL format - must be http/https or relative path
+      const testUrl = existingFrameUrlRaw.startsWith('/') || existingFrameUrlRaw.startsWith('./') || existingFrameUrlRaw.startsWith('../')
+        ? new URL(existingFrameUrlRaw, window.location.origin)
+        : new URL(existingFrameUrlRaw);
+      // Only allow http/https protocols
+      if (['http:', 'https:'].includes(testUrl.protocol)) {
+        existingFrameUrl = existingFrameUrlRaw;
+      }
+    } catch (_error) {
+      // Invalid URL, ignore
+    }
+  }
+  
   const hasExistingBackground = existingFrameUrl && 
                                  existingFrameUrl !== DEFAULT_HOST_URL && 
                                  existingFrameUrl !== buildProxySrc(DEFAULT_HOST_URL);

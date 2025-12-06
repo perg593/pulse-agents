@@ -120,9 +120,27 @@ async function init() {
   
   // Preserve existing background URL if already loaded (e.g., from present parameter)
   // Check iframe's dataset first, then URL params, then default
-  const existingUrl = elements.backgroundFrame?.dataset?.previewOriginalUrl || 
-                      new URLSearchParams(window.location.search).get('background') ||
-                      null;
+  const existingUrlRaw = elements.backgroundFrame?.dataset?.previewOriginalUrl || 
+                          new URLSearchParams(window.location.search).get('background') ||
+                          null;
+  
+  // Validate URL before using it (prevents CodeQL unvalidated redirect warning)
+  let existingUrl = null;
+  if (existingUrlRaw) {
+    try {
+      // Validate URL format - must be http/https or relative path
+      const testUrl = existingUrlRaw.startsWith('/') || existingUrlRaw.startsWith('./') || existingUrlRaw.startsWith('../')
+        ? new URL(existingUrlRaw, window.location.origin)
+        : new URL(existingUrlRaw);
+      // Only allow http/https protocols
+      if (['http:', 'https:'].includes(testUrl.protocol)) {
+        existingUrl = existingUrlRaw;
+      }
+    } catch (_error) {
+      // Invalid URL, ignore
+    }
+  }
+  
   const initialBackground = existingUrl || DEFAULT_BACKGROUND;
   
   loadBackground(elements.backgroundFrame, initialBackground);
