@@ -444,9 +444,18 @@ export async function onRequest(context) {
       const cfPassthroughDomains = parseCfPassthroughDomains(env?.PROXY_CF_PASSTHROUGH_DOMAINS);
       const shouldPassthrough = shouldPassthroughCfChallenge(target.hostname, cfPassthroughDomains);
       
+      // Check if this is a challenge script URL from a passthrough domain
+      // Challenge scripts (e.g., cdn-cgi/challenge-platform/scripts/jsd/main.js) are legitimate
+      // and should be allowed through even if they return 403, as they're needed for challenge resolution
+      const urlLower = target.toString().toLowerCase();
+      const isChallengeScriptUrl = urlLower.includes('cdn-cgi/challenge-platform') || 
+                                   urlLower.includes('challenge-platform/scripts');
+      const allowChallengeScript = shouldPassthrough && isChallengeScriptUrl;
+      
       // Detect Cloudflare challenge/blocking (skip if domain is in passthrough allowlist)
-      const isChallenge = shouldPassthrough ? false : isCloudflareChallenge(upstreamResponse, errorBody, target.toString());
-      const isMismatch = isContentTypeMismatch(contentType, expectedContentType.type, upstreamResponse.status);
+      // Also skip if this is a challenge script URL from a passthrough domain
+      const isChallenge = (shouldPassthrough || allowChallengeScript) ? false : isCloudflareChallenge(upstreamResponse, errorBody, target.toString());
+      const isMismatch = allowChallengeScript ? false : isContentTypeMismatch(contentType, expectedContentType.type, upstreamResponse.status);
       
       if (isChallenge || isMismatch) {
         console.warn(`[PI-Proxy] Cloudflare challenge/block detected (status: ${upstreamResponse.status}, challenge: ${isChallenge}, mismatch: ${isMismatch}): ${target.toString()}`);

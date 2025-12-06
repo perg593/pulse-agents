@@ -117,8 +117,16 @@ async function init() {
 
   populateSurveySelect();
   attachEventListeners();
-  loadBackground(elements.backgroundFrame, DEFAULT_BACKGROUND);
-  elements.backgroundInput.value = DEFAULT_BACKGROUND;
+  
+  // Preserve existing background URL if already loaded (e.g., from present parameter)
+  // Check iframe's dataset first, then URL params, then default
+  const existingUrl = elements.backgroundFrame?.dataset?.previewOriginalUrl || 
+                      new URLSearchParams(window.location.search).get('background') ||
+                      null;
+  const initialBackground = existingUrl || DEFAULT_BACKGROUND;
+  
+  loadBackground(elements.backgroundFrame, initialBackground);
+  elements.backgroundInput.value = initialBackground;
   elements.accountIndicator.textContent = state.account;
   renderTriggers(elements.triggerContainer, buildTriggerConfig(), { onTrigger: handleTrigger });
   initThemeManager({
