@@ -521,12 +521,19 @@ async function init() {
                                  existingFrameUrl !== DEFAULT_HOST_URL && 
                                  existingFrameUrl !== buildProxySrc(DEFAULT_HOST_URL);
   
-  // Only use default if no background is requested AND no existing background is loaded
-  const hostToLoad = requestedHost || (hasExistingBackground ? existingFrameUrl : DEFAULT_HOST_URL);
+  // Check if we're running inside an iframe (e.g., player iframe)
+  // If so, skip background loading - parent already has background
+  const isInIframe = window.self !== window.top;
   
-  if (!hasDemoFilter && !presentSurveyId && !hasExistingBackground) {
+  // Only use default if no background is requested AND no existing background is loaded AND we're not in an iframe
+  const hostToLoad = requestedHost || (hasExistingBackground ? existingFrameUrl : (isInIframe ? '' : DEFAULT_HOST_URL));
+  
+  if (isInIframe && !requestedHost) {
+    // Skip background loading in iframe context - parent handles it
+    addLog('Skipping background load in iframe context (parent handles background)', 'info');
+  } else if (!hasDemoFilter && !presentSurveyId && !hasExistingBackground && !isInIframe) {
     addLog(`No demo parameter detected; defaulting host to ${DEFAULT_HOST_URL}.`);
-  } else if (!requestedHost && (hasDemoFilter || presentSurveyId) && !hasExistingBackground) {
+  } else if (!requestedHost && (hasDemoFilter || presentSurveyId) && !hasExistingBackground && !isInIframe) {
     addLog(`Background URL not found; falling back to ${DEFAULT_HOST_URL}.`, 'warn');
   } else if (hasExistingBackground && !requestedHost) {
     addLog(`Preserving existing background URL: ${existingFrameUrl}`, 'info');
