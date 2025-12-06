@@ -5,3 +5,4 @@ pages_build_output_dir = "."
 [vars]
 BACKGROUND_PROXY_ALLOWLIST = "*"
 BACKGROUND_PROXY_BLOCKLIST = "localhost,127.,::1"
+PROXY_CF_PASSTHROUGH_DOMAINS = "njtransit.com"

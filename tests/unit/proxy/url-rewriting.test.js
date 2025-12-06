@@ -546,5 +546,72 @@ test('Cloudflare challenge markers should be detected', () => {
   assert(!isCloudflareChallenge({ status: 404 }, '', 'https://example.com'), '404 should not be detected as challenge');
 });
 
+// Test 21: Cloudflare passthrough allowlist parsing
+test('parseCfPassthroughDomains should parse comma-separated domains', () => {
+  // Helper function (matches proxy.js logic)
+  function parseCfPassthroughDomains(envValue) {
+    if (!envValue) {
+      return [];
+    }
+    
+    return envValue
+      .split(',')
+      .map(entry => entry.trim())
+      .filter(Boolean);
+  }
+  
+  assert(parseCfPassthroughDomains('njtransit.com').length === 1, 'Single domain should be parsed');
+  assert(parseCfPassthroughDomains('njtransit.com')[0] === 'njtransit.com', 'Single domain should match');
+  
+  assert(parseCfPassthroughDomains('njtransit.com,example.com').length === 2, 'Multiple domains should be parsed');
+  assert(parseCfPassthroughDomains('njtransit.com,example.com')[0] === 'njtransit.com', 'First domain should match');
+  assert(parseCfPassthroughDomains('njtransit.com,example.com')[1] === 'example.com', 'Second domain should match');
+  
+  assert(parseCfPassthroughDomains('njtransit.com, example.com').length === 2, 'Whitespace should be trimmed');
+  assert(parseCfPassthroughDomains('njtransit.com, example.com')[1] === 'example.com', 'Whitespace should be trimmed from second domain');
+  
+  assert(parseCfPassthroughDomains('').length === 0, 'Empty string should return empty array');
+  assert(parseCfPassthroughDomains(undefined).length === 0, 'Undefined should return empty array');
+  assert(parseCfPassthroughDomains(null).length === 0, 'Null should return empty array');
+});
+
+// Test 22: Cloudflare passthrough domain matching
+test('shouldPassthroughCfChallenge should match domains correctly', () => {
+  // Helper function (matches proxy.js logic)
+  function shouldPassthroughCfChallenge(hostname, allowlist) {
+    if (!hostname || !allowlist || allowlist.length === 0) {
+      return false;
+    }
+    
+    const hostnameLower = hostname.toLowerCase();
+    
+    // Check for exact match or subdomain match
+    return allowlist.some(domain => {
+      const domainLower = domain.toLowerCase();
+      return hostnameLower === domainLower || hostnameLower.endsWith('.' + domainLower);
+    });
+  }
+  
+  const allowlist = ['njtransit.com', 'example.com'];
+  
+  assert(shouldPassthroughCfChallenge('njtransit.com', allowlist), 'Exact match should passthrough');
+  assert(shouldPassthroughCfChallenge('www.njtransit.com', allowlist), 'Subdomain should passthrough');
+  assert(shouldPassthroughCfChallenge('api.njtransit.com', allowlist), 'Subdomain should passthrough');
+  assert(shouldPassthroughCfChallenge('example.com', allowlist), 'Exact match should passthrough');
+  assert(shouldPassthroughCfChallenge('www.example.com', allowlist), 'Subdomain should passthrough');
+  
+  assert(!shouldPassthroughCfChallenge('waterworks.com', allowlist), 'Non-matching domain should not passthrough');
+  assert(!shouldPassthroughCfChallenge('njtransit.org', allowlist), 'Similar domain should not passthrough');
+  assert(!shouldPassthroughCfChallenge('evil-njtransit.com', allowlist), 'Suffix match should not passthrough');
+  
+  assert(!shouldPassthroughCfChallenge('njtransit.com', []), 'Empty allowlist should not passthrough');
+  assert(!shouldPassthroughCfChallenge('njtransit.com', undefined), 'Undefined allowlist should not passthrough');
+  assert(!shouldPassthroughCfChallenge(null, allowlist), 'Null hostname should not passthrough');
+  
+  // Case insensitive matching
+  assert(shouldPassthroughCfChallenge('NJTRANSIT.COM', allowlist), 'Uppercase should match');
+  assert(shouldPassthroughCfChallenge('www.NJTRANSIT.COM', allowlist), 'Uppercase subdomain should match');
+});
+
 console.log('\nAll URL rewriting tests passed!');
 

@@ -1,5 +1,5 @@
 const DEFAULT_USER_AGENT =
-  'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 PulsePreviewProxy/1.0';
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
 
 // Analytics domains to block from proxying
 const DEFAULT_ANALYTICS_BLOCKLIST = [
@@ -269,6 +269,42 @@ function shouldBlockDomain(hostname, blocklist) {
   });
 }
 
+/**
+ * Parse Cloudflare passthrough allowlist from environment variable
+ * @param {string|undefined} envValue - Environment variable value (comma-separated)
+ * @returns {string[]} Array of domains that should bypass Cloudflare challenge detection
+ */
+function parseCfPassthroughDomains(envValue) {
+  if (!envValue) {
+    return [];
+  }
+  
+  return envValue
+    .split(',')
+    .map(entry => entry.trim())
+    .filter(Boolean);
+}
+
+/**
+ * Check if a domain should bypass Cloudflare challenge detection
+ * @param {string} hostname - Hostname to check
+ * @param {string[]} allowlist - List of domains that should bypass detection
+ * @returns {boolean} True if domain should bypass Cloudflare challenge detection
+ */
+function shouldPassthroughCfChallenge(hostname, allowlist) {
+  if (!hostname || !allowlist || allowlist.length === 0) {
+    return false;
+  }
+  
+  const hostnameLower = hostname.toLowerCase();
+  
+  // Check for exact match or subdomain match
+  return allowlist.some(domain => {
+    const domainLower = domain.toLowerCase();
+    return hostnameLower === domainLower || hostnameLower.endsWith('.' + domainLower);
+  });
+}
+
 export async function onRequest(context) {
   const { request, env } = context;
   const incoming = new URL(request.url);
@@ -404,8 +440,12 @@ export async function onRequest(context) {
       const errorBody = await upstreamResponse.text().catch(() => '');
       const isHtmlErrorPage = errorBody.trim().startsWith('<!') || errorBody.trim().startsWith('<html') || contentType.includes('text/html');
       
-      // Detect Cloudflare challenge/blocking
-      const isChallenge = isCloudflareChallenge(upstreamResponse, errorBody, target.toString());
+      // Parse passthrough allowlist and check if domain should bypass CF detection
+      const cfPassthroughDomains = parseCfPassthroughDomains(env?.PROXY_CF_PASSTHROUGH_DOMAINS);
+      const shouldPassthrough = shouldPassthroughCfChallenge(target.hostname, cfPassthroughDomains);
+      
+      // Detect Cloudflare challenge/blocking (skip if domain is in passthrough allowlist)
+      const isChallenge = shouldPassthrough ? false : isCloudflareChallenge(upstreamResponse, errorBody, target.toString());
       const isMismatch = isContentTypeMismatch(contentType, expectedContentType.type, upstreamResponse.status);
       
       if (isChallenge || isMismatch) {
@@ -489,8 +529,12 @@ export async function onRequest(context) {
       
       let body = await upstreamResponse.text();
       
-      // Check for Cloudflare challenge even in successful responses
-      const isChallenge = isCloudflareChallenge(upstreamResponse, body, target.toString());
+      // Parse passthrough allowlist and check if domain should bypass CF detection
+      const cfPassthroughDomains = parseCfPassthroughDomains(env?.PROXY_CF_PASSTHROUGH_DOMAINS);
+      const shouldPassthrough = shouldPassthroughCfChallenge(target.hostname, cfPassthroughDomains);
+      
+      // Check for Cloudflare challenge even in successful responses (skip if domain is in passthrough allowlist)
+      const isChallenge = shouldPassthrough ? false : isCloudflareChallenge(upstreamResponse, body, target.toString());
       if (isChallenge) {
         console.warn(`[PI-Proxy] Cloudflare challenge detected in HTML response: ${target.toString()}`);
         const blockedHtml = generateBlockedSitePage(target, 'cloudflare_challenge');
@@ -683,7 +727,12 @@ function buildUpstreamHeaders(headers, target, env, method = 'GET') {
     ['accept-encoding', headers.get('accept-encoding') || 'gzip, deflate, br'],
     ['referer', headers.get('referer') || target.origin],
     ['origin', headers.get('origin') || target.origin],
-    ['cookie', sanitizeCookies(headers.get('cookie'), sensitiveCookiePatterns)]
+    ['cookie', sanitizeCookies(headers.get('cookie'), sensitiveCookiePatterns)],
+    ['sec-fetch-dest', 'document'],
+    ['sec-fetch-mode', 'navigate'],
+    ['sec-fetch-site', 'cross-site'],
+    ['sec-fetch-user', '?1'],
+    ['upgrade-insecure-requests', '1']
   ];
   
   // Forward Content-Type for POST/PUT requests
@@ -705,9 +754,11 @@ function buildUpstreamHeaders(headers, target, env, method = 'GET') {
   });
 
   const secHeaders = [
-    ['sec-fetch-dest', headers.get('sec-fetch-dest') || (method === 'GET' ? 'document' : 'empty')],
-    ['sec-fetch-mode', headers.get('sec-fetch-mode') || (method === 'GET' ? 'navigate' : 'cors')],
-    ['sec-fetch-site', headers.get('sec-fetch-site') || 'none']
+    ['sec-fetch-dest', headers.get('sec-fetch-dest') || 'document'],
+    ['sec-fetch-mode', headers.get('sec-fetch-mode') || 'navigate'],
+    ['sec-fetch-site', headers.get('sec-fetch-site') || 'cross-site'],
+    ['sec-fetch-user', headers.get('sec-fetch-user') || '?1'],
+    ['upgrade-insecure-requests', '1']
   ];
 
   secHeaders.forEach(([key, value]) => {

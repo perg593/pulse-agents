@@ -67,7 +67,7 @@ const BLOCKED_HOSTS = (process.env.BACKGROUND_PROXY_BLOCKLIST || 'localhost,127.
   .filter(Boolean);
 
 const DEFAULT_USER_AGENT =
-  'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 PulsePreviewProxy/1.0';
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
 
 // Analytics domains to block from proxying
 const DEFAULT_ANALYTICS_BLOCKLIST = [
@@ -337,6 +337,42 @@ function shouldBlockDomain(hostname, blocklist) {
 }
 
 /**
+ * Parse Cloudflare passthrough allowlist from environment variable
+ * @param {string|undefined} envValue - Environment variable value (comma-separated)
+ * @returns {string[]} Array of domains that should bypass Cloudflare challenge detection
+ */
+function parseCfPassthroughDomains(envValue) {
+  if (!envValue) {
+    return [];
+  }
+  
+  return envValue
+    .split(',')
+    .map(entry => entry.trim())
+    .filter(Boolean);
+}
+
+/**
+ * Check if a domain should bypass Cloudflare challenge detection
+ * @param {string} hostname - Hostname to check
+ * @param {string[]} allowlist - List of domains that should bypass detection
+ * @returns {boolean} True if domain should bypass Cloudflare challenge detection
+ */
+function shouldPassthroughCfChallenge(hostname, allowlist) {
+  if (!hostname || !allowlist || allowlist.length === 0) {
+    return false;
+  }
+  
+  const hostnameLower = hostname.toLowerCase();
+  
+  // Check for exact match or subdomain match
+  return allowlist.some(domain => {
+    const domainLower = domain.toLowerCase();
+    return hostnameLower === domainLower || hostnameLower.endsWith('.' + domainLower);
+  });
+}
+
+/**
  * Generate a blocked site page HTML
  * @param {URL} target - The target URL that was blocked
  * @param {string} reason - Reason for blocking ('cloudflare_challenge', 'content_type_mismatch', 'domain_blocklist')
@@ -584,9 +620,11 @@ app.options('/proxy', (req, res) => {
       Referer: incomingHeaders['referer'] || target.origin,
       Origin: target.origin,
       Cookie: sanitizeCookies(incomingHeaders.cookie),
-      'Sec-Fetch-Dest': incomingHeaders['sec-fetch-dest'] || (method === 'GET' ? 'document' : 'empty'),
-      'Sec-Fetch-Mode': incomingHeaders['sec-fetch-mode'] || (method === 'GET' ? 'navigate' : 'cors'),
-      'Sec-Fetch-Site': incomingHeaders['sec-fetch-site'] || 'none'
+      'Sec-Fetch-Dest': incomingHeaders['sec-fetch-dest'] || 'document',
+      'Sec-Fetch-Mode': incomingHeaders['sec-fetch-mode'] || 'navigate',
+      'Sec-Fetch-Site': incomingHeaders['sec-fetch-site'] || 'cross-site',
+      'Sec-Fetch-User': incomingHeaders['sec-fetch-user'] || '?1',
+      'Upgrade-Insecure-Requests': '1'
     };
     
     // NOTE: Cookie for target origin is set ONLY for HTML responses (see below)
@@ -689,8 +727,12 @@ app.options('/proxy', (req, res) => {
       const errorBody = await response.text().catch(() => '');
       const isHtmlErrorPage = errorBody.trim().startsWith('<!') || errorBody.trim().startsWith('<html') || contentType.includes('text/html');
       
-      // Detect Cloudflare challenge/blocking
-      const isChallenge = isCloudflareChallenge(response, errorBody, target.toString());
+      // Parse passthrough allowlist and check if domain should bypass CF detection
+      const cfPassthroughDomains = parseCfPassthroughDomains(process.env.PROXY_CF_PASSTHROUGH_DOMAINS);
+      const shouldPassthrough = shouldPassthroughCfChallenge(target.hostname, cfPassthroughDomains);
+      
+      // Detect Cloudflare challenge/blocking (skip if domain is in passthrough allowlist)
+      const isChallenge = shouldPassthrough ? false : isCloudflareChallenge(response, errorBody, target.toString());
       const isMismatch = isContentTypeMismatch(contentType, expectedContentType.type, response.status);
       
       if (isChallenge || isMismatch) {
@@ -771,8 +813,12 @@ app.options('/proxy', (req, res) => {
       
       let body = await response.text();
       
-      // Check for Cloudflare challenge even in successful responses
-      const isChallenge = isCloudflareChallenge(response, body, target.toString());
+      // Parse passthrough allowlist and check if domain should bypass CF detection
+      const cfPassthroughDomains = parseCfPassthroughDomains(process.env.PROXY_CF_PASSTHROUGH_DOMAINS);
+      const shouldPassthrough = shouldPassthroughCfChallenge(target.hostname, cfPassthroughDomains);
+      
+      // Check for Cloudflare challenge even in successful responses (skip if domain is in passthrough allowlist)
+      const isChallenge = shouldPassthrough ? false : isCloudflareChallenge(response, body, target.toString());
       if (isChallenge) {
         console.warn(`[PI-Proxy] Cloudflare challenge detected in HTML response: ${target.toString()}`);
         const blockedHtml = generateBlockedSitePage(target, 'cloudflare_challenge');
@@ -994,7 +1040,12 @@ app.use(async (req, res, next) => {
       'Accept-Encoding': req.headers['accept-encoding'] || 'gzip, deflate, br',
       Referer: targetOrigin,
       Origin: targetOrigin,
-      Cookie: sanitizeCookies(req.headers.cookie)
+      Cookie: sanitizeCookies(req.headers.cookie),
+      'Sec-Fetch-Dest': req.headers['sec-fetch-dest'] || 'document',
+      'Sec-Fetch-Mode': req.headers['sec-fetch-mode'] || 'navigate',
+      'Sec-Fetch-Site': req.headers['sec-fetch-site'] || 'cross-site',
+      'Sec-Fetch-User': req.headers['sec-fetch-user'] || '?1',
+      'Upgrade-Insecure-Requests': '1'
     };
     
     // Forward Content-Type for POST/PUT requests
@@ -1059,8 +1110,12 @@ app.use(async (req, res, next) => {
       const errorBody = await response.text().catch(() => '');
       const isHtmlErrorPage = errorBody.trim().startsWith('<!') || errorBody.trim().startsWith('<html') || contentType.includes('text/html');
       
-      // Detect Cloudflare challenge/blocking
-      const isChallenge = isCloudflareChallenge(response, errorBody, targetUrl.toString());
+      // Parse passthrough allowlist and check if domain should bypass CF detection
+      const cfPassthroughDomains = parseCfPassthroughDomains(process.env.PROXY_CF_PASSTHROUGH_DOMAINS);
+      const shouldPassthrough = shouldPassthroughCfChallenge(targetUrl.hostname, cfPassthroughDomains);
+      
+      // Detect Cloudflare challenge/blocking (skip if domain is in passthrough allowlist)
+      const isChallenge = shouldPassthrough ? false : isCloudflareChallenge(response, errorBody, targetUrl.toString());
       const isMismatch = isContentTypeMismatch(contentType, expectedContentType.type, response.status);
       
       if (isChallenge || isMismatch) {
@@ -1142,8 +1197,12 @@ app.use(async (req, res, next) => {
       
       let body = await response.text();
       
-      // Check for Cloudflare challenge even in successful responses
-      const isChallenge = isCloudflareChallenge(response, body, targetUrl.toString());
+      // Parse passthrough allowlist and check if domain should bypass CF detection
+      const cfPassthroughDomains = parseCfPassthroughDomains(process.env.PROXY_CF_PASSTHROUGH_DOMAINS);
+      const shouldPassthrough = shouldPassthroughCfChallenge(targetUrl.hostname, cfPassthroughDomains);
+      
+      // Check for Cloudflare challenge even in successful responses (skip if domain is in passthrough allowlist)
+      const isChallenge = shouldPassthrough ? false : isCloudflareChallenge(response, body, targetUrl.toString());
       if (isChallenge) {
         console.warn(`[PI-Proxy] [Catch-all] Cloudflare challenge detected in HTML response: ${targetUrl.toString()}`);
         const blockedHtml = generateBlockedSitePage(targetUrl, 'cloudflare_challenge');
