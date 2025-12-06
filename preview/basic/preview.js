@@ -508,9 +508,9 @@ async function init() {
       const testUrl = existingFrameUrlRaw.startsWith('/') || existingFrameUrlRaw.startsWith('./') || existingFrameUrlRaw.startsWith('../')
         ? new URL(existingFrameUrlRaw, window.location.origin)
         : new URL(existingFrameUrlRaw);
-      // Only allow http/https protocols
+      // Only allow http/https protocols - use validated URL's href property
       if (['http:', 'https:'].includes(testUrl.protocol)) {
-        existingFrameUrl = existingFrameUrlRaw;
+        existingFrameUrl = testUrl.href;
       }
     } catch (_error) {
       // Invalid URL, ignore
