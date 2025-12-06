@@ -495,11 +495,41 @@ async function init() {
     requestedHost = hasDemoFilter ? surveyInfo?.backgroundUrl || '' : '';
   }
   
-  const hostToLoad = requestedHost || DEFAULT_HOST_URL;
-  if (!hasDemoFilter && !presentSurveyId) {
+  // Preserve existing background URL if already loaded (prevent redirect away from current page)
+  // Check if there's already a background iframe with a URL different from default
+  const existingFrame = siteRoot?.querySelector('iframe.background-frame');
+  const existingFrameUrlRaw = existingFrame?.dataset?.previewOriginalUrl || '';
+  
+  // Validate existing URL before using it (prevents CodeQL unvalidated redirect warning)
+  let existingFrameUrl = '';
+  if (existingFrameUrlRaw) {
+    try {
+      // Validate URL format - must be http/https or relative path
+      const testUrl = existingFrameUrlRaw.startsWith('/') || existingFrameUrlRaw.startsWith('./') || existingFrameUrlRaw.startsWith('../')
+        ? new URL(existingFrameUrlRaw, window.location.origin)
+        : new URL(existingFrameUrlRaw);
+      // Only allow http/https protocols - use validated URL's href property
+      if (['http:', 'https:'].includes(testUrl.protocol)) {
+        existingFrameUrl = testUrl.href;
+      }
+    } catch (_error) {
+      // Invalid URL, ignore
+    }
+  }
+  
+  const hasExistingBackground = existingFrameUrl && 
+                                 existingFrameUrl !== DEFAULT_HOST_URL && 
+                                 existingFrameUrl !== buildProxySrc(DEFAULT_HOST_URL);
+  
+  // Only use default if no background is requested AND no existing background is loaded
+  const hostToLoad = requestedHost || (hasExistingBackground ? existingFrameUrl : DEFAULT_HOST_URL);
+  
+  if (!hasDemoFilter && !presentSurveyId && !hasExistingBackground) {
     addLog(`No demo parameter detected; defaulting host to ${DEFAULT_HOST_URL}.`);
-  } else if (!requestedHost && (hasDemoFilter || presentSurveyId)) {
+  } else if (!requestedHost && (hasDemoFilter || presentSurveyId) && !hasExistingBackground) {
     addLog(`Background URL not found; falling back to ${DEFAULT_HOST_URL}.`, 'warn');
+  } else if (hasExistingBackground && !requestedHost) {
+    addLog(`Preserving existing background URL: ${existingFrameUrl}`, 'info');
   }
 
   let hostLoaded = false;

@@ -117,8 +117,34 @@ async function init() {
 
   populateSurveySelect();
   attachEventListeners();
-  loadBackground(elements.backgroundFrame, DEFAULT_BACKGROUND);
-  elements.backgroundInput.value = DEFAULT_BACKGROUND;
+  
+  // Preserve existing background URL if already loaded (e.g., from present parameter)
+  // Check iframe's dataset first, then URL params, then default
+  const existingUrlRaw = elements.backgroundFrame?.dataset?.previewOriginalUrl || 
+                          new URLSearchParams(window.location.search).get('background') ||
+                          null;
+  
+  // Validate URL before using it (prevents CodeQL unvalidated redirect warning)
+  let existingUrl = null;
+  if (existingUrlRaw) {
+    try {
+      // Validate URL format - must be http/https or relative path
+      const testUrl = existingUrlRaw.startsWith('/') || existingUrlRaw.startsWith('./') || existingUrlRaw.startsWith('../')
+        ? new URL(existingUrlRaw, window.location.origin)
+        : new URL(existingUrlRaw);
+      // Only allow http/https protocols - use validated URL's href property
+      if (['http:', 'https:'].includes(testUrl.protocol)) {
+        existingUrl = testUrl.href;
+      }
+    } catch (_error) {
+      // Invalid URL, ignore
+    }
+  }
+  
+  const initialBackground = existingUrl || DEFAULT_BACKGROUND;
+  
+  loadBackground(elements.backgroundFrame, initialBackground);
+  elements.backgroundInput.value = initialBackground;
   elements.accountIndicator.textContent = state.account;
   renderTriggers(elements.triggerContainer, buildTriggerConfig(), { onTrigger: handleTrigger });
   initThemeManager({
