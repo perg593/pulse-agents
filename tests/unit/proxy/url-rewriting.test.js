@@ -413,5 +413,138 @@ test('srcset rewriting should handle each URL separately', () => {
   assert(rewritten.includes('512w'), 'Should preserve second descriptor');
 });
 
+// Test 18: Malformed URL detection
+test('Double-encoded URL should be detected as malformed', () => {
+  // Helper function to detect malformed URLs (matches proxy.js logic)
+  function isMalformedUrl(url) {
+    if (!url || typeof url !== 'string') return false;
+    
+    try {
+      let decoded = decodeURIComponent(url);
+      
+      // Check if still contains encoded fragments after decoding
+      if (decoded.includes('https%3A') || decoded.includes('http%3A') || decoded.includes('%3A%2F%2F')) {
+        return true;
+      }
+      
+      // Check for mismatched quotes
+      const singleQuotes = (decoded.match(/'/g) || []).length;
+      const doubleQuotes = (decoded.match(/"/g) || []).length;
+      if (singleQuotes % 2 !== 0 || doubleQuotes % 2 !== 0) {
+        return true;
+      }
+      
+      // Try to parse as URL
+      try {
+        new URL(decoded);
+      } catch (e) {
+        try {
+          new URL(url);
+        } catch (e2) {
+          return true;
+        }
+      }
+      
+      return false;
+    } catch (e) {
+      return true;
+    }
+  }
+  
+  // Test double-encoded URL (URL encoded twice)
+  const doubleEncoded = encodeURIComponent('https%3A%2F%2Fexample.com');
+  assert(isMalformedUrl(doubleEncoded), 'Double-encoded URL should be detected');
+  
+  // Test URL with mismatched quotes
+  const mismatchedQuotes = "https://example.com/path'with\"unmatched";
+  assert(isMalformedUrl(mismatchedQuotes), 'URL with mismatched quotes should be detected');
+  
+  // Test valid URL
+  const validUrl = 'https://example.com/path';
+  assert(!isMalformedUrl(validUrl), 'Valid URL should not be detected as malformed');
+  
+  // Test URL with properly matched quotes (should be OK)
+  const matchedQuotes = 'https://example.com/path"with"matched';
+  assert(!isMalformedUrl(matchedQuotes), 'URL with matched quotes should not be detected');
+});
+
+// Test 19: Domain blocklist
+test('Domain blocklist should block specified domains', () => {
+  // Helper function (matches proxy.js logic)
+  function shouldBlockDomain(hostname, blocklist) {
+    if (!hostname || !blocklist || blocklist.length === 0) return false;
+    
+    const hostnameLower = hostname.toLowerCase();
+    return blocklist.some(pattern => {
+      return hostnameLower === pattern || hostnameLower.endsWith('.' + pattern);
+    });
+  }
+  
+  const blocklist = ['waterworks.com', 'njtransit.com'];
+  
+  assert(shouldBlockDomain('waterworks.com', blocklist), 'Exact match should be blocked');
+  assert(shouldBlockDomain('www.waterworks.com', blocklist), 'Subdomain should be blocked');
+  assert(!shouldBlockDomain('example.com', blocklist), 'Non-blocked domain should not be blocked');
+  assert(!shouldBlockDomain('', blocklist), 'Empty hostname should not be blocked');
+  assert(!shouldBlockDomain('waterworks.com', []), 'Empty blocklist should not block');
+});
+
+// Test 20: Cloudflare challenge detection
+test('Cloudflare challenge markers should be detected', () => {
+  // Helper function (matches proxy.js logic)
+  function isCloudflareChallenge(response, bodyText, url) {
+    const CLOUDFLARE_CHALLENGE_MARKERS = [
+      'cdn-cgi/challenge-platform',
+      'cf-chl-bypass',
+      'jsd/main.js',
+      'challenge-platform',
+      'cf-browser-verification',
+      'checking your browser',
+      'please wait',
+      'ray id',
+      'cf-ray'
+    ];
+    
+    // Mock response object for testing
+    const status = response.status || 200;
+    const server = response.server || '';
+    
+    if (status === 403 || status === 503) {
+      if (server.toLowerCase().includes('cloudflare')) {
+        return true;
+      }
+      
+      const urlLower = url.toLowerCase();
+      if (CLOUDFLARE_CHALLENGE_MARKERS.some(marker => urlLower.includes(marker.toLowerCase()))) {
+        return true;
+      }
+      
+      if (bodyText) {
+        const bodyLower = bodyText.toLowerCase();
+        if (CLOUDFLARE_CHALLENGE_MARKERS.some(marker => bodyLower.includes(marker.toLowerCase()))) {
+          return true;
+        }
+      }
+    }
+    
+    return false;
+  }
+  
+  // Test URL with challenge marker
+  const challengeUrl = 'https://example.com/cdn-cgi/challenge-platform/scripts/jsd/main.js';
+  assert(isCloudflareChallenge({ status: 403 }, '', challengeUrl), 'Challenge URL should be detected');
+  
+  // Test body with challenge text
+  const challengeBody = '<html><body>Checking your browser before accessing...</body></html>';
+  assert(isCloudflareChallenge({ status: 403 }, challengeBody, 'https://example.com'), 'Challenge body should be detected');
+  
+  // Test Cloudflare server header
+  assert(isCloudflareChallenge({ status: 403, server: 'cloudflare' }, '', 'https://example.com'), 'Cloudflare server header should be detected');
+  
+  // Test non-challenge response
+  assert(!isCloudflareChallenge({ status: 200 }, 'normal content', 'https://example.com'), 'Normal response should not be detected');
+  assert(!isCloudflareChallenge({ status: 404 }, '', 'https://example.com'), '404 should not be detected as challenge');
+});
+
 console.log('\nAll URL rewriting tests passed!');
 

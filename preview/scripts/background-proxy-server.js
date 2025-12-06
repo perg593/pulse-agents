@@ -171,6 +171,242 @@ const CONSENT_BANNER_SELECTORS = [
   '.truste_box_overlay'
 ];
 
+/**
+ * Cloudflare challenge markers to detect blocked/challenge responses
+ * @type {string[]}
+ */
+const CLOUDFLARE_CHALLENGE_MARKERS = [
+  'cdn-cgi/challenge-platform',
+  'cf-chl-bypass',
+  'jsd/main.js',
+  'challenge-platform',
+  'cf-browser-verification',
+  'checking your browser',
+  'ray id',
+  'cf-ray'
+];
+
+/**
+ * Check if a response indicates a Cloudflare challenge or blocking
+ * @param {Object} response - The upstream response (node-fetch Response)
+ * @param {string} bodyText - The response body text (if available)
+ * @param {string} url - The requested URL
+ * @returns {boolean} True if this appears to be a Cloudflare challenge/block
+ */
+function isCloudflareChallenge(response, bodyText = '', url = '') {
+  // Check server header first (works for any status code)
+  const server = response.headers.get('server') || '';
+  if (server.toLowerCase().includes('cloudflare')) {
+    // For Cloudflare servers, check if it's a challenge page
+    // Check URL for challenge markers
+    const urlLower = url.toLowerCase();
+    if (CLOUDFLARE_CHALLENGE_MARKERS.some(marker => urlLower.includes(marker.toLowerCase()))) {
+      return true;
+    }
+    
+    // Check response body for challenge markers
+    if (bodyText) {
+      const bodyLower = bodyText.toLowerCase();
+      if (CLOUDFLARE_CHALLENGE_MARKERS.some(marker => bodyLower.includes(marker.toLowerCase()))) {
+        return true;
+      }
+    }
+    
+    // If Cloudflare server with 403/503, likely a challenge
+    if (response.status === 403 || response.status === 503) {
+      return true;
+    }
+  }
+  
+  // For non-Cloudflare servers, only check 403/503 with challenge markers
+  if (response.status === 403 || response.status === 503) {
+    // Check URL for challenge markers
+    const urlLower = url.toLowerCase();
+    if (CLOUDFLARE_CHALLENGE_MARKERS.some(marker => urlLower.includes(marker.toLowerCase()))) {
+      return true;
+    }
+    
+    // Check response body for challenge markers
+    if (bodyText) {
+      const bodyLower = bodyText.toLowerCase();
+      if (CLOUDFLARE_CHALLENGE_MARKERS.some(marker => bodyLower.includes(marker.toLowerCase()))) {
+        return true;
+      }
+    }
+  }
+  
+  return false;
+}
+
+/**
+ * Check if a URL is malformed or double-encoded
+ * @param {string} url - URL to check
+ * @returns {boolean} True if URL appears malformed
+ */
+function isMalformedUrl(url) {
+  if (!url || typeof url !== 'string') return false;
+  
+  try {
+    // Decode once
+    let decoded = decodeURIComponent(url);
+    
+    // Check if still contains encoded fragments after decoding
+    if (decoded.includes('https%3A') || decoded.includes('http%3A') || decoded.includes('%3A%2F%2F')) {
+      return true;
+    }
+    
+    // Check for mismatched quotes (common in malformed URLs)
+    const singleQuotes = (decoded.match(/'/g) || []).length;
+    const doubleQuotes = (decoded.match(/"/g) || []).length;
+    if (singleQuotes % 2 !== 0 || doubleQuotes % 2 !== 0) {
+      // Odd number of quotes suggests malformation
+      return true;
+    }
+    
+    // Try to parse as URL - if it fails, it's malformed
+    try {
+      new URL(decoded);
+    } catch (e) {
+      // If decoding helped, try the original
+      try {
+        new URL(url);
+      } catch (e2) {
+        return true;
+      }
+    }
+    
+    return false;
+  } catch (e) {
+    // If decoding fails entirely, consider it malformed
+    return true;
+  }
+}
+
+/**
+ * Check if content-type mismatch indicates a blocked/challenge response
+ * @param {string} contentType - Response content-type
+ * @param {string} expectedType - Expected content type ('javascript', 'css', 'html', etc.)
+ * @param {number} status - Response status code
+ * @returns {boolean} True if mismatch suggests blocking
+ */
+function isContentTypeMismatch(contentType, expectedType, status) {
+  if (!contentType || !expectedType) return false;
+  
+  const contentTypeLower = contentType.toLowerCase();
+  const isHtml = contentTypeLower.includes('text/html');
+  
+  // If we expected JS/CSS but got HTML with error status, it's likely a challenge/block
+  if ((expectedType === 'javascript' || expectedType === 'css' || expectedType === 'font') && 
+      isHtml && 
+      status >= 400) {
+    return true;
+  }
+  
+  return false;
+}
+
+/**
+ * Parse domain blocklist from environment variable
+ * @param {string|undefined} envValue - Environment variable value (comma-separated)
+ * @returns {string[]} Array of domain patterns to block
+ */
+function parseDomainBlocklist(envValue) {
+  if (!envValue) {
+    return [];
+  }
+  
+  return envValue
+    .split(',')
+    .map(entry => entry.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+/**
+ * Check if a domain should be blocked based on blocklist
+ * @param {string} hostname - Hostname to check
+ * @param {string[]} blocklist - List of domain patterns to block
+ * @returns {boolean} True if domain should be blocked
+ */
+function shouldBlockDomain(hostname, blocklist) {
+  if (!hostname || !blocklist || blocklist.length === 0) return false;
+  
+  const hostnameLower = hostname.toLowerCase();
+  return blocklist.some(pattern => {
+    return hostnameLower === pattern || hostnameLower.endsWith('.' + pattern);
+  });
+}
+
+/**
+ * Generate a blocked site page HTML
+ * @param {URL} target - The target URL that was blocked
+ * @param {string} reason - Reason for blocking ('cloudflare_challenge', 'content_type_mismatch', 'domain_blocklist')
+ * @returns {string} HTML page for blocked site
+ */
+function generateBlockedSitePage(target, reason = 'unknown') {
+  const reasonMessages = {
+    cloudflare_challenge: 'This site is protected by Cloudflare and is blocking automated access.',
+    content_type_mismatch: 'This site returned an unexpected response type, indicating it may be blocking the proxy.',
+    domain_blocklist: 'This domain has been marked as non-demoable.',
+    unknown: 'This site blocked the preview proxy request.'
+  };
+  
+  const message = reasonMessages[reason] || reasonMessages.unknown;
+  
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Preview Blocked - ${target.hostname}</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+    .container {
+      text-align: center;
+      padding: 40px;
+      max-width: 600px;
+    }
+    h1 {
+      font-size: 48px;
+      margin: 0 0 20px 0;
+    }
+    p {
+      font-size: 18px;
+      line-height: 1.6;
+      margin: 20px 0;
+      opacity: 0.9;
+    }
+    .domain {
+      font-weight: 600;
+      font-size: 20px;
+      margin: 20px 0;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>⚠️ Preview Blocked</h1>
+    <p>${message}</p>
+    <div class="domain">${target.hostname}</div>
+    <p>Some sites block automated access for security reasons. This site cannot be previewed through the proxy.</p>
+  </div>
+</body>
+</html>`;
+}
+
 function isHostAllowed(hostname) {
   if (!hostname) return false;
   const lower = hostname.toLowerCase();
@@ -235,12 +471,16 @@ function detectExpectedContentType(req, targetUrl) {
   // Fallback to file extension
   const jsExtensions = ['js', 'mjs', 'jsx', 'ts', 'tsx'];
   const cssExtensions = ['css', 'scss', 'sass', 'less'];
+  const fontExtensions = ['woff', 'woff2', 'ttf', 'otf', 'eot'];
   
   if (jsExtensions.includes(extension)) {
     return { type: 'javascript', mimeType: 'application/javascript' };
   }
   if (cssExtensions.includes(extension)) {
     return { type: 'css', mimeType: 'text/css' };
+  }
+  if (fontExtensions.includes(extension)) {
+    return { type: 'font', mimeType: 'application/font-woff' };
   }
   
   // Check URL path patterns
@@ -302,9 +542,32 @@ app.options('/proxy', (req, res) => {
     return;
   }
 
+  // Check for malformed/double-encoded URLs early
+  if (isMalformedUrl(targetRaw)) {
+    console.warn('[PI-Proxy] Malformed URL detected, blocking request:', targetRaw.substring(0, 100));
+    res.status(400).json({ 
+      error: 'Invalid URL format detected',
+      reason: 'malformed_url'
+    });
+    return;
+  }
+
+  // Parse domain blocklist for demo (optional per-domain blocking)
+  const domainBlocklist = parseDomainBlocklist(process.env.PROXY_DOMAIN_BLOCKLIST);
+
   let target;
   try {
     target = resolveTarget(targetRaw);
+    
+    // Check if domain is in blocklist
+    if (shouldBlockDomain(target.hostname, domainBlocklist)) {
+      console.log('[PI-Proxy] Domain blocked by blocklist:', target.hostname);
+      res.status(403).json({ 
+        error: `Domain ${target.hostname} is blocked`,
+        reason: 'domain_blocklist'
+      });
+      return;
+    }
   } catch (error) {
     res.status(400).json({ error: error.message });
     return;
@@ -426,9 +689,41 @@ app.options('/proxy', (req, res) => {
       const errorBody = await response.text().catch(() => '');
       const isHtmlErrorPage = errorBody.trim().startsWith('<!') || errorBody.trim().startsWith('<html') || contentType.includes('text/html');
       
+      // Detect Cloudflare challenge/blocking
+      const isChallenge = isCloudflareChallenge(response, errorBody, target.toString());
+      const isMismatch = isContentTypeMismatch(contentType, expectedContentType.type, response.status);
+      
+      if (isChallenge || isMismatch) {
+        console.warn(`[PI-Proxy] Cloudflare challenge/block detected (status: ${response.status}, challenge: ${isChallenge}, mismatch: ${isMismatch}): ${target.toString()}`);
+        
+        // For HTML requests, return blocked page with banner
+        if (expectedContentType.type === 'html') {
+          const blockedHtml = generateBlockedSitePage(target, isChallenge ? 'cloudflare_challenge' : 'content_type_mismatch');
+          res.setHeader('content-type', 'text/html');
+          res.status(403).send(blockedHtml);
+          return;
+        }
+        
+        // For JS/CSS/font requests, return empty/error response instead of HTML
+        if (expectedContentType.type === 'javascript') {
+          res.setHeader('content-type', 'application/javascript');
+          res.status(403).send(`// Error ${response.status}: Site blocked (Cloudflare challenge detected)\n// Resource: ${target.toString()}\n// This site is blocking automated access`);
+          return;
+        } else if (expectedContentType.type === 'css') {
+          res.setHeader('content-type', 'text/css');
+          res.status(403).send(`/* Error ${response.status}: Site blocked (Cloudflare challenge detected) */\n/* Resource: ${target.toString()} */`);
+          return;
+        } else if (expectedContentType.type === 'font') {
+          // For fonts, return empty response to allow fallback
+          res.setHeader('content-type', 'application/octet-stream');
+          res.status(403).send('');
+          return;
+        }
+      }
+      
       // If upstream returned HTML error page but request expects JS/CSS, override Content-Type
       if (isHtmlErrorPage && expectedContentType.type !== 'html') {
-        console.warn(`[Proxy] Upstream returned HTML error page (${response.status}) for ${expectedContentType.type} request: ${target.toString()}`);
+        console.warn(`[PI-Proxy] Upstream returned HTML error page (${response.status}) for ${expectedContentType.type} request: ${target.toString()}`);
         
         if (expectedContentType.type === 'javascript') {
           // Return empty JS module or error comment for JS requests
@@ -471,16 +766,27 @@ app.options('/proxy', (req, res) => {
     }
 
     if (contentType.includes('text/html')) {
+      // Parse analytics blocklist from environment
+      const analyticsBlocklist = parseAnalyticsBlocklist(process.env.PROXY_ANALYTICS_BLOCKLIST);
+      
+      let body = await response.text();
+      
+      // Check for Cloudflare challenge even in successful responses
+      const isChallenge = isCloudflareChallenge(response, body, target.toString());
+      if (isChallenge) {
+        console.warn(`[PI-Proxy] Cloudflare challenge detected in HTML response: ${target.toString()}`);
+        const blockedHtml = generateBlockedSitePage(target, 'cloudflare_challenge');
+        res.setHeader('content-type', 'text/html');
+        res.status(403).send(blockedHtml);
+        return;
+      }
+      
       // Store the target origin in a cookie ONLY for HTML responses
       // This prevents third-party scripts (like js.pulseinsights.com) from overwriting the correct target
       const cookieValue = `${PROXY_TARGET_COOKIE}=${encodeURIComponent(target.origin)}; Path=/; Max-Age=3600; SameSite=Lax`;
       res.setHeader('Set-Cookie', cookieValue);
       console.log(`[Proxy] Setting target origin cookie for HTML response: ${target.origin}`);
       
-      // Parse analytics blocklist from environment
-      const analyticsBlocklist = parseAnalyticsBlocklist(process.env.PROXY_ANALYTICS_BLOCKLIST);
-      
-      let body = await response.text();
       body = ensureBaseHref(body, target);
       // Rewrite resource URLs to go through proxy
       body = rewriteResourceUrls(body, target, req, analyticsBlocklist);
@@ -647,6 +953,31 @@ app.use(async (req, res, next) => {
     });
   }
   
+  // Check for malformed URL in catch-all handler
+  if (isMalformedUrl(targetUrl.toString())) {
+    console.warn('[PI-Proxy] [Catch-all] Malformed URL detected, blocking request:', targetUrl.toString().substring(0, 100));
+    res.status(400).json({ 
+      error: 'Invalid URL format detected',
+      reason: 'malformed_url',
+      path: req.path
+    });
+    return;
+  }
+  
+  // Parse domain blocklist for demo (optional per-domain blocking)
+  const domainBlocklist = parseDomainBlocklist(process.env.PROXY_DOMAIN_BLOCKLIST);
+  
+  // Check if domain is in blocklist
+  if (shouldBlockDomain(targetUrl.hostname, domainBlocklist)) {
+    console.log('[PI-Proxy] [Catch-all] Domain blocked by blocklist:', targetUrl.hostname);
+    res.status(403).json({ 
+      error: `Domain ${targetUrl.hostname} is blocked`,
+      reason: 'domain_blocklist',
+      path: req.path
+    });
+    return;
+  }
+  
   console.log(`[Catch-all] Proxying ${req.method} ${req.path} -> ${targetUrl.toString()}`);
   
   try {
@@ -728,9 +1059,41 @@ app.use(async (req, res, next) => {
       const errorBody = await response.text().catch(() => '');
       const isHtmlErrorPage = errorBody.trim().startsWith('<!') || errorBody.trim().startsWith('<html') || contentType.includes('text/html');
       
+      // Detect Cloudflare challenge/blocking
+      const isChallenge = isCloudflareChallenge(response, errorBody, targetUrl.toString());
+      const isMismatch = isContentTypeMismatch(contentType, expectedContentType.type, response.status);
+      
+      if (isChallenge || isMismatch) {
+        console.warn(`[PI-Proxy] [Catch-all] Cloudflare challenge/block detected (status: ${response.status}, challenge: ${isChallenge}, mismatch: ${isMismatch}): ${targetUrl.toString()}`);
+        
+        // For HTML requests, return blocked page with banner
+        if (expectedContentType.type === 'html') {
+          const blockedHtml = generateBlockedSitePage(targetUrl, isChallenge ? 'cloudflare_challenge' : 'content_type_mismatch');
+          res.setHeader('content-type', 'text/html');
+          res.status(403).send(blockedHtml);
+          return;
+        }
+        
+        // For JS/CSS/font requests, return empty/error response instead of HTML
+        if (expectedContentType.type === 'javascript') {
+          res.setHeader('content-type', 'application/javascript');
+          res.status(403).send(`// Error ${response.status}: Site blocked (Cloudflare challenge detected)\n// Resource: ${targetUrl.toString()}\n// This site is blocking automated access`);
+          return;
+        } else if (expectedContentType.type === 'css') {
+          res.setHeader('content-type', 'text/css');
+          res.status(403).send(`/* Error ${response.status}: Site blocked (Cloudflare challenge detected) */\n/* Resource: ${targetUrl.toString()} */`);
+          return;
+        } else if (expectedContentType.type === 'font') {
+          // For fonts, return empty response to allow fallback
+          res.setHeader('content-type', 'application/octet-stream');
+          res.status(403).send('');
+          return;
+        }
+      }
+      
       // If upstream returned HTML error page but request expects JS/CSS, override Content-Type
       if (isHtmlErrorPage && expectedContentType.type !== 'html') {
-        console.warn(`[Catch-all] Upstream returned HTML error page (${response.status}) for ${expectedContentType.type} request: ${targetUrl.toString()}`);
+        console.warn(`[PI-Proxy] [Catch-all] Upstream returned HTML error page (${response.status}) for ${expectedContentType.type} request: ${targetUrl.toString()}`);
         
         if (expectedContentType.type === 'javascript') {
           // Return empty JS module or error comment for JS requests
@@ -778,6 +1141,17 @@ app.use(async (req, res, next) => {
       const analyticsBlocklist = parseAnalyticsBlocklist(process.env.PROXY_ANALYTICS_BLOCKLIST);
       
       let body = await response.text();
+      
+      // Check for Cloudflare challenge even in successful responses
+      const isChallenge = isCloudflareChallenge(response, body, targetUrl.toString());
+      if (isChallenge) {
+        console.warn(`[PI-Proxy] [Catch-all] Cloudflare challenge detected in HTML response: ${targetUrl.toString()}`);
+        const blockedHtml = generateBlockedSitePage(targetUrl, 'cloudflare_challenge');
+        res.setHeader('content-type', 'text/html');
+        res.status(403).send(blockedHtml);
+        return;
+      }
+      
       body = ensureBaseHref(body, targetUrl);
       body = rewriteResourceUrls(body, targetUrl, req, analyticsBlocklist);
       // Inject framework error handler FIRST (before URL rewriting script)
@@ -814,6 +1188,9 @@ app.use(async (req, res, next) => {
     } else if (expectedContentType.type === 'css') {
       res.setHeader('content-type', 'text/css');
       res.status(502).send(`/* Error: Failed to fetch ${targetUrl.toString()}: ${error.message} */\n`);
+    } else if (expectedContentType.type === 'font') {
+      res.setHeader('content-type', 'application/octet-stream');
+      res.status(502).send('');
     } else {
       res.status(502).json({
         error: `Failed to fetch ${targetUrl.toString()}: ${error.message}`
@@ -908,6 +1285,19 @@ function rewriteResourceUrls(html, target, req, analyticsBlocklist = []) {
     jsonLdBlocks.push(fullMatch);
     jsonLdPlaceholders.push(placeholder);
     placeholderIndex++;
+  }
+  
+  // Log JSON-LD preservation
+  if (jsonLdBlocks.length > 0) {
+    console.log('[PI-Proxy] [Bypass] Preserving JSON-LD blocks:', {
+      count: jsonLdBlocks.length,
+      reason: 'jsonld_preservation',
+      blocks: jsonLdBlocks.map((block, i) => ({
+        index: i,
+        length: block.length,
+        preview: block.substring(0, 100)
+      }))
+    });
   }
   
   // Replace JSON-LD blocks with placeholders
@@ -1057,7 +1447,11 @@ function rewriteUrl(url, targetOrigin, proxyBase, analyticsBlocklist = []) {
 
   // Block analytics/tracking URLs - return about:blank to prevent loading
   if (analyticsBlocklist.length > 0 && shouldBlockAnalyticsUrl(trimmed, analyticsBlocklist)) {
-    console.log('[PI-Proxy] Blocked analytics URL:', trimmed);
+    console.log('[PI-Proxy] [Bypass] Blocked analytics URL:', {
+      url: trimmed.substring(0, 100),
+      reason: 'analytics_blocklist',
+      blocklistMatch: analyticsBlocklist.find(pattern => trimmed.toLowerCase().includes(pattern.toLowerCase()))
+    });
     return 'about:blank';
   }
 
@@ -1489,6 +1883,15 @@ function injectUrlRewritingScript(html, target, req, analyticsBlocklist = []) {
       // Synchronous requests must not have a timeout set (causes InvalidAccessError)
       const isAsync = async !== false;
       
+      // Log synchronous XHR handling
+      if (!isAsync) {
+        log('[Bypass] Synchronous XHR detected, skipping timeout:', {
+          method,
+          url: url.substring(0, 100),
+          reason: 'sync_xhr_no_timeout'
+        });
+      }
+      
       // Store async flag for setTimeout interception
       this.__pi_proxy_is_async = isAsync;
       
@@ -1502,7 +1905,10 @@ function injectUrlRewritingScript(html, target, req, analyticsBlocklist = []) {
         if (this.__pi_proxy_is_async !== false) {
           return originalSetTimeout.call(this, timeout);
         } else {
-          log('Skipping setTimeout for synchronous XHR');
+          log('[Bypass] Skipping setTimeout for synchronous XHR:', {
+            reason: 'sync_xhr_no_timeout',
+            url: this.responseURL ? this.responseURL.substring(0, 100) : 'unknown'
+          });
           // Don't set timeout for sync requests - just return
           return;
         }
