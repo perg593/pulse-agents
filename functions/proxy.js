@@ -447,9 +447,10 @@ export async function onRequest(context) {
       // Check if this is a challenge script URL from a passthrough domain
       // Challenge scripts (e.g., cdn-cgi/challenge-platform/scripts/jsd/main.js) are legitimate
       // and should be allowed through even if they return 403, as they're needed for challenge resolution
-      const urlLower = target.toString().toLowerCase();
-      const isChallengeScriptUrl = urlLower.includes('cdn-cgi/challenge-platform') || 
-                                   urlLower.includes('challenge-platform/scripts');
+      // Use pathname for safer URL checking (avoids query string manipulation)
+      const pathnameLower = target.pathname.toLowerCase();
+      const isChallengeScriptUrl = pathnameLower.includes('/cdn-cgi/challenge-platform') || 
+                                   pathnameLower.includes('/challenge-platform/scripts');
       const allowChallengeScript = shouldPassthrough && isChallengeScriptUrl;
       
       // Detect Cloudflare challenge/blocking (skip if domain is in passthrough allowlist)
