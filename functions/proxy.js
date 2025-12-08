@@ -318,6 +318,105 @@ export async function onRequest(context) {
     return withCors(jsonResponse({ error: 'Method not allowed' }, { status: 405 }), request);
   }
 
+  // Handle /cdn-cgi/ paths (Cloudflare challenge platform endpoints)
+  // These come as relative URLs from challenge scripts and need to be forwarded to the passthrough domain
+  if (incoming.pathname.startsWith('/cdn-cgi/')) {
+    // Parse passthrough allowlist
+    const cfPassthroughDomains = parseCfPassthroughDomains(env?.PROXY_CF_PASSTHROUGH_DOMAINS);
+    
+    if (cfPassthroughDomains.length === 0) {
+      return withCors(jsonResponse({ error: 'No passthrough domains configured' }, { status: 400 }), request);
+    }
+    
+    // Extract target origin from referer header
+    // The referer should be a proxied URL like: /proxy?url=https%3A%2F%2Fwww.njtransit.com%2F...
+    let targetOrigin = null;
+    const referer = request.headers.get('referer') || request.headers.get('referrer');
+    
+    if (referer) {
+      try {
+        const refererUrl = new URL(referer);
+        const urlParam = refererUrl.searchParams.get('url');
+        if (urlParam) {
+          const decodedUrl = decodeURIComponent(urlParam);
+          const targetUrl = new URL(decodedUrl);
+          targetOrigin = targetUrl.origin;
+        }
+      } catch (e) {
+        // If referer parsing fails, try to extract from pathname
+        const refererMatch = referer.match(/proxy[?&]url=([^&]+)/);
+        if (refererMatch) {
+          try {
+            const decodedUrl = decodeURIComponent(refererMatch[1]);
+            const targetUrl = new URL(decodedUrl);
+            targetOrigin = targetUrl.origin;
+          } catch (e2) {
+            // Ignore
+          }
+        }
+      }
+    }
+    
+    // If no target origin found, use first passthrough domain
+    if (!targetOrigin && cfPassthroughDomains.length > 0) {
+      // Default to https://www.{domain} format
+      const domain = cfPassthroughDomains[0];
+      targetOrigin = `https://www.${domain}`;
+    }
+    
+    if (!targetOrigin) {
+      return withCors(jsonResponse({ error: 'Could not determine target origin' }, { status: 400 }), request);
+    }
+    
+    // Check if target origin is in passthrough allowlist
+    const targetUrlObj = new URL(targetOrigin);
+    if (!shouldPassthroughCfChallenge(targetUrlObj.hostname, cfPassthroughDomains)) {
+      return withCors(jsonResponse({ error: 'Domain not in passthrough allowlist' }, { status: 403 }), request);
+    }
+    
+    // Build target URL: https://www.njtransit.com/cdn-cgi/...
+    const targetUrl = `${targetOrigin}${incoming.pathname}${incoming.search}`;
+    
+    try {
+      const upstreamHeaders = buildUpstreamHeaders(request.headers, new URL(targetUrl), env, request.method);
+      
+      const fetchOptions = {
+        method: request.method,
+        headers: upstreamHeaders,
+        redirect: 'follow'
+      };
+      
+      // Forward request body for POST/PUT requests
+      if (['POST', 'PUT'].includes(request.method)) {
+        const clonedRequest = request.clone();
+        try {
+          const body = await clonedRequest.arrayBuffer();
+          fetchOptions.body = body;
+        } catch (error) {
+          console.error('[PI-Proxy] Failed to read request body for /cdn-cgi/ route:', error);
+        }
+      }
+      
+      const upstreamResponse = await fetch(targetUrl, fetchOptions);
+      
+      const responseHeaders = buildCorsHeaders(request.headers);
+      copyPassthroughHeaders(upstreamResponse, responseHeaders);
+      removeFrameBlockingHeaders(upstreamResponse, responseHeaders);
+      
+      // For challenge platform endpoints, pass through response as-is (even 403s)
+      const buffer = await upstreamResponse.arrayBuffer().catch(() => new ArrayBuffer(0));
+      
+      return new Response(buffer, {
+        status: upstreamResponse.status,
+        statusText: upstreamResponse.statusText,
+        headers: responseHeaders
+      });
+    } catch (error) {
+      console.error('[PI-Proxy] Error forwarding /cdn-cgi/ request:', error);
+      return withCors(jsonResponse({ error: 'Failed to forward request' }, { status: 500 }), request);
+    }
+  }
+
   const targetRaw = incoming.searchParams.get('url');
   if (!targetRaw) {
     return withCors(jsonResponse({ error: 'Missing url query parameter' }, { status: 400 }), request);
@@ -441,6 +540,15 @@ export async function onRequest(context) {
       const cfPassthroughDomains = parseCfPassthroughDomains(env?.PROXY_CF_PASSTHROUGH_DOMAINS);
       const shouldPassthrough = shouldPassthroughCfChallenge(target.hostname, cfPassthroughDomains);
       
+      // Debug logging for passthrough detection
+      if (target.hostname.includes('njtransit')) {
+        console.log(`[PI-Proxy] Passthrough check for ${target.hostname}:`, {
+          cfPassthroughDomains,
+          shouldPassthrough,
+          envVar: env?.PROXY_CF_PASSTHROUGH_DOMAINS
+        });
+      }
+      
       // Check if this is a challenge script URL from a passthrough domain BEFORE reading body
       // Challenge scripts (e.g., cdn-cgi/challenge-platform/scripts/jsd/main.js) are legitimate
       // and should be allowed through even if they return 403, as they're needed for challenge resolution
@@ -450,8 +558,14 @@ export async function onRequest(context) {
                                    pathnameLower.includes('/challenge-platform/scripts');
       const allowChallengeScript = shouldPassthrough && isChallengeScriptUrl;
       
+      // Debug logging for challenge script detection
+      if (isChallengeScriptUrl) {
+        console.log(`[PI-Proxy] Challenge script detected: ${target.toString()}, shouldPassthrough: ${shouldPassthrough}, allowChallengeScript: ${allowChallengeScript}`);
+      }
+      
       // For challenge scripts from passthrough domains, pass through immediately without reading body
       if (allowChallengeScript) {
+        console.log(`[PI-Proxy] Passing through challenge script (status ${upstreamResponse.status}): ${target.toString()}`);
         // Clone response to avoid consuming the body
         const clonedResponse = upstreamResponse.clone();
         const buffer = await clonedResponse.arrayBuffer().catch(() => new ArrayBuffer(0));
@@ -467,8 +581,9 @@ export async function onRequest(context) {
       
       // Detect Cloudflare challenge/blocking (skip if domain is in passthrough allowlist)
       // Also skip if this is a challenge script URL from a passthrough domain
+      // For passthrough domains, skip ALL blocking checks (challenge detection and content-type mismatches)
       const isChallenge = (shouldPassthrough || allowChallengeScript) ? false : isCloudflareChallenge(upstreamResponse, errorBody, target.toString());
-      const isMismatch = allowChallengeScript ? false : isContentTypeMismatch(contentType, expectedContentType.type, upstreamResponse.status);
+      const isMismatch = (shouldPassthrough || allowChallengeScript) ? false : isContentTypeMismatch(contentType, expectedContentType.type, upstreamResponse.status);
       
       if (isChallenge || isMismatch) {
         console.warn(`[PI-Proxy] Cloudflare challenge/block detected (status: ${upstreamResponse.status}, challenge: ${isChallenge}, mismatch: ${isMismatch}): ${target.toString()}`);
@@ -501,7 +616,8 @@ export async function onRequest(context) {
       }
       
       // If upstream returned HTML error page but request expects JS/CSS, override Content-Type
-      if (isHtmlErrorPage && expectedContentType.type !== 'html') {
+      // Skip this conversion for passthrough domains - pass through responses as-is
+      if (isHtmlErrorPage && expectedContentType.type !== 'html' && !shouldPassthrough) {
         console.warn(`[PI-Proxy] Upstream returned HTML error page (${upstreamResponse.status}) for ${expectedContentType.type} request: ${target.toString()}`);
         
         if (expectedContentType.type === 'javascript') {
