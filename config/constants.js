@@ -48,7 +48,10 @@ const UI_CONSTANTS = {
   RAIL_SHORTCUT_RESET_MS: 1500,
   
   /** Player frame margin in pixels */
-  PLAYER_FRAME_MARGIN: 24
+  PLAYER_FRAME_MARGIN: 24,
+  
+  /** Whether to auto-open the demo library overlay on page load (default: false) */
+  DEMO_LIBRARY_AUTO_OPEN: false
 };
 
 /**
@@ -57,7 +60,7 @@ const UI_CONSTANTS = {
  */
 const BEHAVIOR_LISTENER_DEFAULTS = {
   'exit-intent': false,
-  'scroll-depth': true,
+  'scroll-depth': false,
   'time-delay': false,
   'rage-click': false
 };

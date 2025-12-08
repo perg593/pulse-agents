@@ -580,11 +580,29 @@ async function init() {
 
   // Surface the demo directory so presenters can pick the correct demo before interacting.
   // Skip demo directory if present parameter is set (user wants specific survey)
-  if (demoDirectoryOptions.length && !demoForFilterParam && !demoDismissed && !presentSurveyId) {
+  // Only auto-open if enabled via UI_CONSTANTS.DEMO_LIBRARY_AUTO_OPEN
+  const shouldAutoOpenDemoLibrary = UI_CONSTANTS.DEMO_LIBRARY_AUTO_OPEN && 
+                                     demoDirectoryOptions.length && 
+                                     !demoForFilterParam && 
+                                     !demoDismissed && 
+                                     !presentSurveyId;
+  
+  // Debug logging to help diagnose why auto-open might not be working
+  if (UI_CONSTANTS.DEMO_LIBRARY_AUTO_OPEN) {
+    logBehavior(`Demo library auto-open enabled. Options: ${demoDirectoryOptions.length}, demoFor: ${demoForFilterParam || 'none'}, dismissed: ${demoDismissed}, present: ${presentSurveyId || 'none'}`);
+  }
+  
+  if (shouldAutoOpenDemoLibrary) {
     openDemoDirectory();
     logBehavior('Demo directory opened by default so the demo context is explicit.');
   } else {
-    logBehavior('Demo directory not available yet; listeners still armed with defaults.');
+    const reason = !UI_CONSTANTS.DEMO_LIBRARY_AUTO_OPEN ? 'auto-open disabled' :
+                   !demoDirectoryOptions.length ? 'no demo options available' :
+                   demoForFilterParam ? 'demo_for filter active' :
+                   demoDismissed ? 'demo dismissed' :
+                   presentSurveyId ? 'present parameter active' :
+                   'unknown';
+    logBehavior(`Demo directory not available yet; listeners still armed with defaults. Reason: ${reason}`);
   }
 }
 

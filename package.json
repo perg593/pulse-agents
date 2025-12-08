@@ -17,6 +17,18 @@
     "clean": "bash scripts/cleanup.sh",
     "clean:all": "CLEAN_BUILD=1 CLEAN_NODE_MODULES=1 bash scripts/cleanup.sh"
   },
+  "description": "Pulse Widgets - Preview and development tools for Pulse Insights surveys",
+  "keywords": ["pulse", "widgets", "preview", "surveys"],
+  "author": "",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.19.2",
