@@ -750,8 +750,9 @@ app.options('/proxy', (req, res) => {
       const isHtmlErrorPage = errorBody.trim().startsWith('<!') || errorBody.trim().startsWith('<html') || contentType.includes('text/html');
       
       // Detect Cloudflare challenge/blocking (skip if domain is in passthrough allowlist)
-      const isChallenge = shouldPassthrough ? false : isCloudflareChallenge(response, errorBody, target.toString());
-      const isMismatch = isContentTypeMismatch(contentType, expectedContentType.type, response.status);
+      // Also skip if this is a challenge script URL from a passthrough domain
+      const isChallenge = (shouldPassthrough || allowChallengeScript) ? false : isCloudflareChallenge(response, errorBody, target.toString());
+      const isMismatch = allowChallengeScript ? false : isContentTypeMismatch(contentType, expectedContentType.type, response.status);
       
       if (isChallenge || isMismatch) {
         console.warn(`[PI-Proxy] Cloudflare challenge/block detected (status: ${response.status}, challenge: ${isChallenge}, mismatch: ${isMismatch}): ${target.toString()}`);
@@ -1151,7 +1152,8 @@ app.use(async (req, res, next) => {
       const isHtmlErrorPage = errorBody.trim().startsWith('<!') || errorBody.trim().startsWith('<html') || contentType.includes('text/html');
       
       // Detect Cloudflare challenge/blocking (skip if domain is in passthrough allowlist)
-      const isChallenge = shouldPassthrough ? false : isCloudflareChallenge(response, errorBody, targetUrl.toString());
+      // Also skip if this is a challenge script URL from a passthrough domain
+      const isChallenge = (shouldPassthrough || allowChallengeScript) ? false : isCloudflareChallenge(response, errorBody, targetUrl.toString());
       const isMismatch = isContentTypeMismatch(contentType, expectedContentType.type, response.status);
       
       if (isChallenge || isMismatch) {

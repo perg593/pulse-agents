@@ -466,8 +466,9 @@ export async function onRequest(context) {
       const isHtmlErrorPage = errorBody.trim().startsWith('<!') || errorBody.trim().startsWith('<html') || contentType.includes('text/html');
       
       // Detect Cloudflare challenge/blocking (skip if domain is in passthrough allowlist)
-      const isChallenge = shouldPassthrough ? false : isCloudflareChallenge(upstreamResponse, errorBody, target.toString());
-      const isMismatch = isContentTypeMismatch(contentType, expectedContentType.type, upstreamResponse.status);
+      // Also skip if this is a challenge script URL from a passthrough domain
+      const isChallenge = (shouldPassthrough || allowChallengeScript) ? false : isCloudflareChallenge(upstreamResponse, errorBody, target.toString());
+      const isMismatch = allowChallengeScript ? false : isContentTypeMismatch(contentType, expectedContentType.type, upstreamResponse.status);
       
       if (isChallenge || isMismatch) {
         console.warn(`[PI-Proxy] Cloudflare challenge/block detected (status: ${upstreamResponse.status}, challenge: ${isChallenge}, mismatch: ${isMismatch}): ${target.toString()}`);
