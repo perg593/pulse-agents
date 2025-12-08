@@ -521,12 +521,19 @@ async function init() {
                                  existingFrameUrl !== DEFAULT_HOST_URL && 
                                  existingFrameUrl !== buildProxySrc(DEFAULT_HOST_URL);
   
-  // Only use default if no background is requested AND no existing background is loaded
-  const hostToLoad = requestedHost || (hasExistingBackground ? existingFrameUrl : DEFAULT_HOST_URL);
+  // Check if we're running inside an iframe (e.g., player iframe)
+  // If so, skip background loading - parent already has background
+  const isInIframe = window.self !== window.top;
   
-  if (!hasDemoFilter && !presentSurveyId && !hasExistingBackground) {
+  // Only use default if no background is requested AND no existing background is loaded AND we're not in an iframe
+  const hostToLoad = requestedHost || (hasExistingBackground ? existingFrameUrl : (isInIframe ? '' : DEFAULT_HOST_URL));
+  
+  if (isInIframe && !requestedHost) {
+    // Skip background loading in iframe context - parent handles it
+    addLog('Skipping background load in iframe context (parent handles background)', 'info');
+  } else if (!hasDemoFilter && !presentSurveyId && !hasExistingBackground && !isInIframe) {
     addLog(`No demo parameter detected; defaulting host to ${DEFAULT_HOST_URL}.`);
-  } else if (!requestedHost && (hasDemoFilter || presentSurveyId) && !hasExistingBackground) {
+  } else if (!requestedHost && (hasDemoFilter || presentSurveyId) && !hasExistingBackground && !isInIframe) {
     addLog(`Background URL not found; falling back to ${DEFAULT_HOST_URL}.`, 'warn');
   } else if (hasExistingBackground && !requestedHost) {
     addLog(`Preserving existing background URL: ${existingFrameUrl}`, 'info');
@@ -573,11 +580,29 @@ async function init() {
 
   // Surface the demo directory so presenters can pick the correct demo before interacting.
   // Skip demo directory if present parameter is set (user wants specific survey)
-  if (demoDirectoryOptions.length && !demoForFilterParam && !demoDismissed && !presentSurveyId) {
+  // Only auto-open if enabled via UI_CONSTANTS.DEMO_LIBRARY_AUTO_OPEN
+  const shouldAutoOpenDemoLibrary = UI_CONSTANTS.DEMO_LIBRARY_AUTO_OPEN && 
+                                     demoDirectoryOptions.length && 
+                                     !demoForFilterParam && 
+                                     !demoDismissed && 
+                                     !presentSurveyId;
+  
+  // Debug logging to help diagnose why auto-open might not be working
+  if (UI_CONSTANTS.DEMO_LIBRARY_AUTO_OPEN) {
+    logBehavior(`Demo library auto-open enabled. Options: ${demoDirectoryOptions.length}, demoFor: ${demoForFilterParam || 'none'}, dismissed: ${demoDismissed}, present: ${presentSurveyId || 'none'}`);
+  }
+  
+  if (shouldAutoOpenDemoLibrary) {
     openDemoDirectory();
     logBehavior('Demo directory opened by default so the demo context is explicit.');
   } else {
-    logBehavior('Demo directory not available yet; listeners still armed with defaults.');
+    const reason = !UI_CONSTANTS.DEMO_LIBRARY_AUTO_OPEN ? 'auto-open disabled' :
+                   !demoDirectoryOptions.length ? 'no demo options available' :
+                   demoForFilterParam ? 'demo_for filter active' :
+                   demoDismissed ? 'demo dismissed' :
+                   presentSurveyId ? 'present parameter active' :
+                   'unknown';
+    logBehavior(`Demo directory not available yet; listeners still armed with defaults. Reason: ${reason}`);
   }
 }
 

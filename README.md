@@ -48,9 +48,20 @@ node tests/unit/lib/errors.test.js
 
 ### 3. Launch the Demo Studio (production tag + triggers)
 ```bash
-npm start                              # or: ./scripts/launch/preview.sh
+npm start                              # Full preview (port 8000)
+# or
+npm run start:lite                    # Lightweight version (faster startup)
+
+# Open in browser
 open http://localhost:8000/preview/index.html
 ```
+
+**Ports:**
+- Preview Server: `8000` (default)
+- Background Proxy: `3100` (default)
+- Stripe Demo: `4242` (default, optional)
+
+> 📖 **See [NPM Scripts Documentation](docs/development/npm-scripts.md) for complete reference of all scripts and ports**
 
 ## 🔄 Service Management
 
@@ -72,7 +83,7 @@ npm start                              # or: ./scripts/launch/preview.sh
 
 ### Individual Service Management
 
-#### Preview Server (Main)
+#### Preview Server (Port 8000)
 ```bash
 # Stop
 pkill -f "python3 -m http.server"
@@ -82,22 +93,36 @@ python3 -m http.server 8000
 
 # Check status
 curl http://localhost:8000/
+
+# Health check
+curl http://localhost:8000/preview/index.html
 ```
 
-#### Stripe Demo Server
+#### Background Proxy Server (Port 3100)
+```bash
+# Stop
+pkill -f "background-proxy-server.js"
+
+# Start
+BACKGROUND_PROXY_PORT=3100 node preview/scripts/background-proxy-server.js
+
+# Check status
+curl http://localhost:3100/background-proxy/health
+```
+
+#### Stripe Demo Server (Port 4242, Optional)
 ```bash
 # Stop
 pkill -f "stripe-demo-server.js"
 
-# Start
-cd preview/scripts
-node stripe-demo-server.js
+# Start (requires STRIPE_SECRET_KEY)
+STRIPE_SECRET_KEY=sk_test_... STRIPE_DEMO_PORT=4242 node preview/scripts/stripe-demo-server.js
 
 # Check status
 curl http://localhost:4242/stripe-demo/health
 ```
 
-#### Background Proxy Server
+> 📖 **See [NPM Scripts Documentation](docs/development/npm-scripts.md) for complete port reference and troubleshooting**
 ```bash
 # Stop
 pkill -f "background-proxy-server.js"

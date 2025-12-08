@@ -437,14 +437,11 @@ export async function onRequest(context) {
 
     // Handle error responses - fix MIME type when upstream returns HTML error pages for JS/CSS requests
     if (upstreamResponse.status >= 400) {
-      const errorBody = await upstreamResponse.text().catch(() => '');
-      const isHtmlErrorPage = errorBody.trim().startsWith('<!') || errorBody.trim().startsWith('<html') || contentType.includes('text/html');
-      
       // Parse passthrough allowlist and check if domain should bypass CF detection
       const cfPassthroughDomains = parseCfPassthroughDomains(env?.PROXY_CF_PASSTHROUGH_DOMAINS);
       const shouldPassthrough = shouldPassthroughCfChallenge(target.hostname, cfPassthroughDomains);
       
-      // Check if this is a challenge script URL from a passthrough domain
+      // Check if this is a challenge script URL from a passthrough domain BEFORE reading body
       // Challenge scripts (e.g., cdn-cgi/challenge-platform/scripts/jsd/main.js) are legitimate
       // and should be allowed through even if they return 403, as they're needed for challenge resolution
       // Use pathname for safer URL checking (avoids query string manipulation)
@@ -452,6 +449,21 @@ export async function onRequest(context) {
       const isChallengeScriptUrl = pathnameLower.includes('/cdn-cgi/challenge-platform') || 
                                    pathnameLower.includes('/challenge-platform/scripts');
       const allowChallengeScript = shouldPassthrough && isChallengeScriptUrl;
+      
+      // For challenge scripts from passthrough domains, pass through immediately without reading body
+      if (allowChallengeScript) {
+        // Clone response to avoid consuming the body
+        const clonedResponse = upstreamResponse.clone();
+        const buffer = await clonedResponse.arrayBuffer().catch(() => new ArrayBuffer(0));
+        return new Response(buffer, {
+          status: upstreamResponse.status,
+          headers: responseHeaders
+        });
+      }
+      
+      // Read error body only if not a challenge script
+      const errorBody = await upstreamResponse.text().catch(() => '');
+      const isHtmlErrorPage = errorBody.trim().startsWith('<!') || errorBody.trim().startsWith('<html') || contentType.includes('text/html');
       
       // Detect Cloudflare challenge/blocking (skip if domain is in passthrough allowlist)
       // Also skip if this is a challenge script URL from a passthrough domain

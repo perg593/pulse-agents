@@ -135,11 +135,12 @@ test.test('UI_CONSTANTS should have correct values', () => {
   test.assertEqual(UI_CONSTANTS.SEQUENCE_MAX_LENGTH, 3);
   test.assertEqual(UI_CONSTANTS.RAIL_SHORTCUT_RESET_MS, 1500);
   test.assertEqual(UI_CONSTANTS.PLAYER_FRAME_MARGIN, 24);
+  test.assertEqual(UI_CONSTANTS.DEMO_LIBRARY_AUTO_OPEN, false);
 });
 
 test.test('BEHAVIOR_LISTENER_DEFAULTS should have correct values', () => {
   test.assert(!BEHAVIOR_LISTENER_DEFAULTS['exit-intent']);
-  test.assert(BEHAVIOR_LISTENER_DEFAULTS['scroll-depth']);
+  test.assert(!BEHAVIOR_LISTENER_DEFAULTS['scroll-depth']);
   test.assert(!BEHAVIOR_LISTENER_DEFAULTS['time-delay']);
   test.assert(!BEHAVIOR_LISTENER_DEFAULTS['rage-click']);
 });
