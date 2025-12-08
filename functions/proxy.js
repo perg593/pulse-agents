@@ -563,6 +563,20 @@ export async function onRequest(context) {
         console.log(`[PI-Proxy] Challenge script detected: ${target.toString()}, shouldPassthrough: ${shouldPassthrough}, allowChallengeScript: ${allowChallengeScript}`);
       }
       
+      // For passthrough domains, pass through ALL error responses as-is (including 403s)
+      // This ensures Cloudflare challenge responses are passed through without modification
+      if (shouldPassthrough) {
+        console.log(`[PI-Proxy] Passing through error response for passthrough domain (status ${upstreamResponse.status}): ${target.toString()}`);
+        // Clone response to avoid consuming the body
+        const clonedResponse = upstreamResponse.clone();
+        const buffer = await clonedResponse.arrayBuffer().catch(() => new ArrayBuffer(0));
+        return new Response(buffer, {
+          status: upstreamResponse.status,
+          statusText: upstreamResponse.statusText,
+          headers: responseHeaders
+        });
+      }
+      
       // For challenge scripts from passthrough domains, pass through immediately without reading body
       if (allowChallengeScript) {
         console.log(`[PI-Proxy] Passing through challenge script (status ${upstreamResponse.status}): ${target.toString()}`);
@@ -575,7 +589,7 @@ export async function onRequest(context) {
         });
       }
       
-      // Read error body only if not a challenge script
+      // Read error body only if not a passthrough domain or challenge script
       const errorBody = await upstreamResponse.text().catch(() => '');
       const isHtmlErrorPage = errorBody.trim().startsWith('<!') || errorBody.trim().startsWith('<html') || contentType.includes('text/html');
       
