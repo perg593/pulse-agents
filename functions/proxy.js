@@ -33,6 +33,8 @@ const DEFAULT_ANALYTICS_BLOCKLIST = [
   'adtechus.com'
 ];
 
+const { isRewritableUrl, URL_ATTRS } = require('../lib/url-rewrite-utils');
+
 /**
  * Parse analytics blocklist from environment variable or use defaults
  * @param {string|undefined} envValue - Environment variable value (comma-separated)
@@ -1119,71 +1121,35 @@ function rewriteResourceUrls(html, target, proxyUrl, analyticsBlocklist = []) {
 
   let processedOutput = output;
 
-  // Rewrite URLs in common attributes: src, href, srcset, data-src, etc.
-  const urlAttributes = [
-    'src',
-    'href',
-    'srcset',
-    'data-src',
-    'data-href',
-    'data-srcset',
-    'action',
-    'formaction',
-    'cite',
-    'poster',
-    'background',
-    'content'
-  ];
+  const allowedAttributes = Array.from(URL_ATTRS).filter((attr) => attr !== 'content');
 
-  urlAttributes.forEach((attr) => {
-    // Match attribute="value" or attribute='value' or attribute=value
-    const attrRegex = new RegExp(
-      `(${attr}\\s*=\\s*["'])([^"']+)(["'])`,
-      'gi'
-    );
+  const rewriteAttrValue = (value) => {
+    if (!isRewritableUrl(value)) return value;
+    return rewriteUrl(value, targetOrigin, proxyBase, analyticsBlocklist);
+  };
+
+  allowedAttributes.forEach((attr) => {
+    const attrRegex = new RegExp(`(${attr}\\s*=\\s*["'])([^"']+)(["'])`, 'gi');
     processedOutput = processedOutput.replace(attrRegex, (match, prefix, url, suffix) => {
-      const rewritten = rewriteUrl(url, targetOrigin, proxyBase, analyticsBlocklist);
+      const rewritten = rewriteAttrValue(url);
+      if (rewritten === url) return match;
       return `${prefix}${rewritten}${suffix}`;
     });
 
-    // Also handle unquoted attributes (less common but possible)
-    const unquotedRegex = new RegExp(
-      `(${attr}\\s*=\\s*)([^\\s>]+)`,
-      'gi'
-    );
+    const unquotedRegex = new RegExp(`(${attr}\\s*=\\s*)([^\\s>]+)`, 'gi');
     processedOutput = processedOutput.replace(unquotedRegex, (match, prefix, url) => {
       const trimmed = url.trim();
-      // Skip if it's clearly not a URL (data URLs, javascript:, etc. are handled by rewriteUrl)
-      // But process relative paths and absolute URLs
-      if (trimmed && !/^(data:|blob:|javascript:|mailto:|tel:|#|about:)/i.test(trimmed)) {
-        const rewritten = rewriteUrl(trimmed, targetOrigin, proxyBase, analyticsBlocklist);
-        return `${prefix}${rewritten}`;
-      }
-      return match;
+      if (!isRewritableUrl(trimmed)) return match;
+      const rewritten = rewriteAttrValue(trimmed);
+      if (rewritten === trimmed) return match;
+      return `${prefix}${rewritten}`;
     });
   });
 
-  // Handle srcset attribute specially (can contain multiple URLs)
-  // Parse each URL entry individually to avoid treating entire srcset as one URL
-  const srcsetRegex = /srcset\s*=\s*["']([^"']+)["']/gi;
-  processedOutput = processedOutput.replace(srcsetRegex, (match, srcsetValue) => {
-    // srcset format: "url1 1x, url2 2x, url3 100w"
-    // Split by comma, then parse each entry separately
-    const rewritten = srcsetValue
-      .split(',')
-      .map((entry) => {
-        const trimmed = entry.trim();
-        if (!trimmed) return trimmed;
-        // Split by whitespace - first part is URL, rest are descriptors
-        const parts = trimmed.split(/\s+/);
-        if (parts.length === 0) return trimmed;
-        const url = parts[0];
-        const descriptors = parts.slice(1).join(' ');
-        const rewrittenUrl = rewriteUrl(url, targetOrigin, proxyBase, analyticsBlocklist);
-        return descriptors ? `${rewrittenUrl} ${descriptors}` : rewrittenUrl;
-      })
-      .join(', ');
-    return match.replace(srcsetValue, rewritten);
+  const metaRefreshRegex = /<meta[^>]*http-equiv=["']refresh["'][^>]*content\s*=\s*(["'])([^"']*)(["'][^>]*>)/gi;
+  processedOutput = processedOutput.replace(metaRefreshRegex, (full, prefixQuote, contentValue, suffixRest) => {
+    const updatedContent = rewriteMetaRefreshContent(contentValue, targetOrigin, proxyBase, analyticsBlocklist);
+    return full.replace(contentValue, updatedContent);
   });
 
   // Handle CSS url() references in style attributes and style tags
@@ -1206,6 +1172,16 @@ function rewriteResourceUrls(html, target, proxyUrl, analyticsBlocklist = []) {
   });
 
   return processedOutput;
+}
+
+function rewriteMetaRefreshContent(contentValue, targetOrigin, proxyBase, analyticsBlocklist) {
+  const urlMatch = contentValue.match(/url\s*=\s*([^;]+)/i);
+  if (!urlMatch) return contentValue;
+  const originalUrl = urlMatch[1].trim();
+  if (!isRewritableUrl(originalUrl)) return contentValue;
+  const rewritten = rewriteUrl(originalUrl, targetOrigin, proxyBase, analyticsBlocklist);
+  if (rewritten === originalUrl) return contentValue;
+  return contentValue.replace(urlMatch[0], `url=${rewritten}`);
 }
 
 /**

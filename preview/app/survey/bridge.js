@@ -402,7 +402,7 @@ function createLegacyBridge({ container, onReady, onStatus, onStateChange, onClo
       const iframe = document.createElement('iframe');
       iframe.src = buildPlayerUrl(config);
       iframe.setAttribute('title', 'Pulse Survey Player');
-      iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+      iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-downloads');
       iframe.setAttribute('referrerpolicy', 'no-referrer');
       
       // Security: Set playerOrigin BEFORE attaching listeners to prevent race condition
@@ -607,7 +607,7 @@ function createProtocolBridge({ container, onReady, onStatus, onStateChange, onE
       iframe = document.createElement('iframe');
       iframe.src = buildPlayerUrl(config);
       iframe.setAttribute('title', 'Pulse Survey Player');
-      iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+      iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-downloads');
       iframe.setAttribute('referrerpolicy', 'no-referrer');
       container.appendChild(iframe);
 
