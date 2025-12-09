@@ -21,6 +21,10 @@ const DEFAULT_ACCOUNT = 'PI-81598442';
 const DEFAULT_HOST = 'survey.pulseinsights.com';
 const DEFAULT_TAG_SRC = 'https://js.pulseinsights.com/surveys.js';
 const INLINE_PATTERN = /inline/i;
+const PRESENT_BACKGROUND_OVERRIDES = {
+  '8102':
+    'https://www.njtransit.com/train-to?origin=Ramsey%20Route%2017%20Station&destination=30th%20Street%20Station%20Philadelphia&date=2025-12-01&originStationCode=754&destinationStationCode=182',
+};
 
 const state = {
   manifest: [],
@@ -120,9 +124,10 @@ async function init() {
   
   // Preserve existing background URL if already loaded (e.g., from present parameter)
   // Check iframe's dataset first, then URL params, then default
-  const existingUrlRaw = elements.backgroundFrame?.dataset?.previewOriginalUrl || 
-                          new URLSearchParams(window.location.search).get('background') ||
-                          null;
+  const params = new URLSearchParams(window.location.search);
+  const existingUrlRaw = elements.backgroundFrame?.dataset?.previewOriginalUrl ||
+    params.get('background') ||
+    null;
   
   // Validate URL before using it (prevents CodeQL unvalidated redirect warning)
   let existingUrl = null;
@@ -141,7 +146,11 @@ async function init() {
     }
   }
   
-  const initialBackground = existingUrl || DEFAULT_BACKGROUND;
+  const presentParam = (params.get('present') || '').trim();
+  const overrideBackground = presentParam && PRESENT_BACKGROUND_OVERRIDES[presentParam]
+    ? PRESENT_BACKGROUND_OVERRIDES[presentParam]
+    : null;
+  const initialBackground = existingUrl || overrideBackground || DEFAULT_BACKGROUND;
   
   loadBackground(elements.backgroundFrame, initialBackground);
   elements.backgroundInput.value = initialBackground;

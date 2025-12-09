@@ -20,6 +20,10 @@ const LIPSUM_INDEX = PATH_CONSTANTS.LIPSUM_INDEX;
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/17k7uKh_TGMNy0hJblfImUGmmbkW_71rDbYlIEfya5Z8/gviz/tq?tqx=out:csv&gid=0';
 const DEFAULT_IDENTIFIER = 'PI-81598442';
 const DEFAULT_HOST_URL = 'https://www.pulseinsights.com/agents';
+const PRESENT_BACKGROUND_OVERRIDES = {
+  '8102':
+    'https://www.njtransit.com/train-to?origin=Ramsey%20Route%2017%20Station&destination=30th%20Street%20Station%20Philadelphia&date=2025-12-01&originStationCode=754&destinationStationCode=182',
+};
 const DEFAULT_PULSE_HOST = 'survey.pulseinsights.com';
 const PROXY_ORIGIN = (window.__PI_PROXY_ORIGIN__ || '').trim();
 const DEFAULT_TAG_SRC = 'https://js.pulseinsights.com/surveys.js';
@@ -487,6 +491,9 @@ async function init() {
     if (presentRecord && presentRecord.backgroundUrl) {
       requestedHost = presentRecord.backgroundUrl;
       addLog(`Using background URL from present survey ${presentSurveyId}: ${requestedHost}`, 'info');
+    } else if (PRESENT_BACKGROUND_OVERRIDES[presentSurveyId]) {
+      requestedHost = PRESENT_BACKGROUND_OVERRIDES[presentSurveyId];
+      addLog(`Using background override for present survey ${presentSurveyId}: ${requestedHost}`, 'info');
     }
   }
   
