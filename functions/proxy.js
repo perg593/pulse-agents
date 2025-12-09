@@ -706,6 +706,11 @@ export async function onRequest(context) {
       if (upstreamResponse.status === 403) {
         body = inject403Message(body, target);
       }
+
+      // Set cookie with target origin for catch-all proxy (ES module dynamic imports)
+      // This allows subsequent requests like /_nuxt/foo.js to be proxied correctly
+      const targetOriginCookie = encodeURIComponent(target.origin);
+      responseHeaders.append('Set-Cookie', `__pi_proxy_origin=${targetOriginCookie}; Path=/; SameSite=Lax; Max-Age=3600`);
       
       return new Response(body, {
         status: upstreamResponse.status,
