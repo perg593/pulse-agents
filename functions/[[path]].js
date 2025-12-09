@@ -12,7 +12,7 @@
  * - /proxy routes are handled by proxy.js (higher priority)
  */
 
-// Patterns that indicate a request is for a proxied site's assets
+// Patterns that indicate a request is for a proxied site's assets or pages
 const PROXY_ASSET_PATTERNS = [
   /^\/_nuxt\//,          // NuxtJS assets
   /^\/_next\//,          // Next.js assets
@@ -21,6 +21,26 @@ const PROXY_ASSET_PATTERNS = [
   /^\/cdn-cgi\//,        // Cloudflare scripts
   /^\/api\//,            // API routes (may need proxying)
   /\.(js|mjs|css|woff2?|ttf|eot|svg|png|jpg|jpeg|gif|webp|ico|json)$/i, // Asset file extensions
+];
+
+// Known NJ Transit routes that should be proxied (client-side navigation)
+const NJTRANSIT_ROUTES = [
+  /^\/train-to/,
+  /^\/bus-to/,
+  /^\/light-rail-to/,
+  /^\/services/,
+  /^\/status/,
+  /^\/tickets/,
+  /^\/destinations/,
+  /^\/maps/,
+  /^\/travel-alerts/,
+  /^\/accessibility/,
+  /^\/about-us/,
+  /^\/careers/,
+  /^\/contact/,
+  /^\/subscribe/,
+  /^\/privacy/,
+  /^\/sitemap/,
 ];
 
 // Paths that should NEVER be proxied (preview app paths)
@@ -60,8 +80,11 @@ export async function onRequest(context) {
   // Check if this looks like a proxied site asset
   const looksLikeProxyAsset = PROXY_ASSET_PATTERNS.some((pattern) => pattern.test(pathname));
 
-  // If it doesn't look like a proxy asset, pass through
-  if (!looksLikeProxyAsset) {
+  // Check if this is a known NJ Transit route (for client-side navigation)
+  const looksLikeNjtransitRoute = NJTRANSIT_ROUTES.some((pattern) => pattern.test(pathname));
+
+  // If it doesn't look like a proxy asset or NJ Transit route, pass through
+  if (!looksLikeProxyAsset && !looksLikeNjtransitRoute) {
     return context.next();
   }
 
@@ -100,10 +123,30 @@ export async function onRequest(context) {
     return context.next();
   }
 
-  // Build the proxied URL
-  const targetUrl = `${targetOrigin}${pathname}${url.search}`;
+  // Fix NuxtJS asset paths - chunks without /_nuxt/ prefix need it added
+  // NuxtJS chunks have hash-like names (e.g., BhYfDVsa.js, Thumbnail.CzOzmLo0.css)
+  let fixedPathname = pathname;
+  const isNuxtChunk = /^\/[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.(js|css|mjs)$/i.test(pathname);
+  if (isNuxtChunk && !pathname.startsWith('/_nuxt/')) {
+    fixedPathname = `/_nuxt${pathname}`;
+    console.log('[PI-Proxy] Fixed NuxtJS chunk path:', { from: pathname, to: fixedPathname });
+  }
 
-  console.log('[PI-Proxy] Catch-all proxying:', {
+  // Build the proxied URL
+  const targetUrl = `${targetOrigin}${fixedPathname}${url.search}`;
+
+  // For HTML page navigation (not assets), redirect to the main proxy
+  // This ensures the page gets proper HTML rewriting, base href, etc.
+  if (looksLikeNjtransitRoute) {
+    const proxyUrl = `/proxy?url=${encodeURIComponent(targetUrl)}`;
+    console.log('[PI-Proxy] Catch-all redirecting navigation:', {
+      from: pathname,
+      to: proxyUrl,
+    });
+    return Response.redirect(new URL(proxyUrl, url.origin).toString(), 302);
+  }
+
+  console.log('[PI-Proxy] Catch-all proxying asset:', {
     from: pathname,
     to: targetUrl,
     referer: referer.substring(0, 100),
