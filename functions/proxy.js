@@ -582,6 +582,7 @@ export async function onRequest(context) {
       // For challenge scripts from passthrough domains, pass through immediately without reading body
       if (allowChallengeScript) {
         console.log(`[PI-Proxy] Passing through challenge script (status ${upstreamResponse.status}): ${target.toString()}`);
+
         // Clone response to avoid consuming the body
         const clonedResponse = upstreamResponse.clone();
         const buffer = await clonedResponse.arrayBuffer().catch(() => new ArrayBuffer(0));
