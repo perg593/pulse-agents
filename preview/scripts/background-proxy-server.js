@@ -3,6 +3,7 @@
 const express = require('express');
 const { URL } = require('url');
 const path = require('path');
+const { isRewritableUrl, URL_ATTRS } = require('../../lib/url-rewrite-utils');
 
 // Load centralized port configuration
 let PORT;
@@ -569,6 +570,172 @@ app.options('/proxy', (req, res) => {
   res.status(204).send();
 });
 
+// Handle /cdn-cgi/ paths (Cloudflare challenge platform endpoints)
+// These come as relative URLs from challenge scripts and need to be forwarded to the passthrough domain
+app.all('/cdn-cgi/*', async (req, res) => {
+  // Parse passthrough allowlist
+  const cfPassthroughDomains = parseCfPassthroughDomains(process.env.PROXY_CF_PASSTHROUGH_DOMAINS);
+  
+  if (cfPassthroughDomains.length === 0) {
+    res.status(400).json({ error: 'No passthrough domains configured' });
+    return;
+  }
+  
+  // Extract target origin from referer header
+  // The referer should be a proxied URL like: /proxy?url=https%3A%2F%2Fwww.njtransit.com%2F...
+  let targetOrigin = null;
+  const referer = req.headers['referer'] || req.headers['referrer'];
+  
+  if (referer) {
+    try {
+      const refererUrl = new URL(referer);
+      const urlParam = refererUrl.searchParams.get('url');
+      if (urlParam) {
+        const decodedUrl = decodeURIComponent(urlParam);
+        const targetUrl = new URL(decodedUrl);
+        targetOrigin = targetUrl.origin;
+      }
+    } catch (e) {
+      // If referer parsing fails, try to extract from pathname
+      const refererMatch = referer.match(/proxy[?&]url=([^&]+)/);
+      if (refererMatch) {
+        try {
+          const decodedUrl = decodeURIComponent(refererMatch[1]);
+          const targetUrl = new URL(decodedUrl);
+          targetOrigin = targetUrl.origin;
+        } catch (e2) {
+          // Ignore
+        }
+      }
+    }
+  }
+  
+  // If no target origin found, use first passthrough domain
+  if (!targetOrigin && cfPassthroughDomains.length > 0) {
+    // Default to https://www.{domain} format
+    const domain = cfPassthroughDomains[0];
+    targetOrigin = `https://www.${domain}`;
+  }
+  
+  if (!targetOrigin) {
+    res.status(400).json({ error: 'Could not determine target origin' });
+    return;
+  }
+  
+  // Parse and validate target origin against allowlist
+  let parsedOrigin;
+  try {
+    parsedOrigin = new URL(targetOrigin);
+  } catch (e) {
+    res.status(400).json({ error: 'Invalid target origin URL' });
+    return;
+  }
+  
+  // Find matching domain in allowlist - returns the allowlist domain (trusted)
+  const matchedDomain = cfPassthroughDomains.find(domain => {
+    const hostname = parsedOrigin.hostname.toLowerCase();
+    const domainLower = domain.toLowerCase();
+    return hostname === domainLower || hostname.endsWith('.' + domainLower);
+  });
+  
+  if (!matchedDomain) {
+    res.status(403).json({ error: 'Domain not in passthrough allowlist' });
+    return;
+  }
+  
+  // Validate path starts with /cdn-cgi/ to prevent path traversal attacks
+  const requestPath = req.path;
+  if (!requestPath.startsWith('/cdn-cgi/') || requestPath.includes('..')) {
+    res.status(400).json({ error: 'Invalid path' });
+    return;
+  }
+  
+  // Build target URL using ONLY the allowlist domain (trusted source)
+  // This breaks the taint chain for CodeQL SSRF detection
+  // We always use www.{allowlistDomain} format for consistency
+  const trustedOrigin = `https://www.${matchedDomain}`;
+  
+  // Construct URL from trusted components only - domain from allowlist, path validated above
+  const targetUrl = `${trustedOrigin}${requestPath}${req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : ''}`;
+  
+  try {
+    const incomingHeaders = req.headers;
+    const method = req.method.toUpperCase();
+    const upstreamHeaders = {
+      'User-Agent': incomingHeaders['user-agent'] || DEFAULT_USER_AGENT,
+      Accept: incomingHeaders['accept'] || '*/*',
+      'Accept-Language': incomingHeaders['accept-language'] || 'en-US,en;q=0.9',
+      'Accept-Encoding': incomingHeaders['accept-encoding'] || 'gzip, deflate, br',
+      Referer: trustedOrigin,
+      Origin: trustedOrigin,
+      Cookie: sanitizeCookies(incomingHeaders.cookie),
+      'Sec-Fetch-Dest': incomingHeaders['sec-fetch-dest'] || 'empty',
+      'Sec-Fetch-Mode': incomingHeaders['sec-fetch-mode'] || 'cors',
+      'Sec-Fetch-Site': incomingHeaders['sec-fetch-site'] || 'same-origin',
+      'Sec-Fetch-User': incomingHeaders['sec-fetch-user'] || '?1',
+      'Upgrade-Insecure-Requests': '1'
+    };
+    
+    // Forward Content-Type for POST/PUT requests
+    if (['POST', 'PUT'].includes(method)) {
+      const contentType = incomingHeaders['content-type'];
+      if (contentType) {
+        upstreamHeaders['Content-Type'] = contentType;
+      }
+    }
+    
+    Object.keys(upstreamHeaders).forEach((key) => {
+      if (upstreamHeaders[key] === undefined) {
+        delete upstreamHeaders[key];
+      }
+    });
+    
+    const fetchOptions = {
+      method: method,
+      headers: upstreamHeaders,
+      redirect: 'follow'
+    };
+    
+    // Forward request body for POST/PUT requests
+    if (['POST', 'PUT'].includes(method)) {
+      // Express body parsers have already parsed the body
+      if (req.body) {
+        if (Buffer.isBuffer(req.body)) {
+          fetchOptions.body = req.body;
+        } else if (typeof req.body === 'string') {
+          fetchOptions.body = req.body;
+        } else {
+          fetchOptions.body = JSON.stringify(req.body);
+        }
+      }
+    }
+    
+    const response = await fetch(targetUrl, fetchOptions);
+    
+    // Set CORS headers
+    res.setHeader('access-control-allow-origin', '*');
+    res.setHeader('access-control-allow-credentials', 'true');
+    res.setHeader('access-control-expose-headers', 'content-type,content-length,content-encoding');
+    
+    // Copy response headers (excluding hop-by-hop headers)
+    const hopByHopHeaders = ['connection', 'keep-alive', 'proxy-authenticate', 'proxy-authorization', 'te', 'trailers', 'transfer-encoding', 'upgrade'];
+    response.headers.forEach((value, key) => {
+      const lowerKey = key.toLowerCase();
+      if (!hopByHopHeaders.includes(lowerKey) && lowerKey !== 'content-encoding') {
+        res.setHeader(key, value);
+      }
+    });
+    
+    // For challenge platform endpoints, pass through response as-is (even 403s)
+    const buffer = await response.arrayBuffer().catch(() => new ArrayBuffer(0));
+    
+    res.status(response.status).send(Buffer.from(buffer));
+  } catch (error) {
+    console.error('[PI-Proxy] Error forwarding /cdn-cgi/ request:', error);
+    res.status(500).json({ error: 'Failed to forward request' });
+  }
+});
+
 // Handle all HTTP methods for proxy
 ['get', 'post', 'put', 'delete'].forEach(httpMethod => {
   app[httpMethod]('/proxy', async (req, res) => {
@@ -737,6 +904,16 @@ app.options('/proxy', (req, res) => {
                                    pathnameLower.includes('/challenge-platform/scripts');
       const allowChallengeScript = shouldPassthrough && isChallengeScriptUrl;
       
+      // For passthrough domains, pass through ALL error responses as-is (including 403s)
+      // This ensures Cloudflare challenge responses are passed through without modification
+      if (shouldPassthrough) {
+        console.log(`[PI-Proxy] Passing through error response for passthrough domain (status ${response.status}): ${target.toString()}`);
+        // Get the response body as buffer and send it directly
+        const buffer = await response.arrayBuffer().catch(() => new ArrayBuffer(0));
+        res.status(response.status).send(Buffer.from(buffer));
+        return;
+      }
+      
       // For challenge scripts from passthrough domains, pass through immediately without reading body
       if (allowChallengeScript) {
         // Get the response body as buffer and send it directly
@@ -745,14 +922,15 @@ app.options('/proxy', (req, res) => {
         return;
       }
       
-      // Read error body only if not a challenge script
+      // Read error body only if not a passthrough domain or challenge script
       const errorBody = await response.text().catch(() => '');
       const isHtmlErrorPage = errorBody.trim().startsWith('<!') || errorBody.trim().startsWith('<html') || contentType.includes('text/html');
       
       // Detect Cloudflare challenge/blocking (skip if domain is in passthrough allowlist)
       // Also skip if this is a challenge script URL from a passthrough domain
+      // For passthrough domains, skip ALL blocking checks (challenge detection and content-type mismatches)
       const isChallenge = (shouldPassthrough || allowChallengeScript) ? false : isCloudflareChallenge(response, errorBody, target.toString());
-      const isMismatch = allowChallengeScript ? false : isContentTypeMismatch(contentType, expectedContentType.type, response.status);
+      const isMismatch = (shouldPassthrough || allowChallengeScript) ? false : isContentTypeMismatch(contentType, expectedContentType.type, response.status);
       
       if (isChallenge || isMismatch) {
         console.warn(`[PI-Proxy] Cloudflare challenge/block detected (status: ${response.status}, challenge: ${isChallenge}, mismatch: ${isMismatch}): ${target.toString()}`);
@@ -783,7 +961,8 @@ app.options('/proxy', (req, res) => {
       }
       
       // If upstream returned HTML error page but request expects JS/CSS, override Content-Type
-      if (isHtmlErrorPage && expectedContentType.type !== 'html') {
+      // Skip this conversion for passthrough domains - pass through responses as-is
+      if (isHtmlErrorPage && expectedContentType.type !== 'html' && !shouldPassthrough) {
         console.warn(`[PI-Proxy] Upstream returned HTML error page (${response.status}) for ${expectedContentType.type} request: ${target.toString()}`);
         
         if (expectedContentType.type === 'javascript') {
@@ -1139,6 +1318,16 @@ app.use(async (req, res, next) => {
                                    pathnameLower.includes('/challenge-platform/scripts');
       const allowChallengeScript = shouldPassthrough && isChallengeScriptUrl;
       
+      // For passthrough domains, pass through ALL error responses as-is (including 403s)
+      // This ensures Cloudflare challenge responses are passed through without modification
+      if (shouldPassthrough) {
+        console.log(`[PI-Proxy] [Catch-all] Passing through error response for passthrough domain (status ${response.status}): ${targetUrl.toString()}`);
+        // Get the response body as buffer and send it directly
+        const buffer = await response.arrayBuffer().catch(() => new ArrayBuffer(0));
+        res.status(response.status).send(Buffer.from(buffer));
+        return;
+      }
+      
       // For challenge scripts from passthrough domains, pass through immediately without reading body
       if (allowChallengeScript) {
         // Get the response body as buffer and send it directly
@@ -1147,14 +1336,15 @@ app.use(async (req, res, next) => {
         return;
       }
       
-      // Read error body only if not a challenge script
+      // Read error body only if not a passthrough domain or challenge script
       const errorBody = await response.text().catch(() => '');
       const isHtmlErrorPage = errorBody.trim().startsWith('<!') || errorBody.trim().startsWith('<html') || contentType.includes('text/html');
       
       // Detect Cloudflare challenge/blocking (skip if domain is in passthrough allowlist)
       // Also skip if this is a challenge script URL from a passthrough domain
+      // For passthrough domains, skip ALL blocking checks (challenge detection and content-type mismatches)
       const isChallenge = (shouldPassthrough || allowChallengeScript) ? false : isCloudflareChallenge(response, errorBody, targetUrl.toString());
-      const isMismatch = isContentTypeMismatch(contentType, expectedContentType.type, response.status);
+      const isMismatch = (shouldPassthrough || allowChallengeScript) ? false : isContentTypeMismatch(contentType, expectedContentType.type, response.status);
       
       if (isChallenge || isMismatch) {
         console.warn(`[PI-Proxy] [Catch-all] Cloudflare challenge/block detected (status: ${response.status}, challenge: ${isChallenge}, mismatch: ${isMismatch}): ${targetUrl.toString()}`);
@@ -1185,7 +1375,8 @@ app.use(async (req, res, next) => {
       }
       
       // If upstream returned HTML error page but request expects JS/CSS, override Content-Type
-      if (isHtmlErrorPage && expectedContentType.type !== 'html') {
+      // Skip this conversion for passthrough domains - pass through responses as-is
+      if (isHtmlErrorPage && expectedContentType.type !== 'html' && !shouldPassthrough) {
         console.warn(`[PI-Proxy] [Catch-all] Upstream returned HTML error page (${response.status}) for ${expectedContentType.type} request: ${targetUrl.toString()}`);
         
         if (expectedContentType.type === 'javascript') {
@@ -1406,84 +1597,46 @@ function rewriteResourceUrls(html, target, req, analyticsBlocklist = []) {
   let processedOutput = output;
 
   // Rewrite URLs in common attributes: src, href, srcset, data-src, etc.
-  const urlAttributes = [
-    'src',
-    'href',
-    'srcset',
-    'data-src',
-    'data-href',
-    'data-srcset',
-    'action',
-    'formaction',
-    'cite',
-    'poster',
-    'background',
-    'content'
-  ];
+  const allowedAttributes = Array.from(URL_ATTRS).filter((attr) => attr !== 'content');
 
-  urlAttributes.forEach((attr) => {
-    // Match attribute="value" or attribute='value' or attribute=value
-    const attrRegex = new RegExp(
-      `(${attr}\\s*=\\s*["'])([^"']+)(["'])`,
-      'gi'
-    );
+  const rewriteAttrValue = (value) => {
+    if (!isRewritableUrl(value)) return value;
+    return rewriteUrl(value, targetOrigin, proxyBase, analyticsBlocklist);
+  };
+
+  allowedAttributes.forEach((attr) => {
+    const attrRegex = new RegExp(`(${attr}\\s*=\\s*["'])([^"']+)(["'])`, 'gi');
     processedOutput = processedOutput.replace(attrRegex, (match, prefix, url, suffix) => {
-      const rewritten = rewriteUrl(url, targetOrigin, proxyBase, analyticsBlocklist);
+      const rewritten = rewriteAttrValue(url);
+      if (rewritten === url) return match;
       return `${prefix}${rewritten}${suffix}`;
     });
 
-    // Also handle unquoted attributes (less common but possible)
-    const unquotedRegex = new RegExp(
-      `(${attr}\\s*=\\s*)([^\\s>]+)`,
-      'gi'
-    );
+    const unquotedRegex = new RegExp(`(${attr}\\s*=\\s*)([^\\s>]+)`, 'gi');
     processedOutput = processedOutput.replace(unquotedRegex, (match, prefix, url) => {
       const trimmed = url.trim();
-      // Skip if it's clearly not a URL (data URLs, javascript:, etc. are handled by rewriteUrl)
-      // But process relative paths and absolute URLs
-      if (trimmed && !/^(data:|blob:|javascript:|mailto:|tel:|#|about:)/i.test(trimmed)) {
-        const rewritten = rewriteUrl(trimmed, targetOrigin, proxyBase, analyticsBlocklist);
-        return `${prefix}${rewritten}`;
-      }
-      return match;
+      if (!isRewritableUrl(trimmed)) return match;
+      const rewritten = rewriteAttrValue(trimmed);
+      if (rewritten === trimmed) return match;
+      return `${prefix}${rewritten}`;
     });
   });
 
-  // Handle srcset attribute specially (can contain multiple URLs)
-  // Parse each URL entry individually to avoid treating entire srcset as one URL
-  const srcsetRegex = /srcset\s*=\s*["']([^"']+)["']/gi;
-  processedOutput = processedOutput.replace(srcsetRegex, (match, srcsetValue) => {
-    // srcset format: "url1 1x, url2 2x, url3 100w"
-    // Split by comma, then parse each entry separately
-    const rewritten = srcsetValue
-      .split(',')
-      .map((entry) => {
-        const trimmed = entry.trim();
-        if (!trimmed) return trimmed;
-        // Split by whitespace - first part is URL, rest are descriptors
-        const parts = trimmed.split(/\s+/);
-        if (parts.length === 0) return trimmed;
-        const url = parts[0];
-        const descriptors = parts.slice(1).join(' ');
-        const rewrittenUrl = rewriteUrl(url, targetOrigin, proxyBase, analyticsBlocklist);
-        return descriptors ? `${rewrittenUrl} ${descriptors}` : rewrittenUrl;
-      })
-      .join(', ');
-    return match.replace(srcsetValue, rewritten);
+  const metaRefreshRegex = /<meta[^>]*http-equiv=["']refresh["'][^>]*content\s*=\s*(["'])([^"']*)(["'][^>]*>)/gi;
+  processedOutput = processedOutput.replace(metaRefreshRegex, (full, prefixQuote, contentValue, suffixRest) => {
+    const updatedContent = rewriteMetaRefreshContent(contentValue, targetOrigin, proxyBase, analyticsBlocklist);
+    return full.replace(contentValue, updatedContent);
   });
 
   // Handle CSS url() references in style attributes and style tags
   // This includes @font-face and other CSS rules
-  const cssUrlRegex = /url\s*\(\s*["']?([^"')]+)["']?\s*\)/gi;
-  processedOutput = processedOutput.replace(cssUrlRegex, (match, url) => {
+  const cssUrlRegex = /url\s*\(\s*(['"]?)([^"')]+)\1\s*\)/gi;
+  processedOutput = processedOutput.replace(cssUrlRegex, (match, _quote, url) => {
     const trimmed = url.trim();
-    // Skip data URLs and other special schemes (handled by rewriteUrl)
-    // But process relative paths and absolute URLs
-    if (trimmed && !/^(data:|blob:|javascript:|mailto:|tel:|#|about:)/i.test(trimmed)) {
-      const rewritten = rewriteUrl(trimmed, targetOrigin, proxyBase, analyticsBlocklist);
-      return match.replace(url, rewritten);
-    }
-    return match;
+    if (!isRewritableUrl(trimmed)) return match;
+    const rewritten = rewriteUrl(trimmed, targetOrigin, proxyBase, analyticsBlocklist);
+    if (rewritten === trimmed) return match;
+    return match.replace(url, rewritten);
   });
 
   // Restore JSON-LD blocks (unchanged)
@@ -1492,6 +1645,16 @@ function rewriteResourceUrls(html, target, req, analyticsBlocklist = []) {
   });
 
   return processedOutput;
+}
+
+function rewriteMetaRefreshContent(contentValue, targetOrigin, proxyBase, analyticsBlocklist) {
+  const urlMatch = contentValue.match(/url\s*=\s*([^;]+)/i);
+  if (!urlMatch) return contentValue;
+  const originalUrl = urlMatch[1].trim();
+  if (!isRewritableUrl(originalUrl)) return contentValue;
+  const rewritten = rewriteUrl(originalUrl, targetOrigin, proxyBase, analyticsBlocklist);
+  if (rewritten === originalUrl) return contentValue;
+  return contentValue.replace(urlMatch[0], `url=${rewritten}`);
 }
 
 /**

@@ -33,6 +33,8 @@ const DEFAULT_ANALYTICS_BLOCKLIST = [
   'adtechus.com'
 ];
 
+const { isRewritableUrl, URL_ATTRS } = require('../lib/url-rewrite-utils');
+
 /**
  * Parse analytics blocklist from environment variable or use defaults
  * @param {string|undefined} envValue - Environment variable value (comma-separated)
@@ -318,6 +320,105 @@ export async function onRequest(context) {
     return withCors(jsonResponse({ error: 'Method not allowed' }, { status: 405 }), request);
   }
 
+  // Handle /cdn-cgi/ paths (Cloudflare challenge platform endpoints)
+  // These come as relative URLs from challenge scripts and need to be forwarded to the passthrough domain
+  if (incoming.pathname.startsWith('/cdn-cgi/')) {
+    // Parse passthrough allowlist
+    const cfPassthroughDomains = parseCfPassthroughDomains(env?.PROXY_CF_PASSTHROUGH_DOMAINS);
+    
+    if (cfPassthroughDomains.length === 0) {
+      return withCors(jsonResponse({ error: 'No passthrough domains configured' }, { status: 400 }), request);
+    }
+    
+    // Extract target origin from referer header
+    // The referer should be a proxied URL like: /proxy?url=https%3A%2F%2Fwww.njtransit.com%2F...
+    let targetOrigin = null;
+    const referer = request.headers.get('referer') || request.headers.get('referrer');
+    
+    if (referer) {
+      try {
+        const refererUrl = new URL(referer);
+        const urlParam = refererUrl.searchParams.get('url');
+        if (urlParam) {
+          const decodedUrl = decodeURIComponent(urlParam);
+          const targetUrl = new URL(decodedUrl);
+          targetOrigin = targetUrl.origin;
+        }
+      } catch (e) {
+        // If referer parsing fails, try to extract from pathname
+        const refererMatch = referer.match(/proxy[?&]url=([^&]+)/);
+        if (refererMatch) {
+          try {
+            const decodedUrl = decodeURIComponent(refererMatch[1]);
+            const targetUrl = new URL(decodedUrl);
+            targetOrigin = targetUrl.origin;
+          } catch (e2) {
+            // Ignore
+          }
+        }
+      }
+    }
+    
+    // If no target origin found, use first passthrough domain
+    if (!targetOrigin && cfPassthroughDomains.length > 0) {
+      // Default to https://www.{domain} format
+      const domain = cfPassthroughDomains[0];
+      targetOrigin = `https://www.${domain}`;
+    }
+    
+    if (!targetOrigin) {
+      return withCors(jsonResponse({ error: 'Could not determine target origin' }, { status: 400 }), request);
+    }
+    
+    // Check if target origin is in passthrough allowlist
+    const targetUrlObj = new URL(targetOrigin);
+    if (!shouldPassthroughCfChallenge(targetUrlObj.hostname, cfPassthroughDomains)) {
+      return withCors(jsonResponse({ error: 'Domain not in passthrough allowlist' }, { status: 403 }), request);
+    }
+    
+    // Build target URL: https://www.njtransit.com/cdn-cgi/...
+    const targetUrl = `${targetOrigin}${incoming.pathname}${incoming.search}`;
+    
+    try {
+      const upstreamHeaders = buildUpstreamHeaders(request.headers, new URL(targetUrl), env, request.method);
+      
+      const fetchOptions = {
+        method: request.method,
+        headers: upstreamHeaders,
+        redirect: 'follow'
+      };
+      
+      // Forward request body for POST/PUT requests
+      if (['POST', 'PUT'].includes(request.method)) {
+        const clonedRequest = request.clone();
+        try {
+          const body = await clonedRequest.arrayBuffer();
+          fetchOptions.body = body;
+        } catch (error) {
+          console.error('[PI-Proxy] Failed to read request body for /cdn-cgi/ route:', error);
+        }
+      }
+      
+      const upstreamResponse = await fetch(targetUrl, fetchOptions);
+      
+      const responseHeaders = buildCorsHeaders(request.headers);
+      copyPassthroughHeaders(upstreamResponse, responseHeaders);
+      removeFrameBlockingHeaders(upstreamResponse, responseHeaders);
+      
+      // For challenge platform endpoints, pass through response as-is (even 403s)
+      const buffer = await upstreamResponse.arrayBuffer().catch(() => new ArrayBuffer(0));
+      
+      return new Response(buffer, {
+        status: upstreamResponse.status,
+        statusText: upstreamResponse.statusText,
+        headers: responseHeaders
+      });
+    } catch (error) {
+      console.error('[PI-Proxy] Error forwarding /cdn-cgi/ request:', error);
+      return withCors(jsonResponse({ error: 'Failed to forward request' }, { status: 500 }), request);
+    }
+  }
+
   const targetRaw = incoming.searchParams.get('url');
   if (!targetRaw) {
     return withCors(jsonResponse({ error: 'Missing url query parameter' }, { status: 400 }), request);
@@ -441,6 +542,15 @@ export async function onRequest(context) {
       const cfPassthroughDomains = parseCfPassthroughDomains(env?.PROXY_CF_PASSTHROUGH_DOMAINS);
       const shouldPassthrough = shouldPassthroughCfChallenge(target.hostname, cfPassthroughDomains);
       
+      // Debug logging for passthrough detection
+      if (target.hostname.includes('njtransit')) {
+        console.log(`[PI-Proxy] Passthrough check for ${target.hostname}:`, {
+          cfPassthroughDomains,
+          shouldPassthrough,
+          envVar: env?.PROXY_CF_PASSTHROUGH_DOMAINS
+        });
+      }
+      
       // Check if this is a challenge script URL from a passthrough domain BEFORE reading body
       // Challenge scripts (e.g., cdn-cgi/challenge-platform/scripts/jsd/main.js) are legitimate
       // and should be allowed through even if they return 403, as they're needed for challenge resolution
@@ -450,8 +560,29 @@ export async function onRequest(context) {
                                    pathnameLower.includes('/challenge-platform/scripts');
       const allowChallengeScript = shouldPassthrough && isChallengeScriptUrl;
       
+      // Debug logging for challenge script detection
+      if (isChallengeScriptUrl) {
+        console.log(`[PI-Proxy] Challenge script detected: ${target.toString()}, shouldPassthrough: ${shouldPassthrough}, allowChallengeScript: ${allowChallengeScript}`);
+      }
+      
+      // For passthrough domains, pass through ALL error responses as-is (including 403s)
+      // This ensures Cloudflare challenge responses are passed through without modification
+      if (shouldPassthrough) {
+        console.log(`[PI-Proxy] Passing through error response for passthrough domain (status ${upstreamResponse.status}): ${target.toString()}`);
+        // Clone response to avoid consuming the body
+        const clonedResponse = upstreamResponse.clone();
+        const buffer = await clonedResponse.arrayBuffer().catch(() => new ArrayBuffer(0));
+        return new Response(buffer, {
+          status: upstreamResponse.status,
+          statusText: upstreamResponse.statusText,
+          headers: responseHeaders
+        });
+      }
+      
       // For challenge scripts from passthrough domains, pass through immediately without reading body
       if (allowChallengeScript) {
+        console.log(`[PI-Proxy] Passing through challenge script (status ${upstreamResponse.status}): ${target.toString()}`);
+
         // Clone response to avoid consuming the body
         const clonedResponse = upstreamResponse.clone();
         const buffer = await clonedResponse.arrayBuffer().catch(() => new ArrayBuffer(0));
@@ -461,14 +592,15 @@ export async function onRequest(context) {
         });
       }
       
-      // Read error body only if not a challenge script
+      // Read error body only if not a passthrough domain or challenge script
       const errorBody = await upstreamResponse.text().catch(() => '');
       const isHtmlErrorPage = errorBody.trim().startsWith('<!') || errorBody.trim().startsWith('<html') || contentType.includes('text/html');
       
       // Detect Cloudflare challenge/blocking (skip if domain is in passthrough allowlist)
       // Also skip if this is a challenge script URL from a passthrough domain
+      // For passthrough domains, skip ALL blocking checks (challenge detection and content-type mismatches)
       const isChallenge = (shouldPassthrough || allowChallengeScript) ? false : isCloudflareChallenge(upstreamResponse, errorBody, target.toString());
-      const isMismatch = allowChallengeScript ? false : isContentTypeMismatch(contentType, expectedContentType.type, upstreamResponse.status);
+      const isMismatch = (shouldPassthrough || allowChallengeScript) ? false : isContentTypeMismatch(contentType, expectedContentType.type, upstreamResponse.status);
       
       if (isChallenge || isMismatch) {
         console.warn(`[PI-Proxy] Cloudflare challenge/block detected (status: ${upstreamResponse.status}, challenge: ${isChallenge}, mismatch: ${isMismatch}): ${target.toString()}`);
@@ -501,7 +633,8 @@ export async function onRequest(context) {
       }
       
       // If upstream returned HTML error page but request expects JS/CSS, override Content-Type
-      if (isHtmlErrorPage && expectedContentType.type !== 'html') {
+      // Skip this conversion for passthrough domains - pass through responses as-is
+      if (isHtmlErrorPage && expectedContentType.type !== 'html' && !shouldPassthrough) {
         console.warn(`[PI-Proxy] Upstream returned HTML error page (${upstreamResponse.status}) for ${expectedContentType.type} request: ${target.toString()}`);
         
         if (expectedContentType.type === 'javascript') {
@@ -574,6 +707,11 @@ export async function onRequest(context) {
       if (upstreamResponse.status === 403) {
         body = inject403Message(body, target);
       }
+
+      // Set cookie with target origin for catch-all proxy (ES module dynamic imports)
+      // This allows subsequent requests like /_nuxt/foo.js to be proxied correctly
+      const targetOriginCookie = encodeURIComponent(target.origin);
+      responseHeaders.append('Set-Cookie', `__pi_proxy_origin=${targetOriginCookie}; Path=/; SameSite=Lax; Max-Age=3600`);
       
       return new Response(body, {
         status: upstreamResponse.status,
@@ -989,71 +1127,35 @@ function rewriteResourceUrls(html, target, proxyUrl, analyticsBlocklist = []) {
 
   let processedOutput = output;
 
-  // Rewrite URLs in common attributes: src, href, srcset, data-src, etc.
-  const urlAttributes = [
-    'src',
-    'href',
-    'srcset',
-    'data-src',
-    'data-href',
-    'data-srcset',
-    'action',
-    'formaction',
-    'cite',
-    'poster',
-    'background',
-    'content'
-  ];
+  const allowedAttributes = Array.from(URL_ATTRS).filter((attr) => attr !== 'content');
 
-  urlAttributes.forEach((attr) => {
-    // Match attribute="value" or attribute='value' or attribute=value
-    const attrRegex = new RegExp(
-      `(${attr}\\s*=\\s*["'])([^"']+)(["'])`,
-      'gi'
-    );
+  const rewriteAttrValue = (value) => {
+    if (!isRewritableUrl(value)) return value;
+    return rewriteUrl(value, targetOrigin, proxyBase, analyticsBlocklist);
+  };
+
+  allowedAttributes.forEach((attr) => {
+    const attrRegex = new RegExp(`(${attr}\\s*=\\s*["'])([^"']+)(["'])`, 'gi');
     processedOutput = processedOutput.replace(attrRegex, (match, prefix, url, suffix) => {
-      const rewritten = rewriteUrl(url, targetOrigin, proxyBase, analyticsBlocklist);
+      const rewritten = rewriteAttrValue(url);
+      if (rewritten === url) return match;
       return `${prefix}${rewritten}${suffix}`;
     });
 
-    // Also handle unquoted attributes (less common but possible)
-    const unquotedRegex = new RegExp(
-      `(${attr}\\s*=\\s*)([^\\s>]+)`,
-      'gi'
-    );
+    const unquotedRegex = new RegExp(`(${attr}\\s*=\\s*)([^\\s>]+)`, 'gi');
     processedOutput = processedOutput.replace(unquotedRegex, (match, prefix, url) => {
       const trimmed = url.trim();
-      // Skip if it's clearly not a URL (data URLs, javascript:, etc. are handled by rewriteUrl)
-      // But process relative paths and absolute URLs
-      if (trimmed && !/^(data:|blob:|javascript:|mailto:|tel:|#|about:)/i.test(trimmed)) {
-        const rewritten = rewriteUrl(trimmed, targetOrigin, proxyBase, analyticsBlocklist);
-        return `${prefix}${rewritten}`;
-      }
-      return match;
+      if (!isRewritableUrl(trimmed)) return match;
+      const rewritten = rewriteAttrValue(trimmed);
+      if (rewritten === trimmed) return match;
+      return `${prefix}${rewritten}`;
     });
   });
 
-  // Handle srcset attribute specially (can contain multiple URLs)
-  // Parse each URL entry individually to avoid treating entire srcset as one URL
-  const srcsetRegex = /srcset\s*=\s*["']([^"']+)["']/gi;
-  processedOutput = processedOutput.replace(srcsetRegex, (match, srcsetValue) => {
-    // srcset format: "url1 1x, url2 2x, url3 100w"
-    // Split by comma, then parse each entry separately
-    const rewritten = srcsetValue
-      .split(',')
-      .map((entry) => {
-        const trimmed = entry.trim();
-        if (!trimmed) return trimmed;
-        // Split by whitespace - first part is URL, rest are descriptors
-        const parts = trimmed.split(/\s+/);
-        if (parts.length === 0) return trimmed;
-        const url = parts[0];
-        const descriptors = parts.slice(1).join(' ');
-        const rewrittenUrl = rewriteUrl(url, targetOrigin, proxyBase, analyticsBlocklist);
-        return descriptors ? `${rewrittenUrl} ${descriptors}` : rewrittenUrl;
-      })
-      .join(', ');
-    return match.replace(srcsetValue, rewritten);
+  const metaRefreshRegex = /<meta[^>]*http-equiv=["']refresh["'][^>]*content\s*=\s*(["'])([^"']*)(["'][^>]*>)/gi;
+  processedOutput = processedOutput.replace(metaRefreshRegex, (full, prefixQuote, contentValue, suffixRest) => {
+    const updatedContent = rewriteMetaRefreshContent(contentValue, targetOrigin, proxyBase, analyticsBlocklist);
+    return full.replace(contentValue, updatedContent);
   });
 
   // Handle CSS url() references in style attributes and style tags
@@ -1076,6 +1178,16 @@ function rewriteResourceUrls(html, target, proxyUrl, analyticsBlocklist = []) {
   });
 
   return processedOutput;
+}
+
+function rewriteMetaRefreshContent(contentValue, targetOrigin, proxyBase, analyticsBlocklist) {
+  const urlMatch = contentValue.match(/url\s*=\s*([^;]+)/i);
+  if (!urlMatch) return contentValue;
+  const originalUrl = urlMatch[1].trim();
+  if (!isRewritableUrl(originalUrl)) return contentValue;
+  const rewritten = rewriteUrl(originalUrl, targetOrigin, proxyBase, analyticsBlocklist);
+  if (rewritten === originalUrl) return contentValue;
+  return contentValue.replace(urlMatch[0], `url=${rewritten}`);
 }
 
 /**
