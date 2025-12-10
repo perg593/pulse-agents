@@ -623,23 +623,34 @@ app.all('/cdn-cgi/*', async (req, res) => {
   }
   
   // Check if target origin is in passthrough allowlist
-  const targetUrlObj = new URL(targetOrigin);
-  if (!shouldPassthroughCfChallenge(targetUrlObj.hostname, cfPassthroughDomains)) {
+  // Build target URL using validated origin - domain is validated before use
+  let validatedTargetUrl;
+  try {
+    validatedTargetUrl = new URL(targetOrigin);
+  } catch (e) {
+    res.status(400).json({ error: 'Invalid target origin URL' });
+    return;
+  }
+  
+  if (!shouldPassthroughCfChallenge(validatedTargetUrl.hostname, cfPassthroughDomains)) {
     res.status(403).json({ error: 'Domain not in passthrough allowlist' });
     return;
   }
   
-  // Build target URL: https://www.njtransit.com/cdn-cgi/...
   // Validate path starts with /cdn-cgi/ to prevent path traversal attacks
   const requestPath = req.path;
   if (!requestPath.startsWith('/cdn-cgi/') || requestPath.includes('..')) {
     res.status(400).json({ error: 'Invalid path' });
     return;
   }
-  // This is intentional SSRF for proxying Cloudflare challenge scripts from allowlisted domains
-  // Domain is validated above via shouldPassthroughCfChallenge() check
-  // lgtm[js/request-forgery]
-  const targetUrl = `${targetOrigin}${requestPath}${req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : ''}`;
+  
+  // Build target URL from validated components
+  // This is an intentional proxy for Cloudflare challenge scripts - the domain is validated above
+  validatedTargetUrl.pathname = requestPath;
+  if (req.url.includes('?')) {
+    validatedTargetUrl.search = req.url.substring(req.url.indexOf('?'));
+  }
+  const targetUrl = validatedTargetUrl.toString();
   
   try {
     const incomingHeaders = req.headers;
