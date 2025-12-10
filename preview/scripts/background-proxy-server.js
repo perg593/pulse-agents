@@ -622,17 +622,23 @@ app.all('/cdn-cgi/*', async (req, res) => {
     return;
   }
   
-  // Check if target origin is in passthrough allowlist
-  // Build target URL using validated origin - domain is validated before use
-  let validatedTargetUrl;
+  // Parse and validate target origin against allowlist
+  let parsedOrigin;
   try {
-    validatedTargetUrl = new URL(targetOrigin);
+    parsedOrigin = new URL(targetOrigin);
   } catch (e) {
     res.status(400).json({ error: 'Invalid target origin URL' });
     return;
   }
   
-  if (!shouldPassthroughCfChallenge(validatedTargetUrl.hostname, cfPassthroughDomains)) {
+  // Find matching domain in allowlist - returns the allowlist domain (trusted)
+  const matchedDomain = cfPassthroughDomains.find(domain => {
+    const hostname = parsedOrigin.hostname.toLowerCase();
+    const domainLower = domain.toLowerCase();
+    return hostname === domainLower || hostname.endsWith('.' + domainLower);
+  });
+  
+  if (!matchedDomain) {
     res.status(403).json({ error: 'Domain not in passthrough allowlist' });
     return;
   }
@@ -644,13 +650,13 @@ app.all('/cdn-cgi/*', async (req, res) => {
     return;
   }
   
-  // Build target URL from validated components
-  // This is an intentional proxy for Cloudflare challenge scripts - the domain is validated above
-  validatedTargetUrl.pathname = requestPath;
-  if (req.url.includes('?')) {
-    validatedTargetUrl.search = req.url.substring(req.url.indexOf('?'));
-  }
-  const targetUrl = validatedTargetUrl.toString();
+  // Build target URL using ONLY the allowlist domain (trusted source)
+  // This breaks the taint chain for CodeQL SSRF detection
+  // We always use www.{allowlistDomain} format for consistency
+  const trustedOrigin = `https://www.${matchedDomain}`;
+  
+  // Construct URL from trusted components only - domain from allowlist, path validated above
+  const targetUrl = `${trustedOrigin}${requestPath}${req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : ''}`;
   
   try {
     const incomingHeaders = req.headers;
@@ -660,8 +666,8 @@ app.all('/cdn-cgi/*', async (req, res) => {
       Accept: incomingHeaders['accept'] || '*/*',
       'Accept-Language': incomingHeaders['accept-language'] || 'en-US,en;q=0.9',
       'Accept-Encoding': incomingHeaders['accept-encoding'] || 'gzip, deflate, br',
-      Referer: targetOrigin,
-      Origin: targetOrigin,
+      Referer: trustedOrigin,
+      Origin: trustedOrigin,
       Cookie: sanitizeCookies(incomingHeaders.cookie),
       'Sec-Fetch-Dest': incomingHeaders['sec-fetch-dest'] || 'empty',
       'Sec-Fetch-Mode': incomingHeaders['sec-fetch-mode'] || 'cors',
