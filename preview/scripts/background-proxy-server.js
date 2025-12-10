@@ -630,7 +630,16 @@ app.all('/cdn-cgi/*', async (req, res) => {
   }
   
   // Build target URL: https://www.njtransit.com/cdn-cgi/...
-  const targetUrl = `${targetOrigin}${req.path}${req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : ''}`;
+  // Validate path starts with /cdn-cgi/ to prevent path traversal attacks
+  const requestPath = req.path;
+  if (!requestPath.startsWith('/cdn-cgi/') || requestPath.includes('..')) {
+    res.status(400).json({ error: 'Invalid path' });
+    return;
+  }
+  // This is intentional SSRF for proxying Cloudflare challenge scripts from allowlisted domains
+  // Domain is validated above via shouldPassthroughCfChallenge() check
+  // lgtm[js/request-forgery]
+  const targetUrl = `${targetOrigin}${requestPath}${req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : ''}`;
   
   try {
     const incomingHeaders = req.headers;
