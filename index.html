@@ -19,17 +19,12 @@
     })();
   </script>
   <script>
-    // Hide control rail immediately if present parameter is detected (prevents flash)
+    // Set data attribute for present mode (used for CSS targeting)
     (function() {
       try {
         const params = new URLSearchParams(window.location.search);
         const presentParam = (params.get('present') || '').trim();
         if (presentParam && /^\d{4}$/.test(presentParam)) {
-          // Add inline style to hide control rail before DOM is ready
-          const style = document.createElement('style');
-          style.textContent = '#control-rail { display: none !important; }';
-          document.head.appendChild(style);
-          // Also set data attribute for CSS targeting
           document.documentElement.setAttribute('data-present-mode', 'true');
         }
       } catch (e) {
@@ -39,10 +34,11 @@
   </script>
 </head>
 <body>
+  <div id="rail-hover-zone" class="rail-hover-zone" aria-hidden="true"></div>
+  <button id="rail-toggle" class="rail-toggle" aria-label="Toggle controls" aria-expanded="false">
+    <span class="rail-chevron"></span>
+  </button>
   <aside id="control-rail" class="control-rail" aria-label="Preview controls">
-    <button id="rail-toggle" class="rail-toggle" aria-label="Toggle controls" aria-expanded="false">
-      <span class="rail-chevron"></span>
-    </button>
     <div class="rail-content">
       <header class="rail-header">
         <span class="rail-logo">Pulse Insights</span>
@@ -117,6 +113,26 @@
       </div>
     </section>
     <section id="site-root" class="site-root"></section>
+    <div id="url-display" class="url-display" aria-label="Current demo site URL">
+      <svg class="url-display__icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5f6368" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="2" y1="12" x2="22" y2="12"></line>
+        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+      </svg>
+      <span class="url-display__label">Demo URL:</span>
+      <a id="url-display__link" class="url-display__link" href="#" target="_blank" rel="noopener noreferrer">—</a>
+      <button id="url-display__copy" class="url-display__copy" type="button" aria-label="Copy URL to clipboard" title="Copy URL">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+      </button>
+      <button id="url-display__toggle" class="url-display__toggle" type="button" aria-label="Collapse URL bar" title="Collapse">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </button>
+    </div>
   </main>
 
   <button id="behavior-toggle" class="behavior-toggle is-hidden" type="button" aria-label="Open behavior lab"></button>

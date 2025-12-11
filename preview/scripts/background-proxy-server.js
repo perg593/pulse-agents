@@ -2846,25 +2846,6 @@ function injectFrameworkErrorHandler(html) {
       // Restore the content
       appRoot.innerHTML = ssrContentBackup;
       
-      // Add indicator only once
-      if (!document.querySelector('[data-pi-proxy="ssr-fallback-notice"]')) {
-        var indicator = document.createElement('div');
-        indicator.setAttribute('data-pi-proxy', 'ssr-fallback-notice');
-        indicator.style.cssText = 'position:fixed;bottom:10px;right:10px;background:rgba(0,0,0,0.7);color:white;padding:8px 12px;border-radius:4px;font-size:12px;z-index:999999;font-family:system-ui,sans-serif;';
-        indicator.textContent = 'Showing static preview (interactive features disabled)';
-        document.body.appendChild(indicator);
-        
-        // Auto-hide after 5 seconds using a fresh timeout
-        var hideTimeout = setTimeout(function() {
-          if (indicator.parentNode) {
-            indicator.style.opacity = '0';
-            indicator.style.transition = 'opacity 0.5s';
-            setTimeout(function() {
-              if (indicator.parentNode) indicator.parentNode.removeChild(indicator);
-            }, 500);
-          }
-        }, 5000);
-      }
       
       // Set up continuous monitoring to ensure content stays restored
       if (restoreCount === 1) {
