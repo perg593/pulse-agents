@@ -131,14 +131,14 @@ select {
   transform: translateY(-50%);
   width: 28px;
   height: 46px;
-  border-radius: 0 24px 24px 0;
-  background: linear-gradient(180deg, #c24fd4 0%, #7146d6 100%);
-  border: none;
+  border-radius: 0 12px 12px 0;
+  background: linear-gradient(180deg, #2a2b35 0%, #1e1f28 100%);
+  border: 1px solid rgba(194, 79, 212, 0.4);
   display: grid;
   place-items: center;
   cursor: pointer;
-  color: var(--text-primary);
-  box-shadow: 0 12px 24px rgba(6, 7, 10, 0.4);
+  color: #ffffff;
+  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.3);
   transition: left 0.25s ease, opacity 0.2s ease, background 0.25s ease, border-radius 0.25s ease;
   opacity: 0;
   pointer-events: none;
@@ -162,21 +162,20 @@ body.rail-open .rail-toggle {
   background: linear-gradient(180deg, #2a2b35 0%, #1e1f28 100%);
   border-radius: 0 12px 12px 0;
   box-shadow: 4px 0 12px rgba(0, 0, 0, 0.3);
-  border-left: 1px solid rgba(194, 79, 212, 0.4);
 }
 
 .rail-chevron {
   width: 8px;
   height: 8px;
-  border-top: 2px solid var(--text-primary);
-  border-right: 2px solid var(--text-primary);
+  border-top: 2px solid #ffffff;
+  border-right: 2px solid #ffffff;
   transform: rotate(45deg);
   transition: transform 0.2s ease, border-color 0.25s ease;
 }
 
 body.rail-open .rail-chevron {
   transform: rotate(225deg);
-  border-color: var(--accent);
+  border-color: #ffffff;
 }
 
 .rail-content {
