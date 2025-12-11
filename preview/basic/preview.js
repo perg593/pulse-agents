@@ -71,6 +71,7 @@ const surveySelect = document.getElementById('survey-select');
 const presentBtn = document.getElementById('present-btn');
 const controlRail = document.getElementById('control-rail');
 const railToggle = document.getElementById('rail-toggle');
+const railHoverZone = document.getElementById('rail-hover-zone');
 const demoSubtitle = document.getElementById('demo-subtitle');
 const accordionRoot = document.getElementById('rail-accordion');
 const backgroundInput = document.getElementById('background-input');
@@ -89,6 +90,10 @@ const demoDirectory = document.getElementById('demo-directory');
 const demoDirectoryBackdrop = document.getElementById('demo-directory-backdrop');
 const demoDirectoryList = document.getElementById('demo-directory-list');
 const demoDirectoryClose = document.getElementById('demo-directory-close');
+const urlDisplayLink = document.getElementById('url-display__link');
+const urlDisplayCopyBtn = document.getElementById('url-display__copy');
+const urlDisplayToggleBtn = document.getElementById('url-display__toggle');
+const urlDisplay = document.getElementById('url-display');
 const behaviorRulesStore = RulesStore.shared();
 behaviorRulesStore.replaceWith([]);
 const scrollDepthEngine = createScrollDepthEngine({
@@ -467,6 +472,11 @@ async function init() {
   addLog('Initializing basic preview…');
   addLog(`Preview build stamp ${PREVIEW_BUILD_STAMP}`);
   startPresentGuard();
+  // Ensure rail controls are visible on load; they may have been hidden after a prior manual selection
+  showRailControls();
+  
+  // Initialize URL display with default
+  updateUrlDisplay(currentBackgroundUrl);
 
   const surveyInfo = await populateSurveySelect().catch((error) => {
     addLog(`Failed to load survey list: ${error.message}`, 'warn');
@@ -554,6 +564,7 @@ async function init() {
     if (backgroundInput) {
       backgroundInput.value = currentBackgroundUrl;
     }
+    updateUrlDisplay(currentBackgroundUrl);
   }
 
   // Skip loading Pulse Insights tag in main document when present parameter is active
@@ -689,6 +700,8 @@ function wireUi() {
     await presentSurvey(newOptionId, { force: true, forceReload: true });
     updateBehaviorSurveyLabel();
     showBehaviorMessage('Survey updated. Perform a behavior to trigger it.');
+
+    setRailOpen(false);
   });
 
   if (railToggle) {
@@ -698,6 +711,68 @@ function wireUi() {
     railToggle.setAttribute('aria-label', toggleLabel);
     railToggle.addEventListener('click', () => {
       setRailOpen(!railOpen);
+    });
+  }
+
+  // Rail hover zone - shows toggle on hover, clicking opens rail
+  if (railHoverZone && railToggle) {
+    let hoverTimeout = null;
+    
+    railHoverZone.addEventListener('mouseenter', () => {
+      // Show the toggle button
+      railToggle.classList.add('visible');
+      // Clear any pending hide
+      if (hoverTimeout) {
+        clearTimeout(hoverTimeout);
+        hoverTimeout = null;
+      }
+    });
+    
+    railHoverZone.addEventListener('mouseleave', () => {
+      // Delay hiding to allow moving to the toggle
+      hoverTimeout = setTimeout(() => {
+        if (!railOpen) {
+          railToggle.classList.remove('visible');
+        }
+      }, 300);
+    });
+    
+    // Keep toggle visible when hovering it
+    railToggle.addEventListener('mouseenter', () => {
+      if (hoverTimeout) {
+        clearTimeout(hoverTimeout);
+        hoverTimeout = null;
+      }
+    });
+    
+    railToggle.addEventListener('mouseleave', () => {
+      if (!railOpen) {
+        hoverTimeout = setTimeout(() => {
+          railToggle.classList.remove('visible');
+        }, 300);
+      }
+    });
+    
+    // Clicking hover zone directly opens the rail
+    railHoverZone.addEventListener('click', () => {
+      setRailOpen(true);
+    });
+  }
+
+  // Ensure rail controls reappear when navigating via browser history (e.g., new present= page)
+  if (typeof window !== 'undefined') {
+    window.addEventListener('popstate', () => {
+      showRailControls();
+    });
+
+    window.addEventListener('pageshow', () => {
+      showRailControls();
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        showRailControls();
+      }
     });
   }
 
@@ -956,6 +1031,7 @@ async function loadLipsumSite() {
     addLog('Lipsum site loaded.');
     initializeStylesheetRegistry();
     currentBackgroundUrl = LIPSUM_INDEX;
+    updateUrlDisplay(currentBackgroundUrl);
     return true;
   } catch (error) {
     addLog(`Failed to load Lipsum site: ${error.message}`, 'error');
@@ -2449,6 +2525,7 @@ async function ensureBackgroundForRecord(record, { force = false, skipBridgeLoad
     if (backgroundInput) {
       backgroundInput.value = normalized;
     }
+    updateUrlDisplay(currentBackgroundUrl);
     addLog(`Background ready: ${normalized}`);
     scheduleOverlayLayoutUpdate({ immediate: true, trailing: true });
   } else {
@@ -2568,6 +2645,65 @@ function parseCsv(text) {
   return rows;
 }
 
+/**
+ * Updates the persistent URL display bar with the current background URL.
+ * @param {string} url - The URL to display
+ */
+function updateUrlDisplay(url) {
+  if (!urlDisplayLink) return;
+  
+  const displayUrl = url && url.trim() ? url.trim() : '—';
+  const isValidUrl = displayUrl !== '—';
+  
+  urlDisplayLink.textContent = displayUrl;
+  urlDisplayLink.href = isValidUrl ? displayUrl : '#';
+  urlDisplayLink.style.pointerEvents = isValidUrl ? 'auto' : 'none';
+}
+
+/**
+ * Copies the current URL to clipboard and provides visual feedback.
+ */
+function copyUrlToClipboard() {
+  if (!urlDisplayLink || !urlDisplayCopyBtn) return;
+  
+  const url = urlDisplayLink.href;
+  if (!url || url === '#' || url === window.location.href + '#') {
+    return;
+  }
+  
+  navigator.clipboard.writeText(url).then(() => {
+    urlDisplayCopyBtn.classList.add('copied');
+    setTimeout(() => {
+      urlDisplayCopyBtn.classList.remove('copied');
+    }, 1500);
+  }).catch((err) => {
+    addLog(`Failed to copy URL: ${err.message}`, 'warn');
+  });
+}
+
+// Initialize URL display copy button handler
+if (urlDisplayCopyBtn) {
+  urlDisplayCopyBtn.addEventListener('click', copyUrlToClipboard);
+}
+
+/**
+ * Toggles the collapsed state of the URL display bar.
+ */
+function toggleUrlDisplay() {
+  if (!urlDisplay) return;
+  urlDisplay.classList.toggle('collapsed');
+  
+  const isCollapsed = urlDisplay.classList.contains('collapsed');
+  if (urlDisplayToggleBtn) {
+    urlDisplayToggleBtn.setAttribute('aria-label', isCollapsed ? 'Expand URL bar' : 'Collapse URL bar');
+    urlDisplayToggleBtn.setAttribute('title', isCollapsed ? 'Expand' : 'Collapse');
+  }
+}
+
+// Initialize URL display toggle button handler
+if (urlDisplayToggleBtn) {
+  urlDisplayToggleBtn.addEventListener('click', toggleUrlDisplay);
+}
 
 function addLog(message, level = 'info', context = {}) {
   const timestamp = new Date().toISOString();
@@ -2669,25 +2805,37 @@ function setRailOpen(open) {
   }
   if (railToggle) {
     railToggle.setAttribute('aria-expanded', String(railOpen));
+    if (!railOpen) {
+      railToggle.classList.remove('visible');
+    }
   }
   refreshAccordionHeights();
   scheduleOverlayLayoutUpdate({ immediate: true, trailing: true });
 }
 
 /**
- * Hides the control rail completely when present parameter is active
- * This provides a cleaner presentation view without controls
- * Note: The rail may already be hidden by inline script in HTML head to prevent flash
+ * Ensures the control rail starts in collapsed state when present parameter is active.
+ * The rail is hidden by default (width: 0) but can still be accessed via the hover zone.
  */
 function hideControlRail() {
-  if (controlRail) {
-    controlRail.style.display = 'none';
-    controlRail.setAttribute('aria-hidden', 'true');
-  }
   // Ensure rail-open class is removed so layout calculations don't account for rail width
   document.body.classList.remove('rail-open');
   // Set data attribute for CSS targeting (may already be set by inline script)
   document.documentElement.setAttribute('data-present-mode', 'true');
+}
+
+/**
+ * Shows the rail toggle button and hover zone.
+ * Useful when arriving via present parameter on a new page load.
+ */
+function showRailControls() {
+  if (railToggle) {
+    railToggle.classList.remove('hidden');
+    railToggle.classList.remove('visible');
+  }
+  if (railHoverZone) {
+    railHoverZone.classList.remove('hidden');
+  }
 }
 
 function timestamp() {

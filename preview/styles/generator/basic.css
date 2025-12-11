@@ -71,6 +71,18 @@ select {
   font-family: inherit;
 }
 
+/* Rail hover zone - invisible trigger area on left edge */
+.rail-hover-zone {
+  position: fixed;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 120px;
+  z-index: 34;
+  cursor: pointer;
+}
+
 /* Control rail */
 
 .control-rail {
@@ -78,15 +90,16 @@ select {
   top: 0;
   left: 0;
   height: 100vh;
-  width: var(--rail-width-collapsed);
+  width: 0;
   background: linear-gradient(180deg, #23242d 0%, #161720 100%);
-  box-shadow: var(--shadow-raised);
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: none;
+  border-right: none;
   display: flex;
   flex-direction: column;
-  transition: width 0.25s ease;
+  transition: width 0.25s ease, box-shadow 0.25s ease;
   z-index: 35;
   font-family: 'Raleway', 'Helvetica Neue', Arial, sans-serif;
+  overflow: hidden;
 }
 
 .control-rail * {
@@ -106,14 +119,16 @@ select {
 
 .control-rail.open {
   width: var(--rail-width-open);
+  box-shadow: var(--shadow-raised);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 
 .rail-toggle {
-  position: absolute;
+  position: fixed;
   top: 50%;
-  left: 11px;
-  transform: translate(-50%, -50%);
+  left: 0;
+  transform: translateY(-50%);
   width: 28px;
   height: 46px;
   border-radius: 0 24px 24px 0;
@@ -124,11 +139,30 @@ select {
   cursor: pointer;
   color: var(--text-primary);
   box-shadow: 0 12px 24px rgba(6, 7, 10, 0.4);
-  transition: transform 0.2s ease;
+  transition: left 0.25s ease, opacity 0.2s ease, background 0.25s ease, border-radius 0.25s ease;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 36;
 }
 
-.control-rail.open .rail-toggle {
-  transform: translate(-50%, -50%);
+/* Show toggle on hover zone hover */
+.rail-hover-zone:hover ~ .rail-toggle,
+.rail-toggle:hover,
+.rail-toggle.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Move toggle to edge of open rail and match aside styling */
+body.rail-open .rail-toggle {
+  left: var(--rail-width-open);
+  transform: translateY(-50%);
+  opacity: 1;
+  pointer-events: auto;
+  background: linear-gradient(180deg, #2a2b35 0%, #1e1f28 100%);
+  border-radius: 0 12px 12px 0;
+  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.3);
+  border-left: 1px solid rgba(194, 79, 212, 0.4);
 }
 
 .rail-chevron {
@@ -136,12 +170,13 @@ select {
   height: 8px;
   border-top: 2px solid var(--text-primary);
   border-right: 2px solid var(--text-primary);
-  transform: rotate(225deg);
-  transition: transform 0.2s ease;
+  transform: rotate(45deg);
+  transition: transform 0.2s ease, border-color 0.25s ease;
 }
 
-.control-rail.open .rail-chevron {
-  transform: rotate(45deg);
+body.rail-open .rail-chevron {
+  transform: rotate(225deg);
+  border-color: var(--accent);
 }
 
 .rail-content {
@@ -412,7 +447,7 @@ select {
 
 .layout {
   flex: 1;
-  margin-left: var(--rail-width-collapsed);
+  margin-left: 0;
   padding: 0;
   transition: margin-left 0.25s ease;
 }
@@ -877,11 +912,7 @@ body.rail-open .layout {
 
 @media (max-width: 940px) {
   body.rail-open .layout {
-    margin-left: var(--rail-width-collapsed);
-  }
-
-  .control-rail {
-    transform: translateX(calc(-100% + 48px));
+    margin-left: 0;
   }
 
   .control-rail.open {
@@ -889,7 +920,7 @@ body.rail-open .layout {
   }
 
   .layout {
-    margin-left: var(--rail-width-collapsed);
+    margin-left: 0;
     padding: 0;
   }
 
@@ -1145,4 +1176,139 @@ body.rail-open .layout {
 #behavior-toggle,
 #behavior-banner {
   display: none !important;
+}
+
+/* URL Display Bar - Chrome-style */
+.url-display {
+  position: fixed;
+  bottom: 12px;
+  left: 12px;
+  max-width: 50%;
+  height: 32px;
+  background: #f1f3f4;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 4px 0 10px;
+  font-size: 12px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  color: #202124;
+  z-index: 30;
+  transition: left 0.25s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+body.rail-open .url-display {
+  left: calc(var(--rail-width-open) + 12px);
+}
+
+.url-display__icon {
+  flex-shrink: 0;
+}
+
+.url-display__label {
+  display: none;
+}
+
+.url-display__link {
+  flex: 1;
+  min-width: 0;
+  color: #202124;
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 32px;
+}
+
+.url-display__link:hover,
+.url-display__link:focus-visible {
+  color: #1a73e8;
+  outline: none;
+}
+
+.url-display__copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #5f6368;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.url-display__copy:hover,
+.url-display__copy:focus-visible {
+  background: rgba(95, 99, 104, 0.12);
+  color: #202124;
+  outline: none;
+}
+
+.url-display__copy:active {
+  background: rgba(95, 99, 104, 0.2);
+}
+
+.url-display__copy.copied {
+  background: rgba(52, 168, 83, 0.12);
+  color: #34a853;
+}
+
+.url-display__toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #5f6368;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.2s ease;
+  flex-shrink: 0;
+  margin-left: -2px;
+}
+
+.url-display__toggle:hover,
+.url-display__toggle:focus-visible {
+  background: rgba(95, 99, 104, 0.12);
+  color: #202124;
+  outline: none;
+}
+
+/* Collapsed state */
+.url-display.collapsed {
+  max-width: 32px;
+  padding: 0;
+  justify-content: center;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+}
+
+.url-display.collapsed .url-display__icon,
+.url-display.collapsed .url-display__label,
+.url-display.collapsed .url-display__link,
+.url-display.collapsed .url-display__copy {
+  display: none;
+}
+
+.url-display.collapsed .url-display__toggle {
+  transform: rotate(180deg);
+}
+
+@media (max-width: 940px) {
+  .url-display {
+    left: 12px;
+  }
+
+  body.rail-open .url-display {
+    left: 12px;
+  }
 }
